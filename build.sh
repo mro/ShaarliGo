@@ -13,8 +13,8 @@ go get gopkg.in/yaml.v2
 go get github.com/jteeuwen/go-bindata/...
 # ssh vario find mro.name/vorschau.blog/assets -type f
 
-rsync -aPz --delete --delete-excluded --exclude jquery* --exclude *.zip --exclude *.html vario:~/mro.name/vorschau.blog/assets static \
-&& go-bindata -ignore=\\.DS_Store -prefix static static/...
+# rsync -aPz --delete --delete-excluded --exclude jquery* --exclude *.zip --exclude *.html vario:~/mro.name/vorschau.blog/assets/ static/assets
+go-bindata -ignore=\\.DS_Store -prefix static static/...
 
 PROG_NAME="AtomicShaarli"
 VERSION="0.0.1"
@@ -31,6 +31,9 @@ env GOOS=linux GOARCH=amd64 go build -ldflags "-s" -o "${PROG_NAME}-linux-amd64-
 
 scp "${PROG_NAME}-linux-amd64-${VERSION}" vario:~/mro.name/vorschau.blog/"atom.cgi"
 scp "ServerInfo.cgi" vario:~/mro.name/vorschau.blog/"info.cgi"
+
+ssh vario rm -vrf mro.name/vorschau.blog/assets
+ssh vario rm -vrf mro.name/vorschau.blog/app
 # scp "${PROG_NAME}-linux-amd64-${VERSION}" vario:~/cgi-bin/"${PROG_NAME}".cgi
 
 # curl --data-urlencode "url=wall" --dump-header head.txt "http://vorschau.blog.mro.name/${PROG_NAME}.cgi"

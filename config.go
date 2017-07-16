@@ -20,7 +20,6 @@ package main
 import (
 	"io/ioutil"
 	"os"
-	"syscall"
 
 	"gopkg.in/yaml.v2"
 )
@@ -32,16 +31,13 @@ const (
 
 func LoadConfig() (*Config, error) {
 	ret, err := configFromFileName(CONFIG_FILE_NAME)
-	if err != nil {
-		pathErr, ok := err.(*os.PathError)
-		if ok && pathErr.Op == "open" && syscall.Errno(2) == pathErr.Err {
-			// recover from "no such file or directory" and return empty config
-			ret = Config{}
-		} else {
-			return nil, err
-		}
+	if err == nil {
+		return &ret, nil
 	}
-	return &ret, nil
+	if os.IsNotExist(err) {
+		return &Config{}, nil
+	}
+	return nil, err
 }
 
 type Config struct {
@@ -51,19 +47,11 @@ type Config struct {
 }
 
 func (cfg *Config) Save() error {
-	err := cfg.saveToFileName(CONFIG_FILE_NAME)
-	if err != nil {
-		pathErr, ok := err.(*os.PathError)
-		if ok && "open" == pathErr.Op && syscall.Errno(2) == pathErr.Err {
-			// recover from "no such file or directory" and create dir
-			err = os.Mkdir(CONFIG_FILE_PATH, os.FileMode(0770))
-			if err != nil {
-				return err
-			}
-			return cfg.saveToFileName(CONFIG_FILE_NAME)
-		} else {
+	if err := cfg.saveToFileName(CONFIG_FILE_NAME); os.IsNotExist(err) {
+		if err = os.Mkdir(CONFIG_FILE_PATH, os.FileMode(0770)); err != nil {
 			return err
 		}
+		return cfg.saveToFileName(CONFIG_FILE_NAME)
 	}
 	return nil
 }

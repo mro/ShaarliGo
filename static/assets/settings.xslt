@@ -117,9 +117,11 @@ li {
       </head>
       <body>
         <div class="container">
-          <p/>
-
-          <p>Huch, das sieht ja alles recht frisch aus hier.</p>
+          <p><img alt="Sehr schön, der Webserver ist gut eingestellt." src="../app/i-must-be-403.svg"/></p>
+          
+          <xsl:if test="a:author/a:name = ''">
+            <p>Huch, das sieht ja alles recht frisch aus hier.</p>
+          </xsl:if>
 
           <form id="installform" name="installform" class="form-horizontal" method="POST" action="#">
             <!-- https://www.tjvantoll.com/2012/08/05/html5-form-validation-showing-all-error-messages/ -->

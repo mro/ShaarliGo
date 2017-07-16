@@ -46,8 +46,9 @@ shaarli on diet. Built on Atom.
 
 ```
 GET  atom.cgi
-GET  atom.cgi/config
-POST atom.cgi/config 							token? session?
+GET  atom.cgi/settings
+POST atom.cgi/settings 							token? session?
+GET  pub/posts?#Kk-eZA
 GET  atom.cgi?do=login
 POST atom.cgi?do=login
 GET  atom.cgi?do=logout
@@ -57,7 +58,7 @@ POST atom.cgi/session?method=DELETE
 GET  atom.cgi?post=url&title=Foo&source=AtomicShaarli
 POST atom.cgi?do=login&login=uid&password=pwd&token=xyz
 POST atom.cgi?post=url&title=Foo&source=AtomicShaarli
-GET  ./pub/posts?#Kk-eZA
+GET  pub/posts?#Kk-eZA
 ```
 
 ### 0. Routes

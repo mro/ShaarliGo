@@ -25,6 +25,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 )
 
@@ -65,7 +66,20 @@ func (h settingsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// t.b.d.: login is mandatory if already configured
 	}
 
-	// unpack (nonex) static files
+	// unpack (nonexisting) static files
+	for _, filename := range AssetNames() {
+		if _, err := os.Stat(filename); os.IsNotExist(err) {
+			err := RestoreAsset(".", filename)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+				io.WriteString(w, "error:\n")
+				io.WriteString(w, err.Error())
+				return
+			}
+		}
+	}
+	// os.Chmod("app", os.FileMode(0750)) // not sure if this is a good idea.
 
 	err := r.ParseForm()
 	if err != nil {
