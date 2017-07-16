@@ -28,27 +28,29 @@ func newPlainHandler() http.Handler {
 
 type plainHandler struct{}
 
-func (h plainHandler) ServeHTTP(wri http.ResponseWriter, req *http.Request) {
-	wri.Header().Set("Server", "http://purl.mro.name/AtomicShaarli")
-	wri.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	wri.Header().Set("Status", " 402 Heute nur für Stammgäste") // https://www.safaribooksonline.com/library/view/apache-cookbook/0596001916/ch09s02.html
-	wri.Header().Set("My-Foo-Header", "My Bar Value")
-	wri.WriteHeader(401)
+func (h plainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Server", myselfNamespace)
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Status", " 402 Heute nur für Stammgäste") // https://www.safaribooksonline.com/library/view/apache-cookbook/0596001916/ch09s02.html
+	w.Header().Set("My-Foo-Header", "My Bar Value")
+	w.Header().Set("Handler", "plainHandler")
+	w.WriteHeader(401)
 
-	fmt.Fprintf(wri, "HTTP HEADER\n")
-	for k, v := range req.Header {
-		fmt.Fprintf(wri, "  %s: %s\n", k, v)
+	fmt.Fprintf(w, "HTTP HEADER\n")
+	for k, v := range r.Header {
+		fmt.Fprintf(w, "  %s: %s\n", k, v)
 	}
-	fmt.Fprintf(wri, "Method: %s\n", req.Method)
-	fmt.Fprintf(wri, "URL: %s\n", req.URL)
-	fmt.Fprintf(wri, "ContentLength: %d\n", req.ContentLength)
-	fmt.Fprintf(wri, "Host: %s\n", req.Host)
-	fmt.Fprintf(wri, "RemoteAddr: %s\n", req.RemoteAddr)
-	fmt.Fprintf(wri, "RequestURI: %s\n", req.RequestURI)
-	fmt.Fprintf(wri, "Referer: %s\n", req.Referer())
-	// buf.WriteString(fmt.Sprintf("Referrer: %s\n", req.BasicAuth()))
+	fmt.Fprintf(w, "Method: %s\n", r.Method)
+	fmt.Fprintf(w, "URL: %s\n", r.URL)
+	fmt.Fprintf(w, "ContentLength: %d\n", r.ContentLength)
+	fmt.Fprintf(w, "Host: %s\n", r.Host)
+	fmt.Fprintf(w, "RemoteAddr: %s\n", r.RemoteAddr)
+	fmt.Fprintf(w, "RequestURI: %s\n", r.RequestURI)
+	fmt.Fprintf(w, "Referer: %s\n", r.Referer())
+	// buf.WriteString(fmt.Sprintf("Referrer: %s\n", r.BasicAuth()))
 	// fmt.Printf("Location: %s\n", "https://links.mro.name")
-	fmt.Fprintf(wri, "\n")
+	fmt.Fprintf(w, "\n")
 
-	// wri.Write(h.buf.Bytes())
+	// w.Write(h.buf.Bytes())
+	// w.Flush()
 }

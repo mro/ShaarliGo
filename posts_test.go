@@ -22,6 +22,6 @@ import (
 	"testing"
 )
 
-func TestFeedFromFileName__(t *testing.T) {
+func TestFeedFromFileName_a_(t *testing.T) {
 	assert.Nil(t, nil, "soso")
 }

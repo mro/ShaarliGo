@@ -26,25 +26,19 @@ import (
 
 var _ = strings.Join
 
-func newSetupHandler() http.Handler {
-	return setupHandler{}
+func newPostsHandler() http.Handler {
+	return postsHandler{}
 }
 
-type setupHandler struct{}
+type postsHandler struct{}
 
-func writeElementKeyValue(enc *xml.Encoder, element string, key string, value string) {
-	a := []xml.Attr{xml.Attr{Name: xml.Name{Local: "name"}, Value: key}, xml.Attr{Name: xml.Name{Local: "content"}, Value: value}}
-	n := xml.Name{Local: "meta"}
-	enc.EncodeToken(xml.StartElement{Name: n, Attr: a})
-	enc.EncodeToken(xml.EndElement{Name: n})
-}
+func (postsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Server", myselfNamespace)
+	w.Header().Set("Content-Type", "application/xhtml+xml; charset=utf-8")
+	w.Header().Set("Handler", "postsHandler")
+	// w.WriteHeader(http.StatusOK)
 
-func (setupHandler) ServeHTTP(wri http.ResponseWriter, req *http.Request) {
-	wri.Header().Set("Server", "http://purl.mro.name/AtomicShaarli")
-	wri.Header().Set("Content-Type", "application/xhtml+xml; charset=utf-8")
-	// wri.WriteHeader(http.StatusOK)
-
-	enc := xml.NewEncoder(wri)
+	enc := xml.NewEncoder(w)
 	enc.Indent("", "  ")
 	enc.EncodeToken(xml.ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)})
 	enc.EncodeToken(xml.CharData("\n"))
@@ -52,20 +46,20 @@ func (setupHandler) ServeHTTP(wri http.ResponseWriter, req *http.Request) {
 	enc.EncodeToken(xml.CharData("\n"))
 	enc.EncodeToken(xml.Comment(" Am Anfang war das Licht, dann kam bald das Atom! "))
 	enc.EncodeToken(xml.CharData("\n"))
-	enc.EncodeToken(xml.Comment(fmt.Sprintf(" Method: %s ", req.Method)))
+	enc.EncodeToken(xml.Comment(fmt.Sprintf(" Method: %s ", r.Method)))
 	enc.EncodeToken(xml.CharData("\n"))
-	enc.EncodeToken(xml.Comment(fmt.Sprintf(" TLS: %s ", req.TLS)))
+	enc.EncodeToken(xml.Comment(fmt.Sprintf(" TLS: %s ", r.TLS)))
 	enc.EncodeToken(xml.CharData("\n"))
 	n := xml.Name{Local: "setup"}
 	enc.EncodeToken(xml.StartElement{Name: n})
 	if false {
-		writeElementKeyValue(enc, "form", "url", req.FormValue("url"))
+		writeElementKeyValue(enc, "form", "url", r.FormValue("url"))
 	} else {
-		err := req.ParseForm()
+		err := r.ParseForm()
 		if err != nil {
 			enc.EncodeToken(xml.Comment(err.Error()))
 		} else {
-			for k, v := range req.PostForm {
+			for k, v := range r.PostForm {
 				writeElementKeyValue(enc, "form", k, strings.Join(v, ""))
 			}
 		}
@@ -73,8 +67,4 @@ func (setupHandler) ServeHTTP(wri http.ResponseWriter, req *http.Request) {
 	enc.EncodeToken(xml.EndElement{Name: n})
 	enc.EncodeToken(xml.CharData("\n"))
 	enc.Flush()
-}
-
-func loadSetup() (interface{}, error) {
-	return nil, nil //, errors.New("Not set up yet.")
 }

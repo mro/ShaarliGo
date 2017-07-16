@@ -44,6 +44,8 @@ const lengthyAtomPreambleComment string = ` https://developer.mozilla.org/en/doc
   'application/xml' without charset specified."
 `
 
+const atomNamespace = "http://www.w3.org/2005/Atom"
+
 func FeedFromFileName(file string) (Feed, error) {
 	read, err := os.Open(file)
 	if read == nil {
