@@ -17,34 +17,8 @@
 
 package main
 
-import (
-	"time"
+import ()
 
-	"github.com/stretchr/testify/assert"
-	"testing"
-)
-
-func TestIsBanned(t *testing.T) {
-	mgr := GetManager()
-	assert.NotNil(t, mgr, "soso")
-
-	var t0 time.Time
-	banned, err := mgr.IsBanned(nil, t0)
-	assert.Nil(t, err, "soso")
-	assert.True(t, banned, "soso")
-
-	addr := ""
-	banned, err = mgr.isBanned(&addr, t0)
-	assert.Nil(t, err, "soso")
-	assert.False(t, banned, "soso")
-
-	addr = "127.0.0.1"
-	banned, err = mgr.isBanned(&addr, t0)
-	assert.Nil(t, err, "soso")
-	assert.False(t, banned, "soso")
-}
-
-func TestAfter(t *testing.T) {
-	// var t0 *time.Time = nil
-	// assert.True(t, time.Now().After(*t0), "soso")
+func (m *SessionManager) generateAtomFeeds() error {
+	return nil
 }

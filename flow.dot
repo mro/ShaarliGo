@@ -1,0 +1,31 @@
+digraph flow {
+	rankdir=LR;
+	size="8,5"
+	node [shape = doublecircle]; 
+		start;
+
+	node [shape=circle];
+		"atom.cgi" [ label = "atom.cgi" ];
+	
+	start -> "atom.cgi";
+	"atom.cgi" -> "atom.cgi/settings" [ label = "unconfigured" ];
+	"atom.cgi" -> "pub/posts/" [ label = "configured" ];
+	"atom.cgi/settings" -> "atom.cgi/settings" [ label = "POST" ];
+	"atom.cgi/settings" -> "pub/posts/";
+	"pub/posts/" 
+		-> "atom.cgi?post=url&title=Foo"
+		-> "atom.cgi/login";
+	"atom.cgi/login"
+		-> "atom.cgi/login" [label=POST];
+	"atom.cgi/login" 
+		-> "atom.cgi?post=url&title=Foo"
+		-> "pub/posts/?#Kk-eZA";
+	"atom.cgi?post=url&title=Foo"
+		-> "atom.cgi?post=url&title=Foo" [label=POST];
+	"pub/posts/" 
+		-> "pub/posts/Kk-eZA"
+	"pub/posts/" 
+		-> "atom.cgi/settings"
+	"pub/posts/" 
+		-> "pub/tags/" 
+}

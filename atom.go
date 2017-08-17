@@ -26,6 +26,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	// "golang.org/x/tools/blog/atom"
 )
 
 const lengthyAtomPreambleComment string = ` https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
@@ -66,10 +67,12 @@ func FeedFromReader(file io.Reader) (Feed, error) {
 }
 
 // http://atomenabled.org/developers/syndication/
+//
+// see also https://godoc.org/golang.org/x/tools/blog/atom#Feed
 type Feed struct {
 	XMLName      xml.Name   `xml:"http://www.w3.org/2005/Atom feed"`
 	Title        HumanText  `xml:"title"`
-	Subtitle     HumanText  `xml:"subtitle,omitempty"`
+	Subtitle     *HumanText `xml:"subtitle,omitempty"`
 	Id           string     `xml:"id"`
 	Updated      iso8601    `xml:"updated"`
 	Generator    *Generator `xml:"generator,omitempty"`
@@ -103,6 +106,7 @@ func (c *iso8601) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	return nil
 }
 
+// see also https://godoc.org/golang.org/x/tools/blog/atom#Link
 type Link struct {
 	Href     string `xml:"href,attr"`
 	Rel      string `xml:"rel,attr,omitempty"`
@@ -112,12 +116,14 @@ type Link struct {
 	Length   int64  `xml:"length,attr,omitempty"`
 }
 
+// see also https://godoc.org/golang.org/x/tools/blog/atom#Person
 type Person struct {
 	Name  string `xml:"name"`
 	Email string `xml:"email,omitempty"`
 	Uri   string `xml:"uri,omitempty"`
 }
 
+// see also https://godoc.org/golang.org/x/tools/blog/atom#Entry
 type Entry struct {
 	Title        HumanText  `xml:"title"`
 	Summary      *HumanText `xml:"summary,omitempty"`

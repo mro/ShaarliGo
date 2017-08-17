@@ -29,21 +29,29 @@ const (
 	CONFIG_FILE_NAME string = CONFIG_FILE_PATH + "/config.yaml"
 )
 
-func LoadConfig() (*Config, error) {
-	ret, err := configFromFileName(CONFIG_FILE_NAME)
+func (m *SessionManager) IsConfigured() bool {
+	return m.config.IsConfigured()
+}
+
+func (m *SessionManager) LoadConfig() error {
+	_, err := configFromFileName(CONFIG_FILE_NAME)
 	if err == nil {
-		return &ret, nil
+		return nil
 	}
 	if os.IsNotExist(err) {
-		return &Config{}, nil
+		return nil
 	}
-	return nil, err
+	return err
 }
 
 type Config struct {
 	AuthorName string `yaml:"author_name"`
 	Title      string `yaml:"title"`
 	PwdBcrypt  string `yaml:"pwd_bcrypt"`
+}
+
+func (cfg *Config) IsConfigured() bool {
+	return cfg.AuthorName != ""
 }
 
 func (cfg *Config) Save() error {
@@ -78,8 +86,4 @@ func configFromFileName(file string) (Config, error) {
 	}
 	err = yaml.Unmarshal(read, &ret)
 	return ret, err
-}
-
-func (m *Config) IsConfigured() bool {
-	return m.AuthorName != ""
 }

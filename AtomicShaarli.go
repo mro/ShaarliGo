@@ -25,63 +25,84 @@ import (
 	"net/http/cgi"
 	"os"
 	"strings"
+	"time"
 )
 
 const myselfNamespace = "http://purl.mro.name/AtomicShaarli"
 
 // evtl. as a server, too: http://www.dav-muz.net/blog/2013/09/how-to-use-go-and-fastcgi/
 func main() {
-	// - check non-write perm auf Programm
-	// - check non-http read perm auf private
-	err := cgi.Serve(&muxHandler{})
+	log.Print("I am AtomicShaarli log.Print")
+	// fmt.Print("I am AtomicShaarli fmt.Print") http 500
+	fmt.Fprint(os.Stderr, "I am AtomicShaarli fmt.Fprint(os.Stderr, ...)")
+
+	// - check non-write perm of program?
+	// - check non-http read perm on ./app
+	err := cgi.Serve(http.HandlerFunc(handleMux))
+
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-type muxHandler struct{}
+func respond(w http.ResponseWriter, r *http.Request, code int, msg string) {
+	w.WriteHeader(code)
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	io.WriteString(w, msg)
+}
 
-func (h *muxHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func ifErrRespond500(err error, w http.ResponseWriter, r *http.Request) bool {
+	if err != nil {
+		respond(w, r, http.StatusInternalServerError, "error:\n")
+		io.WriteString(w, err.Error())
+	}
+	return err != nil
+}
+
+func handleMux(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
+	mgr := GetManager()
 	{
-		banned, err := GetBanManager().IsBanned(r, nil)
-		if banned || err != nil {
-			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				io.WriteString(w, "error.\n")
-				fmt.Fprintf(os.Stderr, "%s: %s\n", r.RemoteAddr, err)
-			} else {
-				w.WriteHeader(http.StatusNotAcceptable)
-				io.WriteString(w, "banned.\n")
-			}
+		banned, err := mgr.IsBanned(r, now)
+		if ifErrRespond500(err, w, r) {
+			return
+		}
+		if banned {
+			respond(w, r, http.StatusNotAcceptable, "Sorry, banned")
 			return
 		}
 	}
-
-	cfg, err := LoadConfig()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		io.WriteString(w, "error:\n")
-		io.WriteString(w, err.Error())
+	if ifErrRespond500(mgr.LoadConfig(), w, r) {
 		return
 	}
 
 	// session/login state
+	// cooks := r.Cookies()
 
 	script_name := os.Getenv("SCRIPT_NAME")
 	path_info := os.Getenv("PATH_INFO")
 
 	switch {
 	case "/settings" == path_info:
-		newSettingsHandler(cfg).ServeHTTP(w, r)
-	case !cfg.IsConfigured():
+		if !mgr.IsLoggedIn(r, now) {
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			w.Header().Set("Location", script_name+"/login"+"?url="+r.URL.String())
+			w.WriteHeader(http.StatusSeeOther)
+			io.WriteString(w, "I need a login first, redirecting to "+script_name+"/settings"+"\n")
+			return
+		} else {
+			ifErrRespond500(handleSettings(mgr, w, r), w, r)
+			return
+		}
+	case !mgr.IsConfigured():
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		// http.Redirect(w, r, script_name+"/config", http.StatusSeeOther) adds html :-(
 		w.Header().Set("Location", script_name+"/settings")
 		w.WriteHeader(http.StatusSeeOther)
 		io.WriteString(w, "configure first, redirecting to "+script_name+"/settings"+"\n")
-	case "/session" == path_info:
+	case "/login" == path_info:
+		io.WriteString(w, "session\n")
+	case "/logout" == path_info:
 		io.WriteString(w, "session\n")
 	case r.URL.Path == "":
 		switch {
@@ -93,9 +114,11 @@ func (h *muxHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			io.WriteString(w, "search\n")
 		}
 	default:
+		mgr.SquealFailure(r, now)
+		http.NotFoundHandler().ServeHTTP(w, r)
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.Header().Set("Debug-Pfad", r.URL.Path)
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Print(w, "Gibt's ja gar nicht\n")
+		io.WriteString(w, "not found: "+r.URL.String()+"\n")
 	}
 }

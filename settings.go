@@ -19,19 +19,16 @@ package main
 
 import (
 	"encoding/xml"
-	"fmt"
-	"golang.org/x/crypto/bcrypt"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
-)
+	"time"
 
-func newSettingsHandler(cfg *Config) http.Handler {
-	return settingsHandler{cfg: cfg}
-}
+	"golang.org/x/crypto/bcrypt"
+)
 
 func urlFromString(raw string) (url *url.URL, err error) {
 	url, err = url.Parse(raw)
@@ -39,10 +36,6 @@ func urlFromString(raw string) (url *url.URL, err error) {
 		url, err = url.Parse("https://" + raw)
 	}
 	return
-}
-
-type settingsHandler struct {
-	cfg *Config
 }
 
 func writeElementKeyValue(enc *xml.Encoder, element string, key string, value string) {
@@ -56,14 +49,14 @@ func feedFromLegacyShaarli(urlbase string, uid string, pwd string) (feed Feed, e
 	return
 }
 
-func (h settingsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	isAlreadyConfigured := h.cfg.IsConfigured()
+func handleSettings(mgr *SessionManager, w http.ResponseWriter, r *http.Request) error {
+	isAlreadyConfigured := mgr.IsConfigured()
 	w.Header().Set("Server", myselfNamespace)
-	w.Header().Set("Handler", "settingsHandler")
+	w.Header().Set("Handler", "handleSettings")
 	w.Header().Set("Content-Type", "application/xhtml+xml; charset=utf-8")
 
-	if h.cfg.IsConfigured() {
-		// t.b.d.: login is mandatory if already configured
+	if isAlreadyConfigured && !mgr.IsLoggedIn(r, time.Now()) {
+		panic("double check failed.")
 	}
 
 	// unpack (nonexisting) static files
@@ -71,11 +64,7 @@ func (h settingsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if _, err := os.Stat(filename); os.IsNotExist(err) {
 			err := RestoreAsset(".", filename)
 			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-				io.WriteString(w, "error:\n")
-				io.WriteString(w, err.Error())
-				return
+				return err
 			}
 		}
 	}
@@ -90,23 +79,22 @@ func (h settingsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		uid := strings.TrimSpace(r.FormValue("author/name"))
 		if uid != "" {
-			h.cfg.AuthorName = uid // any conditions? suitable for author: https://gist.github.com/tjdett/4617547#file-atom-rng-xml-L64
+			mgr.config.AuthorName = uid // any conditions? suitable for author: https://gist.github.com/tjdett/4617547#file-atom-rng-xml-L64
 		}
 
 		tit := strings.TrimSpace(r.FormValue("title"))
 		if tit != "" {
-			h.cfg.Title = tit
+			mgr.config.Title = tit
 		}
-		if h.cfg.Title == "" {
-			h.cfg.Title = "Shared links on …"
+		if mgr.config.Title == "" {
+			mgr.config.Title = "Shared links on …"
 		}
 
 		pwd := strings.TrimSpace(r.FormValue("password"))
 
-		if !h.cfg.IsConfigured() || len([]rune(pwd)) < 12 {
-			w.WriteHeader(http.StatusOK)
-			renderPage(w, h.cfg)
-			return
+		if !mgr.IsConfigured() || len([]rune(pwd)) < 12 {
+			renderPage(http.StatusBadRequest, w, &mgr.config)
+			return nil
 		}
 
 		// https://astaxie.gitbooks.io/build-web-application-with-golang/en/09.5.html
@@ -114,16 +102,11 @@ func (h settingsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// original shaarli did $hash = sha1($password.$login.$GLOBALS['salt']);
 		pwdBcrypt, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 		if err == nil {
-			h.cfg.PwdBcrypt = string(pwdBcrypt)
-			err = h.cfg.Save()
+			mgr.config.PwdBcrypt = string(pwdBcrypt)
+			err = mgr.config.Save()
 		}
-
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-			io.WriteString(w, "error:\n")
-			io.WriteString(w, err.Error())
-			return
+			return err
 		}
 
 		// fork that one?
@@ -133,34 +116,40 @@ func (h settingsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// if process is running: add a hint about the running background task into the response,
 		// e.g. as a refresh timer. <meta http-equiv="refresh" content="5; URL=http://www.yourdomain.com/yoursite.html">
 
-		// if all went well:
-		w.Header().Set("Location", "../pub/posts/")
-
 		if !isAlreadyConfigured {
-			// generate posts
+			err = mgr.generateAtomFeeds()
+			if err != nil {
+				return err
+			}
 		}
+
+		// all went well:
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.Header().Set("Location", "../pub/posts/")
+		w.WriteHeader(http.StatusSeeOther)
+		io.WriteString(w, "let's go to "+"../pub/posts/"+"\n")
 	case "GET":
-		w.WriteHeader(http.StatusOK)
-		renderPage(w, h.cfg)
+		renderPage(http.StatusOK, w, &mgr.config)
 
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
+
+	return nil
 }
 
-func renderPage(w io.Writer, c *Config) {
+func renderPage(code int, w http.ResponseWriter, c *Config) {
+	w.WriteHeader(code)
+	renderPageXml(w, c)
+}
+
+func renderPageXml(w io.Writer, c *Config) {
 	enc := xml.NewEncoder(w)
 	enc.Indent("", "  ")
 	enc.EncodeToken(xml.ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)})
 	enc.EncodeToken(xml.CharData("\n"))
 	enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='../assets/settings.xslt'")})
 	enc.EncodeToken(xml.CharData("\n"))
-	enc.EncodeToken(xml.Comment(" Am Anfang war das Licht, dann kam bald das Atom! "))
-	enc.EncodeToken(xml.CharData("\n"))
-	// enc.EncodeToken(xml.Comment(fmt.Sprintf(" Method: %s ", r.Method)))
-	// enc.EncodeToken(xml.CharData("\n"))
-	// enc.EncodeToken(xml.Comment(fmt.Sprintf(" TLS: %s ", r.TLS)))
-	// enc.EncodeToken(xml.CharData("\n"))
 
 	n := xml.Name{Local: "as:setup"}
 	enc.EncodeToken(xml.StartElement{Name: n, Attr: []xml.Attr{
@@ -188,16 +177,6 @@ func renderPage(w io.Writer, c *Config) {
 		enc.EncodeToken(xml.EndElement{Name: author})
 	}
 
-	for _, fileName := range AssetNames() {
-		// check if the file is there and restore in case
-		// RestoreAsset(".", fileName)
-		enc.EncodeToken(xml.Comment(fmt.Sprintf(" file: %s ", fileName)))
-		enc.EncodeToken(xml.CharData("\n"))
-	}
-
-	// for k, v := range r.PostForm {
-	//	writeElementKeyValue(enc, "form", k, strings.Join(v, ""))
-	//}
 	enc.EncodeToken(xml.EndElement{Name: n})
 	enc.EncodeToken(xml.CharData("\n"))
 	enc.Flush()

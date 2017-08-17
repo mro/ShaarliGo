@@ -10,11 +10,11 @@ shaarli on diet. Built on Atom.
 * backwards compatible posting (https://github.com/mro/Shaarli-API-test/)
 * trivial installation and minimal hosting requirements (run on simple hosted webspace),
 * run ok without javascript,
-* reading operates on static flat files (no server code),
+* reading operates on static flat files only (no server code),
 * secure against brute force login attacks,
 * easy translation & skinning,
 * leverage existing, widely deployed web tec,
-* easy fail2ban/etc integration / DOS mitigation,
+* easy fail2ban integration / DOS mitigation,
 
 | Quality         | very good | good | normal | irrelevant |
 |-----------------|:---------:|:----:|:------:|:----------:|
@@ -49,16 +49,17 @@ GET  atom.cgi
 GET  atom.cgi/settings
 POST atom.cgi/settings 							token? session?
 GET  pub/posts?#Kk-eZA
+GET  pub/posts/Kk-eZA
+GET  pub/tags/Design
 GET  atom.cgi?do=login
 POST atom.cgi?do=login
-GET  atom.cgi?do=logout
-GET  atom.cgi/session
-POST atom.cgi/session
-POST atom.cgi/session?method=DELETE
+GET  atom.cgi/logout
+GET  atom.cgi/login
+POST atom.cgi/login
+GET  atom.cgi/logout
 GET  atom.cgi?post=url&title=Foo&source=AtomicShaarli
 POST atom.cgi?do=login&login=uid&password=pwd&token=xyz
 POST atom.cgi?post=url&title=Foo&source=AtomicShaarli
-GET  pub/posts?#Kk-eZA
 ```
 
 ### 0. Routes

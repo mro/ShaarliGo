@@ -26,27 +26,32 @@ import (
 	"time"
 )
 
-type BanManager struct {
+type SessionManager struct {
 	baseDir string
+	config  Config
 }
 
-func GetBanManager() *BanManager {
-	b := BanManager{baseDir: "cache"}
+func GetManager() *SessionManager {
+	b := SessionManager{baseDir: "cache"}
 	return &b
 }
 
-func (m *BanManager) PrepareDirs() error {
+func (m *SessionManager) IsLoggedIn(r *http.Request, t time.Time) bool {
+	return true
+}
+
+func (m *SessionManager) PrepareDirs() error {
 	return nil
 }
 
-func (m *BanManager) IsBanned(r *http.Request, t *time.Time) (bool, error) {
+func (m *SessionManager) IsBanned(r *http.Request, t time.Time) (bool, error) {
 	if r == nil {
 		return m.isBanned(nil, t)
 	}
 	return m.isBanned(&r.RemoteAddr, t)
 }
 
-func (m *BanManager) isBanned(r *string, t0 *time.Time) (bool, error) {
+func (m *SessionManager) isBanned(r *string, t0 time.Time) (bool, error) {
 	if r == nil {
 		return true, nil
 	}
@@ -71,22 +76,18 @@ func (m *BanManager) isBanned(r *string, t0 *time.Time) (bool, error) {
 			return true, err
 		}
 	}
-	if t0 == nil {
-		t := time.Now()
-		t0 = &t
-	}
-	banned := time.Unix(banEndUnix, 0).After(*t0)
+	banned := time.Unix(banEndUnix, 0).After(t0)
 	if !banned {
 		err = os.Remove(*file)
 	}
 	return banned, nil
 }
 
-func (m *BanManager) SquealFailure(r *http.Request, t *time.Time) error {
+func (m *SessionManager) SquealFailure(r *http.Request, t time.Time) error {
 	return m.squealFailure(&r.RemoteAddr, t)
 }
 
-func (m *BanManager) squealFailure(r *string, t *time.Time) error {
+func (m *SessionManager) squealFailure(r *string, t time.Time) error {
 	// load number of tries
 	// increment
 	// is above ban threshold?
@@ -95,21 +96,21 @@ func (m *BanManager) squealFailure(r *string, t *time.Time) error {
 	return nil
 }
 
-func (m *BanManager) LiftBanAndFailures(r *http.Request) error {
+func (m *SessionManager) LiftBanAndFailures(r *http.Request) error {
 	return m.liftBanAndFailures(&r.RemoteAddr)
 }
 
-func (m *BanManager) liftBanAndFailures(r *string) error {
+func (m *SessionManager) liftBanAndFailures(r *string) error {
 	// remove ban
 	// remove failures
 	return nil
 }
 
-func (m *BanManager) banMarkerPath(r *string) *string {
+func (m *SessionManager) banMarkerPath(r *string) *string {
 	ret := filepath.Join(m.baseDir, "ban", "banned", *r)
 	return &ret
 }
-func (m *BanManager) failureMarkerPath(r *string) *string {
+func (m *SessionManager) failureMarkerPath(r *string) *string {
 	ret := filepath.Join(m.baseDir, "ban", "failed", *r)
 	return &ret
 }

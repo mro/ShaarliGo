@@ -117,7 +117,10 @@ li {
       </head>
       <body>
         <div class="container">
-          <p><img alt="Sehr schön, der Webserver ist gut eingestellt." src="../app/i-must-be-403.svg"/></p>
+          <p><img 
+          	alt="Sehr schön, der Webserver ist gut eingestellt, ./app/ ist geschützt." 
+          	title="Wenn hier ein Filmzitat sichtbar ist, liegt ./app/ ungeschützt im Netz."
+          	src="../app/i-must-be-403.svg"/></p>
           
           <xsl:if test="a:author/a:name = ''">
             <p>Huch, das sieht ja alles recht frisch aus hier.</p>
@@ -146,7 +149,7 @@ li {
             </div>
             <!-- evtl. continent / city -->
 
-            <p>Möchtest Du Daten aus einem früheren Shaarli übernehmen?</p>
+            <p>Möchtest Du Material aus einem früheren Shaarli übernehmen?</p>
 
             <div class="form-group">
               <label for="import_shaarli_url" class="control-label col-sm-1">URL</label>

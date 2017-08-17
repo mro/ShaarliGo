@@ -8,6 +8,7 @@ cd "$(dirname "${0}")"
 # Linux x86_64
 # Linux armv6l
 
+go get golang.org/x/tools/blog/atom
 go get golang.org/x/crypto/bcrypt
 go get gopkg.in/yaml.v2
 go get github.com/jteeuwen/go-bindata/...
@@ -29,12 +30,17 @@ env GOOS=linux GOARCH=amd64 go build -ldflags "-s" -o "${PROG_NAME}-linux-amd64-
 # env GOOS=linux GOARCH=386 GO386=387 go build -o "${PROG_NAME}-linux-386-${VERSION}" # https://github.com/golang/go/issues/11631
 # env GOOS=darwin GOARCH=amd64 go build -o "${PROG_NAME}-darwin-amd64-${VERSION}"
 
+# https://lager.mro.name/as/atom.cgi
+scp "${PROG_NAME}-linux-amd64-${VERSION}" simply:/var/www/lighttpd/lager.mro.name/public_html/as/"atom.cgi"
+scp "ServerInfo.cgi" simply:/var/www/lighttpd/lager.mro.name/public_html/as/"info.cgi"
+ssh simply rm -vrf /var/www/lighttpd/lager.mro.name/public_html/as/assets
+ssh simply rm -vrf /var/www/lighttpd/lager.mro.name/public_html/as/app
+
+# http://vorschau.blog.mro.name/atom.cgi
 scp "${PROG_NAME}-linux-amd64-${VERSION}" vario:~/mro.name/vorschau.blog/"atom.cgi"
 scp "ServerInfo.cgi" vario:~/mro.name/vorschau.blog/"info.cgi"
-
 ssh vario rm -vrf mro.name/vorschau.blog/assets
 ssh vario rm -vrf mro.name/vorschau.blog/app
-# scp "${PROG_NAME}-linux-amd64-${VERSION}" vario:~/cgi-bin/"${PROG_NAME}".cgi
 
 # curl --data-urlencode "url=wall" --dump-header head.txt "http://vorschau.blog.mro.name/${PROG_NAME}.cgi"
 # curl --location --dump-header head.txt "http://vorschau.blog.mro.name/"
