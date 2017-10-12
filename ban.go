@@ -18,8 +18,12 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/base64"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -27,17 +31,46 @@ import (
 )
 
 type SessionManager struct {
-	baseDir string
-	config  Config
+	baseDir        string
+	config         Config
+	cookieName     string
+	maxLifeSeconds int
 }
 
 func GetManager() *SessionManager {
-	b := SessionManager{baseDir: "cache"}
+	b := SessionManager{baseDir: "app/var/cache", cookieName: "AtomicShaarli", maxLifeSeconds: 30 * 60}
 	return &b
 }
 
 func (m *SessionManager) IsLoggedIn(r *http.Request, t time.Time) bool {
 	return true
+}
+
+func (m *SessionManager) startSession(w http.ResponseWriter, r *http.Request, uid string) {
+	// https://astaxie.gitbooks.io/build-web-application-with-golang/en/06.2.html
+	b := make([]byte, 32)
+	if _, err := io.ReadFull(rand.Reader, b); err != nil {
+		return
+	}
+	sid := base64.URLEncoding.EncodeToString(b)
+
+	cookie := http.Cookie{Name: m.cookieName, Value: url.QueryEscape(sid), Path: "/", HttpOnly: true, MaxAge: m.maxLifeSeconds}
+	// todo: store session locally
+	// ---
+	// sessions:
+	//   abc:
+	//     expire: '2018-02-19T09:08:27Z'
+	//     uid: mro
+	// tokens:
+	//   a:
+	//     expire: '2018-02-19T09:08:27Z'
+	//   b:
+	//     expire: '2018-02-19T09:10:27Z'
+	// bans:
+	//   127.0.0.1:
+	//     penalty: 12
+	//     expire: '2018-02-19T09:10:27Z'
+	http.SetCookie(w, &cookie)
 }
 
 func (m *SessionManager) PrepareDirs() error {

@@ -45,7 +45,7 @@ func main() {
 	}
 }
 
-func respond(w http.ResponseWriter, r *http.Request, code int, msg string) {
+func respond(code int, msg string, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(code)
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	io.WriteString(w, msg)
@@ -53,13 +53,14 @@ func respond(w http.ResponseWriter, r *http.Request, code int, msg string) {
 
 func ifErrRespond500(err error, w http.ResponseWriter, r *http.Request) bool {
 	if err != nil {
-		respond(w, r, http.StatusInternalServerError, "error:\n")
+		respond(http.StatusInternalServerError, "error:\n", w, r)
 		io.WriteString(w, err.Error())
 	}
 	return err != nil
 }
 
 func handleMux(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Server", myselfNamespace)
 	now := time.Now()
 	mgr := GetManager()
 	{
@@ -68,7 +69,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if banned {
-			respond(w, r, http.StatusNotAcceptable, "Sorry, banned")
+			respond(http.StatusNotAcceptable, "Sorry, banned", w, r)
 			return
 		}
 	}
@@ -84,15 +85,14 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 	switch {
 	case "/settings" == path_info:
-		if !mgr.IsLoggedIn(r, now) {
+		if mgr.IsConfigured() && !mgr.IsLoggedIn(r, now) {
+			// we need a login first.
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			w.Header().Set("Location", script_name+"/login"+"?url="+r.URL.String())
 			w.WriteHeader(http.StatusSeeOther)
 			io.WriteString(w, "I need a login first, redirecting to "+script_name+"/settings"+"\n")
-			return
 		} else {
-			ifErrRespond500(handleSettings(mgr, w, r), w, r)
-			return
+			ifErrRespond500(mgr.handleSettings(w, r), w, r)
 		}
 	case !mgr.IsConfigured():
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -101,24 +101,49 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusSeeOther)
 		io.WriteString(w, "configure first, redirecting to "+script_name+"/settings"+"\n")
 	case "/login" == path_info:
-		io.WriteString(w, "session\n")
+		ifErrRespond500(mgr.handleLogin(w, r), w, r)
 	case "/logout" == path_info:
-		io.WriteString(w, "session\n")
+		ifErrRespond500(mgr.handleLogout(w, r), w, r)
 	case r.URL.Path == "":
 		switch {
 		case r.URL.RawQuery == "do=login":
-			io.WriteString(w, "login\n")
+			ifErrRespond500(mgr.handleLogin(w, r), w, r)
 		case r.URL.RawQuery == "do=logout":
-			io.WriteString(w, "logout\n")
+			ifErrRespond500(mgr.handleLogout(w, r), w, r)
+		case strings.HasPrefix(r.URL.RawQuery, "post="):
+			ifErrRespond500(mgr.handlePost(w, r), w, r)
 		case strings.HasPrefix(r.URL.RawQuery, "q="):
-			io.WriteString(w, "search\n")
+			ifErrRespond500(mgr.handleSearch(w, r), w, r)
 		}
 	default:
 		mgr.SquealFailure(r, now)
-		http.NotFoundHandler().ServeHTTP(w, r)
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		w.Header().Set("Debug-Pfad", r.URL.Path)
+		// http.NotFoundHandler().ServeHTTP(w, r)
 		w.WriteHeader(http.StatusNotFound)
 		io.WriteString(w, "not found: "+r.URL.String()+"\n")
 	}
+}
+
+func (mgr *SessionManager) handleLogin(w http.ResponseWriter, r *http.Request) error {
+	io.WriteString(w, "login"+"\n")
+	// 'GET': send a login form to the client
+	// 'POST' validate, respond error (and squeal) or set session and redirect
+	return nil
+}
+
+func (mgr *SessionManager) handleLogout(w http.ResponseWriter, r *http.Request) error {
+	io.WriteString(w, "logout"+"\n")
+	//  invalidate session and redirect
+	return nil
+}
+
+func (mgr *SessionManager) handlePost(w http.ResponseWriter, r *http.Request) error {
+	io.WriteString(w, "post"+"\n")
+	// 'GET': send a form to the client
+	// 'POST' validate, respond error (and squeal) or post and redirect
+	return nil
+}
+
+func (mgr *SessionManager) handleSearch(w http.ResponseWriter, r *http.Request) error {
+	io.WriteString(w, "search"+"\n")
+	return nil
 }

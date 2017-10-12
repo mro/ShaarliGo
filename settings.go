@@ -20,7 +20,6 @@ package main
 import (
 	"encoding/xml"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -30,7 +29,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func urlFromString(raw string) (url *url.URL, err error) {
+// unused
+func _urlFromString(raw string) (url *url.URL, err error) {
 	url, err = url.Parse(raw)
 	if err != nil {
 		url, err = url.Parse("https://" + raw)
@@ -38,8 +38,16 @@ func urlFromString(raw string) (url *url.URL, err error) {
 	return
 }
 
-func writeElementKeyValue(enc *xml.Encoder, element string, key string, value string) {
-	a := []xml.Attr{xml.Attr{Name: xml.Name{Local: "name"}, Value: key}, xml.Attr{Name: xml.Name{Local: "content"}, Value: value}}
+func encodeValueElement(enc *xml.Encoder, name string, value string) *xml.Encoder {
+	elm := xml.Name{Local: name}
+	enc.EncodeToken(xml.StartElement{Name: elm})
+	enc.EncodeToken(xml.CharData(value))
+	enc.EncodeToken(xml.EndElement{Name: elm})
+	return enc
+}
+
+func encodeMetaNameContent(enc *xml.Encoder, name string, content string) {
+	a := []xml.Attr{xml.Attr{Name: xml.Name{Local: "name"}, Value: name}, xml.Attr{Name: xml.Name{Local: "content"}, Value: content}}
 	n := xml.Name{Local: "meta"}
 	enc.EncodeToken(xml.StartElement{Name: n, Attr: a})
 	enc.EncodeToken(xml.EndElement{Name: n})
@@ -49,11 +57,8 @@ func feedFromLegacyShaarli(urlbase string, uid string, pwd string) (feed Feed, e
 	return
 }
 
-func handleSettings(mgr *SessionManager, w http.ResponseWriter, r *http.Request) error {
+func (mgr *SessionManager) handleSettings(w http.ResponseWriter, r *http.Request) error {
 	isAlreadyConfigured := mgr.IsConfigured()
-	w.Header().Set("Server", myselfNamespace)
-	w.Header().Set("Handler", "handleSettings")
-	w.Header().Set("Content-Type", "application/xhtml+xml; charset=utf-8")
 
 	if isAlreadyConfigured && !mgr.IsLoggedIn(r, time.Now()) {
 		panic("double check failed.")
@@ -62,28 +67,24 @@ func handleSettings(mgr *SessionManager, w http.ResponseWriter, r *http.Request)
 	// unpack (nonexisting) static files
 	for _, filename := range AssetNames() {
 		if _, err := os.Stat(filename); os.IsNotExist(err) {
-			err := RestoreAsset(".", filename)
-			if err != nil {
+			if err := RestoreAsset(".", filename); err != nil {
 				return err
 			}
 		}
 	}
 	// os.Chmod("app", os.FileMode(0750)) // not sure if this is a good idea.
 
-	err := r.ParseForm()
-	if err != nil {
-		log.Fatal(err)
+	if err := r.ParseForm(); err != nil {
+		return err
 	}
 
 	switch r.Method {
 	case "POST":
-		uid := strings.TrimSpace(r.FormValue("author/name"))
-		if uid != "" {
+
+		if uid := strings.TrimSpace(r.FormValue("author/name")); uid != "" {
 			mgr.config.AuthorName = uid // any conditions? suitable for author: https://gist.github.com/tjdett/4617547#file-atom-rng-xml-L64
 		}
-
-		tit := strings.TrimSpace(r.FormValue("title"))
-		if tit != "" {
+		if tit := strings.TrimSpace(r.FormValue("title")); tit != "" {
 			mgr.config.Title = tit
 		}
 		if mgr.config.Title == "" {
@@ -91,9 +92,8 @@ func handleSettings(mgr *SessionManager, w http.ResponseWriter, r *http.Request)
 		}
 
 		pwd := strings.TrimSpace(r.FormValue("password"))
-
 		if !mgr.IsConfigured() || len([]rune(pwd)) < 12 {
-			renderPage(http.StatusBadRequest, w, &mgr.config)
+			renderPage(&mgr.config, http.StatusBadRequest, w)
 			return nil
 		}
 
@@ -117,11 +117,12 @@ func handleSettings(mgr *SessionManager, w http.ResponseWriter, r *http.Request)
 		// e.g. as a refresh timer. <meta http-equiv="refresh" content="5; URL=http://www.yourdomain.com/yoursite.html">
 
 		if !isAlreadyConfigured {
-			err = mgr.generateAtomFeeds()
-			if err != nil {
+			if err = mgr.replaceFeeds(); err != nil {
 				return err
 			}
 		}
+
+		mgr.startSession(w, r, mgr.config.AuthorName)
 
 		// all went well:
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -129,8 +130,7 @@ func handleSettings(mgr *SessionManager, w http.ResponseWriter, r *http.Request)
 		w.WriteHeader(http.StatusSeeOther)
 		io.WriteString(w, "let's go to "+"../pub/posts/"+"\n")
 	case "GET":
-		renderPage(http.StatusOK, w, &mgr.config)
-
+		renderPage(&mgr.config, http.StatusOK, w)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -138,12 +138,13 @@ func handleSettings(mgr *SessionManager, w http.ResponseWriter, r *http.Request)
 	return nil
 }
 
-func renderPage(code int, w http.ResponseWriter, c *Config) {
+func renderPage(c *Config, code int, w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 	w.WriteHeader(code)
-	renderPageXml(w, c)
+	renderPageXml(c, w)
 }
 
-func renderPageXml(w io.Writer, c *Config) {
+func renderPageXml(c *Config, w io.Writer) {
 	enc := xml.NewEncoder(w)
 	enc.Indent("", "  ")
 	enc.EncodeToken(xml.ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)})
@@ -158,22 +159,12 @@ func renderPageXml(w io.Writer, c *Config) {
 	})
 	// todo: link/@rel nach https://martinfowler.com/articles/richardsonMaturityModel.html
 
-	{
-		title := xml.Name{Local: "title"}
-		enc.EncodeToken(xml.StartElement{Name: title})
-		enc.EncodeToken(xml.CharData(c.Title))
-		enc.EncodeToken(xml.EndElement{Name: title})
-	}
+	encodeValueElement(enc, "title", c.Title)
 
 	{
 		author := xml.Name{Local: "author"}
 		enc.EncodeToken(xml.StartElement{Name: author})
-		{
-			name := xml.Name{Local: "name"}
-			enc.EncodeToken(xml.StartElement{Name: name})
-			enc.EncodeToken(xml.CharData(c.AuthorName))
-			enc.EncodeToken(xml.EndElement{Name: name})
-		}
+		encodeValueElement(enc, "name", c.AuthorName)
 		enc.EncodeToken(xml.EndElement{Name: author})
 	}
 
