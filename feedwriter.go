@@ -21,7 +21,9 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
+	"strconv"
 )
 
 const uriPub = "pub"
@@ -29,23 +31,56 @@ const uriPosts = "posts"
 const uriTags = "tags"
 const fileName = "index.xml"
 
-func (m *SessionManager) replaceFeeds() error {
-	// create stage dir
-
-	var feed *Feed
-
-	base_dir := "/t.b.d./"
-	fctWriteCloser := func(uri string, page int) (io.WriteCloser, error) {
-		fileName := fmt.Sprintf("%s/%s/%s", base_dir, appendPageNumber(uri, page), fileName)
-		return os.Open(fileName)
+// maybe replace the CONTENT of pub rather than pub itself. So . could remain readonly.
+//
+func (feed *Feed) replaceFeeds() error {
+	// check race: if .lock exists kill pid?
+	if byPid, err := ioutil.ReadFile("./app/var/lock"); err == nil {
+		if pid, err := strconv.Atoi(string(byPid)); err == nil {
+			if proc, err := os.FindProcess(pid); err == nil {
+				err = proc.Kill()
+			}
+		}
+		if err != nil {
+			return err
+		}
+		if err = os.Remove("./app/var/lock"); err != nil {
+			return err
+		}
 	}
-
-	err := feed.writeFeeds(100, fctWriteCloser)
-
-	// move pub -> old
-	// move stage -> pub
-	// remove old
-
+	// create .lock file with pid
+	newDirPerms := os.ModeDir | os.ModePerm
+	var err error
+	if err = os.MkdirAll("./app/var", newDirPerms); err == nil {
+		if err = ioutil.WriteFile("./app/var/lock", []byte(string(os.Getpid())), os.ModeExclusive); err == nil {
+			defer os.Remove("./app/var/lock")
+			os.RemoveAll("./app/var/stage")
+			os.RemoveAll("./app/var/old")
+			if err = os.MkdirAll("./app/var", newDirPerms); err == nil {
+				if err = feed.writeFeeds(100, func(uri string, page int) (io.WriteCloser, error) {
+					dirName := fmt.Sprintf("%s/%s", "./app/var/stage", appendPageNumber(uri, page))
+					if err := os.MkdirAll(dirName, newDirPerms); err != nil {
+						return nil, err
+					}
+					return os.Create(fmt.Sprintf("%s/%s", dirName, fileName))
+				}); err == nil {
+					if _, err = os.Stat("./pub"); os.IsNotExist(err) {
+						err = nil // ignore nonexisting pub dir. That's fine for first launch.
+					} else {
+						err = os.Rename("./pub", "./app/var/old")
+					}
+					if err == nil {
+						if err = os.Rename("./app/var/stage/pub", "./pub"); err == nil {
+							os.RemoveAll("./app/var/stage")
+							if err = os.RemoveAll("./app/var/old"); err == nil {
+								err = os.Remove("./app/var/lock")
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	return err
 }
 
@@ -158,35 +193,31 @@ func (feed Feed) writePage(page int, lastPage int, entries []*Entry, enc *xml.En
 			feed.Links = append(feed.Links, Link{Rel: "next", Href: appendPageNumber(feed.Id, page+1)})
 		}
 		feed.Links = append(feed.Links, Link{Rel: "last", Href: appendPageNumber(feed.Id, lastPage)})
+	} else {
+		// TODO https://tools.ietf.org/html/rfc5005#section-2
+		// xmlns:fh="http://purl.org/syndication/history/1.0" <fh:complete/>
 	}
 	feed.Entries = entries
 	return feed.write(enc)
 }
 
 func (feed *Feed) write(enc *xml.Encoder) error {
+	var err error
 	// preamble
-	if err := enc.EncodeToken(xml.ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)}); err != nil {
-		return err
+	if err = enc.EncodeToken(xml.ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)}); err == nil {
+		if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
+			if err = enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='../../assets/posts.xslt'")}); err == nil {
+				if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
+					if err = enc.EncodeToken(xml.Comment(lengthyAtomPreambleComment)); err == nil {
+						if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
+							if err = enc.Encode(feed); err == nil {
+								err = enc.EncodeToken(xml.CharData("\n"))
+							}
+						}
+					}
+				}
+			}
+		}
 	}
-	if err := enc.EncodeToken(xml.CharData("\n")); err != nil {
-		return err
-	}
-	if err := enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='../../assets/atom2html.xslt'")}); err != nil {
-		return err
-	}
-	if err := enc.EncodeToken(xml.CharData("\n")); err != nil {
-		return err
-	}
-	// space comment
-	if err := enc.EncodeToken(xml.Comment(lengthyAtomPreambleComment)); err != nil {
-		return err
-	}
-	if err := enc.EncodeToken(xml.CharData("\n")); err != nil {
-		return err
-	}
-	// feed content
-	if err := enc.Encode(feed); err != nil {
-		return err
-	}
-	return enc.EncodeToken(xml.CharData("\n"))
+	return err
 }

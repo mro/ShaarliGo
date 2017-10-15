@@ -1,0 +1,5 @@
+# mandatory
+DirectoryIndex index.xml
+
+# nice
+AddOutputFilter DEFLATE xml xslt css js

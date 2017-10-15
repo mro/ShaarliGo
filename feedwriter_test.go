@@ -19,7 +19,6 @@ package main
 
 import (
 	"io"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -35,14 +34,6 @@ func TestSliceIndices(t *testing.T) {
 	p = s[2:len(s)]
 	assert.Equal(t, 1, len(p), "Oha")
 	assert.Equal(t, "c", p[0], "Oha")
-}
-
-func mustParseRFC3339(str string) time.Time {
-	ret, err := time.Parse(time.RFC3339, str)
-	if err != nil {
-		panic(err)
-	}
-	return ret
 }
 
 func TestComputeLastPage(t *testing.T) {
@@ -110,7 +101,7 @@ func TestWriteFeedsEmpty1(t *testing.T) {
 	assert.Equal(t, 2, len(bufs), "soso")
 	assert.NotNil(t, bufs["pub/0001-01-01"], "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='../../assets/atom2html.xslt'?>
+<?xml-stylesheet type='text/xsl' href='../../assets/posts.xslt'?>
 <!--
   https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
 
@@ -164,7 +155,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
 	assert.Equal(t, 2, len(bufs), "soso")
 	assert.NotNil(t, bufs["pub/1990-12-31"], "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='../../assets/atom2html.xslt'?>
+<?xml-stylesheet type='text/xsl' href='../../assets/posts.xslt'?>
 <!--
   https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
 
@@ -232,7 +223,7 @@ func TestWriteFeedsPaged(t *testing.T) {
 	assert.NotNil(t, bufs["pub/1990-12-30"], "aha")
 	assert.NotNil(t, bufs["pub/1990-12-31"], "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='../../assets/atom2html.xslt'?>
+<?xml-stylesheet type='text/xsl' href='../../assets/posts.xslt'?>
 <!--
   https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
 
@@ -270,7 +261,7 @@ func TestWriteFeedsPaged(t *testing.T) {
 `, string(bufs["pub/posts"].b), "soso")
 
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='../../assets/atom2html.xslt'?>
+<?xml-stylesheet type='text/xsl' href='../../assets/posts.xslt'?>
 <!--
   https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
 

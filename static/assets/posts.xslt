@@ -164,7 +164,7 @@ li {
           <xsl:choose>
           	<!-- http://getbootstrap.com/css/#forms-horizontal -->
             <xsl:when test="not(a:link[@rel='previous'])">
-              <form class="form-horizontal">
+              <form class="form-horizontal" action="../../atom.cgi/posts" method="POST">
                 <div class="form-group">
                   <input type="text" class="form-control" id="email_id" name="email_name" placeholder="Was gibt's Neues? (Text oder URL)"/>
                 </div>

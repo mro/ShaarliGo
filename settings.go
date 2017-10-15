@@ -18,6 +18,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/xml"
 	"io"
 	"net/http"
@@ -36,6 +37,14 @@ func _urlFromString(raw string) (url *url.URL, err error) {
 		url, err = url.Parse("https://" + raw)
 	}
 	return
+}
+
+func mustParseRFC3339(str string) time.Time {
+	ret, err := time.Parse(time.RFC3339, str)
+	if err != nil {
+		panic(err)
+	}
+	return ret
 }
 
 func encodeValueElement(enc *xml.Encoder, name string, value string) *xml.Encoder {
@@ -117,7 +126,43 @@ func (mgr *SessionManager) handleSettings(w http.ResponseWriter, r *http.Request
 		// e.g. as a refresh timer. <meta http-equiv="refresh" content="5; URL=http://www.yourdomain.com/yoursite.html">
 
 		if !isAlreadyConfigured {
-			if err = mgr.replaceFeeds(); err != nil {
+			strURL := r.URL.String()
+			idx := bytes.LastIndex([]byte(strURL), []byte(os.Getenv("SCRIPT_NAME")+os.Getenv("PATH_INFO")))
+			if idx < 0 {
+				panic("cannot happen.")
+			}
+			baseURL := strURL[:idx]
+			feed := &Feed{
+				Id:      baseURL,
+				Title:   HumanText{Body: "Hello, Atom!"},
+				Authors: []Person{Person{Name: "John Doe"}},
+				Entries: []*Entry{
+					&Entry{
+						Id:         "e2",
+						Title:      HumanText{Body: "Hello, Entry 2!"},
+						Links:      []Link{Link{Rel: "via", Href: "http://www.loremipsum.de/"}},
+						Categories: []Category{Category{Term: "🐳", Scheme: baseURL + "/" + uriPub + "/" + uriTags + "#"}, Category{Term: "self-hosted", Scheme: baseURL + "/" + uriPub + "/" + uriTags + "#"}},
+						Content:    &HumanText{Type: "text", Body: "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."},
+						Updated:    iso8601{mustParseRFC3339("1990-12-31T02:02:02+01:00")},
+					},
+					&Entry{
+						Id:         "e1",
+						Title:      HumanText{Body: "Hello, Entry 1!"},
+						Links:      []Link{Link{Rel: "via", Href: "http://blog.fefe.de/"}},
+						Categories: []Category{Category{Term: "🐳", Scheme: baseURL + "/" + uriPub + "/" + uriTags + "#"}},
+						Content:    &HumanText{Body: ""},
+						Updated:    iso8601{mustParseRFC3339("1990-12-31T01:01:01+01:00")},
+					},
+					&Entry{
+						Id:         "e0",
+						Title:      HumanText{Body: "Hello, Entry 0!"},
+						Categories: []Category{Category{Term: "self-hosted", Scheme: baseURL + "/" + uriPub + "/" + uriTags + "#"}},
+						Content:    &HumanText{Body: ""},
+						Updated:    iso8601{mustParseRFC3339("1990-12-30T00:00:00+01:00")},
+					},
+				},
+			}
+			if err = feed.replaceFeeds(); err != nil {
 				return err
 			}
 		}
