@@ -20,10 +20,12 @@ package main
 import (
 	"bytes"
 	"encoding/xml"
+	//"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -40,11 +42,11 @@ func _urlFromString(raw string) (url *url.URL, err error) {
 }
 
 func mustParseRFC3339(str string) time.Time {
-	ret, err := time.Parse(time.RFC3339, str)
-	if err != nil {
+	if ret, err := time.Parse(time.RFC3339, str); err != nil {
 		panic(err)
+	} else {
+		return ret
 	}
-	return ret
 }
 
 func encodeValueElement(enc *xml.Encoder, name string, value string) *xml.Encoder {
@@ -125,40 +127,54 @@ func (mgr *SessionManager) handleSettings(w http.ResponseWriter, r *http.Request
 		// if process is running: add a hint about the running background task into the response,
 		// e.g. as a refresh timer. <meta http-equiv="refresh" content="5; URL=http://www.yourdomain.com/yoursite.html">
 
+		strURL := r.URL.String()
+		idxBase := 1 + bytes.LastIndex([]byte(strURL), []byte(os.Getenv("SCRIPT_NAME")+os.Getenv("PATH_INFO")))
+		if idxBase < 0 {
+			panic("cannot happen.")
+		}
+		urlBase, err := url.Parse(strURL[:idxBase])
+
 		if !isAlreadyConfigured {
-			strURL := r.URL.String()
-			idx := bytes.LastIndex([]byte(strURL), []byte(os.Getenv("SCRIPT_NAME")+os.Getenv("PATH_INFO")))
-			if idx < 0 {
-				panic("cannot happen.")
-			}
-			baseURL := strURL[:idx]
+			// idxPost := idxBase + len(os.Getenv("SCRIPT_NAME"))
+			// urlPost, err := url.Parse(strURL[:idxPost] + "/" + uriPub + "/" + uriPosts)
+			// load template feed, set Id and birthday.
+			// tagScheme := baseURL.ResolveReference(mustParseURL(uriPub, uriTags, "#")).String()
 			feed := &Feed{
-				Id:      baseURL,
-				Title:   HumanText{Body: "Hello, Atom!"},
-				Authors: []Person{Person{Name: "John Doe"}},
+				XmlBase:   urlBase.String(),
+				Id:        urlBase.String(), // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
+				Title:     HumanText{Body: mgr.config.Title},
+				Authors:   []Person{Person{Name: mgr.config.AuthorName}},
+				Generator: &Generator{Uri: myselfNamespace, Version: "0.0.1", Body: "AtomicShaarli"},
+				Links: []Link{
+					Link{Rel: relEdit, Href: path.Join(cgiName, uriPub, uriPosts), Title: "Maybe better a app:collection https://tools.ietf.org/html/rfc5023#section-8.3.3"},
+				},
 				Entries: []*Entry{
 					&Entry{
-						Id:         "e2",
-						Title:      HumanText{Body: "Hello, Entry 2!"},
-						Links:      []Link{Link{Rel: "via", Href: "http://www.loremipsum.de/"}},
-						Categories: []Category{Category{Term: "🐳", Scheme: baseURL + "/" + uriPub + "/" + uriTags + "#"}, Category{Term: "self-hosted", Scheme: baseURL + "/" + uriPub + "/" + uriTags + "#"}},
-						Content:    &HumanText{Type: "text", Body: "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."},
-						Updated:    iso8601{mustParseRFC3339("1990-12-31T02:02:02+01:00")},
+						Title: HumanText{Body: "Hello, Atom!"},
+						Id:    "e2",
+						Links: []Link{
+							Link{Rel: relAlternate, Href: mustParseURL("http://www.loremipsum.de/").String()},
+						},
+						Categories: []Category{Category{Term: "🐳"}, Category{Term: "opensource"}, Category{Term: "ipsum"}},
+						Content:    &HumanText{Body: "Lorem #ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."},
+						Updated:    iso8601{mustParseRFC3339("2012-12-31T02:02:02+01:00")},
 					},
 					&Entry{
-						Id:         "e1",
 						Title:      HumanText{Body: "Hello, Entry 1!"},
-						Links:      []Link{Link{Rel: "via", Href: "http://blog.fefe.de/"}},
-						Categories: []Category{Category{Term: "🐳", Scheme: baseURL + "/" + uriPub + "/" + uriTags + "#"}},
+						Id:         "e1",
+						Categories: []Category{Category{Term: "🐳"}},
 						Content:    &HumanText{Body: ""},
-						Updated:    iso8601{mustParseRFC3339("1990-12-31T01:01:01+01:00")},
+						Updated:    iso8601{mustParseRFC3339("2012-12-31T01:01:01+01:00")},
 					},
 					&Entry{
-						Id:         "e0",
-						Title:      HumanText{Body: "Hello, Entry 0!"},
-						Categories: []Category{Category{Term: "self-hosted", Scheme: baseURL + "/" + uriPub + "/" + uriTags + "#"}},
-						Content:    &HumanText{Body: ""},
-						Updated:    iso8601{mustParseRFC3339("1990-12-30T00:00:00+01:00")},
+						Title: HumanText{Body: "Shaarli - sebsauvage.net"},
+						Id:    "kaJ9Rw",
+						Links: []Link{
+							Link{Rel: relAlternate, Href: mustParseURL("http://sebsauvage.net/wiki/doku.php?id=php:shaarli").String()},
+						},
+						Categories: []Category{Category{Term: "opensource"}, Category{Term: "Software"}},
+						Updated:    iso8601{mustParseRFC3339("2011-09-14T19:00:00+02:00")},
+						Content:    &HumanText{Body: "Welcome to Shaarli ! This is a bookmark. To edit or delete me, you must first login."},
 					},
 				},
 			}
@@ -171,9 +187,10 @@ func (mgr *SessionManager) handleSettings(w http.ResponseWriter, r *http.Request
 
 		// all went well:
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		w.Header().Set("Location", "../pub/posts/")
+		dst := path.Join("..", uriPub, uriPosts)
+		w.Header().Set("Location", dst)
 		w.WriteHeader(http.StatusSeeOther)
-		io.WriteString(w, "let's go to "+"../pub/posts/"+"\n")
+		io.WriteString(w, "let's go to "+dst+"\n")
 	case "GET":
 		renderPage(&mgr.config, http.StatusOK, w)
 	default:
@@ -194,13 +211,14 @@ func renderPageXml(c *Config, w io.Writer) {
 	enc.Indent("", "  ")
 	enc.EncodeToken(xml.ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)})
 	enc.EncodeToken(xml.CharData("\n"))
-	enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='../assets/settings.xslt'")})
+	enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='" + path.Join("..", "assets", "settings.xslt") + "'")})
 	enc.EncodeToken(xml.CharData("\n"))
 
 	n := xml.Name{Local: "as:setup"}
 	enc.EncodeToken(xml.StartElement{Name: n, Attr: []xml.Attr{
 		xml.Attr{Name: xml.Name{Local: "xmlns:as"}, Value: myselfNamespace},
-		xml.Attr{Name: xml.Name{Local: "xmlns"}, Value: atomNamespace}},
+		xml.Attr{Name: xml.Name{Local: "xmlns"}, Value: atomNamespace},
+		xml.Attr{Name: xml.Name{Local: "xml:base"}, Value: "t.b.d."}},
 	})
 	// todo: link/@rel nach https://martinfowler.com/articles/richardsonMaturityModel.html
 
@@ -209,7 +227,7 @@ func renderPageXml(c *Config, w io.Writer) {
 	{
 		author := xml.Name{Local: "author"}
 		enc.EncodeToken(xml.StartElement{Name: author})
-		encodeValueElement(enc, "name", c.AuthorName)
+		enc.Encode(Person{Name: c.AuthorName})
 		enc.EncodeToken(xml.EndElement{Name: author})
 	}
 

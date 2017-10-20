@@ -162,7 +162,7 @@ li {
           <h2>Feed Untertitel</h2>
 
           <xsl:choose>
-          	<!-- http://getbootstrap.com/css/#forms-horizontal -->
+            <!-- http://getbootstrap.com/css/#forms-horizontal -->
             <xsl:when test="not(a:link[@rel='previous'])">
               <form class="form-horizontal" action="../../atom.cgi/posts" method="POST">
                 <div class="form-group">
@@ -247,7 +247,7 @@ li {
 
           <hr style="clear:left;"/>
           <p id="footer">
-            <a title="Validate my Atom 1.0 feed" href="https://validator.w3.org/feed/check.cgi?url={a:link[@rel='self']/@href}">
+            <a title="Validate my Atom 1.0 feed" href="https://validator.w3.org/feed/check.cgi?url={@xml:base}{a:link[@rel='self']/@href}">
               <img alt="Valid Atom 1.0" src="../../../assets/valid-atom.png" style="border:0;width:88px;height:31px"/>
             </a><xsl:text> </xsl:text>
             <a href="https://validator.w3.org/check?uri=referer">
@@ -266,8 +266,8 @@ li {
   <xsl:template match="a:entry">
     <li id="{substring-after(a:id, '#')}" class="clearfix">
       <p class="small">
-      	<img alt="Vorschaubild" class="img-responsive pull-right" src="https://links.mro.name/?do=genthumbnail&amp;hmac=d8f746960e34eb1ece5cb067a03363f71d419bb7bba2a7d146ee7be3026ad3c6&amp;url=https%3A%2F%2Fheise.de%2F-3619788"/>
-      	
+        <img alt="Vorschaubild" class="img-responsive pull-right" src="https://links.mro.name/?do=genthumbnail&amp;hmac=d8f746960e34eb1ece5cb067a03363f71d419bb7bba2a7d146ee7be3026ad3c6&amp;url=https%3A%2F%2Fheise.de%2F-3619788"/>
+
         <xsl:variable name="entry_updated" select="a:updated"/>
         <xsl:variable name="entry_updated_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_updated"/></xsl:call-template></xsl:variable>
         <a class="time" title="{$entry_updated}" href="{a:id}">🔗 <xsl:value-of select="$entry_updated_human"/></a>
@@ -280,13 +280,14 @@ li {
         <div class="renderhtml">
           <!-- html content won't work that easy (out-of-the-firebox): https://bugzilla.mozilla.org/show_bug.cgi?id=98168#c140 -->
           <!-- workaround via jquery: http://stackoverflow.com/a/9714567 -->
-          
+
           <!-- Überbleibsel vom Shaarli Atom Feed raus: -->
-          <xsl:value-of select="substring-before(a:content[not(@src)], '&lt;br&gt;(&lt;a href=&quot;https://links.mro.name/?')" disable-output-escaping="yes" />
+          <!-- xsl:value-of select="substring-before(a:content[not(@src)], '&lt;br&gt;(&lt;a href=&quot;https://links.mro.name/?')" disable-output-escaping="yes" / -->
+          <xsl:value-of select="a:content" disable-output-escaping="yes" />
         </div>
         <p class="categories" title="Schlagworte">
           <xsl:for-each select="a:category">
-          	<xsl:sort select="@term"/>
+            <xsl:sort select="@term"/>
             <a href="../tags/{@term}/">#<xsl:value-of select="@term"/></a><xsl:text> </xsl:text>
           </xsl:for-each>
         </p>

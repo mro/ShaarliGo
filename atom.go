@@ -71,6 +71,8 @@ func FeedFromReader(file io.Reader) (Feed, error) {
 // see also https://godoc.org/golang.org/x/tools/blog/atom#Feed
 type Feed struct {
 	XMLName      xml.Name   `xml:"http://www.w3.org/2005/Atom feed"`
+	XmlBase      string     `xml:"xml:base,attr,omitempty"`
+	XmlLang      string     `xml:"xml:lang,attr,omitempty"`
 	Title        HumanText  `xml:"title"`
 	Subtitle     *HumanText `xml:"subtitle,omitempty"`
 	Id           string     `xml:"id"`
@@ -125,6 +127,8 @@ type Person struct {
 
 // see also https://godoc.org/golang.org/x/tools/blog/atom#Entry
 type Entry struct {
+	XmlBase      string     `xml:"xml:base,attr,omitempty"`
+	XmlLang      string     `xml:"xml:lang,attr,omitempty"`
 	Title        HumanText  `xml:"title"`
 	Summary      *HumanText `xml:"summary,omitempty"`
 	Id           string     `xml:"id"`
@@ -141,9 +145,10 @@ type Entry struct {
 }
 
 type HumanText struct {
-	Body string `xml:",chardata"`
-	Type string `xml:"type,attr,omitempty"`
-	Src  string `xml:"src,attr,omitempty"`
+	XmlLang string `xml:"xml:lang,attr,omitempty"`
+	Body    string `xml:",chardata"`
+	Type    string `xml:"type,attr,omitempty"`
+	Src     string `xml:"src,attr,omitempty"`
 }
 
 type Category struct {

@@ -22,7 +22,7 @@ VERSION="0.0.1"
 
 rm "${PROG_NAME}"-*-"${VERSION}" 2>/dev/null
 
-go test || exit $?
+# go test || exit $?
 
 # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
 # env GOOS=linux GOARCH=arm GOARM=6 go build -o "${PROG_NAME}-linux-arm-${VERSION}"
@@ -31,10 +31,10 @@ env GOOS=linux GOARCH=amd64 go build -ldflags "-s" -o "${PROG_NAME}-linux-amd64-
 # env GOOS=darwin GOARCH=amd64 go build -o "${PROG_NAME}-darwin-amd64-${VERSION}"
 
 # https://lager.mro.name/as/atom.cgi
-scp "${PROG_NAME}-linux-amd64-${VERSION}" simply:/var/www/lighttpd/lager.mro.name/public_html/as/"atom.cgi"
-scp "ServerInfo.cgi" simply:/var/www/lighttpd/lager.mro.name/public_html/as/"info.cgi"
-ssh simply rm -vrf /var/www/lighttpd/lager.mro.name/public_html/as/assets
-ssh simply rm -vrf /var/www/lighttpd/lager.mro.name/public_html/as/app
+# scp "${PROG_NAME}-linux-amd64-${VERSION}" simply:/var/www/lighttpd/lager.mro.name/public_html/as/"atom.cgi"
+# scp "ServerInfo.cgi" simply:/var/www/lighttpd/lager.mro.name/public_html/as/"info.cgi"
+# ssh simply rm -vrf /var/www/lighttpd/lager.mro.name/public_html/as/assets
+# ssh simply rm -vrf /var/www/lighttpd/lager.mro.name/public_html/as/app
 
 # http://vorschau.blog.mro.name/atom.cgi
 scp "${PROG_NAME}-linux-amd64-${VERSION}" vario:~/mro.name/vorschau.blog/"atom.cgi"
@@ -46,3 +46,14 @@ ssh vario rm -vrf mro.name/vorschau.blog/app
 # curl --location --dump-header head.txt "http://vorschau.blog.mro.name/"
 # echo "===="
 #cat head.txt
+
+# curl --location 'http://vorschau.blog.mro.name/atom.cgi/settings?foo' ; say 'aha, aha, soso'
+
+curl --dump-header head.txt --location 'http://vorschau.blog.mro.name/atom.cgi/settings?foo' \
+  --data-urlencode 'title=A' \
+  --data-urlencode 'author/name=B' \
+  --data-urlencode 'password=123456789012' \
+  --data-urlencode 'import_shaarli_url=' \
+  --data-urlencode 'import_shaarli_setlogin=' \
+  --data-urlencode 'import_shaarli_setpassword=' \
+> body.txt ; cat head.txt body.txt ; say 'aha, aha, soso'

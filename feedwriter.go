@@ -19,21 +19,51 @@ package main
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/url"
 	"os"
+	"path"
+	"path/filepath"
+	"regexp"
 	"strconv"
+	"strings"
 )
+
+func mustParseURL(u string) *url.URL {
+	if ret, err := url.Parse(u); err != nil {
+		panic("Cannot parse URL '" + u + "' " + err.Error())
+	} else {
+		return ret
+	}
+}
+
+const cgiName = "atom.cgi"
+const fileName = "index.xml" // could be 'index.atom' but xml may have a proper mimetype out of the box
 
 const uriPub = "pub"
 const uriPosts = "posts"
 const uriTags = "tags"
-const fileName = "index.xml"
+
+const relSelf = "self"            // https://www.iana.org/assignments/link-relations/link-relations.xhtml
+const relAlternate = "alternate"  // https://www.iana.org/assignments/link-relations/link-relations.xhtml
+const relVia = "via"              // https://www.iana.org/assignments/link-relations/link-relations.xhtml
+const relEnclosure = "enclosure"  // https://www.iana.org/assignments/link-relations/link-relations.xhtml
+const relFirst = "first"          //
+const relLast = "last"            //
+const relNext = "next"            //
+const relPrevious = "previous"    //
+const relEdit = "edit"            // https://www.iana.org/assignments/link-relations/link-relations.xhtml
+const relEditMedia = "edit-media" // https://www.iana.org/assignments/link-relations/link-relations.xhtml
 
 // maybe replace the CONTENT of pub rather than pub itself. So . could remain readonly.
 //
 func (feed *Feed) replaceFeeds() error {
+	if path.Join("a", "b") != filepath.Join("a", "b") {
+		return errors.New("Go, get an OS.")
+	}
 	// check race: if .lock exists kill pid?
 	if byPid, err := ioutil.ReadFile("./app/var/lock"); err == nil {
 		if pid, err := strconv.Atoi(string(byPid)); err == nil {
@@ -58,11 +88,11 @@ func (feed *Feed) replaceFeeds() error {
 			os.RemoveAll("./app/var/old")
 			if err = os.MkdirAll("./app/var", newDirPerms); err == nil {
 				if err = feed.writeFeeds(100, func(uri string, page int) (io.WriteCloser, error) {
-					dirName := fmt.Sprintf("%s/%s", "./app/var/stage", appendPageNumber(uri, page))
+					dirName := filepath.Join("./app/var/stage", appendPageNumber(uri, page))
 					if err := os.MkdirAll(dirName, newDirPerms); err != nil {
 						return nil, err
 					}
-					return os.Create(fmt.Sprintf("%s/%s", dirName, fileName))
+					return os.Create(filepath.Join(dirName, fileName))
 				}); err == nil {
 					if _, err = os.Stat("./pub"); os.IsNotExist(err) {
 						err = nil // ignore nonexisting pub dir. That's fine for first launch.
@@ -85,21 +115,36 @@ func (feed *Feed) replaceFeeds() error {
 }
 
 func (feed *Feed) writeFeeds(entriesPerPage int, fctWriteCloser func(string, int) (io.WriteCloser, error)) error {
-	base := fmt.Sprintf("%s/%s/%s", feed.Id, uriPub, uriPosts)
+	xmlBase := mustParseURL(feed.XmlBase)
+	if !xmlBase.IsAbs() || !strings.HasSuffix(xmlBase.Path, "/") {
+		return errors.New("feed/@xml:base must be set to an absolute URL with a trailing slash")
+	}
+	// load template feed, set Id and birthday.
 	// we need to know the total pages per each feed in order to know the 'last' uri.
 	// So no concurrency here :-(
+	catScheme := xmlBase.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String()
 	uri2entries := make(map[string][]*Entry)
 	for _, item := range feed.Entries {
-		// change entries for output but don't save the change: normalize Id:
-		realId := item.Id
-		item.Id = appendPageNumber(base, 0) + "/" + realId
+		// change entries for output but don't save the change:
+		selfURL := mustParseURL(path.Join(uriPub, uriPosts, item.Id))
+		editURL := path.Join(cgiName, selfURL.String())
+		item.Id = xmlBase.ResolveReference(selfURL).String() // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
+		item.Links = append(item.Links,
+			Link{Rel: relSelf, Href: selfURL.String()},
+			Link{Rel: relEdit, Href: editURL},
+			// Link{Rel: relEditMedia, Href: editURL},
+		)
+		for i, _ := range item.Categories {
+			item.Categories[i].Scheme = catScheme
+		}
 		for _, uri := range feedUrlsForEntry(item) {
 			uri2entries[uri] = append(uri2entries[uri], item)
 		}
+
+		// item.write(fctWriteCloser)
 	}
 
 	for uri, entries := range uri2entries {
-		// but here we could go parallel...
 		// ... if not for the error handling. Maybe https://godoc.org/golang.org/x/sync/errgroup
 		feed.writeFeed(uri, entries, entriesPerPage, fctWriteCloser)
 	}
@@ -112,20 +157,21 @@ func (feed *Feed) writeFeeds(entriesPerPage int, fctWriteCloser func(string, int
 // The results have to be turned into (relative) feed uris down at writeEntries()
 // and may well be a int index into a LUT
 func feedUrlsForEntry(itm *Entry) []string {
-	audience := uriPub
-	date := itm.Published
-	if date == nil {
-		date = &itm.Updated
+	day := itm.Published
+	if day == nil {
+		day = &itm.Updated
 	}
 	ret := make([]string, 0, 2+len(itm.Categories))
+
+	audience := uriPub
 	ret = append(ret,
-		fmt.Sprintf("%s/%s", audience, uriPosts), // default feed
-		// fmt.Sprintf("%s/%s/%s", audience, uriPosts, itm.Id), // standalone TODO?
-		fmt.Sprintf("%s/%s", audience, date.Format("2006-01-02")), // daily feed
+		path.Join(audience, uriPosts),                 // default feed
+		path.Join(audience, day.Format("2006-01-02")), // daily feed
 	)
 	for _, cat := range itm.Categories {
-		ret = append(ret, fmt.Sprintf("%s/%s/%s", audience, uriTags, cat.Term)) // category feeds
+		ret = append(ret, path.Join(audience, uriTags, cat.Term)) // category feeds
 	}
+
 	return ret
 }
 
@@ -145,7 +191,7 @@ func computeLastPage(count int, entriesPerPage int) int {
 
 // seed is cloned on each call
 func (seed Feed) writeFeed(uri string, entries []*Entry, entriesPerPage int, fctWriteCloser func(string, int) (io.WriteCloser, error)) error {
-	seed.Id = fmt.Sprintf("%s/%s", seed.Id, uri)
+	pathPrefix := regexp.MustCompile("[^/]+").ReplaceAllString(uri, "..")
 
 	totalEntries := len(entries)
 	lastPage := computeLastPage(totalEntries, entriesPerPage)
@@ -170,7 +216,7 @@ func (seed Feed) writeFeed(uri string, entries []*Entry, entriesPerPage int, fct
 				defer w.Close()
 				enc := xml.NewEncoder(w)
 				enc.Indent("", "  ")
-				seed.writePage(page, lastPage, pageEntries, enc)
+				seed.writePage(uri, page, lastPage, pageEntries, pathPrefix, enc)
 				return enc.Flush()
 			}
 		}(); err != nil {
@@ -181,32 +227,32 @@ func (seed Feed) writeFeed(uri string, entries []*Entry, entriesPerPage int, fct
 }
 
 // feed is cloned on each call
-func (feed Feed) writePage(page int, lastPage int, entries []*Entry, enc *xml.Encoder) error {
-	feed.Links = append(feed.Links, Link{Rel: "self", Href: appendPageNumber(feed.Id, page)})
+func (feed Feed) writePage(uri string, page, lastPage int, entries []*Entry, pathPrefix string, enc *xml.Encoder) error {
+	feed.Links = append(feed.Links, Link{Rel: relSelf, Href: appendPageNumber(uri, page), Title: fmt.Sprintf("%d", page+1)})
 	// https://tools.ietf.org/html/rfc5005#section-3
 	if lastPage > 0 {
-		feed.Links = append(feed.Links, Link{Rel: "first", Href: appendPageNumber(feed.Id, 0)})
+		feed.Links = append(feed.Links, Link{Rel: relFirst, Href: appendPageNumber(uri, 0), Title: fmt.Sprintf("%d", 0+1)})
 		if page > 0 {
-			feed.Links = append(feed.Links, Link{Rel: "previous", Href: appendPageNumber(feed.Id, page-1)})
+			feed.Links = append(feed.Links, Link{Rel: relPrevious, Href: appendPageNumber(uri, page-1), Title: fmt.Sprintf("%d", page-1+1)})
 		}
 		if page < lastPage {
-			feed.Links = append(feed.Links, Link{Rel: "next", Href: appendPageNumber(feed.Id, page+1)})
+			feed.Links = append(feed.Links, Link{Rel: relNext, Href: appendPageNumber(uri, page+1), Title: fmt.Sprintf("%d", page+1+1)})
 		}
-		feed.Links = append(feed.Links, Link{Rel: "last", Href: appendPageNumber(feed.Id, lastPage)})
+		feed.Links = append(feed.Links, Link{Rel: relLast, Href: appendPageNumber(uri, lastPage), Title: fmt.Sprintf("%d", lastPage+1)})
 	} else {
 		// TODO https://tools.ietf.org/html/rfc5005#section-2
 		// xmlns:fh="http://purl.org/syndication/history/1.0" <fh:complete/>
 	}
 	feed.Entries = entries
-	return feed.write(enc)
+	return feed.write(pathPrefix, enc)
 }
 
-func (feed *Feed) write(enc *xml.Encoder) error {
+func (feed *Feed) write(pathPrefix string, enc *xml.Encoder) error {
 	var err error
 	// preamble
 	if err = enc.EncodeToken(xml.ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)}); err == nil {
 		if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
-			if err = enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='../../assets/posts.xslt'")}); err == nil {
+			if err = enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='" + path.Join(pathPrefix, "assets", "posts.xslt") + "'")}); err == nil {
 				if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
 					if err = enc.EncodeToken(xml.Comment(lengthyAtomPreambleComment)); err == nil {
 						if err = enc.EncodeToken(xml.CharData("\n")); err == nil {

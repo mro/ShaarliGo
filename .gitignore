@@ -4,7 +4,11 @@ testdata/links.gob
 testdata/sebsauvage.atom
 AtomicShaarli
 ServerInfo.cgi
-head.txt
 settings.sh
 flow.pdf
 neu0.graphmlz
+atom.cgi
+body.txt
+head.txt
+*~
+t/

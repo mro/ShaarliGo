@@ -19,6 +19,8 @@ package main
 
 import (
 	"io"
+	"path"
+	"regexp"
 
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -36,6 +38,29 @@ func TestSliceIndices(t *testing.T) {
 	assert.Equal(t, "c", p[0], "Oha")
 }
 
+func TestUriBasics(t *testing.T) {
+	u1 := mustParseURL("b")
+	assert.Equal(t, "a/b", path.Join("a", u1.Path), "Oha")
+	assert.Equal(t, "/b", mustParseURL("a").ResolveReference(u1).String(), "Oha")
+	assert.Equal(t, "/b", mustParseURL(".").ResolveReference(u1).String(), "Oha")
+	assert.Equal(t, "https://mro.name/b", mustParseURL("https://mro.name").ResolveReference(u1).String(), "Oha")
+	assert.Equal(t, "https://mro.name/b", mustParseURL("https://mro.name/").ResolveReference(u1).String(), "Oha")
+
+	assert.Equal(t, "https://mro.name/b", mustParseURL("https://mro.name/sub").ResolveReference(u1).String(), "Oha")
+	assert.Equal(t, "https://mro.name/sub/b", mustParseURL("https://mro.name/sub/").ResolveReference(u1).String(), "Oha")
+
+	urn := mustParseURL("urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6")
+	assert.Equal(t, "urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6", urn.String(), "Oha")
+	assert.Equal(t, "urn", urn.Scheme, "Oha")
+	assert.Equal(t, "uuid:60a76c80-d399-11d9-b93C-0003939e0af6", urn.Opaque, "Oha")
+	assert.Equal(t, "", urn.Host, "Oha")
+	assert.Equal(t, "", urn.Path, "Oha")
+	assert.Equal(t, "", urn.RawQuery, "Oha")
+	assert.Equal(t, "", urn.Fragment, "Oha")
+
+	assert.Equal(t, "../../..", regexp.MustCompile("[^/]+").ReplaceAllString("a/b/c", ".."), "Oha")
+}
+
 func TestComputeLastPage(t *testing.T) {
 	assert.Equal(t, 0, computeLastPage(0, 100), "Oha")
 	assert.Equal(t, 0, computeLastPage(1, 100), "Oha")
@@ -45,16 +70,28 @@ func TestComputeLastPage(t *testing.T) {
 
 func TestFeedUrlsForEntry(t *testing.T) {
 	itm := &Entry{
+		Id:         "id_0",
 		Published:  &iso8601{mustParseRFC3339("2010-12-31T00:11:22Z")},
 		Categories: []Category{Category{Term: "🐳"}},
 	}
 
 	uris := feedUrlsForEntry(itm)
 
-	assert.Equal(t, 3, len(uris), "Oha")
+	assert.Equal(t, 2+1, len(uris), "Oha")
 	assert.Equal(t, "pub/posts", uris[0], "Oha")
 	assert.Equal(t, "pub/2010-12-31", uris[1], "Oha")
 	assert.Equal(t, "pub/tags/🐳", uris[2], "Oha")
+}
+
+func TestPathJoin(t *testing.T) {
+	assert.Equal(t, "a/b", path.Join("a", "b", ""), "Oha")
+}
+
+func TestAppendPageNumber(t *testing.T) {
+	s := "abc/"
+	assert.Equal(t, "/", s[len(s)-1:], "Oha")
+	assert.Equal(t, "pub/posts", appendPageNumber("pub/posts", 0), "Oha")
+	assert.Equal(t, "pub/posts-1", appendPageNumber("pub/posts", 1), "Oha")
 }
 
 type buff struct {
@@ -71,18 +108,7 @@ func (buff *buff) Close() error {
 }
 
 func TestWriteFeedsEmpty0(t *testing.T) {
-	bufs := make(map[string]*buff)
-	// callback
-	fctWriteCloser := func(uri string, page int) (io.WriteCloser, error) {
-		bf := new(buff)
-		bufs[appendPageNumber(uri, page)] = bf
-		return bf, nil
-	}
-
-	feed := new(Feed)
-	err := feed.writeFeeds(2, fctWriteCloser)
-	assert.Equal(t, 0, len(bufs), "soso")
-	assert.Nil(t, err, "aha")
+	assert.Equal(t, "feed/@xml:base must be set to an absolute URL with a trailing slash", new(Feed).writeFeeds(2, nil).Error(), "aha")
 }
 
 func TestWriteFeedsEmpty1(t *testing.T) {
@@ -94,7 +120,10 @@ func TestWriteFeedsEmpty1(t *testing.T) {
 		return bf, nil
 	}
 
-	feed := &Feed{Entries: []*Entry{new(Entry)}}
+	feed := &Feed{
+		XmlBase: mustParseURL("http://example.com/").String(),
+		Entries: []*Entry{new(Entry)},
+	}
 	err := feed.writeFeeds(2, fctWriteCloser)
 
 	assert.Nil(t, err, "soso")
@@ -117,15 +146,17 @@ func TestWriteFeedsEmpty1(t *testing.T) {
   For best results serve both atom feed and xslt as 'text/xml' or
   'application/xml' without charset specified.
 -->
-<feed xmlns="http://www.w3.org/2005/Atom">
+<feed xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
   <title></title>
-  <id>/pub/posts</id>
+  <id></id>
   <updated>0001-01-01T00:00:00Z</updated>
-  <link href="/pub/posts" rel="self"></link>
+  <link href="pub/posts" rel="self" title="1"></link>
   <entry>
     <title></title>
-    <id>/pub/posts/</id>
+    <id>http://example.com/pub/posts</id>
     <updated>0001-01-01T00:00:00Z</updated>
+    <link href="pub/posts" rel="self"></link>
+    <link href="atom.cgi/pub/posts" rel="edit"></link>
   </entry>
 </feed>
 `, string(bufs["pub/posts"].b), "soso")
@@ -141,18 +172,20 @@ func TestWriteFeedsUnpaged(t *testing.T) {
 	}
 
 	feed := &Feed{
-		Id:    "http://example.com",
-		Title: HumanText{Body: "Hello, Atom!"},
+		XmlBase: mustParseURL("http://example.com/").String(),
+		Id:      mustParseURL("http://example.com/").String(),
+		Title:   HumanText{Body: "Hello, Atom!"},
 		Entries: []*Entry{&Entry{
-			Id:      "e0",
-			Title:   HumanText{Body: "Hello, Entry!"},
-			Updated: iso8601{mustParseRFC3339("1990-12-31T01:02:03+01:00")},
+			Id:         "e0",
+			Title:      HumanText{Body: "Hello, Entry!"},
+			Updated:    iso8601{mustParseRFC3339("1990-12-31T01:02:03+01:00")},
+			Categories: []Category{Category{Term: "aha"}},
 		}},
 	}
 	err := feed.writeFeeds(2, fctWriteCloser)
 
 	assert.Nil(t, err, "soso")
-	assert.Equal(t, 2, len(bufs), "soso")
+	assert.Equal(t, 2+1, len(bufs), "soso")
 	assert.NotNil(t, bufs["pub/1990-12-31"], "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../assets/posts.xslt'?>
@@ -171,15 +204,18 @@ func TestWriteFeedsUnpaged(t *testing.T) {
   For best results serve both atom feed and xslt as 'text/xml' or
   'application/xml' without charset specified.
 -->
-<feed xmlns="http://www.w3.org/2005/Atom">
+<feed xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
   <title>Hello, Atom!</title>
-  <id>http://example.com/pub/posts</id>
+  <id>http://example.com/</id>
   <updated>1990-12-31T01:02:03+01:00</updated>
-  <link href="http://example.com/pub/posts" rel="self"></link>
+  <link href="pub/posts" rel="self" title="1"></link>
   <entry>
     <title>Hello, Entry!</title>
     <id>http://example.com/pub/posts/e0</id>
     <updated>1990-12-31T01:02:03+01:00</updated>
+    <link href="pub/posts/e0" rel="self"></link>
+    <link href="atom.cgi/pub/posts/e0" rel="edit"></link>
+    <category term="aha" scheme="http://example.com/pub/tags"></category>
   </entry>
 </feed>
 `, string(bufs["pub/posts"].b), "soso")
@@ -196,8 +232,10 @@ func TestWriteFeedsPaged(t *testing.T) {
 	}
 
 	feed := &Feed{
-		Id:    "http://example.com",
-		Title: HumanText{Body: "Hello, Atom!"},
+		XmlBase: mustParseURL("http://example.com/").String(),
+		XmlLang: "deu",
+		Id:      mustParseURL("http://example.com").String(),
+		Title:   HumanText{Body: "Hello, Atom!"},
 		Entries: []*Entry{
 			&Entry{
 				Id:      "e2",
@@ -239,26 +277,30 @@ func TestWriteFeedsPaged(t *testing.T) {
   For best results serve both atom feed and xslt as 'text/xml' or
   'application/xml' without charset specified.
 -->
-<feed xmlns="http://www.w3.org/2005/Atom">
+<feed xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/" xml:lang="deu">
   <title>Hello, Atom!</title>
-  <id>http://example.com/pub/posts</id>
+  <id>http://example.com</id>
   <updated>1990-12-31T02:02:02+01:00</updated>
-  <link href="http://example.com/pub/posts" rel="self"></link>
-  <link href="http://example.com/pub/posts" rel="first"></link>
-  <link href="http://example.com/pub/posts-1" rel="next"></link>
-  <link href="http://example.com/pub/posts-1" rel="last"></link>
+  <link href="pub/posts" rel="self" title="1"></link>
+  <link href="pub/posts" rel="first" title="1"></link>
+  <link href="pub/posts-1" rel="next" title="2"></link>
+  <link href="pub/posts-1" rel="last" title="2"></link>
   <entry>
     <title>Hello, Entry 2!</title>
     <id>http://example.com/pub/posts/e2</id>
     <updated>1990-12-31T02:02:02+01:00</updated>
+    <link href="pub/posts/e2" rel="self"></link>
+    <link href="atom.cgi/pub/posts/e2" rel="edit"></link>
   </entry>
   <entry>
     <title>Hello, Entry 1!</title>
     <id>http://example.com/pub/posts/e1</id>
     <updated>1990-12-31T01:01:01+01:00</updated>
+    <link href="pub/posts/e1" rel="self"></link>
+    <link href="atom.cgi/pub/posts/e1" rel="edit"></link>
   </entry>
 </feed>
-`, string(bufs["pub/posts"].b), "soso")
+`, string(bufs["pub/posts"].b), "page 1")
 
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../assets/posts.xslt'?>
@@ -277,19 +319,21 @@ func TestWriteFeedsPaged(t *testing.T) {
   For best results serve both atom feed and xslt as 'text/xml' or
   'application/xml' without charset specified.
 -->
-<feed xmlns="http://www.w3.org/2005/Atom">
+<feed xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/" xml:lang="deu">
   <title>Hello, Atom!</title>
-  <id>http://example.com/pub/posts</id>
+  <id>http://example.com</id>
   <updated>1990-12-31T02:02:02+01:00</updated>
-  <link href="http://example.com/pub/posts-1" rel="self"></link>
-  <link href="http://example.com/pub/posts" rel="first"></link>
-  <link href="http://example.com/pub/posts" rel="previous"></link>
-  <link href="http://example.com/pub/posts-1" rel="last"></link>
+  <link href="pub/posts-1" rel="self" title="2"></link>
+  <link href="pub/posts" rel="first" title="1"></link>
+  <link href="pub/posts" rel="previous" title="1"></link>
+  <link href="pub/posts-1" rel="last" title="2"></link>
   <entry>
     <title>Hello, Entry 0!</title>
     <id>http://example.com/pub/posts/e0</id>
     <updated>1990-12-30T00:00:00+01:00</updated>
+    <link href="pub/posts/e0" rel="self"></link>
+    <link href="atom.cgi/pub/posts/e0" rel="edit"></link>
   </entry>
 </feed>
-`, string(bufs["pub/posts-1"].b), "soso")
+`, string(bufs["pub/posts-1"].b), "page 2")
 }

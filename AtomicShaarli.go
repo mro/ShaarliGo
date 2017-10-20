@@ -18,7 +18,7 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"io"
 	"log"
 	"net/http"
@@ -32,9 +32,9 @@ const myselfNamespace = "http://purl.mro.name/AtomicShaarli"
 
 // evtl. as a server, too: http://www.dav-muz.net/blog/2013/09/how-to-use-go-and-fastcgi/
 func main() {
-	log.Print("I am AtomicShaarli log.Print")
+	// log.Print("I am AtomicShaarli log.Print") stderr
 	// fmt.Print("I am AtomicShaarli fmt.Print") http 500
-	fmt.Fprint(os.Stderr, "I am AtomicShaarli fmt.Fprint(os.Stderr, ...)")
+	// fmt.Fprint(os.Stderr, "I am AtomicShaarli fmt.Fprint(os.Stderr, ...)") stderr
 
 	// - check non-write perm of program?
 	// - check non-http read perm on ./app
