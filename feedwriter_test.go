@@ -79,7 +79,7 @@ func TestFeedUrlsForEntry(t *testing.T) {
 
 	assert.Equal(t, 2+1, len(uris), "Oha")
 	assert.Equal(t, "pub/posts", uris[0], "Oha")
-	assert.Equal(t, "pub/2010-12-31", uris[1], "Oha")
+	assert.Equal(t, "pub/days/2010-12-31", uris[1], "Oha")
 	assert.Equal(t, "pub/tags/🐳", uris[2], "Oha")
 }
 
@@ -128,7 +128,7 @@ func TestWriteFeedsEmpty1(t *testing.T) {
 
 	assert.Nil(t, err, "soso")
 	assert.Equal(t, 2, len(bufs), "soso")
-	assert.NotNil(t, bufs["pub/0001-01-01"], "aha")
+	assert.NotNil(t, bufs["pub/days/0001-01-01"], "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../assets/posts.xslt'?>
 <!--
@@ -186,7 +186,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
 
 	assert.Nil(t, err, "soso")
 	assert.Equal(t, 2+1, len(bufs), "soso")
-	assert.NotNil(t, bufs["pub/1990-12-31"], "aha")
+	assert.NotNil(t, bufs["pub/days/1990-12-31"], "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../assets/posts.xslt'?>
 <!--
@@ -258,8 +258,8 @@ func TestWriteFeedsPaged(t *testing.T) {
 
 	assert.Nil(t, err, "soso")
 	assert.Equal(t, 4, len(bufs), "soso")
-	assert.NotNil(t, bufs["pub/1990-12-30"], "aha")
-	assert.NotNil(t, bufs["pub/1990-12-31"], "aha")
+	assert.NotNil(t, bufs["pub/days/1990-12-30"], "aha")
+	assert.NotNil(t, bufs["pub/days/1990-12-31"], "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../assets/posts.xslt'?>
 <!--

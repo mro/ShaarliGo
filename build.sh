@@ -50,7 +50,7 @@ ssh vario rm -vrf mro.name/vorschau.blog/app
 # curl --location 'http://vorschau.blog.mro.name/atom.cgi/settings?foo' ; say 'aha, aha, soso'
 
 curl --dump-header head.txt --location 'http://vorschau.blog.mro.name/atom.cgi/settings?foo' \
-  --data-urlencode 'title=A' \
+  --data-urlencode 'title=🔗 My Bookmarks' \
   --data-urlencode 'author/name=B' \
   --data-urlencode 'password=123456789012' \
   --data-urlencode 'import_shaarli_url=' \

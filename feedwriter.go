@@ -45,18 +45,21 @@ const fileName = "index.xml" // could be 'index.atom' but xml may have a proper 
 
 const uriPub = "pub"
 const uriPosts = "posts"
+const uriDays = "days"
 const uriTags = "tags"
 
 const relSelf = "self"            // https://www.iana.org/assignments/link-relations/link-relations.xhtml
 const relAlternate = "alternate"  // https://www.iana.org/assignments/link-relations/link-relations.xhtml
-const relVia = "via"              // https://www.iana.org/assignments/link-relations/link-relations.xhtml
-const relEnclosure = "enclosure"  // https://www.iana.org/assignments/link-relations/link-relations.xhtml
-const relFirst = "first"          //
-const relLast = "last"            //
-const relNext = "next"            //
-const relPrevious = "previous"    //
-const relEdit = "edit"            // https://www.iana.org/assignments/link-relations/link-relations.xhtml
-const relEditMedia = "edit-media" // https://www.iana.org/assignments/link-relations/link-relations.xhtml
+const relVia = "via"              // Atom https://tools.ietf.org/html/rfc4287
+const relEnclosure = "enclosure"  // Atom https://tools.ietf.org/html/rfc4287
+const relFirst = "first"          // paged feeds https://tools.ietf.org/html/rfc5005#section-3
+const relLast = "last"            // paged feeds https://tools.ietf.org/html/rfc5005#section-3
+const relNext = "next"            // paged feeds https://tools.ietf.org/html/rfc5005#section-3
+const relPrevious = "previous"    // paged feeds https://tools.ietf.org/html/rfc5005#section-3
+const relEdit = "edit"            // AtomPub https://tools.ietf.org/html/rfc5023
+const relEditMedia = "edit-media" // AtomPub https://tools.ietf.org/html/rfc5023
+
+var rexPath = regexp.MustCompile("[^/]+")
 
 // maybe replace the CONTENT of pub rather than pub itself. So . could remain readonly.
 //
@@ -165,8 +168,8 @@ func feedUrlsForEntry(itm *Entry) []string {
 
 	audience := uriPub
 	ret = append(ret,
-		path.Join(audience, uriPosts),                 // default feed
-		path.Join(audience, day.Format("2006-01-02")), // daily feed
+		path.Join(audience, uriPosts),                          // default feed
+		path.Join(audience, uriDays, day.Format("2006-01-02")), // daily feed
 	)
 	for _, cat := range itm.Categories {
 		ret = append(ret, path.Join(audience, uriTags, cat.Term)) // category feeds
@@ -191,13 +194,24 @@ func computeLastPage(count int, entriesPerPage int) int {
 
 // seed is cloned on each call
 func (seed Feed) writeFeed(uri string, entries []*Entry, entriesPerPage int, fctWriteCloser func(string, int) (io.WriteCloser, error)) error {
-	pathPrefix := regexp.MustCompile("[^/]+").ReplaceAllString(uri, "..")
+	pathPrefix := rexPath.ReplaceAllString(uri, "..")
 
 	totalEntries := len(entries)
 	lastPage := computeLastPage(totalEntries, entriesPerPage)
 
 	if totalEntries > 0 {
 		seed.Updated = entries[0].Updated // most recent sets the date
+	}
+
+	switch {
+	case strings.HasPrefix(uri, path.Join(uriPub, uriPosts)):
+		// leave as is
+	case strings.HasPrefix(uri, path.Join(uriPub, uriTags)):
+		seed.Subtitle = &HumanText{Body: uri[len(uriPub)+len(uriTags)+2:]}
+	case strings.HasPrefix(uri, path.Join(uriPub, uriDays)):
+		seed.Subtitle = &HumanText{Body: uri[len(uriPub)+len(uriDays)+2:]}
+	default:
+		seed.Subtitle = &HumanText{Body: "Oha"}
 	}
 
 	for page := 0; page <= lastPage; page++ {

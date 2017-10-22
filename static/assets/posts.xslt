@@ -93,7 +93,7 @@
   <xsl:key name="CategorY" match="a:entry/a:category" use="@term" />
 
   <xsl:template match="a:feed">
-    <html xmlns="http://www.w3.org/1999/xhtml">
+    <html xmlns="http://www.w3.org/1999/xhtml" class="loggedout">
       <head>
         <meta content="text/html; charset=utf-8" http-equiv="content-type"/>
         <!-- https://developer.apple.com/library/IOS/documentation/AppleApplications/Reference/SafariWebContent/UsingtheViewport/UsingtheViewport.html#//apple_ref/doc/uid/TP40006509-SW26 -->
@@ -102,13 +102,18 @@
         <!-- http://www.quirksmode.org/blog/archives/2013/10/initialscale1_m.html -->
         <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
         <!-- meta name="viewport" content="width=400"/ -->
-        <link href="../../assets/bootstrap.css" rel="stylesheet" type="text/css"/>
-        <link href="../../assets/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
+        <link href="{@xml:base}assets/bootstrap.css" rel="stylesheet" type="text/css"/>
+        <link href="{@xml:base}assets/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
 
         <link href="." rel="alternate" type="application/atom+xml"/>
         <link href="." rel="self" type="application/xhtml+xml"/>
 
         <style type="text/css">
+.container {
+}
+#links_commands {
+  margin: 2ex 0;
+}
 .table {
   width: 100%;
   max-width: 100%;
@@ -117,6 +122,36 @@ li {
   background-color: #F8F8F8;
   margin: 1em 0;
 }
+.loggedout #post {
+  display: none;
+}
+.loggedout .link_edit {
+  display: none;
+}
+.loggedout #link_logout, .loggedout #link_tools {
+  display: none;
+}
+.loggedin #link_login {
+  display: none;
+}
+p.categories {
+  margin: 1ex 0;
+}
+.categories a {
+  padding: 0.5ex;
+  background: linear-gradient(#F2F2F2, #ffffff);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+  border-radius: 3px;
+}
+
+#demo {
+  display: none;
+}
+
+/* This is a workaround for Browsers that insert additional br tags.
+ * See http://purl.mro.name/safari-xslt-br-bug */
+br { display:none; }
+br.br { display:inline; }
         </style>
         <title><xsl:value-of select="a:title"/></title>
       </head>
@@ -124,158 +159,143 @@ li {
         <div class="container">
           <noscript><p>JavaScript ist aus, es geht zwar (fast) alles auch ohne, aber mit ist's <em>schöner</em>.</p></noscript>
 
-          <p/>
-
-          <table class="table table-bordered table-striped table-inverse">
+          <table id="links_commands" class="toolbar table table-bordered table-striped table-inverse">
             <tbody>
               <tr>
-                <td class="text-left"><a href="../tags/">⛅ # Tag Cloud</a></td>
-                <td class="text-center"><a href="../thumbnails/">🎨 Picture Wall</a></td>
-                <td class="text-center"><a href="../days/now">📅 Daily</a></td>
-                <td class="text-center"><a href="../tools/">🔨 Tools</a></td>
+                <td class="text-left"><a href="{@xml:base}pub/posts"><xsl:value-of select="a:title"/></a></td>
+                <td class="text-center"><a href="../tags/">⛅ # Tags</a></td>
+                <td class="text-center"><a href="../imgs/">🎨 Bilder</a></td>
+                <td class="text-center"><a id="link_daily" href="../days/">📅 Tage</a></td>
+                <td class="text-center"><a id="link_tools" href="{@xml:base}atom.cgi?do=tools">🔨 Tools</a></td>
                 <td class="text-right">
-                  <span class="hidden"><a href="../login">Login</a> <a href="../../?do=login">🌺</a></span>
-                  <span><a href="../logout">Logout</a> <a href="../../?do=logout">🌺</a></span>
+                  <a id="link_login" href="{@xml:base}atom.cgi?do=login">Anmelden 🌺</a>
+                  <a id="link_logout" href="{@xml:base}atom.cgi?do=logout">Abmelden 🍃</a>
                 </td>
               </tr>
             </tbody>
           </table>
 
-          <p/>
+          <xsl:call-template name="prev-next"/>
 
-          <table class="table">
-            <tbody>
-              <tr>
-                <td class="text-left"><a href="{a:link[@rel='first']/@href}" title="Erste Seite">|&lt; Erste</a></td>
-                <td class="text-center"><a href="{a:link[@rel='previous']/@href}" title="Vorige Seite">&lt; Vorige</a></td>
-                <td class="text-center"><xsl:value-of select="a:subtitle"/></td>
-                <td class="text-center"><a href="{a:link[@rel='next']/@href}" title="Nächste Seite">Nächste &gt;</a></td>
-                <td class="text-right"><a href="{a:link[@rel='last']/@href}" title="Letzte Seite">Letzte &gt;|</a></td>
-              </tr>
-            </tbody>
-          </table>
+          <!-- <h1><xsl:value-of select="a:title"/></h1> -->
 
-          <p/>
+          <xsl:if test="a:subtitle">
+            <h2><xsl:value-of select="a:subtitle"/></h2>
+          </xsl:if>
 
-          <h1><xsl:value-of select="a:title"/></h1>
-
-          <h2>Feed Untertitel</h2>
-
-          <xsl:choose>
-            <!-- http://getbootstrap.com/css/#forms-horizontal -->
-            <xsl:when test="not(a:link[@rel='previous'])">
-              <form class="form-horizontal" action="../../atom.cgi/posts" method="POST">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="email_id" name="email_name" placeholder="Was gibt's Neues? (Text oder URL)"/>
-                </div>
-                <div class="form-group">
-                  <input type="file" class="file" id="input-1" placeholder="Bild"/>
-                </div>
-                <div class="form-group">
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input class="form-check-input" type="checkbox"/> Privat?
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <button type="submit" class="btn btn-primary">Shaaaare!</button>
-                </div>
-              </form>
-            </xsl:when>
-            <xsl:when test="a:link[@rel='previous'] and a:link[@rel='next']">
-              <form class="form-horizontal">
-                <div class="form-group">
-                  <label for="email_id" class="control-label col-sm-1">URL</label>
-                  <div class="col-sm-11">
-                    <input type="text" class="form-control" id="email_id" name="email_name" placeholder="example.com/nice-blog-post/"/>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="email_id" class="control-label col-sm-1">Titel</label>
-                  <div class="col-sm-11">
-                    <input type="text" class="form-control" id="email_id" name="email_name" placeholder="Foo Bar"/>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="email_id" class="control-label col-sm-1">Text</label>
-                  <div class="col-sm-11">
-                    <textarea class="form-control" id="message_id" name="message" rows="3" placeholder="Lorem Ipsum"></textarea>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="email_id" class="control-label col-sm-1">Bild</label>
-                  <div class="col-sm-11">
-                    <input type="file" class="file" id="input-1" placeholder="Bild"/>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="col-sm-11 col-sm-offset-1">
-                    <div class="form-check">
-                      <label class="form-check-label">
-                        <input class="form-check-input" type="checkbox"/> Privat?
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="col-sm-11 col-sm-offset-1">
-                    <button type="submit" class="btn btn-primary">Shaaaare!</button>
-                  </div>
-                </div>
-              </form>
-            </xsl:when>
-          </xsl:choose>
+          <form id="post" class="form-horizontal" action="{@xml:base}atom.cgi?do=addlink" method="GET">
+            <div class="form-group">
+              <input type="text" class="form-control" id="post" name="post" placeholder="Was gibt's Neues? (Notiz oder URL)"/>
+            </div>
+            <div class="form-group" style="display:none">
+              <input type="file" class="file pull-right" id="input-1" placeholder="Bild"/>
+            </div>
+            <div class="form-group text-right" style="display:none">
+              <div class="form-check">
+                <label class="form-check-label">
+                  <input class="form-check-input" type="checkbox"/> Privat?
+                </label>
+              </div>
+            </div>
+            <div class="form-group text-right">
+              <button type="submit" class="btn btn-primary">Shaaaare!</button>
+            </div>
+          </form>
 
           <ol id="entries" class="list-unstyled">
             <xsl:apply-templates select="a:entry"/>
           </ol>
 
-          <table class="table">
-            <tbody>
-              <tr>
-                <td class="text-left"><a href="{a:link[@rel='first']/@href}" title="Erste Seite">|&lt; Erste</a></td>
-                <td class="text-center"><a href="{a:link[@rel='previous']/@href}" title="Vorige Seite">&lt; Vorige</a></td>
-                <td class="text-center"><xsl:value-of select="a:subtitle"/></td>
-                <td class="text-center"><a href="{a:link[@rel='next']/@href}" title="Nächste Seite">Nächste &gt;</a></td>
-                <td class="text-right"><a href="{a:link[@rel='last']/@href}" title="Letzte Seite">Letzte &gt;|</a></td>
-              </tr>
-            </tbody>
-          </table>
+          <xsl:call-template name="prev-next"/>
 
-          <script src="../../../assets/script.js" type="text/javascript"></script>
+          <script src="{@xml:base}assets/script.js" type="text/javascript"></script>
 
           <hr style="clear:left;"/>
           <p id="footer">
             <a title="Validate my Atom 1.0 feed" href="https://validator.w3.org/feed/check.cgi?url={@xml:base}{a:link[@rel='self']/@href}">
-              <img alt="Valid Atom 1.0" src="../../../assets/valid-atom.png" style="border:0;width:88px;height:31px"/>
-            </a><xsl:text> </xsl:text>
+              <img alt="Valid Atom 1.0" src="{@xml:base}assets/valid-atom.png" style="border:0;width:88px;height:31px"/>
+            </a>
+            <!-- <xsl:text> </xsl:text>
             <a href="https://validator.w3.org/check?uri=referer">
-              <img alt="Valid XHTML 1.0 Strict" src="../../../assets/valid-xhtml10-blue-v.svg" style="border:0;width:88px;height:31px"/>
+              <img alt="Valid XHTML 1.0 Strict" src="{@xml:base}assets/valid-xhtml10-blue-v.svg" style="border:0;width:88px;height:31px"/>
             </a>
             <a href="https://jigsaw.w3.org/css-validator/check/referer?profile=css3&amp;usermedium=screen&amp;warning=2&amp;vextwarning=false&amp;lang=de">
-              <img alt="CSS ist valide!" src="../../../assets/valid-css-blue-v.svg" style="border:0;width:88px;height:31px"/>
+              <img alt="CSS ist valide!" src="{@xml:base}assets/valid-css-blue-v.svg" style="border:0;width:88px;height:31px"/>
             </a>
+            -->
+          </p>
+          <p id="demo">
+📝 ❌ 🔐 🔓 🌸 🐳  alt ok: ⛅ 🎑 📜 📄 🔧 🔨 🎨 📰 ⚛ ⚛ ⚛ ⚛ ⚛
           </p>
         </div>
-        📝 ❌ 🔐 🔓 🌸 🐳  alt ok: ⛅ 🎑 📜 📄 🔧 🔨 🎨 📰 ⚛ ⚛ ⚛ ⚛ ⚛
       </body>
     </html>
   </xsl:template>
 
+  <xsl:template name="prev-next">
+    <xsl:if test="a:link[@rel='first'] or a:link[@rel='last']">
+    <table class="table prev-next">
+      <tbody>
+        <tr>
+          <xsl:if test="a:link[@rel='first']">
+            <td class="text-left"  ><a href="{a:link[@rel='first']/@href}">Seite 1</a></td>
+          </xsl:if>
+          <xsl:if test="a:link[@rel='previous']">
+            <td class="text-center"><a href="{a:link[@rel='previous']/@href}"><xsl:value-of select="a:link[@rel='previous']/@title"/></a></td>
+          </xsl:if>
+          <td class="text-center"><a href="{a:link[@rel='self']/@href}">Seite <xsl:value-of select="a:link[@rel='self']/@title"/></a></td>
+          <xsl:if test="a:link[@rel='next']">
+            <td class="text-center"><a href="{a:link[@rel='next']/@href}"><xsl:value-of select="a:link[@rel='next']/@title"/></a></td>
+          </xsl:if>
+          <xsl:if test="a:link[@rel='last']">
+            <td class="text-right" ><a href="{a:link[@rel='last']/@href}">Seite <xsl:value-of select="a:link[@rel='last']/@title"/></a></td>
+          </xsl:if>
+        </tr>
+      </tbody>
+    </table>
+    </xsl:if>
+  </xsl:template>
+
   <xsl:template match="a:entry">
-    <li id="{substring-after(a:id, '#')}" class="clearfix">
-      <p class="small">
-        <img alt="Vorschaubild" class="img-responsive pull-right" src="https://links.mro.name/?do=genthumbnail&amp;hmac=d8f746960e34eb1ece5cb067a03363f71d419bb7bba2a7d146ee7be3026ad3c6&amp;url=https%3A%2F%2Fheise.de%2F-3619788"/>
+    <xsl:variable name="xml_base" select="/*/@xml:base"/>
+    <xsl:variable name="link" select="a:link[@rel='alternate']/@href"/>
+    <li id="{substring-after(a:link[@rel='self']/@href, '/posts/')}" class="clearfix">
+      <p class="small text-right">
+        <xsl:if test="media:thumbnail/@url">
+          <a href="{$link}">
+            <img alt="Vorschaubild" class="thumbnail img-responsive pull-right" src="{media:thumbnail/@url}"/>
+          </a>
+        </xsl:if>
 
         <xsl:variable name="entry_updated" select="a:updated"/>
         <xsl:variable name="entry_updated_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_updated"/></xsl:call-template></xsl:variable>
-        <a class="time" title="{$entry_updated}" href="{a:id}">🔗 <xsl:value-of select="$entry_updated_human"/></a>
-        <xsl:text> ~ </xsl:text>
-        <a title="Archiv" href="https://web.archive.org/web/{a:link[not(@rel)]/@href}">@archive.org</a>
+
+        <span class="link_edit" title="Bearbeiten">
+          <a href="{$xml_base}{a:link[@rel='edit']/@href}">🔨</a><xsl:text> </xsl:text>
+        </span>
+        <a class="time" title="Einzelansicht" href="{$xml_base}{a:link[@rel='self']/@href}">¶ <xsl:value-of select="$entry_updated_human"/></a>
+        <xsl:if test="$link">
+          <xsl:text> ~ </xsl:text>
+          <a title="Archiv" href="https://web.archive.org/web/{$link}">@archive.org</a>
+        </xsl:if>
       </p>
-      <h4><a href="{a:link[not(@rel)]/@href}"><xsl:value-of select="a:title"/></a></h4>
-      <h5><xsl:value-of select="a:summary"/></h5>
+      <h4>
+        <xsl:choose>
+          <xsl:when test="$link">
+            <a href="{$link}" title="Original"><xsl:value-of select="a:title"/> 🚀</a>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="a:title"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </h4>
+      <xsl:if test="a:summary">
+        <h5>
+          <xsl:call-template name="linefeed2br">
+            <xsl:with-param name="string" select="a:summary"/>
+          </xsl:call-template>
+        </h5>
+      </xsl:if>
       <div>
         <div class="renderhtml">
           <!-- html content won't work that easy (out-of-the-firebox): https://bugzilla.mozilla.org/show_bug.cgi?id=98168#c140 -->
@@ -283,12 +303,14 @@ li {
 
           <!-- Überbleibsel vom Shaarli Atom Feed raus: -->
           <!-- xsl:value-of select="substring-before(a:content[not(@src)], '&lt;br&gt;(&lt;a href=&quot;https://links.mro.name/?')" disable-output-escaping="yes" / -->
-          <xsl:value-of select="a:content" disable-output-escaping="yes" />
+          <xsl:call-template name="linefeed2br">
+            <xsl:with-param name="string" select="a:content"/>
+          </xsl:call-template>
         </div>
         <p class="categories" title="Schlagworte">
           <xsl:for-each select="a:category">
             <xsl:sort select="@term"/>
-            <a href="../tags/{@term}/">#<xsl:value-of select="@term"/></a><xsl:text> </xsl:text>
+            <a href="{@scheme}/{@term}">#<xsl:value-of select="@term"/></a><xsl:text> </xsl:text>
           </xsl:for-each>
         </p>
       </div>
