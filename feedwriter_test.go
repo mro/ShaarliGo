@@ -130,7 +130,7 @@ func TestWriteFeedsEmpty1(t *testing.T) {
 	assert.Equal(t, 2, len(bufs), "soso")
 	assert.NotNil(t, bufs["pub/days/0001-01-01"], "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='../../assets/posts.xslt'?>
+<?xml-stylesheet type='text/xsl' href='../../assets/default/de/posts.xslt'?>
 <!--
   https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
 
@@ -188,7 +188,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
 	assert.Equal(t, 2+1, len(bufs), "soso")
 	assert.NotNil(t, bufs["pub/days/1990-12-31"], "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='../../assets/posts.xslt'?>
+<?xml-stylesheet type='text/xsl' href='../../assets/default/de/posts.xslt'?>
 <!--
   https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
 
@@ -261,7 +261,7 @@ func TestWriteFeedsPaged(t *testing.T) {
 	assert.NotNil(t, bufs["pub/days/1990-12-30"], "aha")
 	assert.NotNil(t, bufs["pub/days/1990-12-31"], "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='../../assets/posts.xslt'?>
+<?xml-stylesheet type='text/xsl' href='../../assets/default/de/posts.xslt'?>
 <!--
   https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
 
@@ -303,7 +303,7 @@ func TestWriteFeedsPaged(t *testing.T) {
 `, string(bufs["pub/posts"].b), "page 1")
 
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='../../assets/posts.xslt'?>
+<?xml-stylesheet type='text/xsl' href='../../assets/default/de/posts.xslt'?>
 <!--
   https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
 

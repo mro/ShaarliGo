@@ -102,8 +102,8 @@
         <!-- http://www.quirksmode.org/blog/archives/2013/10/initialscale1_m.html -->
         <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
         <!-- meta name="viewport" content="width=400"/ -->
-        <link href="{@xml:base}assets/bootstrap.css" rel="stylesheet" type="text/css"/>
-        <link href="{@xml:base}assets/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
+        <link href="{@xml:base}assets/default/bootstrap.css" rel="stylesheet" type="text/css"/>
+        <link href="{@xml:base}assets/default/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
 
         <link href="." rel="alternate" type="application/atom+xml"/>
         <link href="." rel="self" type="application/xhtml+xml"/>
@@ -208,19 +208,19 @@ br.br { display:inline; }
 
           <xsl:call-template name="prev-next"/>
 
-          <script src="{@xml:base}assets/script.js" type="text/javascript"></script>
+          <script src="{@xml:base}assets/default/script.js" type="text/javascript"></script>
 
           <hr style="clear:left;"/>
           <p id="footer">
             <a title="Validate my Atom 1.0 feed" href="https://validator.w3.org/feed/check.cgi?url={@xml:base}{a:link[@rel='self']/@href}">
-              <img alt="Valid Atom 1.0" src="{@xml:base}assets/valid-atom.png" style="border:0;width:88px;height:31px"/>
+              <img alt="Valid Atom 1.0" src="{@xml:base}assets/default/valid-atom.png" style="border:0;width:88px;height:31px"/>
             </a>
             <!-- <xsl:text> </xsl:text>
             <a href="https://validator.w3.org/check?uri=referer">
-              <img alt="Valid XHTML 1.0 Strict" src="{@xml:base}assets/valid-xhtml10-blue-v.svg" style="border:0;width:88px;height:31px"/>
+              <img alt="Valid XHTML 1.0 Strict" src="{@xml:base}assets/default/valid-xhtml10-blue-v.svg" style="border:0;width:88px;height:31px"/>
             </a>
             <a href="https://jigsaw.w3.org/css-validator/check/referer?profile=css3&amp;usermedium=screen&amp;warning=2&amp;vextwarning=false&amp;lang=de">
-              <img alt="CSS ist valide!" src="{@xml:base}assets/valid-css-blue-v.svg" style="border:0;width:88px;height:31px"/>
+              <img alt="CSS ist valide!" src="{@xml:base}assets/default/valid-css-blue-v.svg" style="border:0;width:88px;height:31px"/>
             </a>
             -->
           </p>

@@ -90,7 +90,7 @@ func TestFeedFromFileName_PhotosAtom(t *testing.T) {
 		enc.Indent("", "  ")
 		enc.EncodeToken(xml.ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)})
 		enc.EncodeToken(xml.CharData("\n"))
-		enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='assets/atom2html.xslt'")})
+		enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='assets/default/de/posts.xslt'")})
 		enc.EncodeToken(xml.CharData("\n"))
 		enc.EncodeToken(xml.Comment(" Am Anfang war das Licht! "))
 		enc.EncodeToken(xml.CharData("\n"))

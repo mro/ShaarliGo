@@ -77,9 +77,9 @@ atom.cgi?q=%23Design+%23URI+Foo+Bar
 ./pub/tags/Design
 ./~me/2017-07-13
 ./~me/enclosures/foo.svg
-./assets/style.css
-./assets/setup.xslt
-./assets/posts.xslt
+./assets/default/style.css
+./assets/default/de/settings.xslt
+./assets/default/de/posts.xslt
 
 announced via link/@rel/@uri https://martinfowler.com/articles/richardsonMaturityModel.html#level3:
 

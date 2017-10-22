@@ -266,7 +266,7 @@ func (feed *Feed) write(pathPrefix string, enc *xml.Encoder) error {
 	// preamble
 	if err = enc.EncodeToken(xml.ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)}); err == nil {
 		if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
-			if err = enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='" + path.Join(pathPrefix, "assets", "posts.xslt") + "'")}); err == nil {
+			if err = enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='" + path.Join(pathPrefix, "assets", "default", "de", "posts.xslt") + "'")}); err == nil {
 				if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
 					if err = enc.EncodeToken(xml.Comment(lengthyAtomPreambleComment)); err == nil {
 						if err = enc.EncodeToken(xml.CharData("\n")); err == nil {

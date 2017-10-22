@@ -155,14 +155,27 @@ func (mgr *SessionManager) handleSettings(w http.ResponseWriter, r *http.Request
 						Links: []Link{
 							Link{Rel: relAlternate, Href: mustParseURL("http://www.loremipsum.de/").String()},
 						},
-						Categories: []Category{Category{Term: "🐳"}, Category{Term: "Atom"}, Category{Term: "opensource"}, Category{Term: "ipsum"}},
-						Content:    &HumanText{Body: "Lorem #ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."},
-						Updated:    iso8601{mustParseRFC3339("2012-12-31T02:02:02+01:00")},
+						Categories: []Category{
+							Category{Term: "🐳"},
+							Category{Term: "Atom"},
+							Category{Term: "opensource"},
+							Category{Term: "ipsum"},
+						},
+						Content: &HumanText{Body: `Lorem #ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+
+Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
+
+Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.`},
+						Updated: iso8601{mustParseRFC3339("2012-12-31T02:02:02+01:00")},
 					},
 					&Entry{
-						Title:      HumanText{Body: "Was noch alles fehlt"},
-						Id:         "Naev8k",
-						Categories: []Category{Category{Term: "🐳"}, Category{Term: "Cloud"}, Category{Term: "i18n"}},
+						Title: HumanText{Body: "Was noch alles fehlt"},
+						Id:    "Naev8k",
+						Categories: []Category{
+							Category{Term: "🐳"},
+							Category{Term: "Cloud"},
+							Category{Term: "i18n"},
+						},
 						Content: &HumanText{Body: `- Einzeleinträge richtig ablegen,
 - Posten, Löschen, Bookmarklet,
 - Tag #Cloud,
@@ -172,7 +185,7 @@ func (mgr *SessionManager) handleSettings(w http.ResponseWriter, r *http.Request
 - Suche,
 - clickbare Links im Text (client-seitig),
 - Referer-Anonymisierer,
-- Skinning/Templating (asset dir),
+- Skinning/Themeing (asset dir),
 - private Posts,
 - Kommentare,
 - PuSH,
@@ -228,7 +241,7 @@ func renderPageXml(c *Config, w io.Writer) {
 	enc.Indent("", "  ")
 	enc.EncodeToken(xml.ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)})
 	enc.EncodeToken(xml.CharData("\n"))
-	enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='" + path.Join("..", "assets", "settings.xslt") + "'")})
+	enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='" + path.Join("..", "assets", "default", "de", "settings.xslt") + "'")})
 	enc.EncodeToken(xml.CharData("\n"))
 
 	n := xml.Name{Local: "as:setup"}
