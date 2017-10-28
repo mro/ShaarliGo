@@ -18,14 +18,13 @@
 package main
 
 import (
-	"bytes"
 	"encoding/xml"
-	//"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
+	"sort"
 	"strings"
 	"time"
 
@@ -39,6 +38,14 @@ func _urlFromString(raw string) (url *url.URL, err error) {
 		url, err = url.Parse("https://" + raw)
 	}
 	return
+}
+
+func xmlBaseFromRequestURL(r *url.URL, scriptName string) *url.URL {
+	dir := path.Dir(scriptName)
+	if dir[len(dir)-1:] != "/" {
+		dir = dir + "/"
+	}
+	return mustParseURL(r.Scheme + "://" + r.Host + dir)
 }
 
 func mustParseRFC3339(str string) time.Time {
@@ -127,12 +134,7 @@ func (mgr *SessionManager) handleSettings(w http.ResponseWriter, r *http.Request
 		// if process is running: add a hint about the running background task into the response,
 		// e.g. as a refresh timer. <meta http-equiv="refresh" content="5; URL=http://www.yourdomain.com/yoursite.html">
 
-		strURL := r.URL.String()
-		idxBase := 1 + bytes.LastIndex([]byte(strURL), []byte(os.Getenv("SCRIPT_NAME")+os.Getenv("PATH_INFO")))
-		if idxBase < 0 {
-			panic("cannot happen.")
-		}
-		urlBase, err := url.Parse(strURL[:idxBase])
+		urlBase := xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
 
 		if !isAlreadyConfigured {
 			// idxPost := idxBase + len(os.Getenv("SCRIPT_NAME"))
@@ -146,68 +148,70 @@ func (mgr *SessionManager) handleSettings(w http.ResponseWriter, r *http.Request
 				Authors:   []Person{Person{Name: mgr.config.AuthorName}},
 				Generator: &Generator{Uri: myselfNamespace, Version: "0.0.1", Body: "AtomicShaarli"},
 				Links: []Link{
-					Link{Rel: relEdit, Href: path.Join(cgiName, uriPub, uriPosts), Title: "Maybe better a app:collection https://tools.ietf.org/html/rfc5023#section-8.3.3"},
-				},
-				Entries: []*Entry{
-					&Entry{
-						Title: HumanText{Body: "Hello, #Atom!"},
-						Id:    "voo8Uo",
-						Links: []Link{
-							Link{Rel: relAlternate, Href: mustParseURL("http://www.loremipsum.de/").String()},
-						},
-						Categories: []Category{
-							Category{Term: "🐳"},
-							Category{Term: "Atom"},
-							Category{Term: "opensource"},
-							Category{Term: "ipsum"},
-						},
-						Content: &HumanText{Body: `Lorem #ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-
-Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
-
-Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.`},
-						Updated: iso8601{mustParseRFC3339("2012-12-31T02:02:02+01:00")},
-					},
-					&Entry{
-						Title: HumanText{Body: "Was noch alles fehlt"},
-						Id:    "Naev8k",
-						Categories: []Category{
-							Category{Term: "🐳"},
-							Category{Term: "Cloud"},
-							Category{Term: "i18n"},
-						},
-						Content: &HumanText{Body: `- Einzeleinträge richtig ablegen,
-- Posten, Löschen, Bookmarklet,
-- Tag #Cloud,
-- Tagesansicht,
-- Shaarli Import,
-- neue Posts vorbelegen (optional: extern per http GET),
-- Suche,
-- clickbare Links im Text (client-seitig),
-- Referer-Anonymisierer,
-- Skinning/Themeing (asset dir),
-- private Posts,
-- Kommentare,
-- PuSH,
-- Bilder hochladen,
-- #i18n,
-- Html/Markdown (client-seitig),
-- Atom Aggregator?`},
-						Updated: iso8601{mustParseRFC3339("2012-12-31T01:01:01+01:00")},
-					},
-					&Entry{
-						Title: HumanText{Body: "Shaarli — sebsauvage.net"},
-						Id:    "kaJ9Rw",
-						Links: []Link{
-							Link{Rel: relAlternate, Href: mustParseURL("http://sebsauvage.net/wiki/doku.php?id=php:shaarli").String()},
-						},
-						Categories:     []Category{Category{Term: "opensource"}, Category{Term: "Software"}},
-						Updated:        iso8601{mustParseRFC3339("2011-09-14T19:00:00+02:00")},
-						Content:        &HumanText{Body: "Welcome to Shaarli ! This is a bookmark. To edit or delete me, you must first login."},
-						MediaThumbnail: &MediaThumbnail{Url: mustParseURL("http://cdn.rawgit.com/mro/ShaarliOS/master/shaarli-petal.svg").String()},
-					},
+					Link{Rel: relEdit, Href: path.Join(cgiName, uriPub, uriPosts), Title: "PostURI, maybe better a app:collection https://tools.ietf.org/html/rfc5023#section-8.3.3"},
 				},
 			}
+
+			feed.Append(&Entry{
+				Title: HumanText{Body: "Hello, #Atom!"},
+				Id:    "voo8Uo",
+				Links: []Link{
+					Link{Rel: relAlternate, Href: mustParseURL("http://www.loremipsum.de/").String()},
+				},
+				Categories: []Category{
+					Category{Term: "🐳"},
+					Category{Term: "Atom"},
+					Category{Term: "opensource"},
+					Category{Term: "ipsum"},
+				},
+				Content: &HumanText{Body: `Lorem #ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+
+			   Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
+
+			   Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.`},
+				Updated: iso8601{mustParseRFC3339("2012-12-31T02:02:02+01:00")},
+			}).Append(&Entry{
+				Title: HumanText{Body: "Was noch alles fehlt"},
+				Id:    "Naev8k",
+				Categories: []Category{
+					Category{Term: "🐳"},
+					Category{Term: "Cloud"},
+					Category{Term: "i18n"},
+				},
+				Content: &HumanText{Body: `- Einzeleinträge richtig ablegen,
+			   - Posten, Löschen, Bookmarklet,
+			   - Tag #Cloud,
+			   - Tagesansicht,
+			   - Shaarli Import,
+			   - neue Posts vorbelegen (optional: extern per http GET),
+			   - Suche,
+			   - clickbare Links im Text (client-seitig),
+			   - Referer-Anonymisierer,
+			   - Bilder Cache/Proxy,
+			   - Skinning/Themeing (asset dir),
+			   - private Posts,
+			   - Kommentare,
+			   - PuSH,
+			   - Bilder hochladen,
+			   - #i18n,
+			   - Html/Markdown (client-seitig),
+			   - Atom Aggregator?`},
+				Updated: iso8601{mustParseRFC3339("2012-12-31T01:01:01+01:00")},
+			}).Append(&Entry{
+				Title: HumanText{Body: "Shaarli — sebsauvage.net"},
+				Id:    "kaJ9Rw",
+				Links: []Link{
+					Link{Rel: relAlternate, Href: mustParseURL("http://sebsauvage.net/wiki/doku.php?id=php:shaarli").String()},
+				},
+				Categories:     []Category{Category{Term: "opensource"}, Category{Term: "Software"}},
+				Updated:        iso8601{mustParseRFC3339("2011-09-14T19:00:00+02:00")},
+				Content:        &HumanText{Body: "Welcome to Shaarli ! This is a bookmark. To edit or delete me, you must first login."},
+				MediaThumbnail: &MediaThumbnail{Url: mustParseURL("http://cdn.rawgit.com/mro/ShaarliOS/master/shaarli-petal.svg").String()},
+			})
+
+			sort.Reverse(feed.Entries)
+			// TODO: make persistent
+
 			if err = feed.replaceFeeds(); err != nil {
 				return err
 			}

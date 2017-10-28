@@ -125,7 +125,7 @@ func (feed *Feed) writeFeeds(entriesPerPage int, fctWriteCloser func(string, int
 	// load template feed, set Id and birthday.
 	// we need to know the total pages per each feed in order to know the 'last' uri.
 	// So no concurrency here :-(
-	catScheme := xmlBase.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String()
+	catScheme := xmlBase.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String() + "/"
 	uri2entries := make(map[string][]*Entry)
 	for _, item := range feed.Entries {
 		// change entries for output but don't save the change:
@@ -207,7 +207,7 @@ func (seed Feed) writeFeed(uri string, entries []*Entry, entriesPerPage int, fct
 	case strings.HasPrefix(uri, path.Join(uriPub, uriPosts)):
 		// leave as is
 	case strings.HasPrefix(uri, path.Join(uriPub, uriTags)):
-		seed.Subtitle = &HumanText{Body: uri[len(uriPub)+len(uriTags)+2:]}
+		seed.Subtitle = &HumanText{Body: "#" + uri[len(uriPub)+len(uriTags)+2:]}
 	case strings.HasPrefix(uri, path.Join(uriPub, uriDays)):
 		seed.Subtitle = &HumanText{Body: uri[len(uriPub)+len(uriDays)+2:]}
 	default:

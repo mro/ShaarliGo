@@ -92,8 +92,14 @@
   <!-- http://stackoverflow.com/a/16328207 -->
   <xsl:key name="CategorY" match="a:entry/a:category" use="@term" />
 
+  <xsl:variable name="xml_base_pub" select="concat(/*/@xml:base,'pub')"/>
+
   <xsl:template match="a:feed">
-    <html xmlns="http://www.w3.org/1999/xhtml" class="loggedout">
+    <!--
+      Do not set a class="logged-out" initially, but do via early JavaScript.
+      If JavaScript is off, we need mixture between logged-in and -out.
+    -->
+    <html xmlns="http://www.w3.org/1999/xhtml">
       <head>
         <meta content="text/html; charset=utf-8" http-equiv="content-type"/>
         <!-- https://developer.apple.com/library/IOS/documentation/AppleApplications/Reference/SafariWebContent/UsingtheViewport/UsingtheViewport.html#//apple_ref/doc/uid/TP40006509-SW26 -->
@@ -102,15 +108,26 @@
         <!-- http://www.quirksmode.org/blog/archives/2013/10/initialscale1_m.html -->
         <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
         <!-- meta name="viewport" content="width=400"/ -->
-        <link href="{@xml:base}assets/default/bootstrap.css" rel="stylesheet" type="text/css"/>
-        <link href="{@xml:base}assets/default/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
+        <link href="{$xml_base_pub}/../assets/default/bootstrap.css" rel="stylesheet" type="text/css"/>
+        <link href="{$xml_base_pub}/../assets/default/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
 
         <link href="." rel="alternate" type="application/atom+xml"/>
         <link href="." rel="self" type="application/xhtml+xml"/>
 
         <style type="text/css">
+.hidden-logged-in { display:initial; }
+.logged-in .hidden-logged-in { display:none; }
+.visible-logged-in { display:none; }
+.logged-in .visible-logged-in { display:initial; }
+
+.hidden-logged-out { display:initial; }
+.logged-out .hidden-logged-out { display:none; }
+.visible-logged-out { display:none; }
+.logged-out .visible-logged-out { display:initial; }
+
 .container {
 }
+
 #links_commands {
   margin: 2ex 0;
 }
@@ -122,18 +139,14 @@ li {
   background-color: #F8F8F8;
   margin: 1em 0;
 }
-.loggedout #post {
-  display: none;
+form {
+  margin: 1.0ex 0;
 }
-.loggedout .link_edit {
-  display: none;
+
+#links_commands td {
+  min-width: 40px;
 }
-.loggedout #link_logout, .loggedout #link_tools {
-  display: none;
-}
-.loggedin #link_login {
-  display: none;
-}
+
 p.categories {
   margin: 1ex 0;
 }
@@ -143,6 +156,10 @@ p.categories {
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
   border-radius: 3px;
 }
+img.img-thumbnail {
+  width: 120px;
+  height: auto;
+}
 
 #demo {
   display: none;
@@ -150,43 +167,52 @@ p.categories {
 
 /* This is a workaround for Browsers that insert additional br tags.
  * See http://purl.mro.name/safari-xslt-br-bug */
-br { display:none; }
-br.br { display:inline; }
+.renderhtml br { display:none; }
+.renderhtml br.br { display:inline; }
         </style>
         <title><xsl:value-of select="a:title"/></title>
       </head>
       <body>
+<!--
+   onload="document.getElementById('q').removeAttribute('autofocus');document.getElementById('post').setAttribute('autofocus', 'autofocus');"
+   onload="document.form_post.post.focus();"
+-->
+        <script>
+// <![CDATA[
+// TODO: check if we're logged- in (Cookie?).
+document.documentElement.classList.add('logged-out'); // set early.
+
+// document.documentElement.classList.add('logged-in');
+// ]]>
+        </script>
         <div class="container">
           <noscript><p>JavaScript ist aus, es geht zwar (fast) alles auch ohne, aber mit ist's <em>schöner</em>.</p></noscript>
 
-          <table id="links_commands" class="toolbar table table-bordered table-striped table-inverse">
+          <table id="links_commands" class="toolbar table table-bordered table-striped table-inverse" aria-label="Befehle">
             <tbody>
               <tr>
-                <td class="text-left"><a href="{@xml:base}pub/posts"><xsl:value-of select="a:title"/></a></td>
-                <td class="text-center"><a href="../tags/">⛅ # Tags</a></td>
-                <td class="text-center"><a href="../imgs/">🎨 Bilder</a></td>
-                <td class="text-center"><a id="link_daily" href="../days/">📅 Tage</a></td>
-                <td class="text-center"><a id="link_tools" href="{@xml:base}atom.cgi?do=tools">🔨 Tools</a></td>
+                <td class="text-left"><a href="{$xml_base_pub}/posts/"><xsl:value-of select="a:title"/></a></td>
+                <td class="text-right"><a href="{$xml_base_pub}/tags/">⛅ # <span class="hidden-xs">Tags</span></a></td>
+                <td class="text-right"><a href="{$xml_base_pub}/days/">📅 <span class="hidden-xs">Tage</span></a></td>
+                <td class="text-right"><a href="{$xml_base_pub}/imgs/">🎨 <span class="hidden-xs">Bilder</span></a></td>
+                <td class="text-right hidden-logged-out"><a href="{$xml_base_pub}/../atom.cgi?do=tools">🔨 <span class="hidden-xs">Tools</span></a></td>
                 <td class="text-right">
-                  <a id="link_login" href="{@xml:base}atom.cgi?do=login">Anmelden 🌺</a>
-                  <a id="link_logout" href="{@xml:base}atom.cgi?do=logout">Abmelden 🍃</a>
+                  <a id="link_login" href="{$xml_base_pub}/../atom.cgi?do=login" class="visible-logged-out"><span class="hidden-xs">Anmelden</span> 🌺 </a>
+                  <a id="link_logout" href="{$xml_base_pub}/../atom.cgi?do=logout" class="hidden-logged-out"><span class="hidden-xs">Abmelden</span> 🍃 </a>
                 </td>
               </tr>
             </tbody>
           </table>
 
-          <xsl:call-template name="prev-next"/>
-
-          <!-- <h1><xsl:value-of select="a:title"/></h1> -->
-
-          <xsl:if test="a:subtitle">
-            <h2><xsl:value-of select="a:subtitle"/></h2>
-          </xsl:if>
-
-          <form id="post" class="form-horizontal" action="{@xml:base}atom.cgi?do=addlink" method="GET">
-            <div class="form-group">
-              <input type="text" class="form-control" id="post" name="post" placeholder="Was gibt's Neues? (Notiz oder URL)"/>
+          <!-- https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ -->
+          <form id="form_search" name="form_search" class="form-search form-horizontal" action="{$xml_base_pub}/../atom.cgi/search">
+            <div class="input-group">
+              <input autofocus="autofocus" id="q" name="q" type="text" class="form-control search-query" placeholder="Suche Wort oder #Tag..."/>
+              <span class="input-group-btn"><button type="submit" class="btn btn-primary">Suche</button></span>
             </div>
+          </form>
+
+          <form id="form_post" name="form_post" class="form-horizontal hidden-logged-out" action="{$xml_base_pub}/../atom.cgi?do=addlink">
             <div class="form-group" style="display:none">
               <input type="file" class="file pull-right" id="input-1" placeholder="Bild"/>
             </div>
@@ -197,10 +223,19 @@ br.br { display:inline; }
                 </label>
               </div>
             </div>
-            <div class="form-group text-right">
-              <button type="submit" class="btn btn-primary">Shaaaare!</button>
+            <div class="input-group">
+              <input type="text" class="form-control" id="post" name="post" placeholder="Was gibt's Neues? (Notiz oder URL)"/>
+              <span class="input-group-btn"><button type="submit" class="btn btn-primary">Shaaaare!</button></span>
             </div>
           </form>
+
+          <xsl:call-template name="prev-next"/>
+
+          <!-- <h1><xsl:value-of select="a:title"/></h1> -->
+
+          <xsl:if test="a:subtitle">
+            <h2><xsl:value-of select="a:subtitle"/></h2>
+          </xsl:if>
 
           <ol id="entries" class="list-unstyled">
             <xsl:apply-templates select="a:entry"/>
@@ -208,21 +243,24 @@ br.br { display:inline; }
 
           <xsl:call-template name="prev-next"/>
 
-          <script src="{@xml:base}assets/default/script.js" type="text/javascript"></script>
+          <script src="{$xml_base_pub}/../assets/default/script.js" type="text/javascript"></script>
 
           <hr style="clear:left;"/>
           <p id="footer">
-            <a title="Validate my Atom 1.0 feed" href="https://validator.w3.org/feed/check.cgi?url={@xml:base}{a:link[@rel='self']/@href}">
-              <img alt="Valid Atom 1.0" src="{@xml:base}assets/default/valid-atom.png" style="border:0;width:88px;height:31px"/>
+            <a title="Validate my Atom 1.0 feed" href="https://validator.w3.org/feed/check.cgi?url={$xml_base_pub}/../{a:link[@rel='self']/@href}">
+              <img alt="Valid Atom 1.0" src="{$xml_base_pub}/../assets/default/valid-atom.svg" style="border:0;width:88px;height:31px"/>
             </a>
             <!-- <xsl:text> </xsl:text>
             <a href="https://validator.w3.org/check?uri=referer">
-              <img alt="Valid XHTML 1.0 Strict" src="{@xml:base}assets/default/valid-xhtml10-blue-v.svg" style="border:0;width:88px;height:31px"/>
+              <img alt="Valid XHTML 1.0 Strict" src="{$xml_base_pub}/../assets/default/valid-xhtml10-blue-v.svg" style="border:0;width:88px;height:31px"/>
             </a>
             <a href="https://jigsaw.w3.org/css-validator/check/referer?profile=css3&amp;usermedium=screen&amp;warning=2&amp;vextwarning=false&amp;lang=de">
-              <img alt="CSS ist valide!" src="{@xml:base}assets/default/valid-css-blue-v.svg" style="border:0;width:88px;height:31px"/>
+              <img alt="CSS ist valide!" src="{$xml_base_pub}/../assets/default/valid-css-blue-v.svg" style="border:0;width:88px;height:31px"/>
             </a>
             -->
+          </p>
+          <p>
+            <img src="{$xml_base_pub}/../assets/default/qrcode.png" alt="QR Code"/>
           </p>
           <p id="demo">
 📝 ❌ 🔐 🔓 🌸 🐳  alt ok: ⛅ 🎑 📜 📄 🔧 🔨 🎨 📰 ⚛ ⚛ ⚛ ⚛ ⚛
@@ -238,17 +276,17 @@ br.br { display:inline; }
       <tbody>
         <tr>
           <xsl:if test="a:link[@rel='first']">
-            <td class="text-left"  ><a href="{a:link[@rel='first']/@href}">Seite 1</a></td>
+            <td class="text-left"><a href="{a:link[@rel='first']/@href}">1 &lt;&lt;</a></td>
           </xsl:if>
           <xsl:if test="a:link[@rel='previous']">
-            <td class="text-center"><a href="{a:link[@rel='previous']/@href}"><xsl:value-of select="a:link[@rel='previous']/@title"/></a></td>
+            <td class="text-center"><a href="{a:link[@rel='previous']/@href}"><xsl:value-of select="a:link[@rel='previous']/@title"/> &lt;</a></td>
           </xsl:if>
           <td class="text-center"><a href="{a:link[@rel='self']/@href}">Seite <xsl:value-of select="a:link[@rel='self']/@title"/></a></td>
           <xsl:if test="a:link[@rel='next']">
-            <td class="text-center"><a href="{a:link[@rel='next']/@href}"><xsl:value-of select="a:link[@rel='next']/@title"/></a></td>
+            <td class="text-center"><a href="{a:link[@rel='next']/@href}">&gt; <xsl:value-of select="a:link[@rel='next']/@title"/></a></td>
           </xsl:if>
           <xsl:if test="a:link[@rel='last']">
-            <td class="text-right" ><a href="{a:link[@rel='last']/@href}">Seite <xsl:value-of select="a:link[@rel='last']/@title"/></a></td>
+            <td class="text-right" ><a href="{a:link[@rel='last']/@href}">&gt;&gt; <xsl:value-of select="a:link[@rel='last']/@title"/></a></td>
           </xsl:if>
         </tr>
       </tbody>
@@ -257,23 +295,22 @@ br.br { display:inline; }
   </xsl:template>
 
   <xsl:template match="a:entry">
-    <xsl:variable name="xml_base" select="/*/@xml:base"/>
     <xsl:variable name="link" select="a:link[@rel='alternate']/@href"/>
     <li id="{substring-after(a:link[@rel='self']/@href, '/posts/')}" class="clearfix">
       <p class="small text-right">
         <xsl:if test="media:thumbnail/@url">
           <a href="{$link}">
-            <img alt="Vorschaubild" class="thumbnail img-responsive pull-right" src="{media:thumbnail/@url}"/>
+            <img alt="Vorschaubild" class="img-thumbnail pull-right" src="{media:thumbnail/@url}"/>
           </a>
         </xsl:if>
 
         <xsl:variable name="entry_updated" select="a:updated"/>
         <xsl:variable name="entry_updated_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_updated"/></xsl:call-template></xsl:variable>
 
-        <span class="link_edit" title="Bearbeiten">
-          <a href="{$xml_base}{a:link[@rel='edit']/@href}">🔨</a><xsl:text> </xsl:text>
+        <span class="hidden-logged-out" title="Bearbeiten">
+          <a href="{$xml_base_pub}/../{a:link[@rel='edit']/@href}">🔨</a><xsl:text> </xsl:text>
         </span>
-        <a class="time" title="Einzelansicht" href="{$xml_base}{a:link[@rel='self']/@href}">¶ <xsl:value-of select="$entry_updated_human"/></a>
+        <a class="time" title="Einzelansicht" href="{$xml_base_pub}/../{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_updated_human"/> ¶</a>
         <xsl:if test="$link">
           <xsl:text> ~ </xsl:text>
           <a title="Archiv" href="https://web.archive.org/web/{$link}">@archive.org</a>
@@ -310,7 +347,7 @@ br.br { display:inline; }
         <p class="categories" title="Schlagworte">
           <xsl:for-each select="a:category">
             <xsl:sort select="@term"/>
-            <a href="{@scheme}/{@term}">#<xsl:value-of select="@term"/></a><xsl:text> </xsl:text>
+            <a href="{@scheme}{@term}">#<xsl:value-of select="@term"/></a><xsl:text> </xsl:text>
           </xsl:for-each>
         </p>
       </div>

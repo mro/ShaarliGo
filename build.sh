@@ -37,10 +37,11 @@ env GOOS=linux GOARCH=amd64 go build -ldflags "-s" -o "${PROG_NAME}-linux-amd64-
 # ssh simply rm -vrf /var/www/lighttpd/lager.mro.name/public_html/as/app
 
 # http://vorschau.blog.mro.name/atom.cgi
-scp "${PROG_NAME}-linux-amd64-${VERSION}" vario:~/mro.name/vorschau.blog/"atom.cgi"
-scp "ServerInfo.cgi" vario:~/mro.name/vorschau.blog/"info.cgi"
-ssh vario rm -vrf mro.name/vorschau.blog/assets
-ssh vario rm -vrf mro.name/vorschau.blog/app
+scp "${PROG_NAME}-linux-amd64-${VERSION}" vario:~/mro.name/webroot/b/"atom.cgi"
+scp "ServerInfo.cgi" vario:~/mro.name/webroot/b/"info.cgi"
+ssh vario rm -vrf mro.name/webroot/b/assets
+ssh vario rm -vrf mro.name/webroot/b/app
+ssh vario rm -vrf mro.name/webroot/b/.htaccess
 
 # curl --data-urlencode "url=wall" --dump-header head.txt "http://vorschau.blog.mro.name/${PROG_NAME}.cgi"
 # curl --location --dump-header head.txt "http://vorschau.blog.mro.name/"
@@ -49,7 +50,7 @@ ssh vario rm -vrf mro.name/vorschau.blog/app
 
 # curl --location 'http://vorschau.blog.mro.name/atom.cgi/settings?foo' ; say 'aha, aha, soso'
 
-curl --dump-header head.txt --location 'http://vorschau.blog.mro.name/atom.cgi/settings?foo' \
+curl --dump-header head.txt --location 'http://mro.name/b/atom.cgi/settings?foo' \
   --data-urlencode 'title=🔗 My Bookmarks' \
   --data-urlencode 'author/name=B' \
   --data-urlencode 'password=123456789012' \

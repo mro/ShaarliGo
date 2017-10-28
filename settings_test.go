@@ -24,10 +24,6 @@ import (
 	"testing"
 )
 
-func TestFeedFromFileName__(t *testing.T) {
-	assert.Nil(t, nil, "soso")
-}
-
 func TestBcrypt(t *testing.T) {
 	pwd := "123456789012"
 	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
@@ -40,4 +36,13 @@ func TestBcrypt(t *testing.T) {
 
 	err = bcrypt.CompareHashAndPassword([]byte(str), []byte("wrong"))
 	assert.NotNil(t, err, "soso")
+}
+
+func TestXmlBaseFromRequestURL(t *testing.T) {
+	assert.Equal(t, "http://example.com/", xmlBaseFromRequestURL(mustParseURL("http://example.com/atom.cgi"), "/atom.cgi").String(), "soso")
+	assert.Equal(t, "http://example.com/b/", xmlBaseFromRequestURL(mustParseURL("http://example.com/b/atom.cgi"), "/b/atom.cgi").String(), "soso")
+}
+
+func TestFeedFromFileName__(t *testing.T) {
+	assert.Nil(t, nil, "soso")
 }

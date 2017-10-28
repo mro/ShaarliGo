@@ -215,7 +215,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
     <updated>1990-12-31T01:02:03+01:00</updated>
     <link href="pub/posts/e0" rel="self"></link>
     <link href="atom.cgi/pub/posts/e0" rel="edit"></link>
-    <category term="aha" scheme="http://example.com/pub/tags"></category>
+    <category term="aha" scheme="http://example.com/pub/tags/"></category>
   </entry>
 </feed>
 `, string(bufs["pub/posts"].b), "soso")

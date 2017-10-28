@@ -100,8 +100,8 @@
         <!-- http://www.quirksmode.org/blog/archives/2013/10/initialscale1_m.html -->
         <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
         <!-- meta name="viewport" content="width=400"/ -->
-        <link href="../assets/bootstrap.css" rel="stylesheet" type="text/css"/>
-        <link href="../assets/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
+        <link href="../assets/default/bootstrap.css" rel="stylesheet" type="text/css"/>
+        <link href="../assets/default/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
 
         <style type="text/css">
 .table {
@@ -112,33 +112,42 @@ li {
   background-color: #F8F8F8;
   margin: 1em 0;
 }
+div.if_hasdiv_pwd { display:none; }
+.has_pwd div.if_has_pwd { display:block; }
         </style>
         <title><xsl:value-of select="a:title"/></title>
       </head>
-      <body>
+      <body onload="document.form_settings.title.focus();">
         <div class="container">
-          <p><img 
-          	alt="Sehr schön, der Webserver ist gut eingestellt, ./app/ ist geschützt." 
-          	title="Wenn hier ein Filmzitat sichtbar ist, liegt ./app/ ungeschützt im Netz."
-          	src="../app/i-must-be-403.svg"/></p>
-          
+          <p><img
+            alt="Sehr schön, der Webserver ist gut eingestellt, ./app/ ist geschützt."
+            title="Wenn hier ein Filmzitat sichtbar ist, liegt ./app/ ungeschützt im Netz."
+            src="../app/i-must-be-403.svg"/></p>
+
           <xsl:if test="a:author/a:name = ''">
             <p>Huch, das sieht ja alles recht frisch aus hier.</p>
           </xsl:if>
 
-          <form id="installform" name="installform" class="form-horizontal" method="POST" action="#">
+          <form id="form_settings" name="form_settings" class="form-horizontal" method="POST" action="#">
             <!-- https://www.tjvantoll.com/2012/08/05/html5-form-validation-showing-all-error-messages/ -->
 
             <div class="form-group">
               <label for="title" class="control-label col-sm-1">Titel</label>
               <div class="col-sm-11">
-                <input type="text" class="form-control" name="title" placeholder="My AtomicShaarli 🐳" required="required" pattern="\S(.*\S)?" value="{a:title}"/>
+                <input autofocus="autofocus" type="text" class="form-control" name="title" placeholder="My AtomicShaarli 🐳" required="required" pattern="\S(.*\S)?" value="{a:title}"/>
               </div>
             </div>
             <div class="form-group">
               <label for="author/name" class="control-label col-sm-1">User</label>
               <div class="col-sm-11">
-                <input type="text" class="form-control" name="author/name" placeholder="Benutzername dieses neuen AtomicShaarli" required="required" pattern="\S(.*\S)?" _oninvalid="setCustomValidity('Das ist nicht Dein Ernst oder?')" value="{a:author/a:name}"/>
+                <input type="email" class="form-control" name="author/name" placeholder="Benutzername dieses neuen AtomicShaarli" required="required" pattern="\S(.*\S)?" _oninvalid="setCustomValidity('Das ist nicht Dein Ernst oder?')" value="{a:author/a:name}"/>
+              </div>
+            </div>
+
+            <div class="if_has_pwd form-group">
+              <label for="password_existing" class="control-label col-sm-1">Pwd (bestehend)</label>
+              <div class="col-sm-11">
+                <input type="password" class="form-control" name="password_existing" placeholder="Das bisherige Passwort" required="required" minlength="12" pattern="\S(.*\S)?"/>
               </div>
             </div>
             <div class="form-group">
@@ -147,26 +156,32 @@ li {
                 <input type="password" class="form-control" name="password" placeholder="gute Passworte: xkcd.com/936" required="required" minlength="12" pattern="\S(.*\S)?"/>
               </div>
             </div>
-            <!-- evtl. continent / city -->
+            <div class="if_has_pwd form-group">
+              <label for="password_confirmation" class="control-label col-sm-1">Pwd (Wiederholung)</label>
+              <div class="col-sm-11">
+                <input type="password" class="form-control" name="password_confirmation" placeholder="dasselbe nochmal" required="required" minlength="12" pattern="\S(.*\S)?"/>
+              </div>
+            </div>
+            <!-- evtl. Zeitzone, continent / city? -->
 
-            <p>Möchtest Du Material aus einem früheren Shaarli übernehmen?</p>
+            <p>Mag man Material aus einem alten Shaarli übernehmen?</p>
 
             <div class="form-group">
-              <label for="import_shaarli_url" class="control-label col-sm-1">URL</label>
+              <label for="import_shaarli_url" class="control-label col-sm-1">alte Shaarli Adresse</label>
               <div class="col-sm-11">
-                <input type="text" class="form-control" name="import_shaarli_url" placeholder="example.com/shaarli" pattern="\S+"/>
+                <input type="url" class="form-control" name="import_shaarli_url" placeholder="example.com/shaarli" pattern="\S+"/>
               </div>
             </div>
             <div class="form-group">
-              <label for="import_shaarli_setlogin" class="control-label col-sm-1">User</label>
+              <label for="import_shaarli_setlogin" class="control-label col-sm-1">Benutzer</label>
               <div class="col-sm-11">
-                <input type="text" class="form-control" name="import_shaarli_setlogin" placeholder="Benutzername des früheren Shaarli"/>
+                <input type="email" class="form-control" name="import_shaarli_setlogin" placeholder="Benutzername des alten Shaarli"/>
               </div>
             </div>
             <div class="form-group">
               <label for="import_shaarli_setpassword" class="control-label col-sm-1">Pwd</label>
               <div class="col-sm-11">
-                <input type="password" class="form-control" name="import_shaarli_setpassword" placeholder="Passwort des früheren Shaarli"/>
+                <input type="password" class="form-control" name="import_shaarli_setpassword" placeholder="Passwort des alten Shaarli"/>
               </div>
             </div>
 

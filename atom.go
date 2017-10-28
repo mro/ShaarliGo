@@ -70,22 +70,22 @@ func FeedFromReader(file io.Reader) (Feed, error) {
 //
 // see also https://godoc.org/golang.org/x/tools/blog/atom#Feed
 type Feed struct {
-	XMLName      xml.Name   `xml:"http://www.w3.org/2005/Atom feed"`
-	XmlBase      string     `xml:"xml:base,attr,omitempty"`
-	XmlLang      string     `xml:"xml:lang,attr,omitempty"`
-	Title        HumanText  `xml:"title"`
-	Subtitle     *HumanText `xml:"subtitle,omitempty"`
-	Id           string     `xml:"id"`
-	Updated      iso8601    `xml:"updated"`
-	Generator    *Generator `xml:"generator,omitempty"`
-	Icon         string     `xml:"icon,omitempty"`
-	Logo         string     `xml:"logo,omitempty"`
-	Links        []Link     `xml:"link"`
-	Categories   []Category `xml:"category"`
-	Authors      []Person   `xml:"author"`
-	Contributors []Person   `xml:"contributor"`
-	Rights       *HumanText `xml:"rights,omitempty"`
-	Entries      []*Entry   `xml:"entry"`
+	XMLName      xml.Name     `xml:"http://www.w3.org/2005/Atom feed"`
+	XmlBase      string       `xml:"xml:base,attr,omitempty"`
+	XmlLang      string       `xml:"xml:lang,attr,omitempty"`
+	Title        HumanText    `xml:"title"`
+	Subtitle     *HumanText   `xml:"subtitle,omitempty"`
+	Id           string       `xml:"id"`
+	Updated      iso8601      `xml:"updated"`
+	Generator    *Generator   `xml:"generator,omitempty"`
+	Icon         string       `xml:"icon,omitempty"`
+	Logo         string       `xml:"logo,omitempty"`
+	Links        []Link       `xml:"link"`
+	Categories   []Category   `xml:"category"`
+	Authors      []Person     `xml:"author"`
+	Contributors []Person     `xml:"contributor"`
+	Rights       *HumanText   `xml:"rights,omitempty"`
+	Entries      EntriesSlice `xml:"entry"`
 }
 
 type Generator struct {
@@ -124,6 +124,8 @@ type Person struct {
 	Email string `xml:"email,omitempty"`
 	Uri   string `xml:"uri,omitempty"`
 }
+
+type EntriesSlice []*Entry
 
 // see also https://godoc.org/golang.org/x/tools/blog/atom#Entry
 type Entry struct {
@@ -188,4 +190,20 @@ func (c *GeoRssPoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error
 	}
 	*c = GeoRssPoint{Lat: float32(lat), Lon: float32(lon)}
 	return nil
+}
+
+func (s EntriesSlice) Len() int {
+	return len(s)
+}
+func (s EntriesSlice) Less(i, j int) bool {
+	return s[i].Updated.Time.Before(s[j].Updated.Time)
+}
+
+func (s EntriesSlice) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func (feed *Feed) Append(e *Entry) *Feed {
+	feed.Entries = append(feed.Entries, e)
+	return feed
 }
