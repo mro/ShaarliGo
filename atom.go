@@ -129,6 +129,7 @@ type EntriesSlice []*Entry
 
 // see also https://godoc.org/golang.org/x/tools/blog/atom#Entry
 type Entry struct {
+	XMLName      xml.Name   `xml:"http://www.w3.org/2005/Atom entry,omitempty"`
 	XmlBase      string     `xml:"xml:base,attr,omitempty"`
 	XmlLang      string     `xml:"xml:lang,attr,omitempty"`
 	Title        HumanText  `xml:"title"`
@@ -192,6 +193,34 @@ func (c *GeoRssPoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error
 	return nil
 }
 
+func xmlEncodeWithXslt(e interface{}, xslt string, enc *xml.Encoder) error {
+	var err error
+	// preamble
+	if err = enc.EncodeToken(xml.ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)}); err == nil {
+		if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
+			if err = enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='" + xslt + "'")}); err == nil {
+				if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
+					if err = enc.EncodeToken(xml.Comment(lengthyAtomPreambleComment)); err == nil {
+						if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
+							if err = enc.Encode(e); err == nil {
+								err = enc.EncodeToken(xml.CharData("\n"))
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return err
+}
+
+func (feed *Feed) Append(e *Entry) *Feed {
+	feed.Entries = append(feed.Entries, e)
+	return feed
+}
+
+// sort.Interface
+
 func (s EntriesSlice) Len() int {
 	return len(s)
 }
@@ -201,9 +230,4 @@ func (s EntriesSlice) Less(i, j int) bool {
 
 func (s EntriesSlice) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
-}
-
-func (feed *Feed) Append(e *Entry) *Feed {
-	feed.Entries = append(feed.Entries, e)
-	return feed
 }

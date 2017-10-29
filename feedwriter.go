@@ -21,7 +21,6 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -42,6 +41,10 @@ func mustParseURL(u string) *url.URL {
 
 const cgiName = "atom.cgi"
 const fileName = "index.xml" // could be 'index.atom' but xml may have a proper mimetype out of the box
+const dirAssets = "assets"
+
+const themeDefault = "default"
+const langDefault = "de"
 
 const uriPub = "pub"
 const uriPosts = "posts"
@@ -58,8 +61,16 @@ const relNext = "next"            // paged feeds https://tools.ietf.org/html/rfc
 const relPrevious = "previous"    // paged feeds https://tools.ietf.org/html/rfc5005#section-3
 const relEdit = "edit"            // AtomPub https://tools.ietf.org/html/rfc5023
 const relEditMedia = "edit-media" // AtomPub https://tools.ietf.org/html/rfc5023
+const relUp = "up"                // https://www.iana.org/assignments/link-relations/link-relations.xhtml
+const relSearch = "search"        // http://www.opensearch.org/Specifications/OpenSearch/1.1#Autodiscovery_in_RSS.2FAtom
+
+const newDirPerms = os.ModeDir | os.ModePerm
 
 var rexPath = regexp.MustCompile("[^/]+")
+
+type feedWriter interface {
+	Write(feedOrEntry interface{}, self *url.URL, xsltFileName string) error
+}
 
 // maybe replace the CONTENT of pub rather than pub itself. So . could remain readonly.
 //
@@ -82,7 +93,6 @@ func (feed *Feed) replaceFeeds() error {
 		}
 	}
 	// create .lock file with pid
-	newDirPerms := os.ModeDir | os.ModePerm
 	var err error
 	if err = os.MkdirAll("./app/var", newDirPerms); err == nil {
 		if err = ioutil.WriteFile("./app/var/lock", []byte(string(os.Getpid())), os.ModeExclusive); err == nil {
@@ -90,13 +100,7 @@ func (feed *Feed) replaceFeeds() error {
 			os.RemoveAll("./app/var/stage")
 			os.RemoveAll("./app/var/old")
 			if err = os.MkdirAll("./app/var", newDirPerms); err == nil {
-				if err = feed.writeFeeds(100, func(uri string, page int) (io.WriteCloser, error) {
-					dirName := filepath.Join("./app/var/stage", appendPageNumber(uri, page))
-					if err := os.MkdirAll(dirName, newDirPerms); err != nil {
-						return nil, err
-					}
-					return os.Create(filepath.Join(dirName, fileName))
-				}); err == nil {
+				if err = feed.writeFeeds(100, fileFeedWriter{baseDir: "./app/var/stage"}); err == nil {
 					if _, err = os.Stat("./pub"); os.IsNotExist(err) {
 						err = nil // ignore nonexisting pub dir. That's fine for first launch.
 					} else {
@@ -117,7 +121,7 @@ func (feed *Feed) replaceFeeds() error {
 	return err
 }
 
-func (feed *Feed) writeFeeds(entriesPerPage int, fctWriteCloser func(string, int) (io.WriteCloser, error)) error {
+func (feed *Feed) writeFeeds(entriesPerPage int, fw feedWriter) error {
 	xmlBase := mustParseURL(feed.XmlBase)
 	if !xmlBase.IsAbs() || !strings.HasSuffix(xmlBase.Path, "/") {
 		return errors.New("feed/@xml:base must be set to an absolute URL with a trailing slash")
@@ -128,6 +132,7 @@ func (feed *Feed) writeFeeds(entriesPerPage int, fctWriteCloser func(string, int
 	catScheme := xmlBase.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String() + "/"
 	uri2entries := make(map[string][]*Entry)
 	for _, item := range feed.Entries {
+		item.XmlBase = xmlBase.String()
 		// change entries for output but don't save the change:
 		selfURL := mustParseURL(path.Join(uriPub, uriPosts, item.Id))
 		editURL := path.Join(cgiName, selfURL.String())
@@ -136,6 +141,7 @@ func (feed *Feed) writeFeeds(entriesPerPage int, fctWriteCloser func(string, int
 			Link{Rel: relSelf, Href: selfURL.String()},
 			Link{Rel: relEdit, Href: editURL},
 			// Link{Rel: relEditMedia, Href: editURL},
+			Link{Rel: relUp, Href: "..", Title: feed.Title.Body}, // we need the feed-name somewhere.
 		)
 		for i, _ := range item.Categories {
 			item.Categories[i].Scheme = catScheme
@@ -144,12 +150,12 @@ func (feed *Feed) writeFeeds(entriesPerPage int, fctWriteCloser func(string, int
 			uri2entries[uri] = append(uri2entries[uri], item)
 		}
 
-		// item.write(fctWriteCloser)
+		fw.Write(item, selfURL, "posts.xslt")
 	}
 
 	for uri, entries := range uri2entries {
 		// ... if not for the error handling. Maybe https://godoc.org/golang.org/x/sync/errgroup
-		feed.writeFeed(uri, entries, entriesPerPage, fctWriteCloser)
+		feed.writeFeed(uri, entries, entriesPerPage, fw)
 	}
 
 	return nil
@@ -193,9 +199,7 @@ func computeLastPage(count int, entriesPerPage int) int {
 }
 
 // seed is cloned on each call
-func (seed Feed) writeFeed(uri string, entries []*Entry, entriesPerPage int, fctWriteCloser func(string, int) (io.WriteCloser, error)) error {
-	pathPrefix := rexPath.ReplaceAllString(uri, "..")
-
+func (seed Feed) writeFeed(uri string, entries []*Entry, entriesPerPage int, fw feedWriter) error {
 	totalEntries := len(entries)
 	lastPage := computeLastPage(totalEntries, entriesPerPage)
 
@@ -220,20 +224,9 @@ func (seed Feed) writeFeed(uri string, entries []*Entry, entriesPerPage int, fct
 		if upper > totalEntries {
 			upper = totalEntries
 		}
-		pageEntries := entries[lower:upper]
+		seed.Entries = entries[lower:upper]
 
-		if err := func() error {
-			// and here we could go even more parallel...
-			if w, err := fctWriteCloser(uri, page); err != nil {
-				return err
-			} else {
-				defer w.Close()
-				enc := xml.NewEncoder(w)
-				enc.Indent("", "  ")
-				seed.writePage(uri, page, lastPage, pageEntries, pathPrefix, enc)
-				return enc.Flush()
-			}
-		}(); err != nil {
+		if err := seed.writePage(uri, page, lastPage, fw); err != nil {
 			return err
 		}
 	}
@@ -241,8 +234,9 @@ func (seed Feed) writeFeed(uri string, entries []*Entry, entriesPerPage int, fct
 }
 
 // feed is cloned on each call
-func (feed Feed) writePage(uri string, page, lastPage int, entries []*Entry, pathPrefix string, enc *xml.Encoder) error {
-	feed.Links = append(feed.Links, Link{Rel: relSelf, Href: appendPageNumber(uri, page), Title: fmt.Sprintf("%d", page+1)})
+func (feed Feed) writePage(uri string, page, lastPage int, fw feedWriter) error {
+	pagedUri := appendPageNumber(uri, page)
+	feed.Links = append(feed.Links, Link{Rel: relSelf, Href: pagedUri, Title: fmt.Sprintf("%d", page+1)})
 	// https://tools.ietf.org/html/rfc5005#section-3
 	if lastPage > 0 {
 		feed.Links = append(feed.Links, Link{Rel: relFirst, Href: appendPageNumber(uri, 0), Title: fmt.Sprintf("%d", 0+1)})
@@ -257,24 +251,30 @@ func (feed Feed) writePage(uri string, page, lastPage int, entries []*Entry, pat
 		// TODO https://tools.ietf.org/html/rfc5005#section-2
 		// xmlns:fh="http://purl.org/syndication/history/1.0" <fh:complete/>
 	}
-	feed.Entries = entries
-	return feed.write(pathPrefix, enc)
+	return fw.Write(&feed, mustParseURL(pagedUri), "posts.xslt")
 }
 
-func (feed *Feed) write(pathPrefix string, enc *xml.Encoder) error {
+type fileFeedWriter struct {
+	baseDir string
+}
+
+func (ffw fileFeedWriter) Write(feedOrEntry interface{}, self *url.URL, xsltFileName string) error {
+	uri := self.Path
+	pathPrefix := rexPath.ReplaceAllString(uri, "..")
+	xslt := path.Join(pathPrefix, dirAssets, themeDefault, langDefault, xsltFileName)
+	dstDirName := filepath.Join(ffw.baseDir, filepath.FromSlash(uri))
+	dstFileName := filepath.Join(dstDirName, fileName)
 	var err error
-	// preamble
-	if err = enc.EncodeToken(xml.ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)}); err == nil {
-		if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
-			if err = enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='" + path.Join(pathPrefix, "assets", "default", "de", "posts.xslt") + "'")}); err == nil {
-				if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
-					if err = enc.EncodeToken(xml.Comment(lengthyAtomPreambleComment)); err == nil {
-						if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
-							if err = enc.Encode(feed); err == nil {
-								err = enc.EncodeToken(xml.CharData("\n"))
-							}
-						}
-					}
+	if err = os.MkdirAll(dstDirName, newDirPerms); err == nil {
+		var w *os.File
+		if w, err = os.Create(dstFileName); err == nil {
+			defer w.Close() // just to be sure
+			enc := xml.NewEncoder(w)
+			enc.Indent("", "  ")
+			if err = xmlEncodeWithXslt(feedOrEntry, xslt, enc); err == nil {
+				if err = enc.Flush(); err == nil {
+					return w.Close()
+					// TODO: set timestamp (Updated)
 				}
 			}
 		}

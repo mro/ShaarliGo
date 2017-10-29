@@ -141,11 +141,11 @@ func (mgr *SessionManager) handleSettings(w http.ResponseWriter, r *http.Request
 			// urlPost, err := url.Parse(strURL[:idxPost] + "/" + uriPub + "/" + uriPosts)
 			// load template feed, set Id and birthday.
 			// tagScheme := baseURL.ResolveReference(mustParseURL(uriPub, uriTags, "#")).String()
+			authors := []Person{Person{Name: mgr.config.AuthorName}}
 			feed := &Feed{
 				XmlBase:   urlBase.String(),
 				Id:        urlBase.String(), // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
 				Title:     HumanText{Body: mgr.config.Title},
-				Authors:   []Person{Person{Name: mgr.config.AuthorName}},
 				Generator: &Generator{Uri: myselfNamespace, Version: "0.0.1", Body: "AtomicShaarli"},
 				Links: []Link{
 					Link{Rel: relEdit, Href: path.Join(cgiName, uriPub, uriPosts), Title: "PostURI, maybe better a app:collection https://tools.ietf.org/html/rfc5023#section-8.3.3"},
@@ -156,8 +156,9 @@ func (mgr *SessionManager) handleSettings(w http.ResponseWriter, r *http.Request
 				Title: HumanText{Body: "Hello, #Atom!"},
 				Id:    "voo8Uo",
 				Links: []Link{
-					Link{Rel: relAlternate, Href: mustParseURL("http://www.loremipsum.de/").String()},
+					Link{Href: mustParseURL("http://www.loremipsum.de/").String()},
 				},
+				Authors: authors,
 				Categories: []Category{
 					Category{Term: "🐳"},
 					Category{Term: "Atom"},
@@ -171,23 +172,26 @@ func (mgr *SessionManager) handleSettings(w http.ResponseWriter, r *http.Request
 			   Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.`},
 				Updated: iso8601{mustParseRFC3339("2012-12-31T02:02:02+01:00")},
 			}).Append(&Entry{
-				Title: HumanText{Body: "Was noch alles fehlt"},
-				Id:    "Naev8k",
+				Title:   HumanText{Body: "Was noch alles fehlt"},
+				Id:      "Naev8k",
+				Authors: authors,
 				Categories: []Category{
 					Category{Term: "🐳"},
 					Category{Term: "Cloud"},
 					Category{Term: "i18n"},
 				},
-				Content: &HumanText{Body: `- Einzeleinträge richtig ablegen,
-			   - Posten, Löschen, Bookmarklet,
+				Content: &HumanText{Body: `- Posten, Löschen, Bookmarklet,
+				 - 'API'-Kompatibilität mit Vanilla Shaarli (=> ShaarliOS, Shaarlier)
 			   - Tag #Cloud,
 			   - Tagesansicht,
 			   - Shaarli Import,
+			   - Komplett-Feed (Archiv),
 			   - neue Posts vorbelegen (optional: extern per http GET),
 			   - Suche,
 			   - clickbare Links im Text (client-seitig),
 			   - Referer-Anonymisierer,
 			   - Bilder Cache/Proxy,
+			   - QR-Code pro Post,
 			   - Skinning/Themeing (asset dir),
 			   - private Posts,
 			   - Kommentare,
@@ -201,10 +205,11 @@ func (mgr *SessionManager) handleSettings(w http.ResponseWriter, r *http.Request
 				Title: HumanText{Body: "Shaarli — sebsauvage.net"},
 				Id:    "kaJ9Rw",
 				Links: []Link{
-					Link{Rel: relAlternate, Href: mustParseURL("http://sebsauvage.net/wiki/doku.php?id=php:shaarli").String()},
+					Link{Href: mustParseURL("http://sebsauvage.net/wiki/doku.php?id=php:shaarli").String()},
 				},
+				Authors:        authors,
 				Categories:     []Category{Category{Term: "opensource"}, Category{Term: "Software"}},
-				Updated:        iso8601{mustParseRFC3339("2011-09-14T19:00:00+02:00")},
+				Updated:        iso8601{mustParseRFC3339("2011-09-13T15:45:00+02:00")},
 				Content:        &HumanText{Body: "Welcome to Shaarli ! This is a bookmark. To edit or delete me, you must first login."},
 				MediaThumbnail: &MediaThumbnail{Url: mustParseURL("http://cdn.rawgit.com/mro/ShaarliOS/master/shaarli-petal.svg").String()},
 			})

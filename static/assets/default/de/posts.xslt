@@ -94,7 +94,7 @@
 
   <xsl:variable name="xml_base_pub" select="concat(/*/@xml:base,'pub')"/>
 
-  <xsl:template match="a:feed">
+  <xsl:template match="/">
     <!--
       Do not set a class="logged-out" initially, but do via early JavaScript.
       If JavaScript is off, we need mixture between logged-in and -out.
@@ -185,89 +185,92 @@ document.documentElement.classList.add('logged-out'); // set early.
 // document.documentElement.classList.add('logged-in');
 // ]]>
         </script>
-        <div class="container">
-          <noscript><p>JavaScript ist aus, es geht zwar (fast) alles auch ohne, aber mit ist's <em>schöner</em>.</p></noscript>
-
-          <table id="links_commands" class="toolbar table table-bordered table-striped table-inverse" aria-label="Befehle">
-            <tbody>
-              <tr>
-                <td class="text-left"><a href="{$xml_base_pub}/posts/"><xsl:value-of select="a:title"/></a></td>
-                <td class="text-right"><a href="{$xml_base_pub}/tags/">⛅ # <span class="hidden-xs">Tags</span></a></td>
-                <td class="text-right"><a href="{$xml_base_pub}/days/">📅 <span class="hidden-xs">Tage</span></a></td>
-                <td class="text-right"><a href="{$xml_base_pub}/imgs/">🎨 <span class="hidden-xs">Bilder</span></a></td>
-                <td class="text-right hidden-logged-out"><a href="{$xml_base_pub}/../atom.cgi?do=tools">🔨 <span class="hidden-xs">Tools</span></a></td>
-                <td class="text-right">
-                  <a id="link_login" href="{$xml_base_pub}/../atom.cgi?do=login" class="visible-logged-out"><span class="hidden-xs">Anmelden</span> 🌺 </a>
-                  <a id="link_logout" href="{$xml_base_pub}/../atom.cgi?do=logout" class="hidden-logged-out"><span class="hidden-xs">Abmelden</span> 🍃 </a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <!-- https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ -->
-          <form id="form_search" name="form_search" class="form-search form-horizontal" action="{$xml_base_pub}/../atom.cgi/search">
-            <div class="input-group">
-              <input autofocus="autofocus" id="q" name="q" type="text" class="form-control search-query" placeholder="Suche Wort oder #Tag..."/>
-              <span class="input-group-btn"><button type="submit" class="btn btn-primary">Suche</button></span>
-            </div>
-          </form>
-
-          <form id="form_post" name="form_post" class="form-horizontal hidden-logged-out" action="{$xml_base_pub}/../atom.cgi?do=addlink">
-            <div class="form-group" style="display:none">
-              <input type="file" class="file pull-right" id="input-1" placeholder="Bild"/>
-            </div>
-            <div class="form-group text-right" style="display:none">
-              <div class="form-check">
-                <label class="form-check-label">
-                  <input class="form-check-input" type="checkbox"/> Privat?
-                </label>
-              </div>
-            </div>
-            <div class="input-group">
-              <input type="text" class="form-control" id="post" name="post" placeholder="Was gibt's Neues? (Notiz oder URL)"/>
-              <span class="input-group-btn"><button type="submit" class="btn btn-primary">Shaaaare!</button></span>
-            </div>
-          </form>
-
-          <xsl:call-template name="prev-next"/>
-
-          <!-- <h1><xsl:value-of select="a:title"/></h1> -->
-
-          <xsl:if test="a:subtitle">
-            <h2><xsl:value-of select="a:subtitle"/></h2>
-          </xsl:if>
-
-          <ol id="entries" class="list-unstyled">
-            <xsl:apply-templates select="a:entry"/>
-          </ol>
-
-          <xsl:call-template name="prev-next"/>
-
-          <script src="{$xml_base_pub}/../assets/default/script.js" type="text/javascript"></script>
-
-          <hr style="clear:left;"/>
-          <p id="footer">
-            <a title="Validate my Atom 1.0 feed" href="https://validator.w3.org/feed/check.cgi?url={$xml_base_pub}/../{a:link[@rel='self']/@href}">
-              <img alt="Valid Atom 1.0" src="{$xml_base_pub}/../assets/default/valid-atom.svg" style="border:0;width:88px;height:31px"/>
-            </a>
-            <!-- <xsl:text> </xsl:text>
-            <a href="https://validator.w3.org/check?uri=referer">
-              <img alt="Valid XHTML 1.0 Strict" src="{$xml_base_pub}/../assets/default/valid-xhtml10-blue-v.svg" style="border:0;width:88px;height:31px"/>
-            </a>
-            <a href="https://jigsaw.w3.org/css-validator/check/referer?profile=css3&amp;usermedium=screen&amp;warning=2&amp;vextwarning=false&amp;lang=de">
-              <img alt="CSS ist valide!" src="{$xml_base_pub}/../assets/default/valid-css-blue-v.svg" style="border:0;width:88px;height:31px"/>
-            </a>
-            -->
-          </p>
-          <p>
-            <img src="{$xml_base_pub}/../assets/default/qrcode.png" alt="QR Code"/>
-          </p>
-          <p id="demo">
-📝 ❌ 🔐 🔓 🌸 🐳  alt ok: ⛅ 🎑 📜 📄 🔧 🔨 🎨 📰 ⚛ ⚛ ⚛ ⚛ ⚛
-          </p>
-        </div>
+        <xsl:apply-templates select="a:feed" mode="root"/>
+        <xsl:apply-templates select="a:entry" mode="root"/>
       </body>
     </html>
+  </xsl:template>
+
+  <xsl:template match="a:feed" mode="root">
+    <div class="container">
+      <noscript><p>JavaScript ist aus, es geht zwar (fast) alles auch ohne, aber mit ist's <em>schöner</em>.</p></noscript>
+
+      <xsl:call-template name="links_commands"/>
+
+      <!-- https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ -->
+      <form id="form_search" name="form_search" class="form-search form-horizontal" action="{$xml_base_pub}/../atom.cgi/search">
+        <div class="input-group">
+          <input autofocus="autofocus" id="q" name="q" type="text" class="form-control search-query" placeholder="Suche Wort oder #Tag..."/>
+          <span class="input-group-btn"><button type="submit" class="btn btn-primary">Suche</button></span>
+        </div>
+      </form>
+
+      <form id="form_post" name="form_post" class="form-horizontal hidden-logged-out" action="{$xml_base_pub}/../atom.cgi?do=addlink">
+        <div class="form-group" style="display:none">
+          <input type="file" class="file pull-right" id="input-1" placeholder="Bild"/>
+        </div>
+        <div class="form-group text-right" style="display:none">
+          <div class="form-check">
+            <label class="form-check-label">
+              <input class="form-check-input" type="checkbox"/> Privat?
+            </label>
+          </div>
+        </div>
+        <div class="input-group">
+          <input type="text" class="form-control" id="post" name="post" placeholder="Was gibt's Neues? (Notiz oder URL)"/>
+          <span class="input-group-btn"><button type="submit" class="btn btn-primary">Shaaaare!</button></span>
+        </div>
+      </form>
+
+      <xsl:call-template name="prev-next"/>
+
+      <!-- <h1><xsl:value-of select="a:title"/></h1> -->
+
+      <xsl:if test="a:subtitle">
+        <h2><xsl:value-of select="a:subtitle"/></h2>
+      </xsl:if>
+
+      <ol id="entries" class="list-unstyled">
+        <xsl:apply-templates select="a:entry"/>
+      </ol>
+
+      <xsl:call-template name="prev-next"/>
+
+      <xsl:call-template name="footer"/>
+
+      <p id="demo">
+📝 ❌ 🔐 🔓 🌸 🐳  alt ok: ⛅ 🎑 📜 📄 🔧 🔨 🎨 📰 ⚛ ⚛ ⚛ ⚛ ⚛
+      </p>
+    </div>
+  </xsl:template>
+
+  <xsl:template name="links_commands">
+      <table id="links_commands" class="toolbar table table-bordered table-striped table-inverse" aria-label="Befehle">
+        <tbody>
+          <tr>
+            <td class="text-left">
+              <a href="{$xml_base_pub}/posts/">
+                <xsl:choose>
+            		  <xsl:when test="a:link[@rel = 'up']/@title">
+										<xsl:value-of select="a:link[@rel = 'up']/@title"/>
+            			</xsl:when>
+            			<xsl:otherwise>
+										<xsl:value-of select="a:title"/>
+            			</xsl:otherwise>
+            		</xsl:choose>
+            	</a>
+            </td>
+            <td class="text-right"><a href="{$xml_base_pub}/tags/">⛅ # <span class="hidden-xs">Tags</span></a></td>
+            <td class="text-right"><a href="{$xml_base_pub}/days/">📅 <span class="hidden-xs">Tage</span></a></td>
+            <td class="text-right"><a href="{$xml_base_pub}/imgs/">🎨 <span class="hidden-xs">Bilder</span></a></td>
+            <td class="text-right hidden-logged-out"><a href="{$xml_base_pub}/../atom.cgi?do=tools">🔨 <span class="hidden-xs">Tools</span></a></td>
+            <td class="text-right">
+              <a id="link_login" href="{$xml_base_pub}/../atom.cgi?do=login" class="visible-logged-out"><span class="hidden-xs">Anmelden</span> 🌺 </a>
+              <a id="link_logout" href="{$xml_base_pub}/../atom.cgi?do=logout" class="hidden-logged-out"><span class="hidden-xs">Abmelden</span> 🍃 </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
   </xsl:template>
 
   <xsl:template name="prev-next">
@@ -294,8 +297,43 @@ document.documentElement.classList.add('logged-out'); // set early.
     </xsl:if>
   </xsl:template>
 
+  <xsl:template name="footer">
+		<script src="{$xml_base_pub}/../assets/default/script.js" type="text/javascript"></script>
+
+		<hr style="clear:left;"/>
+		<p id="footer">
+			<a title="Validate my Atom 1.0 feed" href="https://validator.w3.org/feed/check.cgi?url={$xml_base_pub}/../{a:link[@rel='self']/@href}">
+				<img alt="Valid Atom 1.0" src="{$xml_base_pub}/../assets/default/valid-atom.svg" style="border:0;width:88px;height:31px"/>
+			</a>
+			<!-- <xsl:text> </xsl:text>
+			<a href="https://validator.w3.org/check?uri=referer">
+				<img alt="Valid XHTML 1.0 Strict" src="{$xml_base_pub}/../assets/default/valid-xhtml10-blue-v.svg" style="border:0;width:88px;height:31px"/>
+			</a>
+			<a href="https://jigsaw.w3.org/css-validator/check/referer?profile=css3&amp;usermedium=screen&amp;warning=2&amp;vextwarning=false&amp;lang=de">
+				<img alt="CSS ist valide!" src="{$xml_base_pub}/../assets/default/valid-css-blue-v.svg" style="border:0;width:88px;height:31px"/>
+			</a>
+			-->
+		</p>
+		<p>
+			<img src="{$xml_base_pub}/../assets/default/qrcode.png" alt="QR Code"/>
+		</p>
+  </xsl:template>
+
+
+  <xsl:template match="a:entry" mode="root">
+    <div class="container">
+      <noscript><p>JavaScript ist aus, es geht zwar (fast) alles auch ohne, aber mit ist's <em>schöner</em>.</p></noscript>
+
+      <xsl:call-template name="links_commands"/>
+
+      <xsl:apply-templates select="self::a:entry"/>
+
+      <xsl:call-template name="footer"/>
+    </div>
+  </xsl:template>
+
   <xsl:template match="a:entry">
-    <xsl:variable name="link" select="a:link[@rel='alternate']/@href"/>
+    <xsl:variable name="link" select="a:link[not(@rel)]/@href"/>
     <li id="{substring-after(a:link[@rel='self']/@href, '/posts/')}" class="clearfix">
       <p class="small text-right">
         <xsl:if test="media:thumbnail/@url">
