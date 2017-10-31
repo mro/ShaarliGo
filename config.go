@@ -60,8 +60,9 @@ func (cfg *Config) Save() error {
 			return err
 		}
 		return cfg.saveToFileName(CONFIG_FILE_NAME)
+	} else {
+		return err
 	}
-	return nil
 }
 
 func (cfg *Config) saveToFileName(fileName string) error {

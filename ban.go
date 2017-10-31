@@ -20,15 +20,103 @@ package main
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
 	"time"
+
+	"gopkg.in/yaml.v2"
 )
+
+type BanPenalties struct {
+	Penalties map[string]struct {
+		Penalty int
+		End     time.Time
+	}
+}
+
+func isBanned(r *http.Request, now time.Time) (bool, error) {
+	return isRemoteAddrBannedFromYamlFileName(r.RemoteAddr, now, filepath.Join("app", "var", "session.yaml"))
+}
+
+func isRemoteAddrBannedFromYamlFileName(r string, now time.Time, yamlFileName string) (bool, error) {
+	if data, err := ioutil.ReadFile(yamlFileName); err != nil {
+		bans := BanPenalties{}
+		if err := yaml.Unmarshal(data, &bans); err != nil {
+			return true, err
+		} else {
+			return bans.isRemoteAddrBanned(r, now), nil
+		}
+	} else {
+		return true, err
+	}
+}
+
+func (bans BanPenalties) isRemoteAddrBanned(key string, now time.Time) bool {
+	pen := bans.Penalties[key]
+	if pen.Penalty <= 4 { // allow for some failed tries
+		return false
+	}
+	return pen.End.After(now)
+}
+
+func squealFailure(r *http.Request, now time.Time) error {
+	return squealFailureToYamlFileName(r.RemoteAddr, now, filepath.Join("app", "var", "session.yaml"))
+}
+
+func squealFailureToYamlFileName(key string, now time.Time, yamlFileName string) error {
+	var err error
+	var data []byte
+	if data, err = ioutil.ReadFile(yamlFileName); err == nil {
+		bans := BanPenalties{}
+		if err = yaml.Unmarshal(data, &bans); err == nil {
+			if bans.squealFailure(key, now) {
+				if data, err = yaml.Marshal(bans); err == nil {
+					tmpFileName := fmt.Sprintf("%s~%d", yamlFileName, os.Getpid()) // want the mv to be atomic, so use the same dir
+					if err = ioutil.WriteFile(tmpFileName, data, os.ModePerm); err == nil {
+						err = os.Rename(tmpFileName, yamlFileName)
+					}
+				}
+			}
+		}
+	}
+	return err
+}
+
+func (bans *BanPenalties) squealFailure(key string, now time.Time) bool {
+	pen := bans.Penalties[key]
+	if pen.Penalty < 0 {
+		return false // we're known and welcome. So we do not ban.
+	}
+
+	if pen.End.Before(now) {
+		pen.End = now
+	}
+
+	if pen.End.After(now.Add(time.Hour)) {
+		// already banned for more than an hour left, so don't bother adding to the ban.
+		// But rather reduce I/O load a bit.
+		return false
+	}
+
+	pen.End.Add(4 * time.Hour)
+	pen.Penalty += 1
+	bans.Penalties[key] = pen
+
+	for ip, pen := range bans.Penalties {
+		if pen.End.Before(now) {
+			delete(bans.Penalties, ip)
+		}
+	}
+
+	return true
+}
+
+// // // // // // // // // // // // // // // // // // // // // // // // //
 
 type SessionManager struct {
 	baseDir        string
@@ -71,79 +159,4 @@ func (m *SessionManager) startSession(w http.ResponseWriter, r *http.Request, ui
 	//     penalty: 12
 	//     expire: '2018-02-19T09:10:27Z'
 	http.SetCookie(w, &cookie)
-}
-
-func (m *SessionManager) PrepareDirs() error {
-	return nil
-}
-
-func (m *SessionManager) IsBanned(r *http.Request, t time.Time) (bool, error) {
-	if r == nil {
-		return m.isBanned(nil, t)
-	}
-	return m.isBanned(&r.RemoteAddr, t)
-}
-
-func (m *SessionManager) isBanned(r *string, t0 time.Time) (bool, error) {
-	if r == nil {
-		return true, nil
-	}
-	file := m.banMarkerPath(r)
-	byt, err := ioutil.ReadFile(*file)
-	banEndUnix := int64(-9223372036854775808) // very far past
-	if err != nil {
-		pe := err.(*os.PathError)
-		if pe != nil && pe.Op == "open" {
-
-			//		pe := os.PathError{Op: "open", Path: *file, Err: nil}
-			//https://davidnix.io/post/error-handling-in-go/
-			//https://www.goinggo.net/2014/10/error-handling-in-go-part-i.html
-			//		if &pe == nil {
-			//			return true, err
-			//		}
-		}
-	} else {
-		// turn byte slice (UTC unix time as a decimal string) into time
-		banEndUnix, err = strconv.ParseInt(string(byt[:]), 10, 64)
-		if err != nil {
-			return true, err
-		}
-	}
-	banned := time.Unix(banEndUnix, 0).After(t0)
-	if !banned {
-		err = os.Remove(*file)
-	}
-	return banned, nil
-}
-
-func (m *SessionManager) SquealFailure(r *http.Request, t time.Time) error {
-	return m.squealFailure(&r.RemoteAddr, t)
-}
-
-func (m *SessionManager) squealFailure(r *string, t time.Time) error {
-	// load number of tries
-	// increment
-	// is above ban threshold?
-	// yes: add ban, remove failures
-	// no: increment failures
-	return nil
-}
-
-func (m *SessionManager) LiftBanAndFailures(r *http.Request) error {
-	return m.liftBanAndFailures(&r.RemoteAddr)
-}
-
-func (m *SessionManager) liftBanAndFailures(r *string) error {
-	// remove ban
-	// remove failures
-	return nil
-}
-
-func (m *SessionManager) banMarkerPath(r *string) *string {
-	ret := filepath.Join(m.baseDir, "ban", "banned", *r)
-	return &ret
-}
-func (m *SessionManager) failureMarkerPath(r *string) *string {
-	ret := filepath.Join(m.baseDir, "ban", "failed", *r)
-	return &ret
 }

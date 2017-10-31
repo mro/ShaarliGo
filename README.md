@@ -48,7 +48,6 @@ shaarli on diet. Built on Atom.
 GET  atom.cgi
 GET  atom.cgi/settings
 POST atom.cgi/settings 							token? session?
-GET  pub/posts?#Kk-eZA
 GET  pub/posts/Kk-eZA
 GET  pub/tags/Design
 GET  atom.cgi?do=login
@@ -87,25 +86,25 @@ POST
 
 atom.cgi/config
 atom.cgi/session
-atom.cgi/session?method=DELETE (HTML form fallback)
+atom.cgi/session								(HTML form fallback)
 atom.cgi/~me/posts
 atom.cgi/@me/posts
-atom.cgi/pub/posts
-atom.cgi/pub/enclosures
-atom.cgi/pub/posts/DK0BTg?method=PUT (HTML form fallback)
+atom.cgi/posts
+atom.cgi/enclosures
+atom.cgi/posts/DK0BTg						(HTML form fallback)
 
 PUT
 
 atom.cgi/config
 atom.cgi/@me/tags/Design
-atom.cgi/pub/posts/DK0BTg
-atom.cgi/pub/enclosures/foo.svg
+atom.cgi/posts/DK0BTg
+atom.cgi/enclosures/foo.svg
 
 DELETE
 
 atom.cgi/~me/tags/Design
-atom.cgi/pub/posts/DK0BTg
-atom.cgi/pub/enclosures/foo.svg
+atom.cgi/posts/DK0BTg
+atom.cgi/enclosures/foo.svg
 
 ### Shaarli(OS|er) Compatibilty
 
@@ -114,9 +113,9 @@ and https://github.com/mro/Shaarli-API-test/blob/master/tests/test-post.sh
 
 Login/Logout
 
-GET  atom.cgi?do=login
-POST atom.cgi?do=login
-GET  atom.cgi?do=logout
+GET    atom.cgi?do=login
+POST   atom.cgi?do=login
+GET  	 atom.cgi?do=logout
 
 Posting
 
@@ -133,16 +132,17 @@ Settings
 
 Posts
 
-./app/posts.gob
-./app/posts.gob~
-./app/posts.atom
+./app/var/posts.gob.gz
+./app/var/posts.gob.gz~
+./app/var/posts.atom.gz
+./app/var/posts.atom.gz~
 ./~me/enclosures/
 ./pub/enclosures/
 
 Ban
 
-./app/bans.gob
-./app/bans.gob~
+./app/var/bans.gob
+./app/var/bans.gob~
 
 (penalty > threshold) => HTTP 403 oder 429
 

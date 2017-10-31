@@ -18,33 +18,55 @@
 package main
 
 import (
+	"gopkg.in/yaml.v2"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestIsBanned(t *testing.T) {
-	mgr := GetManager()
-	assert.NotNil(t, mgr, "soso")
+func TestIsRemoteAddrBanned(t *testing.T) {
+	now := mustParseRFC3339("2017-11-01T00:00:00+01:00")
 
-	var t0 time.Time
-	banned, err := mgr.IsBanned(nil, t0)
-	assert.Nil(t, err, "soso")
-	assert.True(t, banned, "soso")
+	bp := BanPenalties{
+		Penalties: map[string]struct {
+			Penalty int
+			End     time.Time
+		}{
+			"92.194.87.209": {Penalty: -100, End: mustParseRFC3339("2017-01-01T01:02:03+02:00")},
+			"92.194.87.210": {Penalty: -100, End: now.Add(10 * time.Minute)},
+			"1.2.3.3":       {Penalty: 2, End: now.Add(4 * time.Hour)},
+			"1.2.3.4":       {Penalty: 10, End: now.Add(10 * time.Minute)},
+		},
+	}
 
-	addr := ""
-	banned, err = mgr.isBanned(&addr, t0)
-	assert.Nil(t, err, "soso")
-	assert.False(t, banned, "soso")
+	{
+		data, err := yaml.Marshal(bp)
+		assert.Nil(t, err, "soso")
+		assert.Equal(t, `penalties:
+  1.2.3.3:
+    penalty: 2
+    end: 2017-11-01T04:00:00+01:00
+  1.2.3.4:
+    penalty: 10
+    end: 2017-11-01T00:10:00+01:00
+  92.194.87.209:
+    penalty: -100
+    end: 2017-01-01T01:02:03+02:00
+  92.194.87.210:
+    penalty: -100
+    end: 2017-11-01T00:10:00+01:00
+`, string(data), "ach!")
+	}
 
-	addr = "127.0.0.1"
-	banned, err = mgr.isBanned(&addr, t0)
-	assert.Nil(t, err, "soso")
-	assert.False(t, banned, "soso")
-}
+	assert.NotNil(t, &bp, "soso")
+	assert.Equal(t, -100, bp.Penalties["92.194.87.209"].Penalty, "soso")
 
-func TestAfter(t *testing.T) {
-	// var t0 *time.Time = nil
-	// assert.True(t, time.Now().After(*t0), "soso")
+	assert.False(t, BanPenalties{}.isRemoteAddrBanned("nix", time.Time{}), "unknown shouldn't be banned from teh start")
+	assert.False(t, bp.isRemoteAddrBanned("nix", time.Time{}), "unknown shouldn't be banned from the start")
+	assert.False(t, bp.isRemoteAddrBanned("1.2.3.3", time.Time{}), "should not be banned yet")
+	assert.False(t, bp.isRemoteAddrBanned("1.2.3.3", now), "should not be banned yet")
+	assert.True(t, bp.isRemoteAddrBanned("1.2.3.4", time.Time{}), "should be banned")
+	assert.True(t, bp.isRemoteAddrBanned("1.2.3.4", now), "should be banned")
+	assert.False(t, bp.isRemoteAddrBanned("1.2.3.4", now.Add(10*24*time.Hour)), "ban should be lifted meanwhile")
 }

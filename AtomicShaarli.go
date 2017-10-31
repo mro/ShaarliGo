@@ -15,10 +15,23 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+// Files & Directories
+//
+// .htaccess
+// atom.cgi
+// app/.htaccess
+// app/config.yaml
+// app/posts.gob.gz
+// app/posts.xml.gz
+// app/var/session.yaml
+// app/var/stage/
+// app/var/old/
+// assets/
+// pub/
+//
 package main
 
 import (
-	// "fmt"
 	"io"
 	"log"
 	"net/http"
@@ -38,9 +51,7 @@ func main() {
 
 	// - check non-write perm of program?
 	// - check non-http read perm on ./app
-	err := cgi.Serve(http.HandlerFunc(handleMux))
-
-	if err != nil {
+	if err := cgi.Serve(http.HandlerFunc(handleMux)); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -62,18 +73,12 @@ func ifErrRespond500(err error, w http.ResponseWriter, r *http.Request) bool {
 func handleMux(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Server", myselfNamespace)
 	now := time.Now()
-	mgr := GetManager()
-	{
-		banned, err := mgr.IsBanned(r, now)
-		if ifErrRespond500(err, w, r) {
-			return
-		}
-		if banned {
+
+	// check if the session is valid or the request is from a banned client
+	if banned, err := isBanned(r, now); err != nil || banned {
+		if !ifErrRespond500(err, w, r) {
 			respond(http.StatusNotAcceptable, "Sorry, banned", w, r)
-			return
 		}
-	}
-	if ifErrRespond500(mgr.LoadConfig(), w, r) {
 		return
 	}
 
@@ -83,16 +88,13 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 	script_name := os.Getenv("SCRIPT_NAME")
 	path_info := os.Getenv("PATH_INFO")
 
+	mgr := GetManager()
+
 	switch {
 	case "/settings" == path_info:
-		if mgr.IsConfigured() && !mgr.IsLoggedIn(r, now) {
-			// we need a login first.
-			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-			w.Header().Set("Location", script_name+"/login"+"?url="+r.URL.String())
-			w.WriteHeader(http.StatusSeeOther)
-			io.WriteString(w, "I need a login first, redirecting to "+script_name+"/settings"+"\n")
-		} else {
+		if !mgr.IsConfigured() || mgr.IsLoggedIn(r, now) {
 			ifErrRespond500(mgr.handleSettings(w, r), w, r)
+			return
 		}
 	case !mgr.IsConfigured():
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -104,23 +106,26 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		ifErrRespond500(mgr.handleLogin(w, r), w, r)
 	case "/logout" == path_info:
 		ifErrRespond500(mgr.handleLogout(w, r), w, r)
-	case r.URL.Path == "":
+	case r.URL.Path == "": // legacy API, https://github.com/mro/Shaarli-API-Test
 		switch {
-		case r.URL.RawQuery == "do=login":
+		case strings.HasPrefix(r.URL.RawQuery, "do=login"):
 			ifErrRespond500(mgr.handleLogin(w, r), w, r)
-		case r.URL.RawQuery == "do=logout":
+			return
+		case strings.HasPrefix(r.URL.RawQuery, "do=logout"):
 			ifErrRespond500(mgr.handleLogout(w, r), w, r)
+			return
 		case strings.HasPrefix(r.URL.RawQuery, "post="):
 			ifErrRespond500(mgr.handlePost(w, r), w, r)
-		case strings.HasPrefix(r.URL.RawQuery, "q="):
-			ifErrRespond500(mgr.handleSearch(w, r), w, r)
+			return
 		}
-	default:
-		mgr.SquealFailure(r, now)
-		// http.NotFoundHandler().ServeHTTP(w, r)
-		w.WriteHeader(http.StatusNotFound)
-		io.WriteString(w, "not found: "+r.URL.String()+"\n")
+	case "/search" == path_info:
+		ifErrRespond500(mgr.handleSearch(w, r), w, r)
+		return
 	}
+	squealFailure(r, now)
+	// http.NotFoundHandler().ServeHTTP(w, r)
+	w.WriteHeader(http.StatusNotFound)
+	io.WriteString(w, "not found: "+r.URL.String()+"\n")
 }
 
 func (mgr *SessionManager) handleLogin(w http.ResponseWriter, r *http.Request) error {
