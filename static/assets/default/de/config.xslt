@@ -20,12 +20,8 @@
 -->
 <xsl:stylesheet
   xmlns="http://www.w3.org/1999/xhtml"
-  xmlns:a="http://www.w3.org/2005/Atom"
-  xmlns:media="http://search.yahoo.com/mrss/"
-  xmlns:georss="http://www.georss.org/georss"
-  xmlns:as="http://purl.mro.name/AtomicShaarli"
+  xmlns:h="http://www.w3.org/1999/xhtml"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-  exclude-result-prefixes="a media georss"
   version="1.0">
 
   <!-- replace linefeeds with <br> tags -->
@@ -90,7 +86,7 @@
     doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
     doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN"/>
 
-  <xsl:template match="as:setup">
+  <xsl:template match="/h:html/h:body/h:form">
     <html xmlns="http://www.w3.org/1999/xhtml">
       <head>
         <meta content="text/html; charset=utf-8" http-equiv="content-type"/>
@@ -115,51 +111,53 @@ li {
 div.if_hasdiv_pwd { display:none; }
 .has_pwd div.if_has_pwd { display:block; }
         </style>
-        <title><xsl:value-of select="a:title"/></title>
+        <title><xsl:value-of select="title"/></title>
       </head>
-      <body onload="document.form_settings.title.focus();">
+      <body onload="document.{@name}.title.focus();">
         <div class="container">
           <p><img
             alt="Sehr schön, der Webserver ist gut eingestellt, ./app/ ist geschützt."
             title="Wenn hier ein Filmzitat sichtbar ist, liegt ./app/ ungeschützt im Netz."
             src="../app/i-must-be-403.svg"/></p>
 
-          <xsl:if test="a:author/a:name = ''">
+          <xsl:if test="setlogin = ''">
             <p>Huch, das sieht ja alles recht frisch aus hier.</p>
           </xsl:if>
 
-          <form id="form_settings" name="form_settings" class="form-horizontal" method="POST" action="#">
+          <form id="{@id}" name="{@name}" class="form-horizontal" method="POST" action="#">
             <!-- https://www.tjvantoll.com/2012/08/05/html5-form-validation-showing-all-error-messages/ -->
 
             <div class="form-group">
               <label for="title" class="control-label col-sm-1">Titel</label>
               <div class="col-sm-11">
-                <input autofocus="autofocus" type="text" class="form-control" name="title" placeholder="My AtomicShaarli 🐳" required="required" pattern="\S(.*\S)?" value="{a:title}"/>
+                <input autofocus="autofocus" type="text" class="form-control" name="title" placeholder="My AtomicShaarli 🐳" required="required" pattern="\S(.*\S)?" value="{h:input[@name='title']/@value}"/>
               </div>
             </div>
             <div class="form-group">
               <label for="author/name" class="control-label col-sm-1">User</label>
               <div class="col-sm-11">
-                <input type="email" class="form-control" name="author/name" placeholder="Benutzername dieses neuen AtomicShaarli" required="required" pattern="\S(.*\S)?" _oninvalid="setCustomValidity('Das ist nicht Dein Ernst oder?')" value="{a:author/a:name}"/>
+                <input type="email" class="form-control" name="setlogin" placeholder="Benutzername dieses neuen AtomicShaarli" required="required" pattern="\S(.*\S)?" _oninvalid="setCustomValidity('Das ist nicht Dein Ernst oder?')" value="{h:input[@name='setlogin']/@value}"/>
               </div>
             </div>
 
-            <div class="if_has_pwd form-group">
-              <label for="password_existing" class="control-label col-sm-1">Pwd (bestehend)</label>
-              <div class="col-sm-11">
-                <input type="password" class="form-control" name="password_existing" placeholder="Das bisherige Passwort" required="required" minlength="12" pattern="\S(.*\S)?"/>
+            <xsl:if test="h:input[@name='oldpassword']/@value != ''">
+              <div class="if_has_pwd form-group">
+                <label for="password_existing" class="control-label col-sm-1">Pwd (bestehend)</label>
+                <div class="col-sm-11">
+                  <input type="password" class="form-control" name="oldpassword" placeholder="Das bisherige Passwort" required="required" minlength="12" pattern="\S(.*\S)?" value="{h:input[@name='oldpassword']/@value}"/>
+                </div>
               </div>
-            </div>
+            </xsl:if>
             <div class="form-group">
               <label for="password" class="control-label col-sm-1">Pwd</label>
               <div class="col-sm-11">
-                <input type="password" class="form-control" name="password" placeholder="gute Passworte: xkcd.com/936" required="required" minlength="12" pattern="\S(.*\S)?"/>
+                <input type="password" class="form-control" name="setpassword" placeholder="gute Passworte: xkcd.com/936" required="required" minlength="12" pattern="\S(.*\S)?" value="{h:input[@name='setpassword']/@value}"/>
               </div>
             </div>
             <div class="if_has_pwd form-group">
               <label for="password_confirmation" class="control-label col-sm-1">Pwd (Wiederholung)</label>
               <div class="col-sm-11">
-                <input type="password" class="form-control" name="password_confirmation" placeholder="dasselbe nochmal" required="required" minlength="12" pattern="\S(.*\S)?"/>
+                <input type="password" class="form-control" name="confirmpassword" placeholder="dasselbe nochmal" required="required" minlength="12" pattern="\S(.*\S)?"/>
               </div>
             </div>
             <!-- evtl. Zeitzone, continent / city? -->
@@ -181,7 +179,7 @@ div.if_hasdiv_pwd { display:none; }
             <div class="form-group">
               <label for="import_shaarli_setpassword" class="control-label col-sm-1">Pwd</label>
               <div class="col-sm-11">
-                <input type="password" class="form-control" name="import_shaarli_setpassword" placeholder="Passwort des alten Shaarli"/>
+                <input type="password" class="form-control" name="import_shaarli_password" placeholder="Passwort des alten Shaarli"/>
               </div>
             </div>
 

@@ -46,8 +46,8 @@ shaarli on diet. Built on Atom.
 
 ```
 GET  atom.cgi
-GET  atom.cgi/settings
-POST atom.cgi/settings 							token? session?
+GET  atom.cgi/config
+POST atom.cgi/config 							token? session?
 GET  pub/posts/Kk-eZA
 GET  pub/tags/Design
 GET  atom.cgi?do=login
@@ -77,7 +77,7 @@ atom.cgi?q=%23Design+%23URI+Foo+Bar
 ./~me/2017-07-13
 ./~me/enclosures/foo.svg
 ./assets/default/style.css
-./assets/default/de/settings.xslt
+./assets/default/de/config.xslt
 ./assets/default/de/posts.xslt
 
 announced via link/@rel/@uri https://martinfowler.com/articles/richardsonMaturityModel.html#level3:
@@ -153,7 +153,7 @@ Ban
 3. point browser to base url,
 4. unpack assets if not there,
 6. lock down dirctory permissions,
-4. redirect to ./settings and prepare first post:
+4. redirect to ./config and prepare first post:
 5. post `title`, `uid` and `pwd`,
 6. store stuff
 7. redirect to .

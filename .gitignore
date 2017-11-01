@@ -13,3 +13,5 @@ head.txt
 *~
 t/
 tmp/
+body*.txt
+head*.txt

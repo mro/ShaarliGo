@@ -18,31 +18,17 @@
 package main
 
 import (
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestBcrypt(t *testing.T) {
-	pwd := "123456789012"
-	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
-	assert.Nil(t, err, "soso")
+func TestQueryParse(t *testing.T) {
+	u := mustParseURL("http://example.com/a/atom.cgi?do=login&foo=bar&do=auch")
 
-	str := string(hash)
+	assert.Equal(t, "http://example.com/a/atom.cgi?do=login&foo=bar&do=auch", u.String(), "ach")
+	assert.Equal(t, "do=login&foo=bar&do=auch", u.RawQuery, "ach")
+	v := u.Query()
 
-	err = bcrypt.CompareHashAndPassword([]byte(str), []byte(pwd))
-	assert.Nil(t, err, "soso")
-
-	err = bcrypt.CompareHashAndPassword([]byte(str), []byte("wrong"))
-	assert.NotNil(t, err, "soso")
-}
-
-func TestXmlBaseFromRequestURL(t *testing.T) {
-	assert.Equal(t, "http://example.com/", xmlBaseFromRequestURL(mustParseURL("http://example.com/atom.cgi"), "/atom.cgi").String(), "soso")
-	assert.Equal(t, "http://example.com/b/", xmlBaseFromRequestURL(mustParseURL("http://example.com/b/atom.cgi"), "/b/atom.cgi").String(), "soso")
-}
-
-func TestFeedFromFileName__(t *testing.T) {
-	assert.Nil(t, nil, "soso")
+	assert.Equal(t, 2, len(v["do"]), "omg")
+	assert.Equal(t, "login", v["do"][0], "omg")
 }

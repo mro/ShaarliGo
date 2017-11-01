@@ -42,6 +42,7 @@ func mustParseURL(u string) *url.URL {
 const cgiName = "atom.cgi"
 const fileName = "index.xml" // could be 'index.atom' but xml may have a proper mimetype out of the box
 const dirAssets = "assets"
+const dirApp = "app"
 
 const themeDefault = "default"
 const langDefault = "de"

@@ -32,13 +32,16 @@
 package main
 
 import (
+	"encoding/base64"
 	"io"
 	"log"
 	"net/http"
 	"net/http/cgi"
 	"os"
-	"strings"
+	"path"
 	"time"
+
+	"github.com/gorilla/sessions"
 )
 
 const myselfNamespace = "http://purl.mro.name/AtomicShaarli"
@@ -56,10 +59,25 @@ func main() {
 	}
 }
 
+type App struct {
+	cfg Config
+	ses *sessions.Session
+}
+
+func (app App) IsLoggedIn(now time.Time) bool {
+	// https://gowebexamples.com/sessions/
+	// or https://stackoverflow.com/questions/28616830/gorilla-sessions-how-to-automatically-update-cookie-expiration-on-request
+	timeout, ok := app.ses.Values["timeout"].(int64)
+	return ok && now.Before(time.Unix(timeout, 0))
+}
+
+func (app *App) startSession(w http.ResponseWriter, r *http.Request, now time.Time) error {
+	app.ses.Values["timeout"] = now.Add(30 * time.Minute).Unix()
+	return app.ses.Save(r, w)
+}
+
 func respond(code int, msg string, w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(code)
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	io.WriteString(w, msg)
+	http.Error(w, msg, code)
 }
 
 func ifErrRespond500(err error, w http.ResponseWriter, r *http.Request) bool {
@@ -72,9 +90,11 @@ func ifErrRespond500(err error, w http.ResponseWriter, r *http.Request) bool {
 
 func handleMux(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Server", myselfNamespace)
+	w.Header().Set("CGI-Server", myselfNamespace)
+
 	now := time.Now()
 
-	// check if the session is valid or the request is from a banned client
+	// check if the request is from a banned client
 	if banned, err := isBanned(r, now); err != nil || banned {
 		if !ifErrRespond500(err, w, r) {
 			respond(http.StatusNotAcceptable, "Sorry, banned", w, r)
@@ -82,73 +102,80 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// session/login state
-	// cooks := r.Cookies()
+	// get config and session
+	app := App{}
+	var err error
+	if app.cfg, err = LoadConfig(); err != nil {
+		http.Error(w, "Couldn't load config: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	var buf []byte
+	if buf, err = base64.StdEncoding.DecodeString(app.cfg.CookieStoreSecret); err != nil {
+		http.Error(w, "Couldn't get seed: "+err.Error(), http.StatusInternalServerError)
+		return
+	} else {
+		if app.ses, err = sessions.NewCookieStore(buf).Get(r, "AtomicShaarli"); err != nil {
+			// what if the cookie has changed?
+			http.Error(w, "Couldn't get session: "+err.Error(), http.StatusInternalServerError)
+			return
+		} else {
+			if app.IsLoggedIn(now) {
+				if err = app.startSession(w, r, now); err != nil { // keep the session alive
+					http.Error(w, "Couldn't save session: "+err.Error(), http.StatusInternalServerError)
+					return
+				}
+			}
+		}
+	}
 
 	script_name := os.Getenv("SCRIPT_NAME")
 	path_info := os.Getenv("PATH_INFO")
 
-	mgr := GetManager()
-
 	switch {
-	case "/settings" == path_info:
-		if !mgr.IsConfigured() || mgr.IsLoggedIn(r, now) {
-			ifErrRespond500(mgr.handleSettings(w, r), w, r)
+	case "/config" == path_info:
+		// make a 404 if already configured but not currently logged in
+		if !app.cfg.IsConfigured() || app.IsLoggedIn(now) {
+			ifErrRespond500(app.handleSettings(w, r), w, r)
 			return
 		}
-	case !mgr.IsConfigured():
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		// http.Redirect(w, r, script_name+"/config", http.StatusSeeOther) adds html :-(
-		w.Header().Set("Location", script_name+"/settings")
-		w.WriteHeader(http.StatusSeeOther)
-		io.WriteString(w, "configure first, redirecting to "+script_name+"/settings"+"\n")
-	case "/login" == path_info:
-		ifErrRespond500(mgr.handleLogin(w, r), w, r)
-	case "/logout" == path_info:
-		ifErrRespond500(mgr.handleLogout(w, r), w, r)
-	case r.URL.Path == "": // legacy API, https://github.com/mro/Shaarli-API-Test
+	case "/session" == path_info:
+		if !app.IsLoggedIn(now) {
+			http.NotFound(w, r)
+		}
+		return
+	case "/tools" == path_info:
+		ifErrRespond500(app.handleTools(w, r), w, r)
+	case "" == path_info:
+		param := r.URL.Query()
 		switch {
-		case strings.HasPrefix(r.URL.RawQuery, "do=login"):
-			ifErrRespond500(mgr.handleLogin(w, r), w, r)
+		case "" == r.URL.RawQuery && !app.cfg.IsConfigured():
+			http.Redirect(w, r, path.Join(script_name, "config"), http.StatusSeeOther)
 			return
-		case strings.HasPrefix(r.URL.RawQuery, "do=logout"):
-			ifErrRespond500(mgr.handleLogout(w, r), w, r)
+		// legacy API, https://github.com/mro/Shaarli-API-Test
+		case "login" == param["do"][0]:
+			ifErrRespond500(app.handleDoLogin(w, r), w, r)
 			return
-		case strings.HasPrefix(r.URL.RawQuery, "post="):
-			ifErrRespond500(mgr.handlePost(w, r), w, r)
+		case "logout" == param["do"][0]:
+			ifErrRespond500(app.handleDoLogout(w, r), w, r)
+			return
+		case 1 == len(param["post"]):
+			ifErrRespond500(app.handleDoPost(w, r), w, r)
 			return
 		}
 	case "/search" == path_info:
-		ifErrRespond500(mgr.handleSearch(w, r), w, r)
+		ifErrRespond500(app.handleSearch(w, r), w, r)
 		return
 	}
 	squealFailure(r, now)
-	// http.NotFoundHandler().ServeHTTP(w, r)
-	w.WriteHeader(http.StatusNotFound)
-	io.WriteString(w, "not found: "+r.URL.String()+"\n")
+	http.NotFound(w, r)
 }
 
-func (mgr *SessionManager) handleLogin(w http.ResponseWriter, r *http.Request) error {
-	io.WriteString(w, "login"+"\n")
-	// 'GET': send a login form to the client
-	// 'POST' validate, respond error (and squeal) or set session and redirect
+func (app *App) handleTools(w http.ResponseWriter, r *http.Request) error {
+	io.WriteString(w, "tools"+"\n")
 	return nil
 }
 
-func (mgr *SessionManager) handleLogout(w http.ResponseWriter, r *http.Request) error {
-	io.WriteString(w, "logout"+"\n")
-	//  invalidate session and redirect
-	return nil
-}
-
-func (mgr *SessionManager) handlePost(w http.ResponseWriter, r *http.Request) error {
-	io.WriteString(w, "post"+"\n")
-	// 'GET': send a form to the client
-	// 'POST' validate, respond error (and squeal) or post and redirect
-	return nil
-}
-
-func (mgr *SessionManager) handleSearch(w http.ResponseWriter, r *http.Request) error {
+func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) error {
 	io.WriteString(w, "search"+"\n")
 	return nil
 }

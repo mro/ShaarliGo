@@ -8,10 +8,11 @@ cd "$(dirname "${0}")"
 # Linux x86_64
 # Linux armv6l
 
-go get golang.org/x/tools/blog/atom
-go get golang.org/x/crypto/bcrypt
-go get gopkg.in/yaml.v2
-go get github.com/jteeuwen/go-bindata/...
+go get -u golang.org/x/tools/blog/atom
+go get -u golang.org/x/crypto/bcrypt
+go get -u gopkg.in/yaml.v2
+go get -u github.com/jteeuwen/go-bindata/...
+go get -u github.com/gorilla/sessions
 # ssh vario find mro.name/vorschau.blog/assets -type f
 
 # rsync -aPz --delete --delete-excluded --exclude jquery* --exclude *.zip --exclude *.html vario:~/mro.name/vorschau.blog/assets/ static/assets
@@ -37,11 +38,14 @@ env GOOS=linux GOARCH=amd64 go build -ldflags "-s" -o "${PROG_NAME}-linux-amd64-
 # ssh simply rm -vrf /var/www/lighttpd/lager.mro.name/public_html/as/app
 
 # http://vorschau.blog.mro.name/atom.cgi
+ssh vario rm -vrf mro.name/webroot/b/.htaccess
+ssh vario rm -vrf mro.name/webroot/b/app
+ssh vario rm -vrf mro.name/webroot/b/assets
+ssh vario rm -vrf mro.name/webroot/b/pub
 scp "${PROG_NAME}-linux-amd64-${VERSION}" vario:~/mro.name/webroot/b/"atom.cgi"
 scp "ServerInfo.cgi" vario:~/mro.name/webroot/b/"info.cgi"
-ssh vario rm -vrf mro.name/webroot/b/assets
-ssh vario rm -vrf mro.name/webroot/b/app
-ssh vario rm -vrf mro.name/webroot/b/.htaccess
+
+exit 0
 
 # curl --data-urlencode "url=wall" --dump-header head.txt "http://vorschau.blog.mro.name/${PROG_NAME}.cgi"
 # curl --location --dump-header head.txt "http://vorschau.blog.mro.name/"
@@ -50,11 +54,14 @@ ssh vario rm -vrf mro.name/webroot/b/.htaccess
 
 # curl --location 'http://vorschau.blog.mro.name/atom.cgi/settings?foo' ; say 'aha, aha, soso'
 
-curl --dump-header head.txt --location 'http://mro.name/b/atom.cgi/settings?foo' \
-  --data-urlencode 'title=🔗 My Bookmarks' \
-  --data-urlencode 'author/name=B' \
-  --data-urlencode 'password=123456789012' \
+curl --dump-header head0.txt --location 'http://mro.name/b/atom.cgi/config' \
+  --data-urlencode 'title=🔗 My Bookmärks' \
+  --data-urlencode 'setlogin=Bö' \
+  --data-urlencode 'setpassword=123456789012' \
   --data-urlencode 'import_shaarli_url=' \
   --data-urlencode 'import_shaarli_setlogin=' \
   --data-urlencode 'import_shaarli_setpassword=' \
-> body.txt ; cat head.txt body.txt ; say 'aha, aha, soso'
+> body0.txt ; cat head0.txt body0.txt ; say 'aha, aha, soso'
+
+# curl --dump-header head1.txt --location 'http://mro.name/b/atom.cgi?do=login' \
+# > body1.txt ; cat head1.txt body1.txt ; say 'aha, aha, soso'

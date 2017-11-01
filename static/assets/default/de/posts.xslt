@@ -179,14 +179,13 @@ img.img-thumbnail {
 -->
         <script>
 // <![CDATA[
-// TODO: check if we're logged- in (Cookie?).
-document.documentElement.classList.add('logged-out'); // set early.
-
+// TODO: check if we're logged-in (Cookie?).
+// use ajax to query if HEAD $xml_base_pub/../atom.cgi/session returns 200
+// document.documentElement.classList.add('logged-out');
 // document.documentElement.classList.add('logged-in');
 // ]]>
         </script>
-        <xsl:apply-templates select="a:feed" mode="root"/>
-        <xsl:apply-templates select="a:entry" mode="root"/>
+        <xsl:apply-templates select="a:feed|a:entry" mode="root"/>
       </body>
     </html>
   </xsl:template>
@@ -260,7 +259,7 @@ document.documentElement.classList.add('logged-out'); // set early.
             		</xsl:choose>
             	</a>
             </td>
-            <td class="text-right"><a href="{$xml_base_pub}/tags/">⛅ # <span class="hidden-xs">Tags</span></a></td>
+            <td class="text-right"><a href="{$xml_base_pub}/tags/">⛅ <span class="hidden-xs"># Tags</span></a></td>
             <td class="text-right"><a href="{$xml_base_pub}/days/">📅 <span class="hidden-xs">Tage</span></a></td>
             <td class="text-right"><a href="{$xml_base_pub}/imgs/">🎨 <span class="hidden-xs">Bilder</span></a></td>
             <td class="text-right hidden-logged-out"><a href="{$xml_base_pub}/../atom.cgi?do=tools">🔨 <span class="hidden-xs">Tools</span></a></td>
@@ -348,7 +347,7 @@ document.documentElement.classList.add('logged-out'); // set early.
         <span class="hidden-logged-out" title="Bearbeiten">
           <a href="{$xml_base_pub}/../{a:link[@rel='edit']/@href}">🔨</a><xsl:text> </xsl:text>
         </span>
-        <a class="time" title="Einzelansicht" href="{$xml_base_pub}/../{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_updated_human"/> ¶</a>
+        <a class="time" title="Einzelansicht" href="{$xml_base_pub}/../{a:link[@rel='self']/@href}/"><xsl:value-of select="$entry_updated_human"/> ¶</a>
         <xsl:if test="$link">
           <xsl:text> ~ </xsl:text>
           <a title="Archiv" href="https://web.archive.org/web/{$link}">@archive.org</a>
@@ -385,7 +384,7 @@ document.documentElement.classList.add('logged-out'); // set early.
         <p class="categories" title="Schlagworte">
           <xsl:for-each select="a:category">
             <xsl:sort select="@term"/>
-            <a href="{@scheme}{@term}">#<xsl:value-of select="@term"/></a><xsl:text> </xsl:text>
+            <a href="{@scheme}{@term}/">#<xsl:value-of select="@term"/></a><xsl:text> </xsl:text>
           </xsl:for-each>
         </p>
       </div>
