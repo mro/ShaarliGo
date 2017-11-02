@@ -64,16 +64,29 @@ type App struct {
 	ses *sessions.Session
 }
 
+func (app *App) startSession(w http.ResponseWriter, r *http.Request, now time.Time) error {
+	app.ses.Values["timeout"] = now.Add(30 * time.Minute).Unix()
+	return app.ses.Save(r, w)
+}
+
+func (app *App) stopSession(w http.ResponseWriter, r *http.Request) error {
+	w.Header().Set("ses_timeout", "-1")
+	app.ses.Values["timeout"] = -1
+	return app.ses.Save(r, w)
+}
+
+func (app *App) KeepAlive(w http.ResponseWriter, r *http.Request, now time.Time) error {
+	if app.IsLoggedIn(now) {
+		return app.startSession(w, r, now)
+	}
+	return nil
+}
+
 func (app App) IsLoggedIn(now time.Time) bool {
 	// https://gowebexamples.com/sessions/
 	// or https://stackoverflow.com/questions/28616830/gorilla-sessions-how-to-automatically-update-cookie-expiration-on-request
 	timeout, ok := app.ses.Values["timeout"].(int64)
 	return ok && now.Before(time.Unix(timeout, 0))
-}
-
-func (app *App) startSession(w http.ResponseWriter, r *http.Request, now time.Time) error {
-	app.ses.Values["timeout"] = now.Add(30 * time.Minute).Unix()
-	return app.ses.Save(r, w)
 }
 
 func respond(code int, msg string, w http.ResponseWriter, r *http.Request) {
@@ -104,27 +117,20 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 	// get config and session
 	app := App{}
-	var err error
-	if app.cfg, err = LoadConfig(); err != nil {
-		http.Error(w, "Couldn't load config: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	var buf []byte
-	if buf, err = base64.StdEncoding.DecodeString(app.cfg.CookieStoreSecret); err != nil {
-		http.Error(w, "Couldn't get seed: "+err.Error(), http.StatusInternalServerError)
-		return
-	} else {
-		if app.ses, err = sessions.NewCookieStore(buf).Get(r, "AtomicShaarli"); err != nil {
-			// what if the cookie has changed?
-			http.Error(w, "Couldn't get session: "+err.Error(), http.StatusInternalServerError)
+	{
+		var err error
+		if app.cfg, err = LoadConfig(); err != nil {
+			http.Error(w, "Couldn't load config: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		var buf []byte
+		if buf, err = base64.StdEncoding.DecodeString(app.cfg.CookieStoreSecret); err != nil {
+			http.Error(w, "Couldn't get seed: "+err.Error(), http.StatusInternalServerError)
 			return
 		} else {
-			if app.IsLoggedIn(now) {
-				if err = app.startSession(w, r, now); err != nil { // keep the session alive
-					http.Error(w, "Couldn't save session: "+err.Error(), http.StatusInternalServerError)
-					return
-				}
-			}
+			// what if the cookie has changed? Ignore cookie errors, especially on new/changed keys.
+			app.ses, _ = sessions.NewCookieStore(buf).Get(r, "AtomicShaarli")
+			app.ses.Options = &sessions.Options{MaxAge: 60 * 30}
 		}
 	}
 
@@ -135,11 +141,17 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 	case "/config" == path_info:
 		// make a 404 if already configured but not currently logged in
 		if !app.cfg.IsConfigured() || app.IsLoggedIn(now) {
+			app.KeepAlive(w, r, now)
 			ifErrRespond500(app.handleSettings(w, r), w, r)
 			return
 		}
 	case "/session" == path_info:
-		if !app.IsLoggedIn(now) {
+		if app.IsLoggedIn(now) {
+			// maybe cache, but don't KeepAlive
+			// w.Header().Set("Etag", r.URL.Path)
+			// w.Header().Set("Cache-Control", "max-age=60") // 60 Seconds
+			io.WriteString(w, app.cfg.AuthorName)
+		} else {
 			http.NotFound(w, r)
 		}
 		return
@@ -153,10 +165,10 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		// legacy API, https://github.com/mro/Shaarli-API-Test
 		case "login" == param["do"][0]:
-			ifErrRespond500(app.handleDoLogin(w, r), w, r)
+			app.handleDoLogin(w, r)
 			return
 		case "logout" == param["do"][0]:
-			ifErrRespond500(app.handleDoLogout(w, r), w, r)
+			app.handleDoLogout(w, r)
 			return
 		case 1 == len(param["post"]):
 			ifErrRespond500(app.handleDoPost(w, r), w, r)

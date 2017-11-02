@@ -100,7 +100,7 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	switch r.Method {
-	case "POST":
+	case http.MethodPost:
 		app.cfg.AuthorName = strings.TrimSpace(r.FormValue("setlogin"))
 		app.cfg.Title = strings.TrimSpace(r.FormValue("title"))
 		pwd := strings.TrimSpace(r.FormValue("setpassword"))
@@ -227,7 +227,7 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) error {
 			w.WriteHeader(http.StatusSeeOther)
 			io.WriteString(w, "let's go to "+dst+"\n")
 		*/
-	case "GET":
+	case http.MethodGet:
 		return renderSettingsPage(&app.cfg, http.StatusOK, w)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)

@@ -19,16 +19,22 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"html/template"
 	"io"
 	"net/http"
+	"path"
+	"strings"
+	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) error {
+	now := time.Now()
 	switch r.Method {
-	//
 	// and https://github.com/mro/ShaarliOS/blob/master/ios/ShaarliOS/API/ShaarliCmd.m#L386
-	case "GET":
+	case http.MethodGet:
 		if tmpl, err := template.New("login").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
 <body>
   <form method="post" name="loginform" id="loginform">
@@ -53,18 +59,41 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) error {
 				"token": "ff13e7eaf9541ca2ba30fd44e864c3ff014d2bc9",
 			})
 		}
-	case "POST":
+	case http.MethodPost:
+		// todo: verify token
+		uid := strings.TrimSpace(r.FormValue("login"))
+		pwd := strings.TrimSpace(r.FormValue("password"))
+		// compute anyway (a bit more time constantness)
+		err := bcrypt.CompareHashAndPassword([]byte(app.cfg.PwdBcrypt), []byte(pwd))
+		if uid != app.cfg.AuthorName || err == bcrypt.ErrMismatchedHashAndPassword {
+			squealFailure(r, now)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return nil
+		}
+		if err == nil {
+			err = app.startSession(w, r, now)
+		}
+		if err == nil {
+			http.Redirect(w, r, path.Join(uriPub, uriPosts)+"/", http.StatusSeeOther)
+		}
+		return err
+	default:
+		squealFailure(r, now)
+		http.Error(w, "MethodNotAllowed", http.StatusMethodNotAllowed)
 	}
 	//     NSString *xpath = [NSString stringWithFormat:@"/html/body//form[@name='%1$@']//input[(@type='text' or @type='password' or @type='hidden' or @type='checkbox') and @name] | /html/body//form[@name='%1$@']//textarea[@name]
 
 	// 'POST' validate, respond error (and squeal) or set session and redirect
-	return errors.New("'login' not implemented yet.")
+	return nil
 }
 
-func (app *App) handleDoLogout(w http.ResponseWriter, r *http.Request) error {
-	io.WriteString(w, "logout"+"\n")
-	//  invalidate session and redirect
-	return errors.New("'login' not implemented yet.")
+func (app *App) handleDoLogout(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("ses_timeout_logout", fmt.Sprintf("%v", app.ses.Values["timeout"]))
+	if err := app.stopSession(w, r); err != nil {
+		http.Error(w, "Couldn't end session: "+err.Error(), http.StatusInternalServerError)
+	} else {
+		http.Redirect(w, r, path.Join(uriPub, uriPosts)+"/", http.StatusSeeOther)
+	}
 }
 
 func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) error {

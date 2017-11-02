@@ -16,7 +16,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  http://www.w3.org/TR/xslt/
+  http://www.w3.org/TR/xslt-10/
 -->
 <xsl:stylesheet
   xmlns="http://www.w3.org/1999/xhtml"
@@ -178,11 +178,18 @@ img.img-thumbnail {
    onload="document.form_post.post.focus();"
 -->
         <script>
+var xml_base_pub = '<xsl:value-of select="$xml_base_pub"/>';
 // <![CDATA[
-// TODO: check if we're logged-in (Cookie?).
-// use ajax to query if HEAD $xml_base_pub/../atom.cgi/session returns 200
-// document.documentElement.classList.add('logged-out');
-// document.documentElement.classList.add('logged-in');
+// check if we're logged-in (AJAX or Cookie?).
+var xhr = new XMLHttpRequest();
+xhr.onreadystatechange = function(data0) {
+  if (xhr.readyState == 4) {
+    console.log('xhr.status = ' + xhr.status);
+    document.documentElement.classList.add(xhr.status === 200 ? 'logged-in' : 'logged-out');
+  }
+}
+xhr.open('GET', xml_base_pub + '/../atom.cgi/session');
+xhr.send(null);
 // ]]>
         </script>
         <xsl:apply-templates select="a:feed|a:entry" mode="root"/>
@@ -250,14 +257,14 @@ img.img-thumbnail {
             <td class="text-left">
               <a href="{$xml_base_pub}/posts/">
                 <xsl:choose>
-            		  <xsl:when test="a:link[@rel = 'up']/@title">
-										<xsl:value-of select="a:link[@rel = 'up']/@title"/>
-            			</xsl:when>
-            			<xsl:otherwise>
-										<xsl:value-of select="a:title"/>
-            			</xsl:otherwise>
-            		</xsl:choose>
-            	</a>
+                  <xsl:when test="a:link[@rel = 'up']/@title">
+                    <xsl:value-of select="a:link[@rel = 'up']/@title"/>
+                  </xsl:when>
+                  <xsl:otherwise>
+                    <xsl:value-of select="a:title"/>
+                  </xsl:otherwise>
+                </xsl:choose>
+              </a>
             </td>
             <td class="text-right"><a href="{$xml_base_pub}/tags/">⛅ <span class="hidden-xs"># Tags</span></a></td>
             <td class="text-right"><a href="{$xml_base_pub}/days/">📅 <span class="hidden-xs">Tage</span></a></td>
@@ -297,25 +304,25 @@ img.img-thumbnail {
   </xsl:template>
 
   <xsl:template name="footer">
-		<script src="{$xml_base_pub}/../assets/default/script.js" type="text/javascript"></script>
+    <script src="{$xml_base_pub}/../assets/default/script.js" type="text/javascript"></script>
 
-		<hr style="clear:left;"/>
-		<p id="footer">
-			<a title="Validate my Atom 1.0 feed" href="https://validator.w3.org/feed/check.cgi?url={$xml_base_pub}/../{a:link[@rel='self']/@href}">
-				<img alt="Valid Atom 1.0" src="{$xml_base_pub}/../assets/default/valid-atom.svg" style="border:0;width:88px;height:31px"/>
-			</a>
-			<!-- <xsl:text> </xsl:text>
-			<a href="https://validator.w3.org/check?uri=referer">
-				<img alt="Valid XHTML 1.0 Strict" src="{$xml_base_pub}/../assets/default/valid-xhtml10-blue-v.svg" style="border:0;width:88px;height:31px"/>
-			</a>
-			<a href="https://jigsaw.w3.org/css-validator/check/referer?profile=css3&amp;usermedium=screen&amp;warning=2&amp;vextwarning=false&amp;lang=de">
-				<img alt="CSS ist valide!" src="{$xml_base_pub}/../assets/default/valid-css-blue-v.svg" style="border:0;width:88px;height:31px"/>
-			</a>
-			-->
-		</p>
-		<p>
-			<img src="{$xml_base_pub}/../assets/default/qrcode.png" alt="QR Code"/>
-		</p>
+    <hr style="clear:left;"/>
+    <p id="footer">
+      <a title="Validate my Atom 1.0 feed" href="https://validator.w3.org/feed/check.cgi?url={$xml_base_pub}/../{a:link[@rel='self']/@href}">
+        <img alt="Valid Atom 1.0" src="{$xml_base_pub}/../assets/default/valid-atom.svg" style="border:0;width:88px;height:31px"/>
+      </a>
+      <!-- <xsl:text> </xsl:text>
+      <a href="https://validator.w3.org/check?uri=referer">
+        <img alt="Valid XHTML 1.0 Strict" src="{$xml_base_pub}/../assets/default/valid-xhtml10-blue-v.svg" style="border:0;width:88px;height:31px"/>
+      </a>
+      <a href="https://jigsaw.w3.org/css-validator/check/referer?profile=css3&amp;usermedium=screen&amp;warning=2&amp;vextwarning=false&amp;lang=de">
+        <img alt="CSS ist valide!" src="{$xml_base_pub}/../assets/default/valid-css-blue-v.svg" style="border:0;width:88px;height:31px"/>
+      </a>
+      -->
+    </p>
+    <p>
+      <img src="{$xml_base_pub}/../assets/default/qrcode.png" alt="QR Code"/>
+    </p>
   </xsl:template>
 
 
