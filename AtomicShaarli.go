@@ -141,7 +141,6 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 	case "/config" == path_info:
 		// make a 404 if already configured but not currently logged in
 		if !app.cfg.IsConfigured() || app.IsLoggedIn(now) {
-			app.KeepAlive(w, r, now)
 			ifErrRespond500(app.handleSettings(w, r), w, r)
 			return
 		}

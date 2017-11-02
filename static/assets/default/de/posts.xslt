@@ -186,6 +186,7 @@ xhr.onreadystatechange = function(data0) {
   if (xhr.readyState == 4) {
     console.log('xhr.status = ' + xhr.status);
     document.documentElement.classList.add(xhr.status === 200 ? 'logged-in' : 'logged-out');
+    // store the result locally and use as initial value for later calls.
   }
 }
 xhr.open('GET', xml_base_pub + '/../atom.cgi/session');
@@ -332,7 +333,9 @@ xhr.send(null);
 
       <xsl:call-template name="links_commands"/>
 
-      <xsl:apply-templates select="self::a:entry"/>
+      <ol id="entries" class="list-unstyled">
+        <xsl:apply-templates select="."/>
+      </ol>
 
       <xsl:call-template name="footer"/>
     </div>

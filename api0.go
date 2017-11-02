@@ -36,6 +36,7 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) error {
 	// and https://github.com/mro/ShaarliOS/blob/master/ios/ShaarliOS/API/ShaarliCmd.m#L386
 	case http.MethodGet:
 		if tmpl, err := template.New("login").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>{{index . "title"}}</title></head>
 <body>
   <form method="post" name="loginform" id="loginform">
     <input type="text" name="login" />
@@ -56,6 +57,7 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) error {
 -->
 `)
 			return tmpl.Execute(w, map[string]string{
+				"title": app.cfg.Title,
 				"token": "ff13e7eaf9541ca2ba30fd44e864c3ff014d2bc9",
 			})
 		}

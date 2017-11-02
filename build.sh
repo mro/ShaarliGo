@@ -37,11 +37,10 @@ env GOOS=linux GOARCH=amd64 go build -ldflags "-s" -o "${PROG_NAME}-linux-amd64-
 # ssh simply rm -vrf /var/www/lighttpd/lager.mro.name/public_html/as/assets
 # ssh simply rm -vrf /var/www/lighttpd/lager.mro.name/public_html/as/app
 
-# http://vorschau.blog.mro.name/atom.cgi
-ssh vario rm -vrf mro.name/webroot/b/.htaccess
-ssh vario rm -vrf mro.name/webroot/b/app
-ssh vario rm -vrf mro.name/webroot/b/assets
-ssh vario rm -vrf mro.name/webroot/b/pub
+# ssh vario rm -vrf mro.name/webroot/b/.htaccess
+# ssh vario rm -vrf mro.name/webroot/b/app
+# ssh vario rm -vrf mro.name/webroot/b/assets
+# ssh vario rm -vrf mro.name/webroot/b/pub
 scp "${PROG_NAME}-linux-amd64-${VERSION}" vario:~/mro.name/webroot/b/"atom.cgi"
 scp "ServerInfo.cgi" vario:~/mro.name/webroot/b/"info.cgi"
 

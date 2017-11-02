@@ -220,17 +220,10 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) error {
 
 		// all went well:
 		http.Redirect(w, r, path.Join("..", uriPub, uriPosts)+"/", http.StatusFound)
-		/*
-			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-			dst := path.Join("..", uriPub, uriPosts)
-			w.Header().Set("Location", dst)
-			w.WriteHeader(http.StatusSeeOther)
-			io.WriteString(w, "let's go to "+dst+"\n")
-		*/
 	case http.MethodGet:
 		return renderSettingsPage(&app.cfg, http.StatusOK, w)
 	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		http.Error(w, "MethodNotAllowed", http.StatusMethodNotAllowed)
 	}
 
 	return nil
