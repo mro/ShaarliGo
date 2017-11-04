@@ -70,8 +70,7 @@ func (app *App) startSession(w http.ResponseWriter, r *http.Request, now time.Ti
 }
 
 func (app *App) stopSession(w http.ResponseWriter, r *http.Request) error {
-	w.Header().Set("ses_timeout", "-1")
-	app.ses.Values["timeout"] = -1
+	delete(app.ses.Values, "timeout")
 	return app.ses.Save(r, w)
 }
 
@@ -109,11 +108,17 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 	// check if the request is from a banned client
 	if banned, err := isBanned(r, now); err != nil || banned {
-		if !ifErrRespond500(err, w, r) {
-			respond(http.StatusNotAcceptable, "Sorry, banned", w, r)
+		if banned {
+			http.Error(w, "Sorry, banned", http.StatusNotAcceptable)
+		} else {
+			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
+
+	path_info := os.Getenv("PATH_INFO")
+	script_name := os.Getenv("SCRIPT_NAME")
+	urlBase := xmlBaseFromRequestURL(r.URL, script_name)
 
 	// get config and session
 	app := App{}
@@ -130,18 +135,19 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		} else {
 			// what if the cookie has changed? Ignore cookie errors, especially on new/changed keys.
 			app.ses, _ = sessions.NewCookieStore(buf).Get(r, "AtomicShaarli")
-			app.ses.Options = &sessions.Options{MaxAge: 60 * 30}
+			app.ses.Options = &sessions.Options{
+				Path:     urlBase.Path, // to match all requests
+				MaxAge:   30 * 60,      // Seconds
+				HttpOnly: true,
+			}
 		}
 	}
-
-	script_name := os.Getenv("SCRIPT_NAME")
-	path_info := os.Getenv("PATH_INFO")
 
 	switch {
 	case "/config" == path_info:
 		// make a 404 if already configured but not currently logged in
 		if !app.cfg.IsConfigured() || app.IsLoggedIn(now) {
-			ifErrRespond500(app.handleSettings(w, r), w, r)
+			app.handleSettings(w, r)
 			return
 		}
 	case "/session" == path_info:

@@ -18,8 +18,6 @@
 package main
 
 import (
-	"encoding/xml"
-	"errors"
 	"html/template"
 	"io"
 	"net/http"
@@ -32,15 +30,6 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 )
-
-// unused
-func _urlFromString(raw string) (url *url.URL, err error) {
-	url, err = url.Parse(raw)
-	if err != nil {
-		url, err = url.Parse("https://" + raw)
-	}
-	return
-}
 
 func xmlBaseFromRequestURL(r *url.URL, scriptName string) *url.URL {
 	dir := path.Dir(scriptName)
@@ -58,45 +47,32 @@ func mustParseRFC3339(str string) time.Time {
 	}
 }
 
-func encodeValueElement(enc *xml.Encoder, name string, value string) *xml.Encoder {
-	elm := xml.Name{Local: name}
-	enc.EncodeToken(xml.StartElement{Name: elm})
-	enc.EncodeToken(xml.CharData(value))
-	enc.EncodeToken(xml.EndElement{Name: elm})
-	return enc
-}
-
-func encodeMetaNameContent(enc *xml.Encoder, name string, content string) {
-	a := []xml.Attr{xml.Attr{Name: xml.Name{Local: "name"}, Value: name}, xml.Attr{Name: xml.Name{Local: "content"}, Value: content}}
-	n := xml.Name{Local: "meta"}
-	enc.EncodeToken(xml.StartElement{Name: n, Attr: a})
-	enc.EncodeToken(xml.EndElement{Name: n})
-}
-
 func feedFromLegacyShaarli(urlbase string, uid string, pwd string) (feed Feed, err error) {
 	return
 }
 
-func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) error {
-	isAlreadyConfigured := app.cfg.IsConfigured()
-
+func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
+	isAlreadyConfigured := app.cfg.IsConfigured()
 	if isAlreadyConfigured && !app.IsLoggedIn(now) {
-		return errors.New("double check failed.")
+		http.Error(w, "double check failed.", http.StatusInternalServerError)
+		return
 	}
 
 	// unpack (nonexisting) static files
 	for _, filename := range AssetNames() {
 		if _, err := os.Stat(filename); os.IsNotExist(err) {
 			if err := RestoreAsset(".", filename); err != nil {
-				return err
+				http.Error(w, "couldn't restore asset '"+filename+"': "+err.Error(), http.StatusInternalServerError)
+				return
 			}
 		}
 	}
 	// os.Chmod("app", os.FileMode(0750)) // not sure if this is a good idea.
 
 	if err := r.ParseForm(); err != nil {
-		return err
+		http.Error(w, "couldn't parse form: "+err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	switch r.Method {
@@ -106,7 +82,8 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) error {
 		pwd := strings.TrimSpace(r.FormValue("setpassword"))
 
 		if !app.cfg.IsConfigured() || len([]rune(pwd)) < 12 {
-			return renderSettingsPage(&app.cfg, http.StatusBadRequest, w)
+			app.cfg.renderSettingsPage(w, http.StatusBadRequest)
+			return
 		}
 
 		// https://astaxie.gitbooks.io/build-web-application-with-golang/en/09.5.html
@@ -118,7 +95,8 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) error {
 			err = app.cfg.Save()
 		}
 		if err != nil {
-			return err
+			http.Error(w, "couldn't crypt pwd: "+err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		// fork that one?
@@ -128,9 +106,8 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) error {
 		// if process is running: add a hint about the running background task into the response,
 		// e.g. as a refresh timer. <meta http-equiv="refresh" content="5; URL=http://www.yourdomain.com/yoursite.html">
 
-		urlBase := xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
-
 		if !isAlreadyConfigured {
+			urlBase := xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
 			// idxPost := idxBase + len(os.Getenv("SCRIPT_NAME"))
 			// urlPost, err := url.Parse(strURL[:idxPost] + "/" + uriPub + "/" + uriPosts)
 			// load template feed, set Id and birthday.
@@ -212,36 +189,34 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) error {
 			// TODO: make persistent
 
 			if err = feed.replaceFeeds(); err != nil {
-				return err
+				http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
+				return
 			}
 		}
 
 		app.startSession(w, r, now)
-
-		// all went well:
 		http.Redirect(w, r, path.Join("..", uriPub, uriPosts)+"/", http.StatusFound)
 	case http.MethodGet:
-		return renderSettingsPage(&app.cfg, http.StatusOK, w)
+		app.cfg.renderSettingsPage(w, http.StatusOK)
 	default:
 		http.Error(w, "MethodNotAllowed", http.StatusMethodNotAllowed)
 	}
-
-	return nil
 }
 
-func renderSettingsPage(c *Config, code int, w http.ResponseWriter) error {
-	if tmpl, err := template.New("settings").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
+func (cfg Config) renderSettingsPage(w http.ResponseWriter, code int) {
+	tmpl, err := template.New("settings").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
   <head/>
   <body>
     <form method="post" action="#" name="installform" id="installform">
       <input type="text" name="setlogin" value="{{index . "setlogin"}}"/>
       <input type="password" name="setpassword" />
-      <input type="text" name="title" />
+      <input type="text" name="title" value="{{index . "title"}}"/>
       <input type="submit" name="Save" value="Save config" />
     </form>
   </body>
 </html>
-`); err == nil {
+`)
+	if err == nil {
 		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 		w.WriteHeader(code)
 
@@ -255,10 +230,12 @@ func renderSettingsPage(c *Config, code int, w http.ResponseWriter) error {
 	https://github.com/mro/Shaarli-API-test
 -->
 `)
-		return tmpl.Execute(w, map[string]string{
-			"setlogin": c.AuthorName,
+		err = tmpl.Execute(w, map[string]string{
+			"setlogin": cfg.AuthorName,
+			"title":    cfg.Title,
 		})
-	} else {
-		return err
+	}
+	if err != nil {
+		http.Error(w, "couldn't restore assets: "+err.Error(), http.StatusInternalServerError)
 	}
 }

@@ -18,38 +18,44 @@
 package main
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"gopkg.in/yaml.v2"
 )
 
+type Penalty struct {
+	Badness int
+	End     time.Time
+}
+
 type BanPenalties struct {
-	Penalties map[string]struct {
-		Penalty int
-		End     time.Time
+	Penalties map[string]Penalty
+}
+
+func RemoteAddressToKey(addr string) string {
+	if idx := strings.LastIndex(addr, ":"); idx > -1 {
+		addr = addr[:idx]
 	}
+	return addr
 }
 
 func isBanned(r *http.Request, now time.Time) (bool, error) {
-	return isRemoteAddrBannedFromYamlFileName(r.RemoteAddr, now, filepath.Join("app", "var", "session.yaml"))
+	return isRemoteAddrBannedFromYamlFileName(RemoteAddressToKey(r.RemoteAddr), now, filepath.Join("app", "var", "session.yaml"))
 }
 
 func isRemoteAddrBannedFromYamlFileName(r string, now time.Time, yamlFileName string) (bool, error) {
-	if data, err := ioutil.ReadFile(yamlFileName); err != nil {
+	if data, err := ioutil.ReadFile(yamlFileName); err == nil || os.IsNotExist(err) {
 		bans := BanPenalties{}
-		if err := yaml.Unmarshal(data, &bans); err != nil {
-			return true, err
-		} else {
+		if err := yaml.Unmarshal(data, &bans); err == nil {
 			return bans.isRemoteAddrBanned(r, now), nil
+		} else {
+			return true, err
 		}
 	} else {
 		return true, err
@@ -58,26 +64,26 @@ func isRemoteAddrBannedFromYamlFileName(r string, now time.Time, yamlFileName st
 
 func (bans BanPenalties) isRemoteAddrBanned(key string, now time.Time) bool {
 	pen := bans.Penalties[key]
-	if pen.Penalty <= 4 { // allow for some failed tries
+	if pen.Badness <= 4 { // allow for some failed tries
 		return false
 	}
 	return pen.End.After(now)
 }
 
 func squealFailure(r *http.Request, now time.Time) error {
-	return squealFailureToYamlFileName(r.RemoteAddr, now, filepath.Join("app", "var", "session.yaml"))
+	return squealFailureToYamlFileName(RemoteAddressToKey(r.RemoteAddr), now, filepath.Join("app", "var", "session.yaml"))
 }
 
 func squealFailureToYamlFileName(key string, now time.Time, yamlFileName string) error {
 	var err error
 	var data []byte
-	if data, err = ioutil.ReadFile(yamlFileName); err == nil {
-		bans := BanPenalties{}
+	if data, err = ioutil.ReadFile(yamlFileName); err == nil || os.IsNotExist(err) {
+		bans := BanPenalties{Penalties: map[string]Penalty{}}
 		if err = yaml.Unmarshal(data, &bans); err == nil {
 			if bans.squealFailure(key, now) {
 				if data, err = yaml.Marshal(bans); err == nil {
 					tmpFileName := fmt.Sprintf("%s~%d", yamlFileName, os.Getpid()) // want the mv to be atomic, so use the same dir
-					if err = ioutil.WriteFile(tmpFileName, data, os.ModePerm); err == nil {
+					if err = ioutil.WriteFile(tmpFileName, data, 0600); err == nil {
 						err = os.Rename(tmpFileName, yamlFileName)
 					}
 				}
@@ -89,7 +95,7 @@ func squealFailureToYamlFileName(key string, now time.Time, yamlFileName string)
 
 func (bans *BanPenalties) squealFailure(key string, now time.Time) bool {
 	pen := bans.Penalties[key]
-	if pen.Penalty < 0 {
+	if pen.Badness < 0 {
 		return false // we're known and welcome. So we do not ban.
 	}
 
@@ -103,8 +109,8 @@ func (bans *BanPenalties) squealFailure(key string, now time.Time) bool {
 		return false
 	}
 
-	pen.End.Add(4 * time.Hour)
-	pen.Penalty += 1
+	pen.End = pen.End.Add(4 * time.Hour)
+	pen.Badness += 1
 	bans.Penalties[key] = pen
 
 	for ip, pen := range bans.Penalties {
@@ -114,49 +120,4 @@ func (bans *BanPenalties) squealFailure(key string, now time.Time) bool {
 	}
 
 	return true
-}
-
-// // // // // // // // // // // // // // // // // // // // // // // // //
-
-type SessionManager struct {
-	baseDir        string
-	config         Config
-	cookieName     string
-	maxLifeSeconds int
-}
-
-func GetManager() *SessionManager {
-	b := SessionManager{baseDir: "app/var/cache", cookieName: "AtomicShaarli", maxLifeSeconds: 30 * 60}
-	return &b
-}
-
-func (m *SessionManager) IsLoggedIn(r *http.Request, t time.Time) bool {
-	return true
-}
-
-func (m *SessionManager) startSession(w http.ResponseWriter, r *http.Request, uid string) {
-	// https://astaxie.gitbooks.io/build-web-application-with-golang/en/06.2.html
-	b := make([]byte, 32)
-	if _, err := io.ReadFull(rand.Reader, b); err != nil {
-		return
-	}
-	sid := base64.URLEncoding.EncodeToString(b)
-
-	cookie := http.Cookie{Name: m.cookieName, Value: url.QueryEscape(sid), Path: "/", HttpOnly: true, MaxAge: m.maxLifeSeconds}
-	// todo: store session locally
-	// ---
-	// sessions:
-	//   abc:
-	//     expire: '2018-02-19T09:08:27Z'
-	//     uid: mro
-	// tokens:
-	//   a:
-	//     expire: '2018-02-19T09:08:27Z'
-	//   b:
-	//     expire: '2018-02-19T09:10:27Z'
-	// bans:
-	//   127.0.0.1:
-	//     penalty: 12
-	//     expire: '2018-02-19T09:10:27Z'
-	http.SetCookie(w, &cookie)
 }

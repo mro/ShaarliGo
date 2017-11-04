@@ -19,24 +19,26 @@ package main
 
 import (
 	"gopkg.in/yaml.v2"
+	"strings"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
+func TestSuffix(t *testing.T) {
+	assert.Equal(t, "1.2.3.4", RemoteAddressToKey("1.2.3.4:5"), "soso")
+}
+
 func TestIsRemoteAddrBanned(t *testing.T) {
 	now := mustParseRFC3339("2017-11-01T00:00:00+01:00")
 
 	bp := BanPenalties{
-		Penalties: map[string]struct {
-			Penalty int
-			End     time.Time
-		}{
-			"92.194.87.209": {Penalty: -100, End: mustParseRFC3339("2017-01-01T01:02:03+02:00")},
-			"92.194.87.210": {Penalty: -100, End: now.Add(10 * time.Minute)},
-			"1.2.3.3":       {Penalty: 2, End: now.Add(4 * time.Hour)},
-			"1.2.3.4":       {Penalty: 10, End: now.Add(10 * time.Minute)},
+		Penalties: map[string]Penalty{
+			"92.194.87.209": {Badness: -100, End: mustParseRFC3339("2017-01-01T01:02:03+02:00")},
+			"92.194.87.210": {Badness: -100, End: now.Add(10 * time.Minute)},
+			"1.2.3.3":       {Badness: 2, End: now.Add(4 * time.Hour)},
+			"1.2.3.4":       {Badness: 10, End: now.Add(10 * time.Minute)},
 		},
 	}
 
@@ -45,22 +47,22 @@ func TestIsRemoteAddrBanned(t *testing.T) {
 		assert.Nil(t, err, "soso")
 		assert.Equal(t, `penalties:
   1.2.3.3:
-    penalty: 2
+    badness: 2
     end: 2017-11-01T04:00:00+01:00
   1.2.3.4:
-    penalty: 10
+    badness: 10
     end: 2017-11-01T00:10:00+01:00
   92.194.87.209:
-    penalty: -100
+    badness: -100
     end: 2017-01-01T01:02:03+02:00
   92.194.87.210:
-    penalty: -100
+    badness: -100
     end: 2017-11-01T00:10:00+01:00
 `, string(data), "ach!")
 	}
 
 	assert.NotNil(t, &bp, "soso")
-	assert.Equal(t, -100, bp.Penalties["92.194.87.209"].Penalty, "soso")
+	assert.Equal(t, -100, bp.Penalties["92.194.87.209"].Badness, "soso")
 
 	assert.False(t, BanPenalties{}.isRemoteAddrBanned("nix", time.Time{}), "unknown shouldn't be banned from teh start")
 	assert.False(t, bp.isRemoteAddrBanned("nix", time.Time{}), "unknown shouldn't be banned from the start")
