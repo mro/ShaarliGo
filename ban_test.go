@@ -19,7 +19,6 @@ package main
 
 import (
 	"gopkg.in/yaml.v2"
-	"strings"
 	"time"
 
 	"github.com/stretchr/testify/assert"
@@ -27,7 +26,7 @@ import (
 )
 
 func TestSuffix(t *testing.T) {
-	assert.Equal(t, "1.2.3.4", RemoteAddressToKey("1.2.3.4:5"), "soso")
+	assert.Equal(t, "1.2.3.4", remoteAddressToKey("1.2.3.4:5"), "soso")
 }
 
 func TestIsRemoteAddrBanned(t *testing.T) {

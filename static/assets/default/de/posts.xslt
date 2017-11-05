@@ -100,21 +100,50 @@
       If JavaScript is off, we need mixture between logged-in and -out.
     -->
     <html xmlns="http://www.w3.org/1999/xhtml">
-      <head>
-        <meta content="text/html; charset=utf-8" http-equiv="content-type"/>
-        <!-- https://developer.apple.com/library/IOS/documentation/AppleApplications/Reference/SafariWebContent/UsingtheViewport/UsingtheViewport.html#//apple_ref/doc/uid/TP40006509-SW26 -->
-        <!-- http://maddesigns.de/meta-viewport-1817.html -->
-        <!-- meta name="viewport" content="width=device-width"/ -->
-        <!-- http://www.quirksmode.org/blog/archives/2013/10/initialscale1_m.html -->
-        <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-        <!-- meta name="viewport" content="width=400"/ -->
-        <link href="{$xml_base_pub}/../assets/default/bootstrap.css" rel="stylesheet" type="text/css"/>
-        <link href="{$xml_base_pub}/../assets/default/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
+      <xsl:call-template name="head"/>
 
-        <link href="." rel="alternate" type="application/atom+xml"/>
-        <link href="." rel="self" type="application/xhtml+xml"/>
+      <body>
+<!--
+   onload="document.getElementById('q').removeAttribute('autofocus');document.getElementById('post').setAttribute('autofocus', 'autofocus');"
+   onload="document.form_post.post.focus();"
+-->
+        <script>
+var xml_base_pub = '<xsl:value-of select="$xml_base_pub"/>';
+// <![CDATA[
+// check if we're logged-in (AJAX or Cookie?).
+var xhr = new XMLHttpRequest();
+xhr.onreadystatechange = function(data0) {
+  if (xhr.readyState == 4) {
+    console.log('xhr.status = ' + xhr.status);
+    document.documentElement.classList.add(xhr.status === 200 ? 'logged-in' : 'logged-out');
+    // store the result locally and use as initial value for later calls.
+  }
+}
+xhr.open('GET', xml_base_pub + '/../atom.cgi/session');
+xhr.send(null);
+// ]]>
+        </script>
+        <xsl:apply-templates select="a:feed|a:entry" mode="root"/>
+      </body>
+    </html>
+  </xsl:template>
 
-        <style type="text/css">
+  <xsl:template name="head">
+    <head>
+      <meta content="text/html; charset=utf-8" http-equiv="content-type"/>
+      <!-- https://developer.apple.com/library/IOS/documentation/AppleApplications/Reference/SafariWebContent/UsingtheViewport/UsingtheViewport.html#//apple_ref/doc/uid/TP40006509-SW26 -->
+      <!-- http://maddesigns.de/meta-viewport-1817.html -->
+      <!-- meta name="viewport" content="width=device-width"/ -->
+      <!-- http://www.quirksmode.org/blog/archives/2013/10/initialscale1_m.html -->
+      <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+      <!-- meta name="viewport" content="width=400"/ -->
+      <link href="{$xml_base_pub}/../assets/default/bootstrap.css" rel="stylesheet" type="text/css"/>
+      <link href="{$xml_base_pub}/../assets/default/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
+
+      <link href="." rel="alternate" type="application/atom+xml"/>
+      <link href="." rel="self" type="application/xhtml+xml"/>
+
+      <style type="text/css">
 .hidden-logged-in { display:initial; }
 .logged-in .hidden-logged-in { display:none; }
 .visible-logged-in { display:none; }
@@ -169,33 +198,9 @@ img.img-thumbnail {
  * See http://purl.mro.name/safari-xslt-br-bug */
 .renderhtml br { display:none; }
 .renderhtml br.br { display:inline; }
-        </style>
-        <title><xsl:value-of select="a:title"/></title>
-      </head>
-      <body>
-<!--
-   onload="document.getElementById('q').removeAttribute('autofocus');document.getElementById('post').setAttribute('autofocus', 'autofocus');"
-   onload="document.form_post.post.focus();"
--->
-        <script>
-var xml_base_pub = '<xsl:value-of select="$xml_base_pub"/>';
-// <![CDATA[
-// check if we're logged-in (AJAX or Cookie?).
-var xhr = new XMLHttpRequest();
-xhr.onreadystatechange = function(data0) {
-  if (xhr.readyState == 4) {
-    console.log('xhr.status = ' + xhr.status);
-    document.documentElement.classList.add(xhr.status === 200 ? 'logged-in' : 'logged-out');
-    // store the result locally and use as initial value for later calls.
-  }
-}
-xhr.open('GET', xml_base_pub + '/../atom.cgi/session');
-xhr.send(null);
-// ]]>
-        </script>
-        <xsl:apply-templates select="a:feed|a:entry" mode="root"/>
-      </body>
-    </html>
+      </style>
+      <title><xsl:value-of select="a:title"/></title>
+    </head>
   </xsl:template>
 
   <xsl:template match="a:feed" mode="root">
@@ -205,27 +210,21 @@ xhr.send(null);
       <xsl:call-template name="links_commands"/>
 
       <!-- https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ -->
-      <form id="form_search" name="form_search" class="form-search form-horizontal" action="{$xml_base_pub}/../atom.cgi/search">
+      <form id="form_search" name="form_search" class="form-horizontal form-search" action="{$xml_base_pub}/../atom.cgi/search">
         <div class="input-group">
-          <input autofocus="autofocus" id="q" name="q" type="text" class="form-control search-query" placeholder="Suche Wort oder #Tag..."/>
-          <span class="input-group-btn"><button type="submit" class="btn btn-primary">Suche</button></span>
+          <input name="q" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="form-control search-query"/>
+          <span class="input-group-btn">
+          	<button type="submit" class="btn btn-primary">Suche</button>
+          </span>
         </div>
       </form>
 
       <form id="form_post" name="form_post" class="form-horizontal hidden-logged-out" action="{$xml_base_pub}/../atom.cgi?do=addlink">
-        <div class="form-group" style="display:none">
-          <input type="file" class="file pull-right" id="input-1" placeholder="Bild"/>
-        </div>
-        <div class="form-group text-right" style="display:none">
-          <div class="form-check">
-            <label class="form-check-label">
-              <input class="form-check-input" type="checkbox"/> Privat?
-            </label>
-          </div>
-        </div>
         <div class="input-group">
-          <input type="text" class="form-control" id="post" name="post" placeholder="Was gibt's Neues? (Notiz oder URL)"/>
-          <span class="input-group-btn"><button type="submit" class="btn btn-primary">Shaaaare!</button></span>
+          <input name="post" type="text" placeholder="Was gibt's Neues? (Notiz oder URL)" class="form-control"/>
+          <span class="input-group-btn">
+          	<button type="submit" class="btn btn-primary">Shaaaare!</button>
+          </span>
         </div>
       </form>
 
@@ -246,7 +245,7 @@ xhr.send(null);
       <xsl:call-template name="footer"/>
 
       <p id="demo">
-📝 ❌ 🔐 🔓 🌸 🐳  alt ok: ⛅ 🎑 📜 📄 🔧 🔨 🎨 📰 ⚛ ⚛ ⚛ ⚛ ⚛
+🍂 🍃 📝 ❌ 🔐 🔓 🌸 🐳  alt ok: ⛅ 🎑 📜 📄 🔧 🔨 🎨 📰 ⚛ ⚛ ⚛ ⚛ ⚛
       </p>
     </div>
   </xsl:template>
@@ -270,10 +269,10 @@ xhr.send(null);
             <td class="text-right"><a href="{$xml_base_pub}/tags/">⛅ <span class="hidden-xs"># Tags</span></a></td>
             <td class="text-right"><a href="{$xml_base_pub}/days/">📅 <span class="hidden-xs">Tage</span></a></td>
             <td class="text-right"><a href="{$xml_base_pub}/imgs/">🎨 <span class="hidden-xs">Bilder</span></a></td>
-            <td class="text-right hidden-logged-out"><a href="{$xml_base_pub}/../atom.cgi?do=tools">🔨 <span class="hidden-xs">Tools</span></a></td>
+            <td class="text-right hidden-logged-out"><a href="{$xml_base_pub}/../atom.cgi/tools">🔨 <span class="hidden-xs">Tools</span></a></td>
             <td class="text-right">
               <a id="link_login" href="{$xml_base_pub}/../atom.cgi?do=login" class="visible-logged-out"><span class="hidden-xs">Anmelden</span> 🌺 </a>
-              <a id="link_logout" href="{$xml_base_pub}/../atom.cgi?do=logout" class="hidden-logged-out"><span class="hidden-xs">Abmelden</span> 🍃 </a>
+              <a id="link_logout" href="{$xml_base_pub}/../atom.cgi?do=logout" class="hidden-logged-out"><span class="hidden-xs">Abmelden</span> 🐾 </a>
             </td>
           </tr>
         </tbody>

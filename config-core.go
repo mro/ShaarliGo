@@ -69,5 +69,5 @@ func (cfg Config) Save() error {
 }
 
 func (cfg Config) IsConfigured() bool {
-	return cfg.AuthorName != ""
+	return cfg.PwdBcrypt != ""
 }

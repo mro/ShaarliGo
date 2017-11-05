@@ -39,18 +39,31 @@ import (
 	"net/http/cgi"
 	"os"
 	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/gorilla/sessions"
 )
 
 const myselfNamespace = "http://purl.mro.name/AtomicShaarli"
+const toSession = 30 * time.Minute
 
 // evtl. as a server, too: http://www.dav-muz.net/blog/2013/09/how-to-use-go-and-fastcgi/
 func main() {
-	// log.Print("I am AtomicShaarli log.Print") stderr
-	// fmt.Print("I am AtomicShaarli fmt.Print") http 500
-	// fmt.Fprint(os.Stderr, "I am AtomicShaarli fmt.Fprint(os.Stderr, ...)") stderr
+	{ // log to custom logfile rather than stderr (which may not accessible on shared hosting)
+		dst := filepath.Join("app", "var", "error.log")
+		if err := os.MkdirAll(filepath.Dir(dst), 0700); err != nil {
+			log.Fatal("Couldn't create app/var dir: " + err.Error())
+			return
+		}
+		if w, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600); err != nil {
+			log.Fatal("Couldn't create open logfile: " + err.Error())
+			return
+		} else {
+			defer w.Close()
+			log.SetOutput(w)
+		}
+	}
 
 	// - check non-write perm of program?
 	// - check non-http read perm on ./app
@@ -65,7 +78,7 @@ type App struct {
 }
 
 func (app *App) startSession(w http.ResponseWriter, r *http.Request, now time.Time) error {
-	app.ses.Values["timeout"] = now.Add(30 * time.Minute).Unix()
+	app.ses.Values["timeout"] = now.Add(toSession).Unix()
 	return app.ses.Save(r, w)
 }
 
@@ -108,17 +121,17 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 	// check if the request is from a banned client
 	if banned, err := isBanned(r, now); err != nil || banned {
-		if banned {
-			http.Error(w, "Sorry, banned", http.StatusNotAcceptable)
-		} else {
+		if err != nil {
 			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
+		} else {
+			http.Error(w, "Sorry, banned", http.StatusNotAcceptable)
 		}
 		return
 	}
 
 	path_info := os.Getenv("PATH_INFO")
-	script_name := os.Getenv("SCRIPT_NAME")
-	urlBase := xmlBaseFromRequestURL(r.URL, script_name)
+	//	script_name :=
+	urlBase := xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
 
 	// get config and session
 	app := App{}
@@ -137,20 +150,20 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			app.ses, _ = sessions.NewCookieStore(buf).Get(r, "AtomicShaarli")
 			app.ses.Options = &sessions.Options{
 				Path:     urlBase.Path, // to match all requests
-				MaxAge:   30 * 60,      // Seconds
+				MaxAge:   int(toSession / time.Second),
 				HttpOnly: true,
 			}
 		}
 	}
 
-	switch {
-	case "/config" == path_info:
+	switch path_info {
+	case "/config":
 		// make a 404 if already configured but not currently logged in
 		if !app.cfg.IsConfigured() || app.IsLoggedIn(now) {
 			app.handleSettings(w, r)
 			return
 		}
-	case "/session" == path_info:
+	case "/session":
 		if app.IsLoggedIn(now) {
 			// maybe cache, but don't KeepAlive
 			// w.Header().Set("Etag", r.URL.Path)
@@ -160,13 +173,11 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			http.NotFound(w, r)
 		}
 		return
-	case "/tools" == path_info:
-		ifErrRespond500(app.handleTools(w, r), w, r)
-	case "" == path_info:
+	case "":
 		param := r.URL.Query()
 		switch {
 		case "" == r.URL.RawQuery && !app.cfg.IsConfigured():
-			http.Redirect(w, r, path.Join(script_name, "config"), http.StatusSeeOther)
+			http.Redirect(w, r, path.Join(r.URL.Path, "config"), http.StatusSeeOther)
 			return
 		// legacy API, https://github.com/mro/Shaarli-API-Test
 		case "login" == param["do"][0]:
@@ -179,20 +190,11 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			ifErrRespond500(app.handleDoPost(w, r), w, r)
 			return
 		}
-	case "/search" == path_info:
-		ifErrRespond500(app.handleSearch(w, r), w, r)
-		return
+	case "/tools":
+
+	case "/search":
+
 	}
 	squealFailure(r, now)
 	http.NotFound(w, r)
-}
-
-func (app *App) handleTools(w http.ResponseWriter, r *http.Request) error {
-	io.WriteString(w, "tools"+"\n")
-	return nil
-}
-
-func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) error {
-	io.WriteString(w, "search"+"\n")
-	return nil
 }
