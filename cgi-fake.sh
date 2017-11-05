@@ -11,8 +11,7 @@ export HTTP_HOST="example.com"
 get() {
   export REQUEST_METHOD="GET"
   export PATH_INFO="${1}"
-  rm -rf "tmp" 2>/dev/null
-  mkdir "tmp" && cd "tmp" && time "../${cgi}"
+  cd "tmp" && time "../${cgi}"
 }
 
 post() {
@@ -20,12 +19,15 @@ post() {
   export CONTENT_TYPE="application/x-www-form-urlencoded"
   export PATH_INFO="${1}"
   export CONTENT_LENGTH="${2}"
-
-  rm -rf "tmp" 2>/dev/null
-  mkdir "tmp" && cd "tmp" && time "../${cgi}"
+  cd "tmp" && time "../${cgi}"
 }
 
-# get "/config"
+rm -rf "tmp" 2>/dev/null
+mkdir "tmp" && cd "tmp" && time "../${cgi}"
+
 post "/config" 119 <<EOF
 title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=
 EOF
+
+
+# get "/config"

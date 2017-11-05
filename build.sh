@@ -13,6 +13,11 @@ go get -u golang.org/x/crypto/bcrypt
 go get -u gopkg.in/yaml.v2
 go get -u github.com/jteeuwen/go-bindata/...
 go get -u github.com/gorilla/sessions
+# for testing only:
+go get -u github.com/yhat/scrape
+go get -u golang.org/x/net/html
+go get -u golang.org/x/net/html/atom
+
 # ssh vario find mro.name/vorschau.blog/assets -type f
 
 # rsync -aPz --delete --delete-excluded --exclude jquery* --exclude *.zip --exclude *.html vario:~/mro.name/vorschau.blog/assets/ static/assets

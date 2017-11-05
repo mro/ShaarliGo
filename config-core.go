@@ -20,7 +20,6 @@ package main
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -28,6 +27,12 @@ import (
 
 	"gopkg.in/yaml.v2"
 )
+
+var configFileName string
+
+func init() {
+	configFileName = filepath.Join(dirApp, "config.yaml")
+}
 
 type Config struct {
 	AuthorName        string `yaml:"author_name"`
@@ -38,7 +43,7 @@ type Config struct {
 
 func LoadConfig() (Config, error) {
 	ret := Config{}
-	if read, err := ioutil.ReadFile(filepath.Join(dirApp, "config.yaml")); err == nil {
+	if read, err := ioutil.ReadFile(configFileName); err == nil {
 		err = yaml.Unmarshal(read, &ret)
 		return ret, err
 	} else if os.IsNotExist(err) {
@@ -57,10 +62,11 @@ func LoadConfig() (Config, error) {
 
 func (cfg Config) Save() error {
 	if out, err := yaml.Marshal(cfg); err == nil {
-		fileName := filepath.Join(dirApp, "config.yaml")
-		tmpFileName := filepath.Join(dirApp, fmt.Sprintf("%s~%d", "config.yaml", os.Getpid()))
-		if err = ioutil.WriteFile(tmpFileName, out, os.FileMode(0660)); err == nil {
-			err = os.Rename(tmpFileName, fileName)
+		tmpFileName := configFileName + "~"
+		if err = os.MkdirAll(filepath.Dir(configFileName), 0700); err != nil {
+			if err = ioutil.WriteFile(tmpFileName, out, os.FileMode(0660)); err == nil {
+				err = os.Rename(tmpFileName, configFileName)
+			}
 		}
 		return err
 	} else {

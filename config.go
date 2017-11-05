@@ -80,18 +80,16 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 		app.cfg.AuthorName = strings.TrimSpace(r.FormValue("setlogin"))
 		app.cfg.Title = strings.TrimSpace(r.FormValue("title"))
 		pwd := strings.TrimSpace(r.FormValue("setpassword"))
-
-		if !app.cfg.IsConfigured() || len([]rune(pwd)) < 12 {
-			app.cfg.renderSettingsPage(w, http.StatusBadRequest)
-			return
-		}
-
 		// https://astaxie.gitbooks.io/build-web-application-with-golang/en/09.5.html
 		// $GLOBALS['salt'] = sha1(uniqid('',true).'_'.mt_rand()); // Salt renders rainbow-tables attacks useless.
 		// original shaarli did $hash = sha1($password.$login.$GLOBALS['salt']);
 		pwdBcrypt, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 		if err == nil {
 			app.cfg.PwdBcrypt = string(pwdBcrypt)
+			if len(app.cfg.AuthorName) < 1 || len([]rune(pwd)) < 12 {
+				app.cfg.renderSettingsPage(w, http.StatusBadRequest)
+				return
+			}
 			err = app.cfg.Save()
 		}
 		if err != nil {
@@ -138,9 +136,9 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 				},
 				Content: &HumanText{Body: `Lorem #ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
 
-			   Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
+Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
 
-			   Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.`},
+Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.`},
 				Updated: iso8601{mustParseRFC3339("2012-12-31T02:02:02+01:00")},
 			}).Append(&Entry{
 				Title:   HumanText{Body: "Was noch alles fehlt"},
@@ -152,25 +150,25 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 					Category{Term: "i18n"},
 				},
 				Content: &HumanText{Body: `- Posten, Löschen, Bookmarklet,
-				 - 'API'-Kompatibilität mit Vanilla Shaarli (=> ShaarliOS, Shaarlier)
-			   - Tag #Cloud,
-			   - Tagesansicht,
-			   - Shaarli Import,
-			   - Komplett-Feed (Archiv),
-			   - neue Posts vorbelegen (optional: extern per http GET),
-			   - Suche,
-			   - clickbare Links im Text (client-seitig),
-			   - Referer-Anonymisierer,
-			   - Bilder Cache/Proxy,
-			   - QR-Code pro Post,
-			   - Skinning/Themeing (asset dir),
-			   - private Posts,
-			   - Kommentare,
-			   - PuSH,
-			   - Bilder hochladen,
-			   - #i18n,
-			   - Html/Markdown (client-seitig),
-			   - Atom Aggregator?`},
+- 'API'-Kompatibilität mit Vanilla Shaarli (=> ShaarliOS, Shaarlier)
+- Tag #Cloud,
+- Tagesansicht,
+- Shaarli Import,
+- Komplett-Feed (Archiv),
+- neue Posts vorbelegen (optional: extern per http GET),
+- Suche,
+- clickbare Links im Text (client-seitig),
+- Referer-Anonymisierer,
+- Bilder Cache/Proxy,
+- QR-Code pro Post,
+- Skinning/Themeing (asset dir),
+- private Posts,
+- Kommentare,
+- PuSH,
+- Bilder hochladen,
+- #i18n,
+- Html/Markdown (client-seitig),
+- Atom Aggregator?`},
 				Updated: iso8601{mustParseRFC3339("2012-12-31T01:01:01+01:00")},
 			}).Append(&Entry{
 				Title: HumanText{Body: "Shaarli — sebsauvage.net"},
@@ -223,11 +221,11 @@ func (cfg Config) renderSettingsPage(w http.ResponseWriter, code int) {
 		io.WriteString(w, "<?xml version='1.0' encoding='UTF-8'?>\n"+
 			"<?xml-stylesheet type='text/xsl' href='"+path.Join("..", "assets", "default", "de", "config.xslt")+"'?>\n")
 		io.WriteString(w, `<!--
-	The html you see here is for compatibilty with vanilla shaarli.
-	
-	The main reason is backward compatibility for e.g. https://github.com/mro/ShaarliOS and
-	https://github.com/dimtion/Shaarlier as tested via
-	https://github.com/mro/Shaarli-API-test
+  The html you see here is for compatibilty with vanilla shaarli.
+
+  The main reason is backward compatibility for e.g. https://github.com/mro/ShaarliOS and
+  https://github.com/dimtion/Shaarlier as tested via
+  https://github.com/mro/Shaarli-API-test
 -->
 `)
 		err = tmpl.Execute(w, map[string]string{

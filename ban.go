@@ -32,7 +32,7 @@ import (
 var banFileName string
 
 func init() {
-	banFileName = filepath.Join("app", "var", "bans.yaml")
+	banFileName = filepath.Join(dirApp, "var", "bans.yaml")
 }
 
 type Penalty struct {
