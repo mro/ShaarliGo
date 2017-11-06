@@ -20,6 +20,7 @@ package main
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -35,8 +36,8 @@ func init() {
 }
 
 type Config struct {
-	AuthorName        string `yaml:"author_name"`
 	Title             string `yaml:"title"`
+	AuthorName        string `yaml:"author_name"`
 	PwdBcrypt         string `yaml:"pwd_bcrypt"`
 	CookieStoreSecret string `yaml:"cookie_secret"`
 }
@@ -62,9 +63,9 @@ func LoadConfig() (Config, error) {
 
 func (cfg Config) Save() error {
 	if out, err := yaml.Marshal(cfg); err == nil {
-		tmpFileName := configFileName + "~"
-		if err = os.MkdirAll(filepath.Dir(configFileName), 0700); err != nil {
-			if err = ioutil.WriteFile(tmpFileName, out, os.FileMode(0660)); err == nil {
+		tmpFileName := fmt.Sprintf("%s~%d", configFileName, os.Getpid())
+		if err = os.MkdirAll(filepath.Dir(configFileName), 0770); err == nil {
+			if err = ioutil.WriteFile(tmpFileName, out, 0660); err == nil {
 				err = os.Rename(tmpFileName, configFileName)
 			}
 		}

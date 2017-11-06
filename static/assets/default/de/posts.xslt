@@ -209,7 +209,7 @@ img.img-thumbnail {
 
       <xsl:call-template name="links_commands"/>
 
-      <!-- https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ -->
+      <xsl:comment> https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ </xsl:comment>
       <form id="form_search" name="form_search" class="form-horizontal form-search" action="{$xml_base_pub}/../atom.cgi/search">
         <div class="input-group">
           <input name="q" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="form-control search-query"/>

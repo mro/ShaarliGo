@@ -23,11 +23,12 @@
 // app/config.yaml
 // app/posts.gob.gz
 // app/posts.xml.gz
-// app/var/session.yaml
+// app/var/bans.yaml
+// app/var/error.log
 // app/var/stage/
 // app/var/old/
-// assets/
-// pub/
+// assets/default/de/
+// pub/posts/
 //
 package main
 
@@ -170,23 +171,24 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			// w.Header().Set("Cache-Control", "max-age=60") // 60 Seconds
 			io.WriteString(w, app.cfg.AuthorName)
 		} else {
+			// don't squeal to ban.
 			http.NotFound(w, r)
 		}
 		return
 	case "":
-		param := r.URL.Query()
+		params := r.URL.Query()
 		switch {
 		case "" == r.URL.RawQuery && !app.cfg.IsConfigured():
 			http.Redirect(w, r, path.Join(r.URL.Path, "config"), http.StatusSeeOther)
 			return
 		// legacy API, https://github.com/mro/Shaarli-API-Test
-		case "login" == param["do"][0]:
+		case "login" == params["do"][0]:
 			app.handleDoLogin(w, r)
 			return
-		case "logout" == param["do"][0]:
+		case "logout" == params["do"][0]:
 			app.handleDoLogout(w, r)
 			return
-		case 1 == len(param["post"]):
+		case 1 == len(params["post"]):
 			ifErrRespond500(app.handleDoPost(w, r), w, r)
 			return
 		}

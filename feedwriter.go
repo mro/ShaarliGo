@@ -65,7 +65,7 @@ const relEditMedia = "edit-media" // AtomPub https://tools.ietf.org/html/rfc5023
 const relUp = "up"                // https://www.iana.org/assignments/link-relations/link-relations.xhtml
 const relSearch = "search"        // http://www.opensearch.org/Specifications/OpenSearch/1.1#Autodiscovery_in_RSS.2FAtom
 
-const newDirPerms = os.ModeDir | os.ModePerm
+const newDirPerms = 0775
 
 var rexPath = regexp.MustCompile("[^/]+")
 

@@ -115,6 +115,7 @@ min-width: 40px;
   <xsl:template match="h:form">
     <form method="{@method}" id="{@id}" name="{@name}" class="form-horizontal" action="#">
       <input type="hidden" id="token" name="token" value="{h:input[@name='token']/@value}"/>
+      <input type="hidden" id="returnurl" name="returnurl" value="{h:input[@name='returnurl']/@value}"/>
       <div class="input-group">
         <input type="text" class="form-control" id="login" name="login" placeholder="Wer bist Du?" value="{h:input[@name='login']/@value}"/>
         <input type="password" class="form-control" id="password" name="password" placeholder="Kennst Du das Paßwort?"/>

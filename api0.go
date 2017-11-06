@@ -35,6 +35,10 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) error {
 	switch r.Method {
 	// and https://github.com/mro/ShaarliOS/blob/master/ios/ShaarliOS/API/ShaarliCmd.m#L386
 	case http.MethodGet:
+		returnurl := ""
+		if ru := r.URL.Query()["returnurl"]; ru != nil {
+			returnurl = ru[0]
+		}
 		if tmpl, err := template.New("login").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
 <head><title>{{index . "title"}}</title></head>
 <body>
@@ -44,6 +48,7 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) error {
     <input type="submit" value="Login" />
     <input type="checkbox" name="longlastingsession" id="longlastingsession" />
     <input type="hidden" name="token" value="{{index . "token"}}" />
+    <input type="hidden" name="returnurl" value="{{index . "returnurl"}}" />
   </form>
 </body>
 </html>
@@ -57,8 +62,9 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) error {
 -->
 `)
 			return tmpl.Execute(w, map[string]string{
-				"title": app.cfg.Title,
-				"token": "ff13e7eaf9541ca2ba30fd44e864c3ff014d2bc9",
+				"title":     app.cfg.Title,
+				"token":     "ff13e7eaf9541ca2ba30fd44e864c3ff014d2bc9",
+				"returnurl": returnurl,
 			})
 		}
 	case http.MethodPost:
@@ -76,7 +82,11 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) error {
 			err = app.startSession(w, r, now)
 		}
 		if err == nil {
-			http.Redirect(w, r, path.Join(uriPub, uriPosts)+"/", http.StatusSeeOther)
+			returnurl := strings.TrimSpace(r.FormValue("returnurl"))
+			if "" == returnurl { // TODO restrict to local urls within app scope
+				returnurl = path.Join(uriPub, uriPosts) + "/"
+			}
+			http.Redirect(w, r, returnurl, http.StatusFound)
 		}
 		return err
 	default:

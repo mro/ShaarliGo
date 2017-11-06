@@ -22,7 +22,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -38,13 +40,13 @@ const dirTmp = "go-test~"
 
 // https://stackoverflow.com/a/42310257
 func setupTest(t *testing.T) func(t *testing.T) {
-	t.Log("sub test")
+	// t.Log("sub test")
 	assert.Nil(t, os.RemoveAll(dirTmp), "aha")
 	assert.Nil(t, os.MkdirAll(dirTmp, 0700), "aha")
 	cwd, _ := os.Getwd()
 	os.Chdir(dirTmp)
 	return func(t *testing.T) {
-		t.Log("sub test")
+		// t.Log("sub test")
 		os.Chdir(cwd)
 		// assert.Nil(t, os.RemoveAll(dirTmp), "aha")
 	}
@@ -104,6 +106,26 @@ func doGet(path_info string) (*http.Response, error) {
 	return doHttp("GET", path_info)
 }
 
+func doPost(path_info string, body []byte) (*http.Response, error) {
+	fname := "stdin"
+	if err := ioutil.WriteFile(fname, body, 0600); err != nil {
+		panic(err)
+	}
+	old := os.Stdin
+	temp, err := os.Open(fname)
+	if err != nil {
+		panic(err)
+	}
+	os.Stdin = temp
+	defer func() { temp.Close(); os.Stdin = old }()
+
+	os.Setenv("CONTENT_LENGTH", fmt.Sprintf("%d", len(body)))
+	os.Setenv("CONTENT_TYPE", "application/x-www-form-urlencoded")
+	ret, err := doHttp("POST", path_info)
+
+	return ret, err
+}
+
 func TestGetConfigRaw(t *testing.T) {
 	teardownTest := setupTest(t)
 	defer teardownTest(t)
@@ -158,8 +180,125 @@ func TestGetConfigScraped(t *testing.T) {
 
 	all := scrape.FindAll(root, func(n *html.Node) bool { return atom.Input == n.DataAtom })
 	assert.Equal(t, 4, len(all), "aha")
-	assert.Equal(t, "text", scrape.Attr(all[0], "type"), "aha")
-	assert.Equal(t, "password", scrape.Attr(all[1], "type"), "aha")
-	assert.Equal(t, "text", scrape.Attr(all[2], "type"), "aha")
-	assert.Equal(t, "submit", scrape.Attr(all[3], "type"), "aha")
+	assert.Equal(t, "setlogin", scrape.Attr(all[0], "name"), "aha")
+	assert.Equal(t, "setpassword", scrape.Attr(all[1], "name"), "aha")
+	assert.Equal(t, "title", scrape.Attr(all[2], "name"), "aha")
+	assert.Equal(t, "Save", scrape.Attr(all[3], "name"), "aha")
+}
+
+func TestPostConfig(t *testing.T) {
+	teardownTest := setupTest(t)
+	defer teardownTest(t)
+
+	r, err := doPost("/config", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
+
+	assert.Nil(t, err, "aha")
+	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
+	assert.Equal(t, "/sub/pub/posts/", r.Header["Location"][0], "aha")
+
+	body, err := ioutil.ReadAll(r.Body)
+	assert.Nil(t, err, "aha")
+	assert.Equal(t, 0, len(body), "soso")
+
+	cfg, err := ioutil.ReadFile(filepath.Join("app", "config.yaml"))
+	assert.Nil(t, err, "aha")
+	assert.True(t, strings.HasPrefix(string(cfg), "title: A\nauthor_name: B\n"), string(cfg))
+
+	assert.Equal(t, 1, len(r.Header["Set-Cookie"]), "naja")
+
+	stat, _ := os.Stat("pub")
+	assert.Equal(t, 0755, int(stat.Mode()&os.ModePerm), "ach, wieso?")
+}
+
+func TestGetLoginWithoutRedir(t *testing.T) {
+	teardownTest := setupTest(t)
+	defer teardownTest(t)
+
+	r, err := doPost("/config", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
+	assert.Nil(t, err, "aha")
+	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
+	assert.Equal(t, "/sub/pub/posts/", r.Header["Location"][0], "aha")
+
+	os.Setenv("QUERY_STRING", "do=login")
+	r, err = doGet("")
+	assert.Nil(t, err, "aha")
+	assert.Equal(t, http.StatusOK, r.StatusCode, "aha")
+	root, err := html.Parse(r.Body)
+	assert.Nil(t, err, "aha")
+	assert.NotNil(t, root, "aha")
+	inputs := scrape.FindAll(root, func(n *html.Node) bool { return atom.Input == n.DataAtom })
+	assert.Equal(t, 6, len(inputs), "aha")
+
+	r, err = doPost("", []byte(`login=B&password=123456789012&token=foo`))
+	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
+	assert.Equal(t, "/sub/pub/posts/", r.Header["Location"][0], "aha")
+	cook := r.Header["Set-Cookie"][0]
+	assert.True(t, strings.HasPrefix(cook, "AtomicShaarli=MTU"), cook)
+}
+
+func TestGetLoginWithRedir(t *testing.T) {
+	teardownTest := setupTest(t)
+	defer teardownTest(t)
+
+	os.Unsetenv("COOKIE")
+	r, err := doPost("/config", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
+	assert.Nil(t, err, "aha")
+	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
+	assert.Equal(t, "/sub/pub/posts/", r.Header["Location"][0], "aha")
+
+	returnurl := "/sub/pub/posts/anyid/?foo=bar#baz"
+	os.Setenv("QUERY_STRING", "do=login&returnurl="+url.QueryEscape(returnurl))
+	r, err = doGet("")
+	assert.Nil(t, err, "aha")
+	assert.Equal(t, http.StatusOK, r.StatusCode, "aha")
+	root, err := html.Parse(r.Body)
+	assert.Nil(t, err, "aha")
+	assert.NotNil(t, root, "aha")
+	inputs := scrape.FindAll(root, func(n *html.Node) bool { return atom.Input == n.DataAtom })
+	assert.Equal(t, 6, len(inputs), "aha")
+
+	r, err = doPost("", []byte(`login=B&password=123456789012&token=foo&returnurl=/sub/pub/posts/anyid/?foo=bar#baz`))
+	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
+	assert.Equal(t, returnurl, r.Header["Location"][0], "aha")
+	cook := r.Header["Set-Cookie"][0]
+	assert.True(t, strings.HasPrefix(cook, "AtomicShaarli=MTU"), cook)
+}
+
+func _TestGetPostNew(t *testing.T) {
+	teardownTest := setupTest(t)
+	defer teardownTest(t)
+
+	r, err := doPost("/config", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
+	assert.Nil(t, err, "aha")
+	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
+	assert.Equal(t, "/sub/pub/posts/", r.Header["Location"][0], "aha")
+
+	purl := fmt.Sprintf("?post=%s&title=%s&source=%s", url.QueryEscape("http://example.com/foo?bar=baz#grr"), url.QueryEscape("A first post"), url.QueryEscape("me"))
+	r, err = doGet(purl)
+	assert.Nil(t, err, "aha")
+	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
+	assert.Equal(t, "/sub/atom.cgi?do=login", r.Header["Location"], "aha")
+
+	r, err = doGet(fmt.Sprintf("?do=login&returnurl=/sub/atom.cgi%s", url.QueryEscape(purl)))
+	assert.Nil(t, err, "aha")
+	assert.Equal(t, http.StatusOK, r.StatusCode, "aha")
+	cook := r.Header["Set-Cookie"][0]
+	assert.True(t, strings.HasPrefix(cook, "AtomicShaarli=MTU"), cook)
+	os.Setenv("COOKIE", cook)
+	root, err := html.Parse(r.Body)
+	assert.Nil(t, err, "aha")
+	assert.NotNil(t, root, "aha")
+	assert.Equal(t, 4, len(scrape.FindAll(root, func(n *html.Node) bool { return atom.Input == n.DataAtom })), "aha")
+
+	r, err = doPost(fmt.Sprintf("?do=login&returnurl=/sub/atom.cgi%s", url.QueryEscape(purl)), []byte(`login=B&password=123456789012`))
+	os.Setenv("COOKIE", r.Header["Set-Cookie"][0])
+
+	r, err = doGet(purl)
+	assert.Equal(t, http.StatusOK, r.StatusCode, "aha")
+	os.Setenv("COOKIE", r.Header["Set-Cookie"][0])
+	root, err = html.Parse(r.Body)
+
+	r, err = doPost(purl, nil)
+	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
+	assert.Equal(t, "/sub/pub/posts/?#foo", r.Header["Location"], "aha")
 }

@@ -77,8 +77,8 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodPost:
-		app.cfg.AuthorName = strings.TrimSpace(r.FormValue("setlogin"))
 		app.cfg.Title = strings.TrimSpace(r.FormValue("title"))
+		app.cfg.AuthorName = strings.TrimSpace(r.FormValue("setlogin"))
 		pwd := strings.TrimSpace(r.FormValue("setpassword"))
 		// https://astaxie.gitbooks.io/build-web-application-with-golang/en/09.5.html
 		// $GLOBALS['salt'] = sha1(uniqid('',true).'_'.mt_rand()); // Salt renders rainbow-tables attacks useless.
