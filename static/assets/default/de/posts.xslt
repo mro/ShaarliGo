@@ -219,7 +219,7 @@ img.img-thumbnail {
         </div>
       </form>
 
-      <form id="form_post" name="form_post" class="form-horizontal hidden-logged-out" action="{$xml_base_pub}/../atom.cgi?do=addlink">
+      <form id="form_post" name="form_post" class="form-horizontal hidden-logged-out" action="{$xml_base_pub}/../atom.cgi">
         <div class="input-group">
           <input name="post" type="text" placeholder="Was gibt's Neues? (Notiz oder URL)" class="form-control"/>
           <span class="input-group-btn">

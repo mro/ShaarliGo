@@ -205,7 +205,7 @@ func (cfg Config) renderSettingsPage(w http.ResponseWriter, code int) {
 	tmpl, err := template.New("settings").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
   <head/>
   <body>
-    <form method="post" action="#" name="installform" id="installform">
+    <form method="post" name="installform" id="installform">
       <input type="text" name="setlogin" value="{{index . "setlogin"}}"/>
       <input type="password" name="setpassword" />
       <input type="text" name="title" value="{{index . "title"}}"/>

@@ -181,15 +181,16 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		case "" == r.URL.RawQuery && !app.cfg.IsConfigured():
 			http.Redirect(w, r, path.Join(r.URL.Path, "config"), http.StatusSeeOther)
 			return
+
 		// legacy API, https://github.com/mro/Shaarli-API-Test
-		case "login" == params["do"][0]:
+		case 1 == len(params["post"]):
+			app.handleDoPost(w, r)
+			return
+		case 1 == len(params["do"]) && "login" == params["do"][0]:
 			app.handleDoLogin(w, r)
 			return
-		case "logout" == params["do"][0]:
+		case 1 == len(params["do"]) && "logout" == params["do"][0]:
 			app.handleDoLogout(w, r)
-			return
-		case 1 == len(params["post"]):
-			ifErrRespond500(app.handleDoPost(w, r), w, r)
 			return
 		}
 	case "/tools":

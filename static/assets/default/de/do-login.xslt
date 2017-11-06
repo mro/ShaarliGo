@@ -113,7 +113,7 @@ min-width: 40px;
   </xsl:template>
 
   <xsl:template match="h:form">
-    <form method="{@method}" id="{@id}" name="{@name}" class="form-horizontal" action="#">
+    <form method="{@method}" id="{@id}" name="{@name}" class="form-horizontal">
       <input type="hidden" id="token" name="token" value="{h:input[@name='token']/@value}"/>
       <input type="hidden" id="returnurl" name="returnurl" value="{h:input[@name='returnurl']/@value}"/>
       <div class="input-group">

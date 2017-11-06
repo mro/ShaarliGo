@@ -124,7 +124,7 @@ div.if_hasdiv_pwd { display:none; }
             <p>Huch, das sieht ja alles recht frisch aus hier.</p>
           </xsl:if>
 
-          <form id="{@id}" name="{@name}" class="form-horizontal" method="POST" action="#">
+          <form id="{@id}" name="{@name}" class="form-horizontal" method="POST">
             <!-- https://www.tjvantoll.com/2012/08/05/html5-form-validation-showing-all-error-messages/ -->
 
             <div class="form-group">

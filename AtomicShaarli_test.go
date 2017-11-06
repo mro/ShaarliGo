@@ -151,7 +151,7 @@ func TestGetConfigRaw(t *testing.T) {
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head/>
   <body>
-    <form method="post" action="#" name="installform" id="installform">
+    <form method="post" name="installform" id="installform">
       <input type="text" name="setlogin" value=""/>
       <input type="password" name="setpassword" />
       <input type="text" name="title" value=""/>
@@ -274,7 +274,8 @@ func _TestGetPostNew(t *testing.T) {
 	assert.Equal(t, "/sub/pub/posts/", r.Header["Location"][0], "aha")
 
 	purl := fmt.Sprintf("?post=%s&title=%s&source=%s", url.QueryEscape("http://example.com/foo?bar=baz#grr"), url.QueryEscape("A first post"), url.QueryEscape("me"))
-	r, err = doGet(purl)
+	os.Setenv("QUERY_STRING", purl)
+	r, err = doGet("")
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
 	assert.Equal(t, "/sub/atom.cgi?do=login", r.Header["Location"], "aha")
