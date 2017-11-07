@@ -112,14 +112,16 @@ min-width: 40px;
     </body>
   </xsl:template>
 
-  <xsl:template match="h:form">
-    <form method="{@method}" id="{@id}" name="{@name}" class="form-horizontal">
-      <input type="hidden" id="token" name="token" value="{h:input[@name='token']/@value}"/>
-      <input type="hidden" id="returnurl" name="returnurl" value="{h:input[@name='returnurl']/@value}"/>
+  <xsl:template match="h:form[@name='loginform']">
+    <form method="{@method}" name="{@name}" class="form-horizontal">
+      <input name="token" type="hidden" value="{h:input[@name='token']/@value}"/>
+      <input name="returnurl" type="hidden" value="{h:input[@name='returnurl']/@value}"/>
       <div class="input-group">
-        <input type="text" class="form-control" id="login" name="login" placeholder="Wer bist Du?" value="{h:input[@name='login']/@value}"/>
-        <input type="password" class="form-control" id="password" name="password" placeholder="Kennst Du das Paßwort?"/>
-        <span class="input-group-btn"><button type="submit" class="btn btn-primary">Los!</button></span>
+        <input tabindex="100" name="login" type="text" autofocus="autofocus" placeholder="Wer bist Du?" value="{h:input[@name='login']/@value}" class="form-control" />
+        <input tabindex="200" name="password" type="password" placeholder="Kennst Du das Paßwort?" class="form-control"/>
+        <span class="input-group-btn">
+          <button tabindex="300" type="submit" class="btn btn-primary">Los!</button>
+        </span>
       </div>
     </form>
   </xsl:template>

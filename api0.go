@@ -155,12 +155,12 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			bTok := make([]byte, 20)
 			io.ReadFull(rand.Reader, bTok)
 			if err := tmpl.Execute(w, map[string]string{
-				"title":          "Page Title",
+				"title":          app.cfg.Title,
 				"lf_linkdate":    now.Format(fmtTimeLfTime),
 				"lf_url":         "Foo",
 				"lf_title":       "Post Title",
 				"lf_description": "lorem ipsum",
-				"lf_tags":        strings.Join([]string{"my", "first", "post"}, ""),
+				"lf_tags":        strings.Join([]string{"my", "first", "post"}, " "),
 				"lf_private":     "",
 				"token":          hex.EncodeToString(bTok),
 				"returnurl":      "?do=addlink",

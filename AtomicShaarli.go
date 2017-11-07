@@ -161,6 +161,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 	switch path_info {
 	case "/config":
+		app.KeepAlive(w, r, now)
 		// make a 404 if already configured but not currently logged in
 		if !app.cfg.IsConfigured() || app.IsLoggedIn(now) {
 			app.handleSettings(w, r)
@@ -178,6 +179,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	case "":
+		app.KeepAlive(w, r, now)
 		params := r.URL.Query()
 		switch {
 		case "" == r.URL.RawQuery && !app.cfg.IsConfigured():
@@ -196,8 +198,10 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case "/tools":
+		app.KeepAlive(w, r, now)
 		return
 	case "/search":
+		app.KeepAlive(w, r, now)
 		return
 	}
 	squealFailure(r, now)

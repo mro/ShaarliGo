@@ -196,8 +196,8 @@ img.img-thumbnail {
 
 /* This is a workaround for Browsers that insert additional br tags.
  * See http://purl.mro.name/safari-xslt-br-bug */
-.renderhtml br { display:none; }
-.renderhtml br.br { display:inline; }
+.rendered.type-text br { display:none; }
+.rendered.type-text br.br { display:inline; }
       </style>
       <title><xsl:value-of select="a:title"/></title>
     </head>
@@ -212,18 +212,18 @@ img.img-thumbnail {
       <xsl:comment> https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ </xsl:comment>
       <form id="form_search" name="form_search" class="form-horizontal form-search" action="{$xml_base_pub}/../atom.cgi/search">
         <div class="input-group">
-          <input name="q" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="form-control search-query"/>
+          <input tabindex="100" name="q" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="form-control search-query"/>
           <span class="input-group-btn">
-          	<button type="submit" class="btn btn-primary">Suche</button>
+            <button tabindex="200" type="submit" class="btn btn-primary">Suche</button>
           </span>
         </div>
       </form>
 
       <form id="form_post" name="form_post" class="form-horizontal hidden-logged-out" action="{$xml_base_pub}/../atom.cgi">
         <div class="input-group">
-          <input name="post" type="text" placeholder="Was gibt's Neues? (Notiz oder URL)" class="form-control"/>
+          <input tabindex="300" name="post" type="text" placeholder="Was gibt's Neues? (Notiz oder URL)" class="form-control"/>
           <span class="input-group-btn">
-          	<button type="submit" class="btn btn-primary">Shaaaare!</button>
+            <button tabindex="400" type="submit" class="btn btn-primary">Shaaaare!</button>
           </span>
         </div>
       </form>
@@ -251,55 +251,55 @@ img.img-thumbnail {
   </xsl:template>
 
   <xsl:template name="links_commands">
-      <table id="links_commands" class="toolbar table table-bordered table-striped table-inverse" aria-label="Befehle">
-        <tbody>
-          <tr>
-            <td class="text-left">
-              <a href="{$xml_base_pub}/posts/">
-                <xsl:choose>
-                  <xsl:when test="a:link[@rel = 'up']/@title">
-                    <xsl:value-of select="a:link[@rel = 'up']/@title"/>
-                  </xsl:when>
-                  <xsl:otherwise>
-                    <xsl:value-of select="a:title"/>
-                  </xsl:otherwise>
-                </xsl:choose>
-              </a>
-            </td>
-            <td class="text-right"><a href="{$xml_base_pub}/tags/">⛅ <span class="hidden-xs"># Tags</span></a></td>
-            <td class="text-right"><a href="{$xml_base_pub}/days/">📅 <span class="hidden-xs">Tage</span></a></td>
-            <td class="text-right"><a href="{$xml_base_pub}/imgs/">🎨 <span class="hidden-xs">Bilder</span></a></td>
-            <td class="text-right hidden-logged-out"><a href="{$xml_base_pub}/../atom.cgi/tools">🔨 <span class="hidden-xs">Tools</span></a></td>
-            <td class="text-right">
-              <a id="link_login" href="{$xml_base_pub}/../atom.cgi?do=login" class="visible-logged-out"><span class="hidden-xs">Anmelden</span> 🌺 </a>
-              <a id="link_logout" href="{$xml_base_pub}/../atom.cgi?do=logout" class="hidden-logged-out"><span class="hidden-xs">Abmelden</span> 🐾 </a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <table id="links_commands" class="toolbar table table-bordered table-striped table-inverse" aria-label="Befehle">
+      <tbody>
+        <tr>
+          <td class="text-left">
+            <a tabindex="10" href="{$xml_base_pub}/posts/">
+              <xsl:choose>
+                <xsl:when test="a:link[@rel = 'up']/@title">
+                  <xsl:value-of select="a:link[@rel = 'up']/@title"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="a:title"/>
+                </xsl:otherwise>
+              </xsl:choose>
+            </a>
+          </td>
+          <td tabindex="20" class="text-right"><a href="{$xml_base_pub}/tags/">⛅ <span class="hidden-xs"># Tags</span></a></td>
+          <td tabindex="30" class="text-right"><a href="{$xml_base_pub}/days/">📅 <span class="hidden-xs">Tage</span></a></td>
+          <td tabindex="40" class="text-right"><a href="{$xml_base_pub}/imgs/">🎨 <span class="hidden-xs">Bilder</span></a></td>
+          <td class="text-right hidden-logged-out"><a href="{$xml_base_pub}/../atom.cgi/tools">🔨 <span class="hidden-xs">Tools</span></a></td>
+          <td class="text-right">
+            <a tabindex="50" id="link_login" href="{$xml_base_pub}/../atom.cgi?do=login" class="visible-logged-out"><span class="hidden-xs">Anmelden</span> 🌺 </a>
+            <a tabindex="51" id="link_logout" href="{$xml_base_pub}/../atom.cgi?do=logout" class="hidden-logged-out"><span class="hidden-xs">Abmelden</span> 🐾 </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </xsl:template>
 
   <xsl:template name="prev-next">
     <xsl:if test="a:link[@rel='first'] or a:link[@rel='last']">
-    <table class="table prev-next">
-      <tbody>
-        <tr>
-          <xsl:if test="a:link[@rel='first']">
-            <td class="text-left"><a href="{a:link[@rel='first']/@href}">1 &lt;&lt;</a></td>
-          </xsl:if>
-          <xsl:if test="a:link[@rel='previous']">
-            <td class="text-center"><a href="{a:link[@rel='previous']/@href}"><xsl:value-of select="a:link[@rel='previous']/@title"/> &lt;</a></td>
-          </xsl:if>
-          <td class="text-center"><a href="{a:link[@rel='self']/@href}">Seite <xsl:value-of select="a:link[@rel='self']/@title"/></a></td>
-          <xsl:if test="a:link[@rel='next']">
-            <td class="text-center"><a href="{a:link[@rel='next']/@href}">&gt; <xsl:value-of select="a:link[@rel='next']/@title"/></a></td>
-          </xsl:if>
-          <xsl:if test="a:link[@rel='last']">
-            <td class="text-right" ><a href="{a:link[@rel='last']/@href}">&gt;&gt; <xsl:value-of select="a:link[@rel='last']/@title"/></a></td>
-          </xsl:if>
-        </tr>
-      </tbody>
-    </table>
+      <table class="table prev-next">
+        <tbody>
+          <tr>
+            <xsl:if test="a:link[@rel='first']">
+              <td class="text-left"><a href="{a:link[@rel='first']/@href}">1 &lt;&lt;</a></td>
+            </xsl:if>
+            <xsl:if test="a:link[@rel='previous']">
+              <td class="text-center"><a href="{a:link[@rel='previous']/@href}"><xsl:value-of select="a:link[@rel='previous']/@title"/> &lt;</a></td>
+            </xsl:if>
+            <td class="text-center"><a href="{a:link[@rel='self']/@href}">Seite <xsl:value-of select="a:link[@rel='self']/@title"/></a></td>
+            <xsl:if test="a:link[@rel='next']">
+              <td class="text-center"><a href="{a:link[@rel='next']/@href}">&gt; <xsl:value-of select="a:link[@rel='next']/@title"/></a></td>
+            </xsl:if>
+            <xsl:if test="a:link[@rel='last']">
+              <td class="text-right" ><a href="{a:link[@rel='last']/@href}">&gt;&gt; <xsl:value-of select="a:link[@rel='last']/@title"/></a></td>
+            </xsl:if>
+          </tr>
+        </tbody>
+      </table>
     </xsl:if>
   </xsl:template>
 
@@ -379,17 +379,14 @@ img.img-thumbnail {
           </xsl:call-template>
         </h5>
       </xsl:if>
-      <div>
-        <div class="renderhtml">
-          <!-- html content won't work that easy (out-of-the-firebox): https://bugzilla.mozilla.org/show_bug.cgi?id=98168#c140 -->
-          <!-- workaround via jquery: http://stackoverflow.com/a/9714567 -->
+      <div class="content">
+        <!-- html content won't work that easy (out-of-the-firebox): https://bugzilla.mozilla.org/show_bug.cgi?id=98168#c140 -->
+        <!-- workaround via jquery: http://stackoverflow.com/a/9714567 -->
 
-          <!-- Überbleibsel vom Shaarli Atom Feed raus: -->
-          <!-- xsl:value-of select="substring-before(a:content[not(@src)], '&lt;br&gt;(&lt;a href=&quot;https://links.mro.name/?')" disable-output-escaping="yes" / -->
-          <xsl:call-template name="linefeed2br">
-            <xsl:with-param name="string" select="a:content"/>
-          </xsl:call-template>
-        </div>
+        <!-- Überbleibsel vom Shaarli Atom Feed raus: -->
+        <!-- xsl:value-of select="substring-before(a:content[not(@src)], '&lt;br&gt;(&lt;a href=&quot;https://links.mro.name/?')" disable-output-escaping="yes" / -->
+        <xsl:apply-templates select="a:content"/>
+
         <p class="categories" title="Schlagworte">
           <xsl:for-each select="a:category">
             <xsl:sort select="@term"/>
@@ -398,6 +395,14 @@ img.img-thumbnail {
         </p>
       </div>
     </li>
+  </xsl:template>
+
+  <xsl:template match="a:content[not(@type) or @type = 'text']">
+    <p class="rendered type-text">
+      <xsl:call-template name="linefeed2br">
+        <xsl:with-param name="string" select="."/>
+      </xsl:call-template>
+    </p>
   </xsl:template>
 
 </xsl:stylesheet>

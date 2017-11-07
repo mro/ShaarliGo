@@ -130,13 +130,13 @@ div.if_hasdiv_pwd { display:none; }
             <div class="form-group">
               <label for="title" class="control-label col-sm-1">Titel</label>
               <div class="col-sm-11">
-                <input name="title" autofocus="autofocus" type="text" placeholder="My AtomicShaarli 🐳" required="required" pattern="\S(.*\S)?" value="{h:input[@name='title']/@value}" class="form-control"/>
+                <input tabindex="100" name="title" autofocus="autofocus" type="text" placeholder="My AtomicShaarli 🐳" required="required" pattern="\S(.*\S)?" value="{h:input[@name='title']/@value}" class="form-control"/>
               </div>
             </div>
             <div class="form-group">
               <label for="setlogin" class="control-label col-sm-1">User</label>
               <div class="col-sm-11">
-                <input name="setlogin" type="text" placeholder="Benutzername dieses neuen AtomicShaarli" required="required" pattern="\S(.*\S)?" _oninvalid="setCustomValidity('Das ist nicht Dein Ernst oder?')" value="{h:input[@name='setlogin']/@value}" class="form-control"/>
+                <input tabindex="200" name="setlogin" type="text" placeholder="Benutzername dieses neuen AtomicShaarli" required="required" pattern="\S(.*\S)?" _oninvalid="setCustomValidity('Das ist nicht Dein Ernst oder?')" value="{h:input[@name='setlogin']/@value}" class="form-control"/>
               </div>
             </div>
 
@@ -144,20 +144,20 @@ div.if_hasdiv_pwd { display:none; }
               <div class="if_has_pwd form-group">
                 <label for="oldpassword" class="control-label col-sm-1">Pwd (bestehend)</label>
                 <div class="col-sm-11">
-                  <input name="oldpassword" type="password" placeholder="Das bisherige Passwort" required="required" minlength="12" pattern="\S(.*\S)?" value="{h:input[@name='oldpassword']/@value}" class="form-control"/>
+                  <input tabindex="300" name="oldpassword" type="password" placeholder="Das bisherige Passwort" required="required" minlength="12" pattern="\S(.*\S)?" value="{h:input[@name='oldpassword']/@value}" class="form-control"/>
                 </div>
               </div>
             </xsl:if>
             <div class="form-group">
               <label for="setpassword" class="control-label col-sm-1">Pwd</label>
               <div class="col-sm-11">
-                <input name="setpassword" type="password" placeholder="gute Passworte: xkcd.com/936" required="required" minlength="12" pattern="\S(.*\S)?" value="{h:input[@name='setpassword']/@value}" class="form-control"/>
+                <input tabindex="400" name="setpassword" type="password" placeholder="gute Passworte: xkcd.com/936" required="required" minlength="12" pattern="\S(.*\S)?" value="{h:input[@name='setpassword']/@value}" class="form-control"/>
               </div>
             </div>
             <div class="if_has_pwd form-group">
               <label for="confirmpassword" class="control-label col-sm-1">Pwd (Wiederholung)</label>
               <div class="col-sm-11">
-                <input name="confirmpassword" type="password" placeholder="dasselbe nochmal" required="required" minlength="12" pattern="\S(.*\S)?" class="form-control"/>
+                <input tabindex="500" name="confirmpassword" type="password" placeholder="dasselbe nochmal" required="required" minlength="12" pattern="\S(.*\S)?" class="form-control"/>
               </div>
             </div>
             <!-- evtl. Zeitzone, continent / city? -->
@@ -167,25 +167,25 @@ div.if_hasdiv_pwd { display:none; }
             <div class="form-group">
               <label for="import_shaarli_url" class="control-label col-sm-1">alte Shaarli Adresse</label>
               <div class="col-sm-11">
-                <input name="import_shaarli_url" type="url" placeholder="example.com/shaarli" pattern="\S+" class="form-control"/>
+                <input tabindex="600" name="import_shaarli_url" type="url" placeholder="example.com/shaarli" pattern="\S+" class="form-control"/>
               </div>
             </div>
             <div class="form-group">
               <label for="import_shaarli_setlogin" class="control-label col-sm-1">Benutzer</label>
               <div class="col-sm-11">
-                <input name="import_shaarli_setlogin" type="text" placeholder="Benutzername des alten Shaarli" class="form-control"/>
+                <input tabindex="700" name="import_shaarli_setlogin" type="text" placeholder="Benutzername des alten Shaarli" class="form-control"/>
               </div>
             </div>
             <div class="form-group">
               <label for="import_shaarli_setpassword" class="control-label col-sm-1">Pwd</label>
               <div class="col-sm-11">
-                <input name="import_shaarli_password" type="password" placeholder="Passwort des alten Shaarli" class="form-control"/>
+                <input tabindex="800" name="import_shaarli_password" type="password" placeholder="Passwort des alten Shaarli" class="form-control"/>
               </div>
             </div>
 
             <div class="form-group">
               <div class="col-sm-11 col-sm-offset-1">
-                <button type="submit" class="btn btn-primary">Loooooos!</button>
+                <button tabindex="900" type="submit" class="btn btn-primary">Loooooos!</button>
               </div>
             </div>
           </form>
