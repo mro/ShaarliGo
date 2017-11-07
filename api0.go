@@ -154,7 +154,6 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 `)
 			bTok := make([]byte, 20)
 			io.ReadFull(rand.Reader, bTok)
-			tok := hex.EncodeToString(bTok)
 			if err := tmpl.Execute(w, map[string]string{
 				"title":          "Page Title",
 				"lf_linkdate":    now.Format(fmtTimeLfTime),
@@ -163,7 +162,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 				"lf_description": "lorem ipsum",
 				"lf_tags":        strings.Join([]string{"my", "first", "post"}, ""),
 				"lf_private":     "",
-				"token":          tok,
+				"token":          hex.EncodeToString(bTok),
 				"returnurl":      "?do=addlink",
 			}); err != nil {
 				http.Error(w, "Coudln't send linkform: "+err.Error(), http.StatusInternalServerError)

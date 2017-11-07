@@ -20,9 +20,11 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -113,6 +115,8 @@ func (bans *BanPenalties) squealFailure(key string, now time.Time) bool {
 	pen.End = pen.End.Add(4 * time.Hour)
 	pen.Badness += 1
 	bans.Penalties[key] = pen
+
+	log.Println(strings.Join([]string{"squeal", key, strconv.Itoa(pen.Badness)}, " "))
 
 	for ip, pen := range bans.Penalties {
 		if pen.End.Before(now) {

@@ -41,6 +41,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/gorilla/sessions"
@@ -115,6 +116,7 @@ func ifErrRespond500(err error, w http.ResponseWriter, r *http.Request) bool {
 }
 
 func handleMux(w http.ResponseWriter, r *http.Request) {
+	log.Println(strings.Join([]string{r.RemoteAddr, r.Method, r.URL.String()}, " "))
 	w.Header().Set("Server", myselfNamespace)
 	w.Header().Set("CGI-Server", myselfNamespace)
 
@@ -194,9 +196,9 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case "/tools":
-
+		return
 	case "/search":
-
+		return
 	}
 	squealFailure(r, now)
 	http.NotFound(w, r)
