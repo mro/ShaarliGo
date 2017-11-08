@@ -39,8 +39,8 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	// and https://github.com/mro/ShaarliOS/blob/master/ios/ShaarliOS/API/ShaarliCmd.m#L386
 	case http.MethodGet:
-		returnurl := ""
-		if ru := r.URL.Query()["returnurl"]; ru != nil {
+		returnurl := r.Referer()
+		if ru := r.URL.Query()["returnurl"]; ru != nil && 1 == len(ru) && "" != ru[0] {
 			returnurl = ru[0]
 		}
 		if tmpl, err := template.New("login").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">

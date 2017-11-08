@@ -54,11 +54,11 @@ const toSession = 30 * time.Minute
 func main() {
 	{ // log to custom logfile rather than stderr (which may not accessible on shared hosting)
 		dst := filepath.Join("app", "var", "error.log")
-		if err := os.MkdirAll(filepath.Dir(dst), 0700); err != nil {
+		if err := os.MkdirAll(filepath.Dir(dst), 0770); err != nil {
 			log.Fatal("Couldn't create app/var dir: " + err.Error())
 			return
 		}
-		if w, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600); err != nil {
+		if w, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0660); err != nil {
 			log.Fatal("Couldn't create open logfile: " + err.Error())
 			return
 		} else {
@@ -101,18 +101,6 @@ func (app App) IsLoggedIn(now time.Time) bool {
 	// or https://stackoverflow.com/questions/28616830/gorilla-sessions-how-to-automatically-update-cookie-expiration-on-request
 	timeout, ok := app.ses.Values["timeout"].(int64)
 	return ok && now.Before(time.Unix(timeout, 0))
-}
-
-func respond(code int, msg string, w http.ResponseWriter, r *http.Request) {
-	http.Error(w, msg, code)
-}
-
-func ifErrRespond500(err error, w http.ResponseWriter, r *http.Request) bool {
-	if err != nil {
-		respond(http.StatusInternalServerError, "error:\n", w, r)
-		io.WriteString(w, err.Error())
-	}
-	return err != nil
 }
 
 func handleMux(w http.ResponseWriter, r *http.Request) {
@@ -161,15 +149,15 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 	switch path_info {
 	case "/config":
-		app.KeepAlive(w, r, now)
 		// make a 404 if already configured but not currently logged in
 		if !app.cfg.IsConfigured() || app.IsLoggedIn(now) {
+			app.KeepAlive(w, r, now)
 			app.handleSettings(w, r)
 			return
 		}
 	case "/session":
+		// maybe cache, but never KeepAlive
 		if app.IsLoggedIn(now) {
-			// maybe cache, but don't KeepAlive
 			// w.Header().Set("Etag", r.URL.Path)
 			// w.Header().Set("Cache-Control", "max-age=60") // 60 Seconds
 			io.WriteString(w, app.cfg.AuthorName)
@@ -197,9 +185,6 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			app.handleDoLogout(w, r)
 			return
 		}
-	case "/tools":
-		app.KeepAlive(w, r, now)
-		return
 	case "/search":
 		app.KeepAlive(w, r, now)
 		return
