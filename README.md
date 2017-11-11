@@ -1,5 +1,5 @@
 
-# AtomicShaarli
+# GoShaarli
 
 shaarli on diet. Built on Atom.
 
@@ -45,30 +45,30 @@ shaarli on diet. Built on Atom.
 16. trackback/pingback
 
 ```
-GET  atom.cgi
-GET  atom.cgi/config
-POST atom.cgi/config 							token? session?
+GET  goshaarli.cgi
+GET  goshaarli.cgi/config
+POST goshaarli.cgi/config 							token? session?
 GET  pub/posts/Kk-eZA
 GET  pub/tags/Design
-GET  atom.cgi?do=login
-POST atom.cgi?do=login
-GET  atom.cgi/logout
-GET  atom.cgi/login
-POST atom.cgi/login
-GET  atom.cgi/logout
-GET  atom.cgi?post=url&title=Foo&source=AtomicShaarli
-POST atom.cgi?do=login&login=uid&password=pwd&token=xyz
-POST atom.cgi?post=url&title=Foo&source=AtomicShaarli
+GET  goshaarli.cgi?do=login
+POST goshaarli.cgi?do=login
+GET  goshaarli.cgi/logout
+GET  goshaarli.cgi/login
+POST goshaarli.cgi/login
+GET  goshaarli.cgi/logout
+GET  goshaarli.cgi?post=url&title=Foo&source=GoShaarli
+POST goshaarli.cgi?do=login&login=uid&password=pwd&token=xyz
+POST goshaarli.cgi?post=url&title=Foo&source=GoShaarli
 ```
 
 ### 0. Routes
 
 GET
 
-atom.cgi
-atom.cgi/config
-atom.cgi/session
-atom.cgi?q=%23Design+%23URI+Foo+Bar
+goshaarli.cgi
+goshaarli.cgi/config
+goshaarli.cgi/session
+goshaarli.cgi?q=%23Design+%23URI+Foo+Bar
 ./pub/posts
 ./~me/posts                    	Merged. Check Basic/Digest Auth!!
 ./@me/posts/DK0BTg							allow other ids e.g. guid (base64) or sha1 (base64)
@@ -84,27 +84,27 @@ announced via link/@rel/@uri https://martinfowler.com/articles/richardsonMaturit
 
 POST
 
-atom.cgi/config
-atom.cgi/session
-atom.cgi/session								(HTML form fallback)
-atom.cgi/~me/posts
-atom.cgi/@me/posts
-atom.cgi/posts
-atom.cgi/enclosures
-atom.cgi/posts/DK0BTg						(HTML form fallback)
+goshaarli.cgi/config
+goshaarli.cgi/session
+goshaarli.cgi/session								(HTML form fallback)
+goshaarli.cgi/~me/posts
+goshaarli.cgi/@me/posts
+goshaarli.cgi/posts
+goshaarli.cgi/enclosures
+goshaarli.cgi/posts/DK0BTg						(HTML form fallback)
 
 PUT
 
-atom.cgi/config
-atom.cgi/@me/tags/Design
-atom.cgi/posts/DK0BTg
-atom.cgi/enclosures/foo.svg
+goshaarli.cgi/config
+goshaarli.cgi/@me/tags/Design
+goshaarli.cgi/posts/DK0BTg
+goshaarli.cgi/enclosures/foo.svg
 
 DELETE
 
-atom.cgi/~me/tags/Design
-atom.cgi/posts/DK0BTg
-atom.cgi/enclosures/foo.svg
+goshaarli.cgi/~me/tags/Design
+goshaarli.cgi/posts/DK0BTg
+goshaarli.cgi/enclosures/foo.svg
 
 ### Shaarli(OS|er) Compatibilty
 
@@ -113,15 +113,15 @@ and https://github.com/mro/Shaarli-API-test/blob/master/tests/test-post.sh
 
 Login/Logout
 
-GET    atom.cgi?do=login
-POST   atom.cgi?do=login
-GET  	 atom.cgi?do=logout
+GET    goshaarli.cgi?do=login
+POST   goshaarli.cgi?do=login
+GET  	 goshaarli.cgi?do=logout
 
 Posting
 
-GET  atom.cgi?post=url&title=Foo&source=AtomicShaarli -> ?do=login
-POST atom.cgi?do=login&login=uid&password=pwd&token=xyz -> .
-POST atom.cgi?post=url&title=Foo&source=AtomicShaarli -> ../../@me/posts?#Kk-eZA
+GET  goshaarli.cgi?post=url&title=Foo&source=GoShaarli -> ?do=login
+POST goshaarli.cgi?do=login&login=uid&password=pwd&token=xyz -> .
+POST goshaarli.cgi?post=url&title=Foo&source=GoShaarli -> ../../@me/posts?#Kk-eZA
 
 ### 0.1 Storage
 

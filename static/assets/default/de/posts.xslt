@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  AtomicShaarli, microblogging detox
-  Copyright (C) 2017-2017  Marcus Rohrmoser, http://purl.mro.name/AtomicShaarli
+  GoShaarli, microblogging detox
+  Copyright (C) 2017-2017  Marcus Rohrmoser, http://purl.mro.name/GoShaarli
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -119,7 +119,7 @@ xhr.onreadystatechange = function(data0) {
     // store the result locally and use as initial value for later calls.
   }
 }
-xhr.open('GET', xml_base_pub + '/../atom.cgi/session');
+xhr.open('GET', xml_base_pub + '/../goshaarli.cgi/session');
 xhr.send(null);
 // ]]>
         </script>
@@ -210,7 +210,7 @@ img.img-thumbnail {
       <xsl:call-template name="links_commands"/>
 
       <xsl:comment> https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ </xsl:comment>
-      <form id="form_search" name="form_search" class="form-horizontal form-search" action="{$xml_base_pub}/../atom.cgi/search">
+      <form id="form_search" name="form_search" class="form-horizontal form-search" action="{$xml_base_pub}/../goshaarli.cgi/search">
         <div class="input-group">
           <input tabindex="100" name="q" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="form-control search-query"/>
           <span class="input-group-btn">
@@ -219,7 +219,7 @@ img.img-thumbnail {
         </div>
       </form>
 
-      <form id="form_post" name="form_post" class="form-horizontal hidden-logged-out" action="{$xml_base_pub}/../atom.cgi">
+      <form id="form_post" name="form_post" class="form-horizontal hidden-logged-out" action="{$xml_base_pub}/../goshaarli.cgi">
         <div class="input-group">
           <input tabindex="300" name="post" type="text" placeholder="Was gibt's Neues? (Notiz oder URL)" class="form-control"/>
           <span class="input-group-btn">
@@ -269,10 +269,10 @@ img.img-thumbnail {
           <td tabindex="20" class="text-right"><a href="{$xml_base_pub}/tags/">⛅ <span class="hidden-xs"># Tags</span></a></td>
           <td tabindex="30" class="text-right"><a href="{$xml_base_pub}/days/">📅 <span class="hidden-xs">Tage</span></a></td>
           <td tabindex="40" class="text-right"><a href="{$xml_base_pub}/imgs/">🎨 <span class="hidden-xs">Bilder</span></a></td>
-          <td class="text-right hidden-logged-out"><a href="{$xml_base_pub}/../atom.cgi/tools">🔨 <span class="hidden-xs">Tools</span></a></td>
+          <td class="text-right hidden-logged-out"><a href="{$xml_base_pub}/../goshaarli.cgi/tools">🔨 <span class="hidden-xs">Tools</span></a></td>
           <td class="text-right">
-            <a tabindex="50" id="link_login" href="{$xml_base_pub}/../atom.cgi?do=login" class="visible-logged-out"><span class="hidden-xs">Anmelden</span> 🌺 </a>
-            <a tabindex="51" id="link_logout" href="{$xml_base_pub}/../atom.cgi?do=logout" class="hidden-logged-out"><span class="hidden-xs">Abmelden</span> 🐾 </a>
+            <a tabindex="50" id="link_login" href="{$xml_base_pub}/../goshaarli.cgi?do=login" class="visible-logged-out"><span class="hidden-xs">Anmelden</span> 🌺 </a>
+            <a tabindex="51" id="link_logout" href="{$xml_base_pub}/../goshaarli.cgi?do=logout" class="hidden-logged-out"><span class="hidden-xs">Abmelden</span> 🐾 </a>
           </td>
         </tr>
       </tbody>

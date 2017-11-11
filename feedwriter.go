@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/AtomicShaarli
+// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/GoShaarli
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ func mustParseURL(u string) *url.URL {
 	}
 }
 
-const cgiName = "atom.cgi"
+const cgiName = "goshaarli.cgi"
 const fileName = "index.xml" // could be 'index.atom' but xml may have a proper mimetype out of the box
 const dirAssets = "assets"
 const dirApp = "app"

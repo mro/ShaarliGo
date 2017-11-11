@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/AtomicShaarli
+// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/GoShaarli
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	// "hash/crc32"
 	"io"
 	"net/url"
 	"time"
@@ -57,6 +58,40 @@ func TestLfTimeFmt(t *testing.T) {
 	assert.Equal(t, "20171106_223225", t0.Format(fmtTimeLfTime), "Na klar")
 }
 
+func TestParseLinkUrl(t *testing.T) {
+	t.Parallel()
+
+	// vorher schon geklärt:
+	// - ist's die rechte Seite von :// eines bekannten Links
+	// - ist's eine Id eines bekannten Links
+
+	u, e := url.Parse("www.heise.de")
+	assert.Nil(t, e, "aua")
+	assert.Equal(t, "www.heise.de", u.String(), "aua")
+	assert.False(t, u.IsAbs(), "aua")
+
+	u, e = url.Parse("http://www.heise.de")
+	assert.Equal(t, "http://www.heise.de", u.String(), "aua")
+	assert.True(t, u.IsAbs(), "aua")
+
+	u, e = url.Parse("https://www.heise.de")
+	assert.Equal(t, "https://www.heise.de", u.String(), "aua")
+	assert.True(t, u.IsAbs(), "aua")
+
+	u, e = url.Parse("voo8Uo")
+	assert.Equal(t, "voo8Uo", u.String(), "aua")
+	assert.False(t, u.IsAbs(), "aua")
+
+	assert.Nil(t, e, "aua")
+	assert.NotNil(t, u, "aua")
+
+	assert.Equal(t, "http://heise.de", parseLinkUrl("heise.de").String(), "aua")
+	assert.Equal(t, "http://heise.de", parseLinkUrl("http://heise.de").String(), "aua")
+	assert.Equal(t, "https://heise.de", parseLinkUrl("https://heise.de").String(), "aua")
+	assert.Nil(t, parseLinkUrl("Eine Notiz"), "aua")
+	assert.Nil(t, parseLinkUrl("genau www.heise.de"), "aua")
+}
+
 func TestToken(t *testing.T) {
 	t.Parallel()
 
@@ -70,4 +105,17 @@ func TestToken(t *testing.T) {
 	_, err := io.ReadFull(rand.Reader, src)
 	assert.Nil(t, err, "aua")
 	assert.NotNil(t, hex.EncodeToString(src), "aua")
+}
+
+func TestSmallHash(t *testing.T) {
+	t.Parallel()
+
+	// assert.Equal(t, uint32(0xc2d07353), crc32.Checksum([]byte("20171108_231054"), crc32.MakeTable((0xC96C5795<<32)|0xD7870F42)), "hm")
+	// assert.Equal(t, "wtBzUw", smallHash("20171108_231054"), "aha")
+	// assert.Equal(t, "yZH23w", smallHash("20111006_131924"), "the original from https://github.com/sebsauvage/Shaarli/blob/master/index.php#L228")
+	assert.Equal(t, "AfsQ8g", smallHash("20111006_131924"), "strange - that's what GO produces.")
+
+	tt, _ := time.Parse(fmtTimeLfTime, "20171108_231054")
+	assert.Equal(t, "_o4DWg", smallDateHash(tt), "aha")
+
 }

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/AtomicShaarli
+// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/GoShaarli
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,13 +19,17 @@ package main
 
 import (
 	"crypto/rand"
+	"encoding/base64"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"hash/crc32"
 	"html/template"
 	"io"
 	"net/http"
 	"net/url"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -33,6 +37,45 @@ import (
 )
 
 const fmtTimeLfTime = "20060102_150405"
+
+func parseLinkUrl(raw string) *url.URL {
+	if ret, err := url.Parse(raw); err == nil {
+		if !ret.IsAbs() {
+			if ret, err = url.Parse("http://" + raw); err != nil {
+				return nil
+			}
+		}
+		return ret
+	} else {
+		return nil
+	}
+}
+
+/* Returns the small hash of a string, using RFC 4648 base64url format
+   eg. smallHash('20111006_131924') --> yZH23w
+   Small hashes:
+     - are unique (well, as unique as crc32, at last)
+     - are always 6 characters long.
+     - only use the following characters: a-z A-Z 0-9 - _ @
+     - are NOT cryptographically secure (they CAN be forged)
+   In Shaarli, they are used as a tinyurl-like link to individual entries.
+
+   https://github.com/sebsauvage/Shaarli/blob/master/index.php#L228
+*/
+func smallHash(text string) string {
+	// ret:= rtrim(base64_encode(hash('crc32',$text,true)),'=');
+	crc := crc32.ChecksumIEEE([]byte(text))
+	bs := make([]byte, 4) // https://stackoverflow.com/a/16889357
+	binary.LittleEndian.PutUint32(bs, crc)
+	return base64.RawURLEncoding.EncodeToString(bs)
+}
+
+func smallDateHash(tt time.Time) string {
+	bs := make([]byte, 4) // https://stackoverflow.com/a/16889357
+	// unix time in seconds as uint32
+	binary.LittleEndian.PutUint32(bs, uint32(tt.Unix()&0xFFFFFFFF))
+	return base64.RawURLEncoding.EncodeToString(bs)
+}
 
 func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
@@ -126,6 +169,57 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		// must be compatible to https://github.com/mro/Shaarli-API-Test/...
 		// and https://github.com/mro/ShaarliOS/blob/master/ios/ShaarliOS/API/ShaarliCmd.m#L386
 
+		// 1. pull post= title= and source= and from GET
+		// 2. url or note?
+		// 3. if url:
+		//   a. already there? findEntryForLink
+		//   b. map post, title and source to a new (sparse?) atom entry - feasible in JavaScript as well?
+		//   c. turn atom entry to form map
+
+		bTok := make([]byte, 20) // keep in local session or encrypted cookie
+		io.ReadFull(rand.Reader, bTok)
+
+		params := r.URL.Query()
+
+		data := map[string]string{
+			"title": app.cfg.Title,
+			// "lf_linkdate": now.Format(fmtTimeLfTime),
+			//				"lf_url":         "",
+			//				"lf_title":       "",
+			//				"lf_description": "",
+			//				"lf_tags":        "", strings.Join([]string{"my", "first", "post"}, " "),
+			//				"lf_private":     "",
+			"token": hex.EncodeToString(bTok),
+		}
+
+		feed, _ := FeedFromFileName(filepath.Join(dirApp, "feed.xml"))
+
+		var ent *Entry = nil
+		if 1 == len(params["post"]) && !(len(params["title"]) == 1 && "" != params["title"][0]) {
+			url := parseLinkUrl(params["post"][0])
+			ent = feed.findOrCreateEntryForURL(url, now)
+			if url == nil {
+				ent.Title = HumanText{Body: params["post"][0]}
+			}
+		}
+		if 1 == len(params["title"]) {
+			ent.Title = HumanText{Body: params["title"][0]}
+		}
+		if 1 == len(params["source"]) {
+			data["lf_source"] = params["source"][0]
+		}
+
+		if ent != nil {
+			for _, li := range ent.Links {
+				if "" == li.Rel {
+					data["lf_url"] = li.Href
+				}
+			}
+			data["lf_title"] = ent.Title.Body
+			data["lf_description"] = ent.Content.Body
+			// todo: tags
+		}
+
 		if tmpl, err := template.New("linkform").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
 <head><title>{{index . "title"}}</title></head>
 <body>
@@ -152,24 +246,15 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
   https://github.com/mro/ShaarliOS/blob/master/ios/ShaarliOS/API/ShaarliCmd.m#L386
 -->
 `)
-			bTok := make([]byte, 20)
-			io.ReadFull(rand.Reader, bTok)
-			if err := tmpl.Execute(w, map[string]string{
-				"title":          app.cfg.Title,
-				"lf_linkdate":    now.Format(fmtTimeLfTime),
-				"lf_url":         "Foo",
-				"lf_title":       "Post Title",
-				"lf_description": "lorem ipsum",
-				"lf_tags":        strings.Join([]string{"my", "first", "post"}, " "),
-				"lf_private":     "",
-				"token":          hex.EncodeToString(bTok),
-				"returnurl":      "?do=addlink",
-			}); err != nil {
+			if err := tmpl.Execute(w, data); err != nil {
 				http.Error(w, "Coudln't send linkform: "+err.Error(), http.StatusInternalServerError)
 			}
 		}
 	case http.MethodPost:
 		// 'POST' validate, respond error (and squeal) or post and redirect
+
+		// close bookmarklet popup in case!
+
 		return
 	default:
 		squealFailure(r, now)

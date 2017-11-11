@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  AtomicShaarli, microblogging detox
-  Copyright (C) 2017-2017  Marcus Rohrmoser, http://purl.mro.name/AtomicShaarli
+  GoShaarli, microblogging detox
+  Copyright (C) 2017-2017  Marcus Rohrmoser, http://purl.mro.name/GoShaarli
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -130,13 +130,13 @@ div.if_hasdiv_pwd { display:none; }
             <div class="form-group">
               <label for="title" class="control-label col-sm-1">Titel</label>
               <div class="col-sm-11">
-                <input tabindex="100" name="title" autofocus="autofocus" type="text" placeholder="My AtomicShaarli 🐳" required="required" pattern="\S(.*\S)?" value="{h:input[@name='title']/@value}" class="form-control"/>
+                <input tabindex="100" name="title" autofocus="autofocus" type="text" placeholder="My GoShaarli 🐳" required="required" pattern="\S(.*\S)?" value="{h:input[@name='title']/@value}" class="form-control"/>
               </div>
             </div>
             <div class="form-group">
               <label for="setlogin" class="control-label col-sm-1">User</label>
               <div class="col-sm-11">
-                <input tabindex="200" name="setlogin" type="text" placeholder="Benutzername dieses neuen AtomicShaarli" required="required" pattern="\S(.*\S)?" _oninvalid="setCustomValidity('Das ist nicht Dein Ernst oder?')" value="{h:input[@name='setlogin']/@value}" class="form-control"/>
+                <input tabindex="200" name="setlogin" type="text" placeholder="Benutzername dieses neuen GoShaarli" required="required" pattern="\S(.*\S)?" _oninvalid="setCustomValidity('Das ist nicht Dein Ernst oder?')" value="{h:input[@name='setlogin']/@value}" class="form-control"/>
               </div>
             </div>
 

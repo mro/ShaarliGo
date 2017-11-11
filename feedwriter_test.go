@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/AtomicShaarli
+// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/GoShaarli
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -169,7 +169,7 @@ func TestWriteFeedsEmpty1(t *testing.T) {
 	assert.Nil(t, err, "soso")
 	assert.Equal(t, []string{"pub/days/0001-01-01", "pub/posts"}, keys4map(sfw.bufs), "soso")
 
-	assert.Equal(t, 1393, len(sfw.bufs["pub/days/0001-01-01"].b), "aha")
+	assert.Equal(t, 1398, len(sfw.bufs["pub/days/0001-01-01"].b), "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../assets/default/de/posts.xslt'?>
 <!--
@@ -197,7 +197,7 @@ func TestWriteFeedsEmpty1(t *testing.T) {
     <id>http://example.com/pub/posts</id>
     <updated>0001-01-01T00:00:00Z</updated>
     <link href="pub/posts" rel="self"></link>
-    <link href="atom.cgi/pub/posts" rel="edit"></link>
+    <link href="goshaarli.cgi/pub/posts" rel="edit"></link>
     <link href=".." rel="up"></link>
   </entry>
 </feed>
@@ -226,7 +226,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
 		"pub/tags/aha",
 	}, keys4map(sfw.bufs), "soso")
 
-	assert.Equal(t, 1552, len(sfw.bufs["pub/days/1990-12-31"].b), "aha")
+	assert.Equal(t, 1557, len(sfw.bufs["pub/days/1990-12-31"].b), "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../assets/default/de/posts.xslt'?>
 <!--
@@ -254,7 +254,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
     <id>http://example.com/pub/posts/e0</id>
     <updated>1990-12-31T01:02:03+01:00</updated>
     <link href="pub/posts/e0" rel="self"></link>
-    <link href="atom.cgi/pub/posts/e0" rel="edit"></link>
+    <link href="goshaarli.cgi/pub/posts/e0" rel="edit"></link>
     <link href=".." rel="up" title="Hello, Atom!"></link>
     <category term="aha" scheme="http://example.com/pub/tags/"></category>
   </entry>
@@ -283,7 +283,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
   <id>http://example.com/pub/posts/e0</id>
   <updated>1990-12-31T01:02:03+01:00</updated>
   <link href="pub/posts/e0" rel="self"></link>
-  <link href="atom.cgi/pub/posts/e0" rel="edit"></link>
+  <link href="goshaarli.cgi/pub/posts/e0" rel="edit"></link>
   <link href=".." rel="up" title="Hello, Atom!"></link>
   <category term="aha" scheme="http://example.com/pub/tags/"></category>
 </entry>
@@ -359,7 +359,7 @@ func TestWriteFeedsPaged(t *testing.T) {
     <id>http://example.com/pub/posts/e2</id>
     <updated>1990-12-31T02:02:02+01:00</updated>
     <link href="pub/posts/e2" rel="self"></link>
-    <link href="atom.cgi/pub/posts/e2" rel="edit"></link>
+    <link href="goshaarli.cgi/pub/posts/e2" rel="edit"></link>
     <link href=".." rel="up" title="Hello, Atom!"></link>
   </entry>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
@@ -367,7 +367,7 @@ func TestWriteFeedsPaged(t *testing.T) {
     <id>http://example.com/pub/posts/e1</id>
     <updated>1990-12-31T01:01:01+01:00</updated>
     <link href="pub/posts/e1" rel="self"></link>
-    <link href="atom.cgi/pub/posts/e1" rel="edit"></link>
+    <link href="goshaarli.cgi/pub/posts/e1" rel="edit"></link>
     <link href=".." rel="up" title="Hello, Atom!"></link>
   </entry>
 </feed>
@@ -404,7 +404,7 @@ func TestWriteFeedsPaged(t *testing.T) {
     <id>http://example.com/pub/posts/e0</id>
     <updated>1990-12-30T00:00:00+01:00</updated>
     <link href="pub/posts/e0" rel="self"></link>
-    <link href="atom.cgi/pub/posts/e0" rel="edit"></link>
+    <link href="goshaarli.cgi/pub/posts/e0" rel="edit"></link>
     <link href=".." rel="up" title="Hello, Atom!"></link>
   </entry>
 </feed>
@@ -433,7 +433,7 @@ func TestWriteFeedsPaged(t *testing.T) {
   <id>http://example.com/pub/posts/e0</id>
   <updated>1990-12-30T00:00:00+01:00</updated>
   <link href="pub/posts/e0" rel="self"></link>
-  <link href="atom.cgi/pub/posts/e0" rel="edit"></link>
+  <link href="goshaarli.cgi/pub/posts/e0" rel="edit"></link>
   <link href=".." rel="up" title="Hello, Atom!"></link>
 </entry>
 `,

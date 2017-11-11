@@ -90,10 +90,10 @@ min-width: 40px;
           <td class="text-right"><a href="{$xml_base_pub}/tags/">⛅ <span class="hidden-xs"># Tags</span></a></td>
           <td class="text-right"><a href="{$xml_base_pub}/days/">📅 <span class="hidden-xs">Tage</span></a></td>
           <td class="text-right"><a href="{$xml_base_pub}/imgs/">🎨 <span class="hidden-xs">Bilder</span></a></td>
-          <td class="text-right hidden-logged-out"><a href="{$xml_base_pub}/../atom.cgi?do=tools">🔨 <span class="hidden-xs">Tools</span></a></td>
+          <td class="text-right hidden-logged-out"><a href="{$xml_base_pub}/../goshaarli.cgi?do=tools">🔨 <span class="hidden-xs">Tools</span></a></td>
           <td class="text-right">
-            <a id="link_login" href="{$xml_base_pub}/../atom.cgi?do=login" class="visible-logged-out"><span class="hidden-xs">Anmelden</span> 🌺 </a>
-            <a id="link_logout" href="{$xml_base_pub}/../atom.cgi?do=logout" class="hidden-logged-out"><span class="hidden-xs">Abmelden</span> 🍃 </a>
+            <a id="link_login" href="{$xml_base_pub}/../goshaarli.cgi?do=login" class="visible-logged-out"><span class="hidden-xs">Anmelden</span> 🌺 </a>
+            <a id="link_logout" href="{$xml_base_pub}/../goshaarli.cgi?do=logout" class="hidden-logged-out"><span class="hidden-xs">Abmelden</span> 🍃 </a>
           </td>
         </tr>
       </tbody>
@@ -122,19 +122,19 @@ min-width: 40px;
       </div>
       <div class="input-group">
         <div class="col-sm-12">
-          <input autofocus="autofocus" name="lf_title" type="text" placeholder="Ein Titel" value="{h:input[@name='lf_title']/@value}" class="form-control"/>
+          <input autofocus="autofocus" name="lf_title" type="text" placeholder="Ein Titel, gerne mit #Schlagwort" value="{h:input[@name='lf_title']/@value}" class="form-control"/>
         </div>
       </div>
       <div class="input-group">
         <div class="col-sm-12">
-          <textarea name="lf_description" placeholder="Lorem ipsum…" rows="4" cols="25" class="form-control"><xsl:value-of select="h:input[@name='lf_description']/@value"/></textarea>
+          <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="4" cols="25" class="form-control"><xsl:value-of select="h:input[@name='lf_description']/@value"/></textarea>
         </div>
       </div>
-      <div class="input-group">
+      <!-- div class="input-group">
         <div class="col-sm-12">
           <input name="lf_tags" type="text" placeholder="Schlagwort NochEinSchlagwort" data-multiple="data-multiple" value="{h:input[@name='lf_tags']/@value}" class="form-control"/>
         </div>
-      </div>
+      </div -->
       <!-- div class="input-group">
         <div class="col-sm-12">
           <input name="lf_private" type="checkbox" value="{h:input[@name='lf_private']/@value}" class="form-control"/>

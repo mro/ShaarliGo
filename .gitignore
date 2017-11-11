@@ -1,13 +1,13 @@
-AtomicShaarli-linux-amd64-0.0.1
+GoShaarli-linux-amd64-0.0.1
+GoShaarli
+goshaarli
 testdata/links.atom.bak
 testdata/links.gob
 testdata/sebsauvage.atom
-AtomicShaarli
 ServerInfo.cgi
 settings.sh
 flow.pdf
 neu0.graphmlz
-atom.cgi
 body.txt
 head.txt
 *~

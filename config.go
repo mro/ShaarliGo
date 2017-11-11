@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/AtomicShaarli
+// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/GoShaarli
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -120,7 +121,7 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 				XmlBase:   urlBase.String(),
 				Id:        urlBase.String(), // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
 				Title:     HumanText{Body: app.cfg.Title},
-				Generator: &Generator{Uri: myselfNamespace, Version: "0.0.1", Body: "AtomicShaarli"},
+				Generator: &Generator{Uri: myselfNamespace, Version: "0.0.1", Body: "GoShaarli"},
 				Links: []Link{
 					Link{Rel: relEdit, Href: path.Join(cgiName, uriPub, uriPosts), Title: "PostURI, maybe better a app:collection https://tools.ietf.org/html/rfc5023#section-8.3.3"},
 				},
@@ -156,7 +157,7 @@ Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lo
 				},
 				Content: &HumanText{Body: `- Posten, Löschen, Bookmarklet,
 - 'API'-Kompatibilität mit Vanilla Shaarli (=> ShaarliOS, Shaarlier)
-- neue Posts vorbelegen (optional: extern per http GET),
+- neue Posts vorbelegen (optional: extern per http GET, rewrite URLs à la heise),
 - Tag #Cloud,
 - Shaarli Import,
 - Tagesansicht,
@@ -172,6 +173,7 @@ Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lo
 - private Posts,
 - Kommentare,
 - Bilder hochladen,
+- AtomPub, https://tools.ietf.org/html/rfc5023#section-9.2
 - Html/Markdown (client-seitig),
 - Atom Aggregator?`},
 				Updated: iso8601{mustParseRFC3339("2012-12-31T01:01:01+01:00")},
@@ -189,6 +191,7 @@ Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lo
 			})
 
 			sort.Reverse(feed.Entries)
+			feed.Save(filepath.Join(dirApp, "feed.xml"))
 			// TODO: make persistent
 
 			if err = feed.replaceFeeds(); err != nil {

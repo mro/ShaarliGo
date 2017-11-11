@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export cgi="atom.cgi"
+export cgi="goshaarli.cgi"
 
 go fmt *.go && go build -ldflags "-s" -o "${cgi}" || exit 1
 

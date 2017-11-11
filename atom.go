@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/AtomicShaarli
+// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/GoShaarli
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -225,9 +226,55 @@ func (s EntriesSlice) Len() int {
 	return len(s)
 }
 func (s EntriesSlice) Less(i, j int) bool {
-	return s[i].Updated.Time.Before(s[j].Updated.Time)
+	return s[i].Published.Time.Before(s[j].Published.Time)
 }
 
 func (s EntriesSlice) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
+}
+
+// custom interface
+
+func (feed *Feed) findOrCreateEntryForURL(url *url.URL, now time.Time) *Entry {
+	if url != nil {
+		ur := url.String()
+		for _, entry := range feed.Entries {
+			for _, l := range entry.Links {
+				if l.Rel == "" && l.Href == ur {
+					return entry
+				}
+			}
+		}
+	}
+	ret := &Entry{
+		Published: &iso8601{now},
+		Updated:   iso8601{now},
+		Id:        smallDateHash(now), // could be about anything. Also slug or random, too.
+	}
+	if url != nil {
+		ret.Links = []Link{Link{Href: url.String()}}
+	}
+	return ret
+}
+
+func (feed Feed) Save(dst string) error {
+	tmp := dst + "~"
+	var err error
+	var w *os.File
+	if w, err = os.Create(tmp); err == nil {
+		enc := xml.NewEncoder(w)
+		enc.Indent("", "  ")
+		if err = enc.Encode(feed); err == nil {
+			if err = enc.Flush(); err == nil {
+				if err = w.Close(); err == nil {
+					if err = os.Rename(dst, dst+".bak"); err == nil || os.IsNotExist(err) {
+						if err = os.Rename(tmp, dst); err == nil {
+							return nil
+						}
+					}
+				}
+			}
+		}
+	}
+	return err
 }

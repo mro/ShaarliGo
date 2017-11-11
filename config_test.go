@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/AtomicShaarli
+// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/GoShaarli
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,8 +39,8 @@ func TestBcrypt(t *testing.T) {
 }
 
 func TestXmlBaseFromRequestURL(t *testing.T) {
-	assert.Equal(t, "http://example.com/", xmlBaseFromRequestURL(mustParseURL("http://example.com/atom.cgi"), "/atom.cgi").String(), "soso")
-	assert.Equal(t, "http://example.com/b/", xmlBaseFromRequestURL(mustParseURL("http://example.com/b/atom.cgi"), "/b/atom.cgi").String(), "soso")
+	assert.Equal(t, "http://example.com/", xmlBaseFromRequestURL(mustParseURL("http://example.com/goshaarli.cgi"), "/goshaarli.cgi").String(), "soso")
+	assert.Equal(t, "http://example.com/b/", xmlBaseFromRequestURL(mustParseURL("http://example.com/b/goshaarli.cgi"), "/b/goshaarli.cgi").String(), "soso")
 }
 
 func TestFeedFromFileName__(t *testing.T) {
