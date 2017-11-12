@@ -1,7 +1,8 @@
+
 # mandatory
 DirectoryIndex index.xml
 
-# nice
+# recommended
 AddOutputFilter DEFLATE xml xslt css js svg
 
 # https://stackoverflow.com/questions/21062290/set-rewritebase-to-the-current-folder-path-dynamically/21063276#21063276
@@ -9,3 +10,6 @@ RewriteCond %{REQUEST_URI}::$1 ^(.*?/)(.*)::\2$
 RewriteRule ^(.*)$ - [E=BASE:%1]
 
 RewriteRule ^/?$ %{ENV:BASE}pub/posts/ [redirect=301,last]
+
+# nice
+Header add X-Powered-By "http://purl.mro.name/ShaarliGo#0.0.1"

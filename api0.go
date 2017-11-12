@@ -31,7 +31,6 @@ import (
 	"net/url"
 	"os"
 	"path"
-	"sort"
 	"strings"
 	"time"
 
@@ -244,6 +243,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		} else {
 			app.KeepAlive(w, r, now)
 		}
+		location := path.Join(uriPub, uriPosts)
 		// https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1479
 		log.Println("save_edit: '" + r.FormValue("save_edit") + "'")
 		log.Println("cancel_edit: '" + r.FormValue("cancel_edit") + "'")
@@ -279,15 +279,19 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 						feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
 						feed.Id = feed.XmlBase
 						ent := feed.findOrCreateEntryForURL(lf_url, now)
+						ent.Authors = []Person{Person{Name: app.cfg.AuthorName}}
 						ent.Published = iso8601{lf_linkdate}
-						ent.Links = []Link{Link{Href: lf_url.String()}}
+						if "" == ent.Id {
+							ent.Id = smallDateHash(ent.Published.Time)
+						}
+						if "" != lf_url.String() {
+							ent.Links = []Link{Link{Href: lf_url.String()}}
+						}
 						ent.Title = HumanText{Body: lf_title}
 						ent.Content = &HumanText{Body: lf_description}
-						ent.Authors = []Person{Person{Name: app.cfg.AuthorName}}
 						// todo: tags
+						location = strings.Join([]string{location, ent.Id}, "?#")
 
-						feed.Entries = append(feed.Entries, ent)
-						sort.Sort(ByPublishedDesc(feed.Entries))
 						feed.Save(fileFeedStorage)
 
 						if err := feed.replaceFeeds(); err != nil {
@@ -304,7 +308,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		// close bookmarklet popup in case!
-		http.Redirect(w, r, path.Join(uriPub, uriPosts), http.StatusFound)
+		http.Redirect(w, r, location, http.StatusFound)
 		return
 	default:
 		squealFailure(r, now)

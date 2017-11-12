@@ -56,16 +56,15 @@ func init() {
 	fileFeedStorage = filepath.Join(dirApp, "feed.xml")
 }
 
-// https://coderwall.com/p/cp5fya/measuring-execution-time-in-go
+// even cooler: https://stackoverflow.com/a/8363629
 //
-// somehow even cooler: https://stackoverflow.com/a/8363629
-func timeTrack(start time.Time, name string) {
-	log.Printf("%s took %s", name, time.Since(start))
-}
+// inspired by // https://coderwall.com/p/cp5fya/measuring-execution-time-in-go
+func trace(name string) (string, time.Time) { return name, time.Now() }
+func un(name string, start time.Time)       { log.Printf("%s took %s", name, time.Since(start)) }
 
 // evtl. as a server, too: http://www.dav-muz.net/blog/2013/09/how-to-use-go-and-fastcgi/
 func main() {
-	{ // log to custom logfile rather than stderr (which may not accessible on shared hosting)
+	{ // log to custom logfile rather than stderr (which may not be accessible on shared hosting)
 		dst := filepath.Join("app", "var", "error.log")
 		if err := os.MkdirAll(filepath.Dir(dst), 0770); err != nil {
 			log.Fatal("Couldn't create app/var dir: " + err.Error())
@@ -118,10 +117,10 @@ func (app App) IsLoggedIn(now time.Time) bool {
 }
 
 func handleMux(w http.ResponseWriter, r *http.Request) {
+	defer un(trace(strings.Join([]string{r.RemoteAddr, r.Method, r.URL.String()}, " ")))
+	// w.Header().Set("Server", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
+	// w.Header().Set("X-Powered-By", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
 	now := time.Now()
-	defer timeTrack(now, strings.Join([]string{r.RemoteAddr, r.Method, r.URL.String()}, " "))
-	w.Header().Set("Server", myselfNamespace)
-	w.Header().Set("CGI-Server", myselfNamespace)
 
 	// check if the request is from a banned client
 	if banned, err := isBanned(r, now); err != nil || banned {
@@ -166,17 +165,18 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 	switch path_info {
 	case "/config":
-		// make a 404 if already configured but not currently logged in
+		// make a 404 (fallthrough) if already configured but not currently logged in
 		if !app.cfg.IsConfigured() || app.IsLoggedIn(now) {
 			app.KeepAlive(w, r, now)
 			app.handleSettings(w, r)
 			return
 		}
 	case "/session":
-		// maybe cache, but never KeepAlive
+		// maybe cache a bit, but never KeepAlive
 		if app.IsLoggedIn(now) {
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			// w.Header().Set("Etag", r.URL.Path)
-			// w.Header().Set("Cache-Control", "max-age=60") // 60 Seconds
+			w.Header().Set("Cache-Control", "max-age=59") // 59 Seconds
 			io.WriteString(w, app.cfg.AuthorName)
 		} else {
 			// don't squeal to ban.

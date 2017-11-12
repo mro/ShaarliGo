@@ -24,6 +24,7 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -241,16 +242,17 @@ func (feed *Feed) findOrCreateEntryForURL(url *url.URL, now time.Time) *Entry {
 	}
 	ret := &Entry{
 		Published: iso8601{now},
-		Id:        smallDateHash(now), // could be about anything. Also slug or random, too.
 	}
 	if url != nil {
 		ret.Links = []Link{Link{Href: url.String()}}
 	}
+	feed.Append(ret)
 	return ret
 }
 
 func (feed Feed) Save(dst string) error {
-	defer timeTrack(time.Now(), "Feed.Save")
+	defer un(trace("Feed.Save"))
+	sort.Sort(ByPublishedDesc(feed.Entries))
 	tmp := dst + "~"
 	var err error
 	var w *os.File

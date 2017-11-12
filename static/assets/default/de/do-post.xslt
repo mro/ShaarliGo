@@ -127,7 +127,7 @@ min-width: 40px;
       </div>
       <div class="input-group">
         <div class="col-sm-12">
-          <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="4" cols="25" class="form-control"><xsl:value-of select="h:input[@name='lf_description']/@value"/></textarea>
+          <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="4" cols="25" class="form-control"><xsl:value-of select="h:textarea[@name='lf_description']"/></textarea>
         </div>
       </div>
       <!-- div class="input-group">

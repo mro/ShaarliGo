@@ -1,6 +1,7 @@
-GoShaarli-linux-amd64-0.0.1
-GoShaarli
-goshaarli
+ShaarliGo-linux-amd64-0.0.1
+ShaarliGo
+shaarligo
+shaarligo.cgi
 testdata/links.atom.bak
 testdata/links.gob
 testdata/sebsauvage.atom
@@ -15,4 +16,3 @@ t/
 tmp/
 body*.txt
 head*.txt
-goshaarli.cgi

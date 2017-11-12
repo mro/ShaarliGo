@@ -30,7 +30,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func mustParseURL(u string) *url.URL {
@@ -78,7 +77,7 @@ type feedWriter interface {
 // maybe replace the CONTENT of pub rather than pub itself. So . could remain readonly.
 //
 func (feed *Feed) replaceFeeds() error {
-	defer timeTrack(time.Now(), "Feed.replaceFeeds")
+	defer un(trace("Feed.replaceFeeds"))
 	if path.Join("a", "b") != filepath.Join("a", "b") {
 		return errors.New("Go, get an OS.")
 	}
