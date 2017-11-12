@@ -50,6 +50,19 @@ import (
 const myselfNamespace = "http://purl.mro.name/GoShaarli"
 const toSession = 30 * time.Minute
 
+var fileFeedStorage string
+
+func init() {
+	fileFeedStorage = filepath.Join(dirApp, "feed.xml")
+}
+
+// https://coderwall.com/p/cp5fya/measuring-execution-time-in-go
+//
+// somehow even cooler: https://stackoverflow.com/a/8363629
+func timeTrack(start time.Time, name string) {
+	log.Printf("%s took %s", name, time.Since(start))
+}
+
 // evtl. as a server, too: http://www.dav-muz.net/blog/2013/09/how-to-use-go-and-fastcgi/
 func main() {
 	{ // log to custom logfile rather than stderr (which may not accessible on shared hosting)
@@ -77,6 +90,7 @@ func main() {
 type App struct {
 	cfg Config
 	ses *sessions.Session
+	tz  *time.Location
 }
 
 func (app *App) startSession(w http.ResponseWriter, r *http.Request, now time.Time) error {
@@ -104,11 +118,10 @@ func (app App) IsLoggedIn(now time.Time) bool {
 }
 
 func handleMux(w http.ResponseWriter, r *http.Request) {
-	log.Println(strings.Join([]string{r.RemoteAddr, r.Method, r.URL.String()}, " "))
+	now := time.Now()
+	defer timeTrack(now, strings.Join([]string{r.RemoteAddr, r.Method, r.URL.String()}, " "))
 	w.Header().Set("Server", myselfNamespace)
 	w.Header().Set("CGI-Server", myselfNamespace)
-
-	now := time.Now()
 
 	// check if the request is from a banned client
 	if banned, err := isBanned(r, now); err != nil || banned {
@@ -144,6 +157,10 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 				MaxAge:   int(toSession / time.Second),
 				HttpOnly: true,
 			}
+		}
+		if app.tz, err = time.LoadLocation(app.cfg.TimeZone); err != nil {
+			http.Error(w, "Invalid timezone '"+app.cfg.TimeZone+"': "+err.Error(), http.StatusInternalServerError)
+			return
 		}
 	}
 

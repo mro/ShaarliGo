@@ -71,22 +71,22 @@ func FeedFromReader(file io.Reader) (Feed, error) {
 //
 // see also https://godoc.org/golang.org/x/tools/blog/atom#Feed
 type Feed struct {
-	XMLName      xml.Name     `xml:"http://www.w3.org/2005/Atom feed"`
-	XmlBase      string       `xml:"xml:base,attr,omitempty"`
-	XmlLang      string       `xml:"xml:lang,attr,omitempty"`
-	Title        HumanText    `xml:"title"`
-	Subtitle     *HumanText   `xml:"subtitle,omitempty"`
-	Id           string       `xml:"id"`
-	Updated      iso8601      `xml:"updated"`
-	Generator    *Generator   `xml:"generator,omitempty"`
-	Icon         string       `xml:"icon,omitempty"`
-	Logo         string       `xml:"logo,omitempty"`
-	Links        []Link       `xml:"link"`
-	Categories   []Category   `xml:"category"`
-	Authors      []Person     `xml:"author"`
-	Contributors []Person     `xml:"contributor"`
-	Rights       *HumanText   `xml:"rights,omitempty"`
-	Entries      EntriesSlice `xml:"entry"`
+	XMLName      xml.Name   `xml:"http://www.w3.org/2005/Atom feed"`
+	XmlBase      string     `xml:"xml:base,attr,omitempty"`
+	XmlLang      string     `xml:"xml:lang,attr,omitempty"`
+	Title        HumanText  `xml:"title"`
+	Subtitle     *HumanText `xml:"subtitle,omitempty"`
+	Id           string     `xml:"id"`
+	Updated      iso8601    `xml:"updated"`
+	Generator    *Generator `xml:"generator,omitempty"`
+	Icon         string     `xml:"icon,omitempty"`
+	Logo         string     `xml:"logo,omitempty"`
+	Links        []Link     `xml:"link"`
+	Categories   []Category `xml:"category"`
+	Authors      []Person   `xml:"author"`
+	Contributors []Person   `xml:"contributor"`
+	Rights       *HumanText `xml:"rights,omitempty"`
+	Entries      []*Entry   `xml:"entry"`
 }
 
 type Generator struct {
@@ -126,8 +126,6 @@ type Person struct {
 	Uri   string `xml:"uri,omitempty"`
 }
 
-type EntriesSlice []*Entry
-
 // see also https://godoc.org/golang.org/x/tools/blog/atom#Entry
 type Entry struct {
 	XMLName      xml.Name   `xml:"http://www.w3.org/2005/Atom entry,omitempty"`
@@ -137,7 +135,7 @@ type Entry struct {
 	Summary      *HumanText `xml:"summary,omitempty"`
 	Id           string     `xml:"id"`
 	Updated      iso8601    `xml:"updated"`
-	Published    *iso8601   `xml:"published,omitempty"`
+	Published    iso8601    `xml:"published,omitempty"`
 	Links        []Link     `xml:"link"`
 	Categories   []Category `xml:"category"`
 	Authors      []Person   `xml:"author"`
@@ -222,16 +220,11 @@ func (feed *Feed) Append(e *Entry) *Feed {
 
 // sort.Interface
 
-func (s EntriesSlice) Len() int {
-	return len(s)
-}
-func (s EntriesSlice) Less(i, j int) bool {
-	return s[i].Published.Time.Before(s[j].Published.Time)
-}
+type ByPublishedDesc []*Entry
 
-func (s EntriesSlice) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
+func (a ByPublishedDesc) Len() int           { return len(a) }
+func (a ByPublishedDesc) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByPublishedDesc) Less(i, j int) bool { return !a[i].Published.Time.Before(a[j].Published.Time) }
 
 // custom interface
 
@@ -247,8 +240,7 @@ func (feed *Feed) findOrCreateEntryForURL(url *url.URL, now time.Time) *Entry {
 		}
 	}
 	ret := &Entry{
-		Published: &iso8601{now},
-		Updated:   iso8601{now},
+		Published: iso8601{now},
 		Id:        smallDateHash(now), // could be about anything. Also slug or random, too.
 	}
 	if url != nil {
@@ -258,6 +250,7 @@ func (feed *Feed) findOrCreateEntryForURL(url *url.URL, now time.Time) *Entry {
 }
 
 func (feed Feed) Save(dst string) error {
+	defer timeTrack(time.Now(), "Feed.Save")
 	tmp := dst + "~"
 	var err error
 	var w *os.File

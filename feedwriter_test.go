@@ -73,7 +73,7 @@ func TestComputeLastPage(t *testing.T) {
 func TestFeedUrlsForEntry(t *testing.T) {
 	itm := &Entry{
 		Id:         "id_0",
-		Published:  &iso8601{mustParseRFC3339("2010-12-31T00:11:22Z")},
+		Published:  iso8601{mustParseRFC3339("2010-12-31T00:11:22Z")},
 		Categories: []Category{Category{Term: "🐳"}},
 	}
 
@@ -169,7 +169,7 @@ func TestWriteFeedsEmpty1(t *testing.T) {
 	assert.Nil(t, err, "soso")
 	assert.Equal(t, []string{"pub/days/0001-01-01", "pub/posts"}, keys4map(sfw.bufs), "soso")
 
-	assert.Equal(t, 1398, len(sfw.bufs["pub/days/0001-01-01"].b), "aha")
+	assert.Equal(t, 1446, len(sfw.bufs["pub/days/0001-01-01"].b), "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../assets/default/de/posts.xslt'?>
 <!--
@@ -196,6 +196,7 @@ func TestWriteFeedsEmpty1(t *testing.T) {
     <title></title>
     <id>http://example.com/pub/posts</id>
     <updated>0001-01-01T00:00:00Z</updated>
+    <published>0001-01-01T00:00:00Z</published>
     <link href="pub/posts" rel="self"></link>
     <link href="goshaarli.cgi/pub/posts" rel="edit"></link>
     <link href=".." rel="up"></link>
@@ -226,7 +227,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
 		"pub/tags/aha",
 	}, keys4map(sfw.bufs), "soso")
 
-	assert.Equal(t, 1557, len(sfw.bufs["pub/days/1990-12-31"].b), "aha")
+	assert.Equal(t, 1605, len(sfw.bufs["pub/days/1990-12-31"].b), "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../assets/default/de/posts.xslt'?>
 <!--
@@ -253,6 +254,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
     <title>Hello, Entry!</title>
     <id>http://example.com/pub/posts/e0</id>
     <updated>1990-12-31T01:02:03+01:00</updated>
+    <published>0001-01-01T00:00:00Z</published>
     <link href="pub/posts/e0" rel="self"></link>
     <link href="goshaarli.cgi/pub/posts/e0" rel="edit"></link>
     <link href=".." rel="up" title="Hello, Atom!"></link>
@@ -282,6 +284,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
   <title>Hello, Entry!</title>
   <id>http://example.com/pub/posts/e0</id>
   <updated>1990-12-31T01:02:03+01:00</updated>
+  <published>0001-01-01T00:00:00Z</published>
   <link href="pub/posts/e0" rel="self"></link>
   <link href="goshaarli.cgi/pub/posts/e0" rel="edit"></link>
   <link href=".." rel="up" title="Hello, Atom!"></link>
@@ -358,6 +361,7 @@ func TestWriteFeedsPaged(t *testing.T) {
     <title>Hello, Entry 2!</title>
     <id>http://example.com/pub/posts/e2</id>
     <updated>1990-12-31T02:02:02+01:00</updated>
+    <published>0001-01-01T00:00:00Z</published>
     <link href="pub/posts/e2" rel="self"></link>
     <link href="goshaarli.cgi/pub/posts/e2" rel="edit"></link>
     <link href=".." rel="up" title="Hello, Atom!"></link>
@@ -366,6 +370,7 @@ func TestWriteFeedsPaged(t *testing.T) {
     <title>Hello, Entry 1!</title>
     <id>http://example.com/pub/posts/e1</id>
     <updated>1990-12-31T01:01:01+01:00</updated>
+    <published>0001-01-01T00:00:00Z</published>
     <link href="pub/posts/e1" rel="self"></link>
     <link href="goshaarli.cgi/pub/posts/e1" rel="edit"></link>
     <link href=".." rel="up" title="Hello, Atom!"></link>
@@ -403,6 +408,7 @@ func TestWriteFeedsPaged(t *testing.T) {
     <title>Hello, Entry 0!</title>
     <id>http://example.com/pub/posts/e0</id>
     <updated>1990-12-30T00:00:00+01:00</updated>
+    <published>0001-01-01T00:00:00Z</published>
     <link href="pub/posts/e0" rel="self"></link>
     <link href="goshaarli.cgi/pub/posts/e0" rel="edit"></link>
     <link href=".." rel="up" title="Hello, Atom!"></link>
@@ -432,6 +438,7 @@ func TestWriteFeedsPaged(t *testing.T) {
   <title>Hello, Entry 0!</title>
   <id>http://example.com/pub/posts/e0</id>
   <updated>1990-12-30T00:00:00+01:00</updated>
+  <published>0001-01-01T00:00:00Z</published>
   <link href="pub/posts/e0" rel="self"></link>
   <link href="goshaarli.cgi/pub/posts/e0" rel="edit"></link>
   <link href=".." rel="up" title="Hello, Atom!"></link>

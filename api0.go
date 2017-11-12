@@ -26,10 +26,12 @@ import (
 	"hash/crc32"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
-	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -164,6 +166,8 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		if !app.IsLoggedIn(now) {
 			http.Redirect(w, r, cgiName+"?do=login&returnurl="+url.QueryEscape(r.URL.String()), http.StatusFound)
 			return
+		} else {
+			app.KeepAlive(w, r, now)
 		}
 		// 'GET': send a form to the client
 		// must be compatible to https://github.com/mro/Shaarli-API-Test/...
@@ -176,26 +180,11 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		//   b. map post, title and source to a new (sparse?) atom entry - feasible in JavaScript as well?
 		//   c. turn atom entry to form map
 
-		bTok := make([]byte, 20) // keep in local session or encrypted cookie
-		io.ReadFull(rand.Reader, bTok)
-
 		params := r.URL.Query()
-
-		data := map[string]string{
-			"title": app.cfg.Title,
-			// "lf_linkdate": now.Format(fmtTimeLfTime),
-			//				"lf_url":         "",
-			//				"lf_title":       "",
-			//				"lf_description": "",
-			//				"lf_tags":        "", strings.Join([]string{"my", "first", "post"}, " "),
-			//				"lf_private":     "",
-			"token": hex.EncodeToString(bTok),
-		}
-
-		feed, _ := FeedFromFileName(filepath.Join(dirApp, "feed.xml"))
+		feed, _ := FeedFromFileName(fileFeedStorage)
 
 		var ent *Entry = nil
-		if 1 == len(params["post"]) && !(len(params["title"]) == 1 && "" != params["title"][0]) {
+		if 1 == len(params["post"]) && (len(params["title"]) == 0 || "" == params["title"][0]) {
 			url := parseLinkUrl(params["post"][0])
 			ent = feed.findOrCreateEntryForURL(url, now)
 			if url == nil {
@@ -206,34 +195,23 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			ent.Title = HumanText{Body: params["title"][0]}
 		}
 		if 1 == len(params["source"]) {
-			data["lf_source"] = params["source"][0]
-		}
-
-		if ent != nil {
-			for _, li := range ent.Links {
-				if "" == li.Rel {
-					data["lf_url"] = li.Href
-				}
-			}
-			data["lf_title"] = ent.Title.Body
-			data["lf_description"] = ent.Content.Body
-			// todo: tags
+			// data["lf_source"] = params["source"][0]
 		}
 
 		if tmpl, err := template.New("linkform").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
-<head><title>{{index . "title"}}</title></head>
+<head><title>{{.title}}</title></head>
 <body>
   <form method="post" name="linkform">
-    <input name="lf_linkdate" type="hidden" value="{{index . "lf_linkdate"}}"/>
-    <input name="lf_url" type="text" value="{{index . "lf_url"}}"/>
-    <input name="lf_title" type="text" value="{{index . "lf_title"}}"/>
-    <textarea name="lf_description" rows="4" cols="25">{{index . "lf_description"}}</textarea>
-    <input name="lf_tags" type="text" data-multiple="data-multiple" value="{{index . "lf_tags"}}"/>
-    <input name="lf_private" type="checkbox" value="{{index . "lf_private"}}"/>
+    <input name="lf_linkdate" type="hidden" value="{{.lf_linkdate}}"/>
+    <input name="lf_url" type="text" value="{{.lf_url}}"/>
+    <input name="lf_title" type="text" value="{{.lf_title}}"/>
+    <textarea name="lf_description" rows="4" cols="25">{{.lf_description}}</textarea>
+    <input name="lf_tags" type="text" data-multiple="data-multiple" value="{{.lf_tags}}"/>
+    <input name="lf_private" type="checkbox" value="{{.lf_private}}"/>
     <input name="save_edit" type="submit" value="Save"/>
     <input name="cancel_edit" type="submit" value="Cancel"/>
-    <input name="token" type="hidden" value="{{index . "token"}}"/>
-    <input name="returnurl" type="hidden" value="{{index . "returnurl"}}"/>
+    <input name="token" type="hidden" value="{{.token}}"/>
+    <input name="returnurl" type="hidden" value="{{.returnurl}}"/>
   </form>
 </body>
 </html>
@@ -246,18 +224,108 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
   https://github.com/mro/ShaarliOS/blob/master/ios/ShaarliOS/API/ShaarliCmd.m#L386
 -->
 `)
+			data := ent.api0LinkFormMap()
+			data["title"] = app.cfg.Title
+			bTok := make([]byte, 20) // keep in local session or encrypted cookie
+			io.ReadFull(rand.Reader, bTok)
+			data["token"] = hex.EncodeToString(bTok)
+			data["returnurl"] = ""
+
 			if err := tmpl.Execute(w, data); err != nil {
 				http.Error(w, "Coudln't send linkform: "+err.Error(), http.StatusInternalServerError)
 			}
 		}
 	case http.MethodPost:
 		// 'POST' validate, respond error (and squeal) or post and redirect
+		if !app.IsLoggedIn(now) {
+			squealFailure(r, now)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		} else {
+			app.KeepAlive(w, r, now)
+		}
+		// https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1479
+		log.Println("save_edit: '" + r.FormValue("save_edit") + "'")
+		log.Println("cancel_edit: '" + r.FormValue("cancel_edit") + "'")
+		if r.FormValue("save_edit") != "" {
+			if lf_linkdate, err := time.ParseInLocation(fmtTimeLfTime, strings.TrimSpace(r.FormValue("lf_linkdate")), app.tz); err != nil {
+				squealFailure(r, now)
+				http.Error(w, "Looks like a forged request: "+err.Error(), http.StatusBadRequest)
+				return
+			} else {
+				if lf_url, err := url.Parse(strings.TrimSpace(r.FormValue("lf_url"))); err != nil {
+					squealFailure(r, now)
+					http.Error(w, "Looks like a forged request: "+err.Error(), http.StatusBadRequest)
+					return
+				} else {
+					lf_title := strings.TrimSpace(r.FormValue("lf_title"))
+					lf_description := strings.TrimSpace(r.FormValue("lf_description"))
+					lf_tags := strings.TrimSpace(r.FormValue("lf_tags"))
+					token := strings.TrimSpace(r.FormValue("token"))
+					if returnurl, err := url.Parse(strings.TrimSpace(r.FormValue("returnurl"))); err != nil {
+					} else {
+						log.Println(err)
+						log.Println(lf_linkdate)
+						log.Println(lf_url.String())
+						log.Println(lf_title)
+						log.Println(lf_description)
+						log.Println(lf_tags)
+						log.Println(token)
+						log.Println(returnurl)
 
+						// todo: check token.
+
+						feed, _ := FeedFromFileName(fileFeedStorage)
+						feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
+						feed.Id = feed.XmlBase
+						ent := feed.findOrCreateEntryForURL(lf_url, now)
+						ent.Published = iso8601{lf_linkdate}
+						ent.Links = []Link{Link{Href: lf_url.String()}}
+						ent.Title = HumanText{Body: lf_title}
+						ent.Content = &HumanText{Body: lf_description}
+						ent.Authors = []Person{Person{Name: app.cfg.AuthorName}}
+						// todo: tags
+
+						feed.Entries = append(feed.Entries, ent)
+						sort.Sort(ByPublishedDesc(feed.Entries))
+						feed.Save(fileFeedStorage)
+
+						if err := feed.replaceFeeds(); err != nil {
+							http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
+							return
+						}
+					}
+				}
+			}
+		} else if r.FormValue("cancel_edit") != "" {
+		} else {
+			squealFailure(r, now)
+			http.Error(w, "StatusBadRequest", http.StatusBadRequest)
+			return
+		}
 		// close bookmarklet popup in case!
-
+		http.Redirect(w, r, path.Join(uriPub, uriPosts), http.StatusFound)
 		return
 	default:
 		squealFailure(r, now)
 		http.Error(w, "MethodNotAllowed", http.StatusMethodNotAllowed)
 	}
+}
+
+func (entry Entry) api0LinkFormMap() map[string]string {
+	data := map[string]string{
+		"lf_linkdate": entry.Published.Format(fmtTimeLfTime),
+		"lf_title":    entry.Title.Body,
+	}
+	for _, li := range entry.Links {
+		if "" == li.Rel {
+			data["lf_url"] = li.Href
+			break
+		}
+	}
+	if entry.Content != nil {
+		data["lf_description"] = entry.Content.Body
+	}
+	// todo: tags
+	return data
 }

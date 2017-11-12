@@ -117,5 +117,23 @@ func TestSmallHash(t *testing.T) {
 
 	tt, _ := time.Parse(fmtTimeLfTime, "20171108_231054")
 	assert.Equal(t, "_o4DWg", smallDateHash(tt), "aha")
+}
 
+func TestApi0LinkFormMap(t *testing.T) {
+	t.Parallel()
+
+	e := Entry{}
+	assert.Equal(t, map[string]string{"lf_linkdate": "00010101_000000", "lf_title": ""}, e.api0LinkFormMap(), "oha")
+
+	e = Entry{
+		Title: HumanText{Body: "My #Post"},
+	}
+	assert.Equal(t, map[string]string{"lf_linkdate": "00010101_000000", "lf_title": "My #Post"}, e.api0LinkFormMap(), "oha")
+
+	e = Entry{
+		Title:      HumanText{Body: "My #Post"},
+		Categories: []Category{Category{Term: "Post"}, Category{Term: "tag1"}},
+	}
+	assert.Equal(t, map[string]string{"lf_linkdate": "00010101_000000", "lf_title": "My #Post"}, e.api0LinkFormMap(), "oha")
+	// assert.Equal(t, map[string]string{"lf_linkdate": "00010101_000000", "lf_title": "My #Post", "lf_tags": "tag1"}, e.api0LinkFormMap(), "oha")
 }

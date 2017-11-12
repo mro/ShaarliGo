@@ -25,7 +25,6 @@ import (
 	"net/url"
 	"os"
 	"path"
-	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -145,7 +144,7 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
 
 Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.`},
-				Updated: iso8601{mustParseRFC3339("2012-12-31T02:02:02+01:00")},
+				Published: iso8601{mustParseRFC3339("2012-12-31T02:02:02+01:00")},
 			}).Append(&Entry{
 				Title:   HumanText{Body: "Was noch alles fehlt"},
 				Id:      "Naev8k",
@@ -176,7 +175,7 @@ Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lo
 - AtomPub, https://tools.ietf.org/html/rfc5023#section-9.2
 - Html/Markdown (client-seitig),
 - Atom Aggregator?`},
-				Updated: iso8601{mustParseRFC3339("2012-12-31T01:01:01+01:00")},
+				Published: iso8601{mustParseRFC3339("2012-12-31T01:01:01+01:00")},
 			}).Append(&Entry{
 				Title: HumanText{Body: "Shaarli — sebsauvage.net"},
 				Id:    "kaJ9Rw",
@@ -185,13 +184,13 @@ Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lo
 				},
 				Authors:        authors,
 				Categories:     []Category{Category{Term: "opensource"}, Category{Term: "Software"}},
-				Updated:        iso8601{mustParseRFC3339("2011-09-13T15:45:00+02:00")},
+				Published:      iso8601{mustParseRFC3339("2011-09-13T15:45:00+02:00")},
 				Content:        &HumanText{Body: "Welcome to Shaarli ! This is a bookmark. To edit or delete me, you must first login."},
 				MediaThumbnail: &MediaThumbnail{Url: mustParseURL("http://cdn.rawgit.com/mro/ShaarliOS/master/shaarli-petal.svg").String()},
 			})
 
-			sort.Reverse(feed.Entries)
-			feed.Save(filepath.Join(dirApp, "feed.xml"))
+			sort.Sort(ByPublishedDesc(feed.Entries))
+			feed.Save(fileFeedStorage)
 			// TODO: make persistent
 
 			if err = feed.replaceFeeds(); err != nil {

@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/url"
 	"os"
 	"path"
@@ -29,6 +30,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func mustParseURL(u string) *url.URL {
@@ -76,6 +78,7 @@ type feedWriter interface {
 // maybe replace the CONTENT of pub rather than pub itself. So . could remain readonly.
 //
 func (feed *Feed) replaceFeeds() error {
+	defer timeTrack(time.Now(), "Feed.replaceFeeds")
 	if path.Join("a", "b") != filepath.Join("a", "b") {
 		return errors.New("Go, get an OS.")
 	}
@@ -125,6 +128,7 @@ func (feed *Feed) replaceFeeds() error {
 func (feed *Feed) writeFeeds(entriesPerPage int, fw feedWriter) error {
 	xmlBase := mustParseURL(feed.XmlBase)
 	if !xmlBase.IsAbs() || !strings.HasSuffix(xmlBase.Path, "/") {
+		log.Printf("xml:base is '%s'\n", xmlBase)
 		return errors.New("feed/@xml:base must be set to an absolute URL with a trailing slash")
 	}
 	// load template feed, set Id and birthday.
@@ -134,6 +138,9 @@ func (feed *Feed) writeFeeds(entriesPerPage int, fw feedWriter) error {
 	uri2entries := make(map[string][]*Entry)
 	for _, item := range feed.Entries {
 		item.XmlBase = xmlBase.String()
+		if item.Updated.IsZero() {
+			item.Updated = item.Published
+		}
 		// change entries for output but don't save the change:
 		selfURL := mustParseURL(path.Join(uriPub, uriPosts, item.Id))
 		editURL := path.Join(cgiName, selfURL.String())
@@ -168,8 +175,8 @@ func (feed *Feed) writeFeeds(entriesPerPage int, fw feedWriter) error {
 // and may well be a int index into a LUT
 func feedUrlsForEntry(itm *Entry) []string {
 	day := itm.Published
-	if day == nil {
-		day = &itm.Updated
+	if day.IsZero() {
+		day = itm.Updated
 	}
 	ret := make([]string, 0, 2+len(itm.Categories))
 

@@ -40,10 +40,13 @@ type Config struct {
 	AuthorName        string `yaml:"author_name"`
 	PwdBcrypt         string `yaml:"pwd_bcrypt"`
 	CookieStoreSecret string `yaml:"cookie_secret"`
+	TimeZone          string `yaml:"timezone"`
 }
 
 func LoadConfig() (Config, error) {
-	ret := Config{}
+	ret := Config{
+		TimeZone: "Europe/Paris",
+	}
 	if read, err := ioutil.ReadFile(configFileName); err == nil {
 		err = yaml.Unmarshal(read, &ret)
 		return ret, err
