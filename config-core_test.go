@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/GoShaarli
+// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/ShaarliGo
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

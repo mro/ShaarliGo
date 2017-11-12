@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/GoShaarli
+// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/ShaarliGo
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -120,7 +120,7 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 				XmlBase:   urlBase.String(),
 				Id:        urlBase.String(), // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
 				Title:     HumanText{Body: app.cfg.Title},
-				Generator: &Generator{Uri: myselfNamespace, Version: "0.0.1", Body: "GoShaarli"},
+				Generator: &Generator{Uri: myselfNamespace, Version: "0.0.1", Body: "ShaarliGo"},
 				Links: []Link{
 					Link{Rel: relEdit, Href: path.Join(cgiName, uriPub, uriPosts), Title: "PostURI, maybe better a app:collection https://tools.ietf.org/html/rfc5023#section-8.3.3"},
 				},

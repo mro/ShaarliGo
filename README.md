@@ -1,5 +1,5 @@
 
-# GoShaarli
+# ShaarliGo
 
 shaarli on diet. Built on Atom.
 
@@ -45,30 +45,30 @@ shaarli on diet. Built on Atom.
 16. trackback/pingback
 
 ```
-GET  goshaarli.cgi
-GET  goshaarli.cgi/config
-POST goshaarli.cgi/config 							token? session?
+GET  shaarligo.cgi
+GET  shaarligo.cgi/config
+POST shaarligo.cgi/config 							token? session?
 GET  pub/posts/Kk-eZA
 GET  pub/tags/Design
-GET  goshaarli.cgi?do=login
-POST goshaarli.cgi?do=login
-GET  goshaarli.cgi/logout
-GET  goshaarli.cgi/login
-POST goshaarli.cgi/login
-GET  goshaarli.cgi/logout
-GET  goshaarli.cgi?post=url&title=Foo&source=GoShaarli
-POST goshaarli.cgi?do=login&login=uid&password=pwd&token=xyz
-POST goshaarli.cgi?post=url&title=Foo&source=GoShaarli
+GET  shaarligo.cgi?do=login
+POST shaarligo.cgi?do=login
+GET  shaarligo.cgi/logout
+GET  shaarligo.cgi/login
+POST shaarligo.cgi/login
+GET  shaarligo.cgi/logout
+GET  shaarligo.cgi?post=url&title=Foo&source=ShaarliGo
+POST shaarligo.cgi?do=login&login=uid&password=pwd&token=xyz
+POST shaarligo.cgi?post=url&title=Foo&source=ShaarliGo
 ```
 
 ### 0. Routes
 
 GET
 
-goshaarli.cgi
-goshaarli.cgi/config
-goshaarli.cgi/session
-goshaarli.cgi?q=%23Design+%23URI+Foo+Bar
+shaarligo.cgi
+shaarligo.cgi/config
+shaarligo.cgi/session
+shaarligo.cgi?q=%23Design+%23URI+Foo+Bar
 ./pub/posts
 ./~me/posts                    	Merged. Check Basic/Digest Auth!!
 ./@me/posts/DK0BTg							allow other ids e.g. guid (base64) or sha1 (base64)
@@ -84,27 +84,27 @@ announced via link/@rel/@uri https://martinfowler.com/articles/richardsonMaturit
 
 POST
 
-goshaarli.cgi/config
-goshaarli.cgi/session
-goshaarli.cgi/session								(HTML form fallback)
-goshaarli.cgi/~me/posts
-goshaarli.cgi/@me/posts
-goshaarli.cgi/posts
-goshaarli.cgi/enclosures
-goshaarli.cgi/posts/DK0BTg						(HTML form fallback)
+shaarligo.cgi/config
+shaarligo.cgi/session
+shaarligo.cgi/session								(HTML form fallback)
+shaarligo.cgi/~me/posts
+shaarligo.cgi/@me/posts
+shaarligo.cgi/posts
+shaarligo.cgi/enclosures
+shaarligo.cgi/posts/DK0BTg						(HTML form fallback)
 
 PUT
 
-goshaarli.cgi/config
-goshaarli.cgi/@me/tags/Design
-goshaarli.cgi/posts/DK0BTg
-goshaarli.cgi/enclosures/foo.svg
+shaarligo.cgi/config
+shaarligo.cgi/@me/tags/Design
+shaarligo.cgi/posts/DK0BTg
+shaarligo.cgi/enclosures/foo.svg
 
 DELETE
 
-goshaarli.cgi/~me/tags/Design
-goshaarli.cgi/posts/DK0BTg
-goshaarli.cgi/enclosures/foo.svg
+shaarligo.cgi/~me/tags/Design
+shaarligo.cgi/posts/DK0BTg
+shaarligo.cgi/enclosures/foo.svg
 
 ### Shaarli(OS|er) Compatibilty
 
@@ -113,15 +113,15 @@ and https://github.com/mro/Shaarli-API-test/blob/master/tests/test-post.sh
 
 Login/Logout
 
-GET    goshaarli.cgi?do=login
-POST   goshaarli.cgi?do=login
-GET  	 goshaarli.cgi?do=logout
+GET    shaarligo.cgi?do=login
+POST   shaarligo.cgi?do=login
+GET  	 shaarligo.cgi?do=logout
 
 Posting
 
-GET  goshaarli.cgi?post=url&title=Foo&source=GoShaarli -> ?do=login
-POST goshaarli.cgi?do=login&login=uid&password=pwd&token=xyz -> .
-POST goshaarli.cgi?post=url&title=Foo&source=GoShaarli -> ../../@me/posts?#Kk-eZA
+GET  shaarligo.cgi?post=url&title=Foo&source=ShaarliGo -> ?do=login
+POST shaarligo.cgi?do=login&login=uid&password=pwd&token=xyz -> .
+POST shaarligo.cgi?post=url&title=Foo&source=ShaarliGo -> ../../@me/posts?#Kk-eZA
 
 ### 0.1 Storage
 

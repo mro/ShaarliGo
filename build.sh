@@ -23,7 +23,7 @@ go get -u golang.org/x/net/html/atom
 # rsync -aPz --delete --delete-excluded --exclude jquery* --exclude *.zip --exclude *.html vario:~/mro.name/vorschau.blog/assets/ static/assets
 go-bindata -ignore=\\.DS_Store -prefix static static/...
 
-PROG_NAME="GoShaarli"
+PROG_NAME="ShaarliGo"
 VERSION="0.0.1"
 
 rm "${PROG_NAME}"-*-"${VERSION}" 2>/dev/null
@@ -36,8 +36,8 @@ env GOOS=linux GOARCH=amd64 go build -ldflags "-s" -o "${PROG_NAME}-linux-amd64-
 # env GOOS=linux GOARCH=386 GO386=387 go build -o "${PROG_NAME}-linux-386-${VERSION}" # https://github.com/golang/go/issues/11631
 # env GOOS=darwin GOARCH=amd64 go build -o "${PROG_NAME}-darwin-amd64-${VERSION}"
 
-# https://lager.mro.name/as/goshaarli.cgi
-# scp "${PROG_NAME}-linux-amd64-${VERSION}" simply:/var/www/lighttpd/lager.mro.name/public_html/as/"goshaarli.cgi"
+# https://lager.mro.name/as/shaarligo.cgi
+# scp "${PROG_NAME}-linux-amd64-${VERSION}" simply:/var/www/lighttpd/lager.mro.name/public_html/as/"shaarligo.cgi"
 # scp "ServerInfo.cgi" simply:/var/www/lighttpd/lager.mro.name/public_html/as/"info.cgi"
 # ssh simply rm -vrf /var/www/lighttpd/lager.mro.name/public_html/as/assets
 # ssh simply rm -vrf /var/www/lighttpd/lager.mro.name/public_html/as/app
@@ -46,7 +46,7 @@ env GOOS=linux GOARCH=amd64 go build -ldflags "-s" -o "${PROG_NAME}-linux-amd64-
 # ssh vario rm -vrf mro.name/webroot/b/app
 # ssh vario rm -vrf mro.name/webroot/b/assets
 # ssh vario rm -vrf mro.name/webroot/b/pub
-scp "${PROG_NAME}-linux-amd64-${VERSION}" vario:~/mro.name/webroot/b/"goshaarli.cgi"
+scp "${PROG_NAME}-linux-amd64-${VERSION}" vario:~/mro.name/webroot/b/"shaarligo.cgi"
 scp "ServerInfo.cgi" vario:~/mro.name/webroot/b/"info.cgi"
 
 exit 0
@@ -56,9 +56,9 @@ exit 0
 # echo "===="
 #cat head.txt
 
-# curl --location 'http://vorschau.blog.mro.name/goshaarli.cgi/settings?foo' ; say 'aha, aha, soso'
+# curl --location 'http://vorschau.blog.mro.name/shaarligo.cgi/settings?foo' ; say 'aha, aha, soso'
 
-curl --dump-header head0.txt --location 'http://mro.name/b/goshaarli.cgi/config' \
+curl --dump-header head0.txt --location 'http://mro.name/b/shaarligo.cgi/config' \
   --data-urlencode 'title=🔗 My Bookmärks' \
   --data-urlencode 'setlogin=Bö' \
   --data-urlencode 'setpassword=123456789012' \
@@ -67,5 +67,5 @@ curl --dump-header head0.txt --location 'http://mro.name/b/goshaarli.cgi/config'
   --data-urlencode 'import_shaarli_setpassword=' \
 > body0.txt ; cat head0.txt body0.txt ; say 'aha, aha, soso'
 
-# curl --dump-header head1.txt --location 'http://mro.name/b/goshaarli.cgi?do=login' \
+# curl --dump-header head1.txt --location 'http://mro.name/b/shaarligo.cgi?do=login' \
 # > body1.txt ; cat head1.txt body1.txt ; say 'aha, aha, soso'

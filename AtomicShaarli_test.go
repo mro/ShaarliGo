@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/GoShaarli
+// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/ShaarliGo
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -54,9 +54,9 @@ func setupTest(t *testing.T) func(t *testing.T) {
 
 func TestQueryParse(t *testing.T) {
 	t.Parallel()
-	u := mustParseURL("http://example.com/a/goshaarli.cgi?do=login&foo=bar&do=auch")
+	u := mustParseURL("http://example.com/a/shaarligo.cgi?do=login&foo=bar&do=auch")
 
-	assert.Equal(t, "http://example.com/a/goshaarli.cgi?do=login&foo=bar&do=auch", u.String(), "ach")
+	assert.Equal(t, "http://example.com/a/shaarligo.cgi?do=login&foo=bar&do=auch", u.String(), "ach")
 	assert.Equal(t, "do=login&foo=bar&do=auch", u.RawQuery, "ach")
 	v := u.Query()
 
@@ -65,7 +65,7 @@ func TestQueryParse(t *testing.T) {
 }
 
 func doHttp(method, path_info string) (*http.Response, error) {
-	cgi := "goshaarli.cgi"
+	cgi := "shaarligo.cgi"
 	os.Setenv("SCRIPT_NAME", "/sub/"+cgi)
 	os.Setenv("SERVER_PROTOCOL", "HTTP/1.1")
 	os.Setenv("HTTP_HOST", "example.com")
@@ -233,7 +233,7 @@ func TestGetLoginWithoutRedir(t *testing.T) {
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
 	assert.Equal(t, "/sub/pub/posts/", r.Header["Location"][0], "aha")
 	cook := r.Header["Set-Cookie"][0]
-	assert.True(t, strings.HasPrefix(cook, "GoShaarli=MTU"), cook)
+	assert.True(t, strings.HasPrefix(cook, "ShaarliGo=MTU"), cook)
 }
 
 func TestGetLoginWithRedir(t *testing.T) {
@@ -261,7 +261,7 @@ func TestGetLoginWithRedir(t *testing.T) {
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
 	assert.Equal(t, returnurl, r.Header["Location"][0], "aha")
 	cook := r.Header["Set-Cookie"][0]
-	assert.True(t, strings.HasPrefix(cook, "GoShaarli=MTU"), cook)
+	assert.True(t, strings.HasPrefix(cook, "ShaarliGo=MTU"), cook)
 }
 
 func _TestGetPostNew(t *testing.T) {
@@ -278,20 +278,20 @@ func _TestGetPostNew(t *testing.T) {
 	r, err = doGet("")
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
-	assert.Equal(t, "/sub/goshaarli.cgi?do=login", r.Header["Location"], "aha")
+	assert.Equal(t, "/sub/shaarligo.cgi?do=login", r.Header["Location"], "aha")
 
-	r, err = doGet(fmt.Sprintf("?do=login&returnurl=/sub/goshaarli.cgi%s", url.QueryEscape(purl)))
+	r, err = doGet(fmt.Sprintf("?do=login&returnurl=/sub/shaarligo.cgi%s", url.QueryEscape(purl)))
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, http.StatusOK, r.StatusCode, "aha")
 	cook := r.Header["Set-Cookie"][0]
-	assert.True(t, strings.HasPrefix(cook, "GoShaarli=MTU"), cook)
+	assert.True(t, strings.HasPrefix(cook, "ShaarliGo=MTU"), cook)
 	os.Setenv("COOKIE", cook)
 	root, err := html.Parse(r.Body)
 	assert.Nil(t, err, "aha")
 	assert.NotNil(t, root, "aha")
 	assert.Equal(t, 4, len(scrape.FindAll(root, func(n *html.Node) bool { return atom.Input == n.DataAtom })), "aha")
 
-	r, err = doPost(fmt.Sprintf("?do=login&returnurl=/sub/goshaarli.cgi%s", url.QueryEscape(purl)), []byte(`login=B&password=123456789012`))
+	r, err = doPost(fmt.Sprintf("?do=login&returnurl=/sub/shaarligo.cgi%s", url.QueryEscape(purl)), []byte(`login=B&password=123456789012`))
 	os.Setenv("COOKIE", r.Header["Set-Cookie"][0])
 
 	r, err = doGet(purl)

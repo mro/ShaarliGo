@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/GoShaarli
+// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/ShaarliGo
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 // Files & Directories
 //
 // .htaccess
-// goshaarli.cgi
+// shaarligo.cgi
 // app/.htaccess
 // app/config.yaml
 // app/posts.gob.gz
@@ -47,7 +47,7 @@ import (
 	"github.com/gorilla/sessions"
 )
 
-const myselfNamespace = "http://purl.mro.name/GoShaarli"
+const myselfNamespace = "http://purl.mro.name/ShaarliGo"
 const toSession = 30 * time.Minute
 
 var fileFeedStorage string
@@ -151,7 +151,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		} else {
 			// what if the cookie has changed? Ignore cookie errors, especially on new/changed keys.
-			app.ses, _ = sessions.NewCookieStore(buf).Get(r, "GoShaarli")
+			app.ses, _ = sessions.NewCookieStore(buf).Get(r, "ShaarliGo")
 			app.ses.Options = &sessions.Options{
 				Path:     urlBase.Path, // to match all requests
 				MaxAge:   int(toSession / time.Second),

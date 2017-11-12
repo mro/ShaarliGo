@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export cgi="goshaarli.cgi"
+export cgi="shaarligo.cgi"
 
 go fmt *.go && go build -ldflags "-s" -o "${cgi}" || exit 1
 
