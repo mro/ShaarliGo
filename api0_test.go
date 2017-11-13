@@ -134,6 +134,6 @@ func TestApi0LinkFormMap(t *testing.T) {
 		Title:      HumanText{Body: "My #Post"},
 		Categories: []Category{Category{Term: "Post"}, Category{Term: "tag1"}},
 	}
-	assert.Equal(t, map[string]string{"lf_linkdate": "00010101_000000", "lf_title": "My #Post"}, e.api0LinkFormMap(), "oha")
+	assert.Equal(t, map[string]string{"lf_linkdate": "00010101_000000", "lf_title": "My #Post", "lf_tags": "Post tag1"}, e.api0LinkFormMap(), "oha")
 	// assert.Equal(t, map[string]string{"lf_linkdate": "00010101_000000", "lf_title": "My #Post", "lf_tags": "tag1"}, e.api0LinkFormMap(), "oha")
 }

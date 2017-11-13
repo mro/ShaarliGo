@@ -27,7 +27,25 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestTagsFromString(t *testing.T) {
+	t.Parallel()
+
+	assert.Equal(t, []string{"ha"}, tagsFromString("#ha, foo#nein"), "aha")
+}
+
+func TestEntryCategoriesMerged(t *testing.T) {
+	t.Parallel()
+	e := Entry{
+		Title:      HumanText{Body: "#ha, foo#nein"},
+		Content:    &HumanText{Body: "B #so, bar"},
+		Categories: []Category{Category{Term: "so"}, Category{Term: "da"}},
+	}
+	assert.NotNil(t, e, "genau")
+	assert.Equal(t, []Category{Category{Term: "da"}, Category{Term: "ha"}, Category{Term: "so"}}, e.CategoriesMerged(), "genau")
+}
+
 func TestFeedFromFileName_LinksAtom(t *testing.T) {
+	t.Parallel()
 	feed, err := FeedFromFileName("testdata/links.atom")
 	assert.Nil(t, err, "soso")
 	assert.Equal(t, "🔗 mro", feed.Title.Body, "soso")
@@ -45,6 +63,7 @@ func TestFeedFromFileName_LinksAtom(t *testing.T) {
 }
 
 func TestFeedFromFileName_PhotosAtom(t *testing.T) {
+	t.Parallel()
 	feed, err := FeedFromFileName("testdata/photos.atom")
 	assert.Nil(t, err, "soso")
 	assert.Equal(t, "Demo Album", feed.Title.Body, "soso")
@@ -66,6 +85,7 @@ func TestFeedFromFileName_PhotosAtom(t *testing.T) {
 }
 
 func TestFeedFromFileName_LinksGobGz(t *testing.T) {
+	t.Parallel()
 	file, err := os.Open("testdata/links.gob.gz")
 	assert.Nil(t, err, "soso")
 	defer file.Close()

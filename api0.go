@@ -185,7 +185,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		var ent *Entry = nil
 		if 1 == len(params["post"]) && (len(params["title"]) == 0 || "" == params["title"][0]) {
 			url := parseLinkUrl(params["post"][0])
-			ent = feed.findOrCreateEntryForURL(url, now)
+			ent = feed.findOrCreateEntryForURL(url, now, false)
 			if url == nil {
 				ent.Title = HumanText{Body: params["post"][0]}
 			}
@@ -278,18 +278,20 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 						feed, _ := FeedFromFileName(fileFeedStorage)
 						feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
 						feed.Id = feed.XmlBase
-						ent := feed.findOrCreateEntryForURL(lf_url, now)
+						ent := feed.findOrCreateEntryForURL(lf_url, now, true)
 						ent.Authors = []Person{Person{Name: app.cfg.AuthorName}}
 						ent.Published = iso8601{lf_linkdate}
 						if "" == ent.Id {
 							ent.Id = smallDateHash(ent.Published.Time)
 						}
-						if "" != lf_url.String() {
+						if "" == lf_url.String() {
+							ent.Links = []Link{}
+						} else {
 							ent.Links = []Link{Link{Href: lf_url.String()}}
 						}
 						ent.Title = HumanText{Body: lf_title}
 						ent.Content = &HumanText{Body: lf_description}
-						// todo: tags
+						ent.Categories = ent.CategoriesMerged()
 						location = strings.Join([]string{location, ent.Id}, "?#")
 
 						feed.Save(fileFeedStorage)
@@ -317,6 +319,12 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (entry Entry) api0LinkFormMap() map[string]string {
+	// todo: # mark the tags in title and description and remove them from tags
+	tags := make([]string, 0, len(entry.Categories))
+	for _, c := range entry.Categories {
+		tags = append(tags, c.Term)
+	}
+
 	data := map[string]string{
 		"lf_linkdate": entry.Published.Format(fmtTimeLfTime),
 		"lf_title":    entry.Title.Body,
@@ -330,6 +338,8 @@ func (entry Entry) api0LinkFormMap() map[string]string {
 	if entry.Content != nil {
 		data["lf_description"] = entry.Content.Body
 	}
-	// todo: tags
+	if 0 < len(tags) {
+		data["lf_tags"] = strings.Join(tags, " ")
+	}
 	return data
 }
