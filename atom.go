@@ -236,7 +236,7 @@ func (feed *Feed) findOrCreateEntryForURL(url *url.URL, now time.Time, doAppend 
 		ur := url.String()
 		for _, entry := range feed.Entries {
 			for _, l := range entry.Links {
-				if l.Rel == "" && l.Href == ur {
+				if l.Rel == "" && ((url == nil && l.Href == "") || (ur == l.Href /* todo: url equal */)) {
 					return entry
 				}
 			}
@@ -258,6 +258,24 @@ func (feed Feed) Save(dst string) error {
 	defer un(trace("Feed.Save"))
 	// sort.Sort(ByPublishedDesc(feed.Entries))
 	sort.Slice(feed.Entries, func(i, j int) bool { return !feed.Entries[i].Published.Time.Before(feed.Entries[j].Published.Time) })
+	{
+		// aggregate feed categories
+		cats := make(map[string]int, len(feed.Entries)) // raw len guess
+		for _, ent := range feed.Entries {
+			for _, cat := range ent.Categories {
+				cats[cat.Term] += 1
+			}
+		}
+		cs := make([]Category, 0, len(cats))
+		for term, count := range cats {
+			if term != "" && count != 0 {
+				cs = append(cs, Category{Term: term, Label: strconv.Itoa(count)})
+			}
+		}
+		sort.Slice(cs, func(i, j int) bool { return strings.Compare(cs[i].Term, cs[j].Term) < 0 })
+		feed.Categories = cs
+	}
+
 	tmp := dst + "~"
 	var err error
 	var w *os.File
@@ -282,11 +300,10 @@ func (feed Feed) Save(dst string) error {
 func (entry Entry) CategoriesMerged() []Category {
 	a := entry.Title.Categories()
 	b := entry.Content.Categories()
-	c := entry.Categories
-	ret := make([]Category, 0, len(a)+len(b)+len(c))
+	ret := make([]Category, 0, len(a)+len(b)+len(entry.Categories))
 	ret = append(ret, a...)
 	ret = append(ret, b...)
-	ret = append(ret, c...)
+	ret = append(ret, entry.Categories...)
 	sort.Slice(ret, func(i, j int) bool { return strings.Compare(ret[i].Term, ret[j].Term) < 0 })
 	return uniqCategory(ret)
 }
@@ -309,15 +326,16 @@ func (ht HumanText) Categories() []Category {
 	return ret
 }
 
-func tagsFromString(str string) []string {
+// save string allocations but todo handle atEOF?
+func tagsFromString1(str string) []string {
 	scanner := bufio.NewScanner(strings.NewReader(str))
 	split := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
 		advance, token, err = bufio.ScanWords(data, atEOF)
-		if err == nil && token != nil {
+		if token != nil {
 			if token[0] == byte('#') {
-				token = token[1:]
+				token = token[1:] // de-prefix token
 			} else {
-				token = nil
+				token = nil // drop token
 			}
 		}
 		return
@@ -328,6 +346,23 @@ func tagsFromString(str string) []string {
 	for scanner.Scan() {
 		t := scanner.Text()
 		ret = append(ret, strings.TrimRightFunc(t, unicode.IsPunct))
+	}
+	return ret
+}
+
+func tagsFromString(str string) []string {
+	scanner := bufio.NewScanner(strings.NewReader(str))
+	scanner.Split(bufio.ScanWords)
+
+	ret := make([]string, 0, 10)
+	for scanner.Scan() {
+		token := scanner.Text()
+		if len(token) > 0 && token[0] == byte('#') {
+			term := strings.TrimRightFunc(token[1:], unicode.IsPunct)
+			if len(term) > 0 {
+				ret = append(ret, term)
+			}
+		}
 	}
 	return ret
 }

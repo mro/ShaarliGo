@@ -176,7 +176,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		if app.IsLoggedIn(now) {
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			// w.Header().Set("Etag", r.URL.Path)
-			w.Header().Set("Cache-Control", "max-age=59") // 59 Seconds
+			// w.Header().Set("Cache-Control", "max-age=59") // 59 Seconds
 			io.WriteString(w, app.cfg.AuthorName)
 		} else {
 			// don't squeal to ban.

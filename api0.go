@@ -31,6 +31,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"sort"
 	"strings"
 	"time"
 
@@ -291,8 +292,9 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 						}
 						ent.Title = HumanText{Body: lf_title}
 						ent.Content = &HumanText{Body: lf_description}
+						ent.Categories = []Category{} // discard old categories and only use from POST.
 						ent.Categories = ent.CategoriesMerged()
-						location = strings.Join([]string{location, ent.Id}, "?#")
+						location = strings.Join([]string{location, ent.Id}, "/?#")
 
 						feed.Save(fileFeedStorage)
 
@@ -318,16 +320,35 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Aggregate all tags from #title, #description and <category and remove the first two groups from the set.
 func (entry Entry) api0LinkFormMap() map[string]string {
-	// todo: # mark the tags in title and description and remove them from tags
-	tags := make([]string, 0, len(entry.Categories))
-	for _, c := range entry.Categories {
-		tags = append(tags, c.Term)
-	}
-
 	data := map[string]string{
 		"lf_linkdate": entry.Published.Format(fmtTimeLfTime),
 		"lf_title":    entry.Title.Body,
+	}
+	{
+		// 1. get all atom categories
+		set := make(map[string]struct{}, len(entry.Categories))
+		for _, c := range entry.Categories {
+			set[c.Term] = struct{}{}
+		}
+		// 2. minus #tags from title
+		for _, tag := range tagsFromString(entry.Title.Body) {
+			delete(set, tag)
+		}
+		// 2. minus #tags from content
+		if entry.Content != nil {
+			for _, tag := range tagsFromString(entry.Content.Body) {
+				delete(set, tag)
+			}
+		}
+		// turn map keys into sorted array
+		tags := make([]string, 0, len(set))
+		for key, _ := range set {
+			tags = append(tags, key)
+		}
+		sort.Slice(tags, func(i, j int) bool { return strings.Compare(tags[i], tags[j]) < 0 })
+		data["lf_tags"] = strings.Join(tags, " ")
 	}
 	for _, li := range entry.Links {
 		if "" == li.Rel {
@@ -337,9 +358,6 @@ func (entry Entry) api0LinkFormMap() map[string]string {
 	}
 	if entry.Content != nil {
 		data["lf_description"] = entry.Content.Body
-	}
-	if 0 < len(tags) {
-		data["lf_tags"] = strings.Join(tags, " ")
 	}
 	return data
 }
