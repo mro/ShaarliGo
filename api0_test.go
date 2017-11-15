@@ -37,6 +37,13 @@ func TestURLQuery(t *testing.T) {
 	assert.Equal(t, 1, len(par["post"]), "Na klar")
 	assert.Equal(t, "foo", par["post"][0], "Na klar")
 
+	nul := mustParseURL("")
+	assert.False(t, nul.IsAbs(), "Na klar")
+
+	http := mustParseURL("http://")
+	assert.True(t, http.IsAbs(), "Na klar")
+	assert.Equal(t, "", http.Hostname(), "Na klar")
+
 	purl := fmt.Sprintf("?post=%s&title=%s&source=%s", url.QueryEscape("http://example.com/foo?bar=baz#grr"), url.QueryEscape("A first post"), url.QueryEscape("me"))
 	par = mustParseURL(purl).Query()
 	assert.Equal(t, 1, len(par["post"]), "Na klar")

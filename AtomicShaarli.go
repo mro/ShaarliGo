@@ -201,6 +201,9 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		case 1 == len(params["do"]) && "logout" == params["do"][0]:
 			app.handleDoLogout(w, r)
 			return
+		case 1 == len(params["do"]) && "changepasswd" == params["do"][0]:
+			app.handleDoCheckLoginAfterTheFact(w, r)
+			return
 		}
 	case "/search":
 		app.KeepAlive(w, r, now)

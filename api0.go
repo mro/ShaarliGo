@@ -166,9 +166,9 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		if !app.IsLoggedIn(now) {
 			http.Redirect(w, r, cgiName+"?do=login&returnurl="+url.QueryEscape(r.URL.String()), http.StatusFound)
 			return
-		} else {
-			app.KeepAlive(w, r, now)
 		}
+		app.KeepAlive(w, r, now)
+
 		// 'GET': send a form to the client
 		// must be compatible to https://github.com/mro/Shaarli-API-Test/...
 		// and https://github.com/mro/ShaarliOS/blob/master/ios/ShaarliOS/API/ShaarliCmd.m#L386
@@ -184,15 +184,21 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		feed, _ := FeedFromFileName(fileFeedStorage)
 
 		var ent *Entry = nil
-		if 1 == len(params["post"]) && (len(params["title"]) == 0 || "" == params["title"][0]) {
-			url := parseLinkUrl(params["post"][0])
-			ent = feed.findOrCreateEntryForURL(url, now, false)
-			if url == nil {
+		if 1 == len(params["post"]) {
+			lf_url := parseLinkUrl(params["post"][0])
+			if nil == lf_url || !lf_url.IsAbs() || "" == lf_url.Hostname() {
+				lf_url = nil
+			}
+			ent = feed.findOrCreateEntryForURL(lf_url, now, false)
+			if lf_url == nil {
 				ent.Title = HumanText{Body: params["post"][0]}
 			}
 		}
 		if 1 == len(params["title"]) {
 			ent.Title = HumanText{Body: params["title"][0]}
+		}
+		if 1 == len(params["description"]) {
+			ent.Content = &HumanText{Body: params["description"][0]}
 		}
 		if 1 == len(params["source"]) {
 			// data["lf_source"] = params["source"][0]
@@ -265,9 +271,12 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 					token := strings.TrimSpace(r.FormValue("token"))
 					if returnurl, err := url.Parse(strings.TrimSpace(r.FormValue("returnurl"))); err != nil {
 					} else {
+						if nil == lf_url || !lf_url.IsAbs() || "" == lf_url.Hostname() {
+							lf_url = nil
+						}
 						log.Println(err)
 						log.Println(lf_linkdate)
-						log.Println(lf_url.String())
+						log.Println(lf_url)
 						log.Println(lf_title)
 						log.Println(lf_description)
 						log.Println(lf_tags)
@@ -285,15 +294,21 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 						if "" == ent.Id {
 							ent.Id = smallDateHash(ent.Published.Time)
 						}
-						if "" == lf_url.String() {
+						if nil == lf_url {
 							ent.Links = []Link{}
 						} else {
 							ent.Links = []Link{Link{Href: lf_url.String()}}
 						}
 						ent.Title = HumanText{Body: lf_title}
 						ent.Content = &HumanText{Body: lf_description}
-						ent.Categories = []Category{} // discard old categories and only use from POST.
-						ent.Categories = ent.CategoriesMerged()
+						{
+							tags := strings.Split(lf_tags, " ")
+							ent.Categories = make([]Category, 0, len(tags)) // discard old categories and only use from POST.
+							for _, tg := range tags {
+								ent.Categories = append(ent.Categories, Category{Term: tg})
+							}
+							ent.Categories = ent.CategoriesMerged()
+						}
 						location = strings.Join([]string{location, ent.Id}, "/?#")
 
 						feed.Save(fileFeedStorage)
@@ -317,6 +332,51 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 	default:
 		squealFailure(r, now)
 		http.Error(w, "MethodNotAllowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func (app *App) handleDoCheckLoginAfterTheFact(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
+	switch r.Method {
+	case http.MethodGet:
+		if !app.IsLoggedIn(now) {
+			http.Redirect(w, r, cgiName+"?do=login&returnurl="+url.QueryEscape(r.URL.String()), http.StatusFound)
+			return
+		}
+		app.KeepAlive(w, r, now)
+
+		if tmpl, err := template.New("changepasswordform").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>{{.title}}</title></head>
+<body>
+  <a href="?do=logout">Logout</a>
+  <form method="post" name="changepasswordform">
+    <input type="password" name="oldpassword" />
+    <input type="password" name="setpassword" />
+    <input type="hidden" name="token" value="{{.token}}" />
+    <input type="submit" name="Save" value="Save password" />
+  </form>
+</body>
+</html>
+`); err == nil {
+			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+			io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type='text/xsl' href='./assets/default/de/do-changepassword.xslt'?>
+<!--
+  must be compatible with https://github.com/mro/Shaarli-API-test/blob/master/tests/test-post.sh
+  https://github.com/mro/ShaarliOS/blob/master/ios/ShaarliOS/API/ShaarliCmd.m#L386
+-->
+`)
+			data := make(map[string]string)
+			data["title"] = app.cfg.Title
+			bTok := make([]byte, 20) // keep in local session or encrypted cookie
+			io.ReadFull(rand.Reader, bTok)
+			data["token"] = hex.EncodeToString(bTok)
+			data["returnurl"] = ""
+
+			if err := tmpl.Execute(w, data); err != nil {
+				http.Error(w, "Coudln't send changepasswordform: "+err.Error(), http.StatusInternalServerError)
+			}
+		}
 	}
 }
 
