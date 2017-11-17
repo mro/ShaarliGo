@@ -199,7 +199,7 @@ img.img-thumbnail {
 .rendered.type-text br { display:none; }
 .rendered.type-text br.br { display:inline; }
       </style>
-      <title><xsl:value-of select="a:title"/></title>
+      <title><xsl:value-of select="a:*/a:title"/></title>
     </head>
   </xsl:template>
 
