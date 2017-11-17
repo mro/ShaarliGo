@@ -31,6 +31,9 @@ import (
 	"time"
 	"unicode"
 	// "golang.org/x/tools/blog/atom"
+
+	"github.com/yhat/scrape"
+	"golang.org/x/net/html"
 )
 
 const lengthyAtomPreambleComment string = `
@@ -368,4 +371,16 @@ func tagsFromString(str string) []string {
 		}
 	}
 	return ret
+}
+
+const iWillBeALineFeedMarker = "+,zX@D4X#%`lGdX-vWU?/==v"
+
+func cleanLegacyContent(txt string) string {
+	src := strings.Replace(txt, "<br />", iWillBeALineFeedMarker, -1)
+	if node, err := html.Parse(strings.NewReader(src)); err == nil {
+		str := strings.Replace(scrape.Text(node), iWillBeALineFeedMarker, "", -1)
+		return str[:len(str)-len(" ( Permalink )")]
+	} else {
+		return err.Error()
+	}
 }

@@ -96,6 +96,15 @@ func TestFeedFromFileName_LinksAtom(t *testing.T) {
 	assert.Equal(t, "https://links.mro.name/", feed.Authors[0].Uri, "soso")
 	assert.Equal(t, "https://links.mro.name/", feed.Id, "soso")
 
+	assert.Equal(t, "html", feed.Entries[0].Content.Type, "soso")
+	txt := `&quot;… Ein Vertreter der Bundesanwaltschaft (BAW) erklärte vor dem U-Ausschuss des Bundestages, Marschners Akte sei selbst für die BAW gesperrt. …&quot;<br />
+<br />
+Ach was, wen gibt's denn dann da noch so?<br>(<a href="https://links.mro.name/?aTh_gA">Permalink</a>)`
+	assert.Equal(t, txt, feed.Entries[0].Content.Body, "soso")
+	assert.Equal(t, `"… Ein Vertreter der Bundesanwaltschaft (BAW) erklärte vor dem U-Ausschuss des Bundestages, Marschners Akte sei selbst für die BAW gesperrt. …"
+
+Ach was, wen gibt's denn dann da noch so?`, cleanLegacyContent(txt), "soso")
+
 	assert.Equal(t, 3618, len(feed.Entries), "soso")
 }
 
