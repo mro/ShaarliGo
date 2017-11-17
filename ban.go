@@ -88,9 +88,11 @@ func squealFailure(r *http.Request, now time.Time) error {
 	return err
 }
 
+const banThreshold = 4
+
 func (bans BanPenalties) isRemoteAddrBanned(key string, now time.Time) bool {
 	pen := bans.Penalties[key]
-	if pen.Badness <= 4 { // allow for some failed tries
+	if pen.Badness <= banThreshold { // allow for some failed tries
 		return false
 	}
 	return pen.End.After(now)
@@ -106,7 +108,7 @@ func (bans *BanPenalties) squealFailure(key string, now time.Time) bool {
 		pen.End = now
 	}
 
-	if pen.End.After(now.Add(time.Hour)) {
+	if pen.Badness > banThreshold && pen.End.After(now.Add(1*time.Hour)) {
 		// already banned for more than an hour left, so don't bother adding to the ban.
 		// But rather reduce I/O load a bit.
 		return false
