@@ -102,24 +102,34 @@ func (feed *Feed) replaceFeeds() error {
 			defer os.Remove("./app/var/lock")
 			os.RemoveAll("./app/var/stage")
 			os.RemoveAll("./app/var/old")
-			if err = os.MkdirAll("./app/var", newDirPerms); err == nil {
-				if err = feed.writeFeeds(100, fileFeedWriter{baseDir: "./app/var/stage"}); err == nil {
-					if _, err = os.Stat("./pub"); os.IsNotExist(err) {
-						err = nil // ignore nonexisting pub dir. That's fine for first launch.
-					} else {
-						err = os.Rename("./pub", "./app/var/old")
-					}
-					if err == nil {
-						if err = os.Rename("./app/var/stage/pub", "./pub"); err == nil {
-							os.RemoveAll("./app/var/stage")
-							if err = os.RemoveAll("./app/var/old"); err == nil {
-								err = os.Remove("./app/var/lock")
-							}
-						}
-					}
+			if err = feed.writeFeeds(100, fileFeedWriter{baseDir: "./app/var/stage"}); err == nil {
+				if _, err = os.Stat("./pub"); os.IsNotExist(err) {
+					err = nil // ignore nonexisting pub dir. That's fine for first launch.
+				} else {
+					err = os.Rename("./pub", "./app/var/old")
 				}
+				if err == nil {
+					if err = os.Rename("./app/var/stage/pub", "./pub"); err == nil {
+						os.RemoveAll("./app/var/stage")
+						if err = os.RemoveAll("./app/var/old"); err == nil {
+							err = os.Remove("./app/var/lock")
+						} else {
+							log.Printf("Cannot remove old: %s", err.Error())
+						}
+					} else {
+						log.Printf("Cannot move new: %s", err.Error())
+					}
+				} else {
+					log.Printf("Cannot move old: %s", err.Error())
+				}
+			} else {
+				log.Printf("Cannot write ./app/var/stage: %s", err.Error())
 			}
+		} else {
+			log.Printf("Cannot write ./app/var/lock: %s", err.Error())
 		}
+	} else {
+		log.Printf("Cannot mkdir ./app/var: %s", err.Error())
 	}
 	return err
 }
@@ -157,12 +167,16 @@ func (feed *Feed) writeFeeds(entriesPerPage int, fw feedWriter) error {
 			uri2entries[uri] = append(uri2entries[uri], item)
 		}
 
-		fw.Write(item, selfURL, "posts.xslt")
+		if err := fw.Write(item, selfURL, "posts.xslt"); err != nil {
+			return err
+		}
 	}
 
 	for uri, entries := range uri2entries {
 		// ... if not for the error handling. Maybe https://godoc.org/golang.org/x/sync/errgroup
-		feed.writeFeed(uri, entries, entriesPerPage, fw)
+		if err := feed.writeFeed(uri, entries, entriesPerPage, fw); err != nil {
+			return err
+		}
 	}
 
 	return nil

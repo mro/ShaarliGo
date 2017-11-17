@@ -122,18 +122,18 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
 		// todo: verify token
 		uid := strings.TrimSpace(r.FormValue("login"))
 		pwd := strings.TrimSpace(r.FormValue("password"))
+		returnurl := strings.TrimSpace(r.FormValue("returnurl"))
 		// compute anyway (a bit more time constantness)
 		err := bcrypt.CompareHashAndPassword([]byte(app.cfg.PwdBcrypt), []byte(pwd))
 		if uid != app.cfg.AuthorName || err == bcrypt.ErrMismatchedHashAndPassword {
 			squealFailure(r, now)
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			http.Error(w, "<script>alert(\"Wrong login/password.\");document.location='?do=login&returnurl='"+url.QueryEscape(returnurl)+"';</script>", http.StatusUnauthorized)
 			return
 		}
 		if err == nil {
 			err = app.startSession(w, r, now)
 		}
 		if err == nil {
-			returnurl := strings.TrimSpace(r.FormValue("returnurl"))
 			if "" == returnurl { // TODO restrict to local urls within app scope
 				returnurl = path.Join(uriPub, uriPosts) + "/"
 			}
@@ -247,10 +247,10 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			squealFailure(r, now)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
-		} else {
-			app.KeepAlive(w, r, now)
 		}
+		app.KeepAlive(w, r, now)
 		location := path.Join(uriPub, uriPosts)
+
 		// https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1479
 		log.Println("save_edit: '" + r.FormValue("save_edit") + "'")
 		log.Println("cancel_edit: '" + r.FormValue("cancel_edit") + "'")
@@ -270,18 +270,19 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 					lf_tags := strings.TrimSpace(r.FormValue("lf_tags"))
 					token := strings.TrimSpace(r.FormValue("token"))
 					if returnurl, err := url.Parse(strings.TrimSpace(r.FormValue("returnurl"))); err != nil {
+						log.Printf("Error parsing returnurl: %s", err.Error())
 					} else {
 						if nil == lf_url || !lf_url.IsAbs() || "" == lf_url.Hostname() {
 							lf_url = nil
 						}
-						log.Println(err)
-						log.Println(lf_linkdate)
-						log.Println(lf_url)
-						log.Println(lf_title)
-						log.Println(lf_description)
-						log.Println(lf_tags)
-						log.Println(token)
-						log.Println(returnurl)
+						log.Println("err", err)
+						log.Println("lf_linkdate", lf_linkdate)
+						log.Println("lf_url", lf_url)
+						log.Println("lf_title", lf_title)
+						log.Println("lf_description", lf_description)
+						log.Println("lf_tags", lf_tags)
+						log.Println("token", token)
+						log.Println("returnurl", returnurl)
 
 						// todo: check token.
 
@@ -314,6 +315,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 						feed.Save(fileFeedStorage)
 
 						if err := feed.replaceFeeds(); err != nil {
+							log.Println("couldn't write feeds: " + err.Error())
 							http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
 							return
 						}
@@ -321,6 +323,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		} else if r.FormValue("cancel_edit") != "" {
+
 		} else {
 			squealFailure(r, now)
 			http.Error(w, "StatusBadRequest", http.StatusBadRequest)
@@ -332,6 +335,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 	default:
 		squealFailure(r, now)
 		http.Error(w, "MethodNotAllowed", http.StatusMethodNotAllowed)
+		return
 	}
 }
 
