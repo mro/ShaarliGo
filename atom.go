@@ -311,6 +311,9 @@ func (entry Entry) CategoriesMerged() []Category {
 func uniqCategory(data []Category) []Category {
 	ret := make([]Category, 0, len(data))
 	for i, e := range data {
+		if "" == e.Term {
+			continue
+		}
 		if i == 0 || e.Term != data[i-1].Term {
 			ret = append(ret, e)
 		}
@@ -332,7 +335,7 @@ func tagsFromString1(str string) []string {
 	split := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
 		advance, token, err = bufio.ScanWords(data, atEOF)
 		if token != nil {
-			if token[0] == byte('#') {
+			if byte('#') == token[0] {
 				token = token[1:] // de-prefix token
 			} else {
 				token = nil // drop token
@@ -357,7 +360,7 @@ func tagsFromString(str string) []string {
 	ret := make([]string, 0, 10)
 	for scanner.Scan() {
 		token := scanner.Text()
-		if len(token) > 0 && token[0] == byte('#') {
+		if len(token) > 0 && byte('#') == token[0] {
 			term := strings.TrimRightFunc(token[1:], unicode.IsPunct)
 			if len(term) > 0 {
 				ret = append(ret, term)

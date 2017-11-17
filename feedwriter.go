@@ -185,6 +185,10 @@ func feedUrlsForEntry(itm *Entry) []string {
 		path.Join(audience, uriDays, day.Format("2006-01-02")), // daily feed
 	)
 	for _, cat := range itm.Categories {
+		if "" == cat.Term {
+			log.Println("found a category/@term == ''")
+			continue
+		}
 		ret = append(ret, path.Join(audience, uriTags, cat.Term)) // category feeds
 	}
 
