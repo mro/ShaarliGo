@@ -23,7 +23,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/url"
 	"os"
 	"sort"
 	"strconv"
@@ -234,25 +233,14 @@ func (a ByPublishedDesc) Less(i, j int) bool { return !a[i].Published.Time.Befor
 
 // custom interface
 
-func (feed *Feed) findOrCreateEntryByLinkURL(url *url.URL, now time.Time, doAppend bool) *Entry {
-	if _, ret := feed.findEntry(url.String()); nil != ret {
-		return ret
-	}
-	ret := &Entry{
-		Published: iso8601{now},
-	}
-	if url != nil {
-		ret.Links = []Link{Link{Href: url.String()}}
-	}
-	if doAppend {
-		feed.Append(ret)
-	}
-	return ret
-}
-
 func (feed *Feed) findEntry(id_self_or_link string) (int, *Entry) {
 	defer un(trace(strings.Join([]string{"Feed.findEntry('", id_self_or_link, "')"}, "")))
 	if "" != id_self_or_link {
+		if parts := strings.SplitN(id_self_or_link, "/", 4); 4 == len(parts) && "" == parts[3] && uriPub == parts[0] && uriPosts == parts[1] {
+			// looks like an internal id, so treat it as such.
+			id_self_or_link = parts[2]
+		}
+
 		for idx, entry := range feed.Entries {
 			if id_self_or_link == entry.Id {
 				return idx, entry

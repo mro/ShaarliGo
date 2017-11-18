@@ -148,3 +148,16 @@ func TestApi0LinkFormMap(t *testing.T) {
 	assert.Equal(t, map[string]string{"lf_tags": "tag1", "lf_linkdate": "00010101_000000", "lf_title": "My #Post"}, e.api0LinkFormMap(), "oha")
 	// assert.Equal(t, map[string]string{"lf_linkdate": "00010101_000000", "lf_title": "My #Post", "lf_tags": "tag1"}, e.api0LinkFormMap(), "oha")
 }
+
+func TestUrlFromPostParam(t *testing.T) {
+	t.Parallel()
+
+	assert.Equal(t, "http://foo", urlFromPostParam("http://foo").String(), "oha")
+	assert.Equal(t, "http://foo.de", urlFromPostParam("foo.de").String(), "oha")
+	assert.Equal(t, "http://example.com/und?noch#was", urlFromPostParam("example.com/und?noch#was").String(), "oha")
+	assert.Nil(t, urlFromPostParam("/sub/dir#frag"), "oha")
+	assert.Nil(t, urlFromPostParam("two parts"), "oha")
+	assert.Nil(t, urlFromPostParam("#two"), "oha")
+	assert.Nil(t, urlFromPostParam("example.com und noch was"), "oha")
+	assert.Nil(t, urlFromPostParam("http://example.com und noch was"), "oha")
+}

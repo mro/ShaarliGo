@@ -159,6 +159,20 @@ func (app *App) handleDoLogout(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func urlFromPostParam(post string) *url.URL {
+	if url, err := url.Parse(post); err == nil && url != nil && url.IsAbs() && "" != url.Hostname() {
+		return url
+	} else {
+		if nil != url && !url.IsAbs() {
+			post = strings.Join([]string{"http://", post}, "")
+			if url, err := url.Parse(post); err == nil && url != nil && url.IsAbs() && "" != url.Hostname() {
+				return url
+			}
+		}
+		return nil
+	}
+}
+
 func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	switch r.Method {
@@ -171,30 +185,27 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, cgiName+"?do=login&returnurl="+url.QueryEscape(r.URL.String()), http.StatusFound)
 			return
 		}
-		app.KeepAlive(w, r, now)
-
 		params := r.URL.Query()
-		feed, _ := FeedFromFileName(fileFeedStorage)
-
-		var ent *Entry = nil
-		if 1 == len(params["post"]) {
-			// decide what to to.
-			post := strings.TrimSpace(params["post"][0])
-			if rexInternalId.MatchString(post) {
-				_, ent = feed.findEntry(strings.SplitN(post, "/", 4)[2])
-			}
-			if nil == ent {
-				lf_url := parseLinkUrl(post)
-				if nil == lf_url || !lf_url.IsAbs() || "" == lf_url.Hostname() {
-					// post doesn't look like a url - must be a note
-					lf_url = nil
-				}
-				ent = feed.findOrCreateEntryByLinkURL(lf_url, now, false)
-				if lf_url == nil {
-					ent.Title = HumanText{Body: params["post"][0]}
-				}
-			}
+		if 1 != len(params["post"]) {
+			http.Error(w, "StatusBadRequest", http.StatusBadRequest)
+			return
 		}
+
+		app.KeepAlive(w, r, now)
+		feed, _ := FeedFromFileName(fileFeedStorage)
+		post := params["post"][0]
+		_, ent := feed.findEntry(post)
+		if nil == ent {
+			// nothing found, so we need a new (dangling, unsaved) entry:
+			ent = &Entry{Published: iso8601{now}}
+			if url := urlFromPostParam(post); url != nil {
+				ent.Links = []Link{Link{Href: url.String()}}
+			} else {
+				ent.Title = HumanText{Body: post}
+			}
+			// do not append to feed yet, keep dangling
+		}
+
 		if 1 == len(params["title"]) {
 			ent.Title = HumanText{Body: params["title"][0]}
 		}
@@ -253,73 +264,64 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		location := path.Join(uriPub, uriPosts)
 
 		// https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1479
-		if r.FormValue("save_edit") != "" {
+		if "" != r.FormValue("save_edit") {
 			if lf_linkdate, err := time.ParseInLocation(fmtTimeLfTime, strings.TrimSpace(r.FormValue("lf_linkdate")), app.tz); err != nil {
 				squealFailure(r, now)
 				http.Error(w, "Looks like a forged request: "+err.Error(), http.StatusBadRequest)
 				return
 			} else {
-				if lf_url, err := url.Parse(strings.TrimSpace(r.FormValue("lf_url"))); err != nil {
-					squealFailure(r, now)
-					http.Error(w, "Looks like a forged request: "+err.Error(), http.StatusBadRequest)
+				token := r.FormValue("token")
+				log.Println("todo: check token ", token)
+				if returnurl, err := url.Parse(r.FormValue("returnurl")); err != nil {
+					log.Println("Error parsing returnurl: ", err.Error())
+					http.Error(w, "couldn't parse returnurl: "+err.Error(), http.StatusInternalServerError)
 					return
 				} else {
-					lf_title := strings.TrimSpace(r.FormValue("lf_title"))
-					lf_description := strings.TrimSpace(r.FormValue("lf_description"))
-					lf_tags := strings.TrimSpace(r.FormValue("lf_tags"))
-					token := strings.TrimSpace(r.FormValue("token"))
-					if returnurl, err := url.Parse(strings.TrimSpace(r.FormValue("returnurl"))); err != nil {
-						log.Printf("Error parsing returnurl: %s", err.Error())
-					} else {
-						if nil == lf_url || !lf_url.IsAbs() || "" == lf_url.Hostname() {
-							lf_url = nil
-						}
+					log.Println("todo: use returnurl ", returnurl)
 
-						log.Println("todo: check token ", token)
-						log.Println("todo: use returnurl ", returnurl)
+					feed, _ := FeedFromFileName(fileFeedStorage)
+					feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
+					feed.Id = feed.XmlBase
 
-						feed, _ := FeedFromFileName(fileFeedStorage)
-						feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
-						feed.Id = feed.XmlBase
-						ent := feed.findOrCreateEntryByLinkURL(lf_url, now, true)
-						ent.Authors = []Person{Person{Name: app.cfg.AuthorName}}
-						ent.Published = iso8601{lf_linkdate}
-						if "" == ent.Id {
-							ent.Id = smallDateHash(ent.Published.Time)
+					lf_url := r.FormValue("lf_url")
+					_, ent := feed.findEntry(lf_url)
+					if nil == ent {
+						ent = &Entry{
+							Authors:   []Person{Person{Name: app.cfg.AuthorName}},
+							Published: iso8601{lf_linkdate},
+							Id:        smallDateHash(lf_linkdate),
 						}
-						if lf_url != nil && lf_url.String() == ent.Id {
-							lf_url = nil
-						}
-						if nil == lf_url {
-							ent.Links = []Link{}
-						} else {
-							ent.Links = []Link{Link{Href: lf_url.String()}}
-						}
-						ent.Title = HumanText{Body: lf_title}
-						ent.Content = &HumanText{Body: lf_description}
-						{
-							tags := strings.Split(lf_tags, " ")
-							ent.Categories = make([]Category, 0, len(tags)) // discard old categories and only use from POST.
-							for _, tg := range tags {
-								ent.Categories = append(ent.Categories, Category{Term: tg})
+						feed.Append(ent)
+					}
+					ent.Title = HumanText{Body: strings.TrimSpace(r.FormValue("lf_title")), Type: "text"}
+					ent.Links = []Link{Link{Href: lf_url}}
+					ent.Content = &HumanText{Body: strings.TrimSpace(r.FormValue("lf_description")), Type: "text"}
+
+					{
+						tags := strings.Split(r.FormValue("lf_tags"), " ")
+						a := make([]Category, 0, len(tags))
+						for _, tg := range tags {
+							if "" != tg {
+								a = append(a, Category{Term: tg})
 							}
-							ent.Categories = ent.CategoriesMerged()
 						}
-						location = strings.Join([]string{location, ent.Id}, "/?#")
+						ent.Categories = a // discard old categories and only use from POST.
+						ent.Categories = ent.CategoriesMerged()
+					}
+					location = strings.Join([]string{location, ent.Id}, "/?#")
+					feed.Save(fileFeedStorage)
 
-						feed.Save(fileFeedStorage)
-
-						if err := feed.replaceFeeds(); err != nil {
-							log.Println("couldn't write feeds: ", err.Error())
-							http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
-							return
-						}
+					if err := feed.replaceFeeds(); err != nil {
+						log.Println("couldn't write feeds: ", err.Error())
+						http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
+						return
 					}
 				}
 			}
-		} else if r.FormValue("cancel_edit") != "" {
-		} else if r.FormValue("delete_edit") != "" {
-			token := strings.TrimSpace(r.FormValue("token"))
+		} else if "" != r.FormValue("cancel_edit") {
+
+		} else if "" != r.FormValue("delete_edit") {
+			token := r.FormValue("token")
 			log.Println("todo: check token ", token)
 			feed, _ := FeedFromFileName(fileFeedStorage)
 			id := strings.TrimSpace(r.FormValue("lf_url"))
