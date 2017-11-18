@@ -62,6 +62,25 @@ func TestQueryParse(t *testing.T) {
 
 	assert.Equal(t, 2, len(v["do"]), "omg")
 	assert.Equal(t, "login", v["do"][0], "omg")
+
+	{
+		parts := strings.Split("", "/")
+		assert.Equal(t, 1, len(parts), "ja, genau")
+		assert.Equal(t, "", parts[0], "ja, genau")
+	}
+	{
+		parts := strings.Split("/config", "/")
+		assert.Equal(t, 2, len(parts), "ja, genau")
+		assert.Equal(t, "", parts[0], "ja, genau")
+		assert.Equal(t, "config", parts[1], "ja, genau")
+	}
+	{
+		assert.True(t, rexEditUrl.MatchString("/pub/posts/foo/"), "gut")
+		assert.True(t, rexEditUrl.MatchString("/pab/posts/foo/"), "gut")
+		assert.False(t, rexEditUrl.MatchString("./pub/posts/foo/"), "gut")
+		assert.False(t, rexEditUrl.MatchString("/pub/posts/foo/."), "gut")
+		assert.False(t, rexEditUrl.MatchString("/pub/posts/foo"), "gut")
+	}
 }
 
 func doHttp(method, path_info string) (*http.Response, error) {

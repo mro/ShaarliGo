@@ -234,16 +234,9 @@ func (a ByPublishedDesc) Less(i, j int) bool { return !a[i].Published.Time.Befor
 
 // custom interface
 
-func (feed *Feed) findOrCreateEntryForURL(url *url.URL, now time.Time, doAppend bool) *Entry {
-	if url != nil {
-		ur := url.String()
-		for _, entry := range feed.Entries {
-			for _, l := range entry.Links {
-				if l.Rel == "" && ((url == nil && l.Href == "") || (ur == l.Href /* todo: url equal */)) {
-					return entry
-				}
-			}
-		}
+func (feed *Feed) findOrCreateEntryByLinkURL(url *url.URL, now time.Time, doAppend bool) *Entry {
+	if _, ret := feed.findEntry(url.String()); nil != ret {
+		return ret
 	}
 	ret := &Entry{
 		Published: iso8601{now},
@@ -255,6 +248,35 @@ func (feed *Feed) findOrCreateEntryForURL(url *url.URL, now time.Time, doAppend 
 		feed.Append(ret)
 	}
 	return ret
+}
+
+func (feed *Feed) findEntry(id_self_or_link string) (int, *Entry) {
+	defer un(trace(strings.Join([]string{"Feed.findEntry('", id_self_or_link, "')"}, "")))
+	if "" != id_self_or_link {
+		for idx, entry := range feed.Entries {
+			if id_self_or_link == entry.Id {
+				return idx, entry
+			}
+			for _, l := range entry.Links {
+				if ("" == l.Rel || "self" == l.Rel) && (id_self_or_link == l.Href /* todo: url equal */) {
+					return idx, entry
+				}
+			}
+		}
+	}
+	return -1, nil
+}
+
+func (feed *Feed) deleteEntry(id_self_or_link string) *Entry {
+	if i, entry := feed.findEntry(id_self_or_link); i >= 0 {
+		a := feed.Entries
+		// https://github.com/golang/go/wiki/SliceTricks
+		copy(a[i:], a[i+1:])
+		a[len(a)-1] = nil // or the zero value of T
+		feed.Entries = a[:len(a)-1]
+		return entry
+	}
+	return nil
 }
 
 func (feed Feed) Save(dst string) error {
@@ -379,7 +401,7 @@ func cleanLegacyContent(txt string) string {
 	src := strings.Replace(txt, "<br />", iWillBeALineFeedMarker, -1)
 	if node, err := html.Parse(strings.NewReader(src)); err == nil {
 		str := strings.Replace(scrape.Text(node), iWillBeALineFeedMarker, "", -1)
-		return str[:len(str)-len(" ( Permalink )")]
+		return strings.Trim(str[:len(str)-len("( Permalink )")], " ")
 	} else {
 		return err.Error()
 	}

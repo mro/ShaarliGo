@@ -18,29 +18,11 @@
 package main
 
 import (
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestBcrypt(t *testing.T) {
+func TestFoo(t *testing.T) {
 	t.Parallel()
-	pwd := "123456789012"
-	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
-	assert.Nil(t, err, "soso")
-
-	str := string(hash)
-
-	err = bcrypt.CompareHashAndPassword([]byte(str), []byte(pwd))
-	assert.Nil(t, err, "soso")
-
-	err = bcrypt.CompareHashAndPassword([]byte(str), []byte("wrong"))
-	assert.NotNil(t, err, "soso")
-}
-
-func TestXmlBaseFromRequestURL(t *testing.T) {
-	t.Parallel()
-	assert.Equal(t, "http://example.com/", xmlBaseFromRequestURL(mustParseURL("http://example.com/shaarligo.cgi"), "/shaarligo.cgi").String(), "soso")
-	assert.Equal(t, "http://example.com/b/", xmlBaseFromRequestURL(mustParseURL("http://example.com/b/shaarligo.cgi"), "/b/shaarligo.cgi").String(), "soso")
+	assert.Nil(t, nil, "soso")
 }

@@ -151,14 +151,14 @@ func (feed *Feed) writeFeeds(entriesPerPage int, fw feedWriter) error {
 			item.Updated = item.Published
 		}
 		// change entries for output but don't save the change:
-		selfURL := mustParseURL(path.Join(uriPub, uriPosts, item.Id))
-		editURL := path.Join(cgiName, selfURL.String())
+		selfURL := mustParseURL(path.Join(uriPub, uriPosts, item.Id) + "/")
+		editURL := strings.Join([]string{cgiName, "?post=", selfURL.String()}, "")
 		item.Id = xmlBase.ResolveReference(selfURL).String() // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
 		item.Links = append(item.Links,
 			Link{Rel: relSelf, Href: selfURL.String()},
 			Link{Rel: relEdit, Href: editURL},
 			// Link{Rel: relEditMedia, Href: editURL},
-			Link{Rel: relUp, Href: "..", Title: feed.Title.Body}, // we need the feed-name somewhere.
+			Link{Rel: relUp, Href: "../", Title: feed.Title.Body}, // we need the feed-name somewhere.
 		)
 		for i, _ := range item.Categories {
 			item.Categories[i].Scheme = catScheme
@@ -195,25 +195,28 @@ func feedUrlsForEntry(itm *Entry) []string {
 
 	audience := uriPub
 	ret = append(ret,
-		path.Join(audience, uriPosts),                          // default feed
-		path.Join(audience, uriDays, day.Format("2006-01-02")), // daily feed
+		path.Join(audience, uriPosts)+"/",                          // default feed
+		path.Join(audience, uriDays, day.Format("2006-01-02"))+"/", // daily feed
 	)
 	for _, cat := range itm.Categories {
 		if "" == cat.Term {
 			log.Println("found a category/@term == ''")
 			continue
 		}
-		ret = append(ret, path.Join(audience, uriTags, cat.Term)) // category feeds
+		ret = append(ret, path.Join(audience, uriTags, cat.Term)+"/") // category feeds
 	}
 
 	return ret
 }
 
 func appendPageNumber(prefix string, page int) string {
+	if !strings.HasSuffix(prefix, "/") {
+		panic("invalid input: appendPageNumber('" + prefix + "', " + string(page) + ") needs a trailing slash")
+	}
 	if page == 0 {
 		return prefix
 	}
-	return fmt.Sprintf("%s-%d", prefix, page)
+	return fmt.Sprintf("%s-%d/", prefix[:len(prefix)-1], page)
 }
 
 func computeLastPage(count int, entriesPerPage int) int {

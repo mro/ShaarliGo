@@ -23,11 +23,11 @@ import (
 	"encoding/gob"
 	"os"
 	"strings"
-	"testing"
 	"time"
 	"unicode"
 
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestURLEqual(t *testing.T) {
@@ -81,7 +81,7 @@ func TestEntryCategoriesMerged(t *testing.T) {
 	assert.Equal(t, []Category{Category{Term: "da"}, Category{Term: "ha"}, Category{Term: "so"}}, e.CategoriesMerged(), "genau")
 }
 
-func TestFeedFromFileName_LinksAtom(t *testing.T) {
+func TestFeedFromFileName_Atom(t *testing.T) {
 	t.Parallel()
 	feed, err := FeedFromFileName("testdata/links.atom")
 	assert.Nil(t, err, "soso")
@@ -108,6 +108,16 @@ Ach was, wen gibt's denn dann da noch so?`, cleanLegacyContent(txt), "soso")
 	assert.Equal(t, 3618, len(feed.Entries), "soso")
 }
 
+func TestFeedFromFileName_AtomLarge(t *testing.T) {
+	if testing.Short() {
+		t.Skip("long running")
+	}
+	t.Parallel()
+	feed, err := FeedFromFileName("testdata/sebsauvage.atom")
+	assert.Nil(t, err, "soso")
+	assert.Equal(t, 21900, len(feed.Entries), "soso")
+}
+
 func TestFeedFromFileName_PhotosAtom(t *testing.T) {
 	t.Parallel()
 	feed, err := FeedFromFileName("testdata/photos.atom")
@@ -130,7 +140,83 @@ func TestFeedFromFileName_PhotosAtom(t *testing.T) {
 	assert.Equal(t, float32(10.871933), feed.Entries[0].GeoRssPoint.Lon, "soso")
 }
 
-func TestFeedFromFileName_LinksGobGz(t *testing.T) {
+func TestFeedLargeToGob(t *testing.T) {
+	if testing.Short() {
+		t.Skip("long running")
+	}
+	t.Parallel()
+
+	file, err := os.Create("testdata/sebsauvage.gob~")
+	assert.Nil(t, err, "soso")
+	defer file.Close()
+
+	feed, err := FeedFromFileName("testdata/sebsauvage.atom")
+	assert.Nil(t, err, "soso")
+	err = gob.NewEncoder(file).Encode(feed)
+	assert.Nil(t, err, "soso")
+}
+
+func TestFeedLargeToAtomClean(t *testing.T) {
+	if testing.Short() {
+		t.Skip("long running")
+	}
+	t.Parallel()
+
+	feed, err := FeedFromFileName("testdata/sebsauvage.atom")
+	assert.Nil(t, err, "soso")
+
+	for _, entry := range feed.Entries {
+		entry.Content.Body = cleanLegacyContent(entry.Content.Body)
+		entry.Content.Type = "text"
+		if entry.Published.IsZero() {
+			entry.Published = entry.Updated
+		}
+	}
+
+	err = feed.Save("testdata/sebsauvage.atom~")
+	assert.Nil(t, err, "soso")
+}
+
+func TestFeedFromFileName_GobLarge(t *testing.T) {
+	t.Parallel()
+
+	file, err := os.Open("testdata/sebsauvage.gob")
+	assert.Nil(t, err, "soso")
+	defer file.Close()
+
+	feed := Feed{}
+	err = gob.NewDecoder(file).Decode(&feed)
+	assert.Nil(t, err, "soso")
+	assert.Equal(t, 21900, len(feed.Entries), "soso")
+}
+
+func TestFeedFromFileName_Gob(t *testing.T) {
+	t.Parallel()
+
+	file, err := os.Open("testdata/links.gob")
+	assert.Nil(t, err, "soso")
+	defer file.Close()
+
+	feed := Feed{}
+	err = gob.NewDecoder(file).Decode(&feed)
+	assert.Nil(t, err, "soso")
+
+	assert.Nil(t, err, "soso")
+	assert.Equal(t, "🔗 mro", feed.Title.Body, "soso")
+	assert.Equal(t, "2017-02-09T22:44:52+01:00", feed.Updated.Format(time.RFC3339), "soso")
+	assert.Equal(t, 2, len(feed.Links), "soso")
+	assert.Equal(t, "self", feed.Links[0].Rel, "soso")
+	assert.Equal(t, "https://links.mro.name/?do=atom&nb=all", feed.Links[0].Href, "soso")
+	assert.Equal(t, "hub", feed.Links[1].Rel, "soso")
+	assert.Equal(t, "http://blog.mro.name/?pushpress=hub", feed.Links[1].Href, "soso")
+	assert.Equal(t, "https://links.mro.name/", feed.Authors[0].Name, "soso")
+	assert.Equal(t, "https://links.mro.name/", feed.Authors[0].Uri, "soso")
+	assert.Equal(t, "https://links.mro.name/", feed.Id, "soso")
+
+	assert.Equal(t, 3618, len(feed.Entries), "soso")
+}
+
+func TestFeedFromFileName_GobGz(t *testing.T) {
 	t.Parallel()
 	file, err := os.Open("testdata/links.gob.gz")
 	assert.Nil(t, err, "soso")

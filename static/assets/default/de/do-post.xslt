@@ -175,6 +175,9 @@ min-width: 40px;
           <span class="input-group-btn">
             <input name="cancel_edit" type="submit" value="Cancel" class="btn btn-primary"/>
           </span>
+          <span class="input-group-btn">
+            <input name="delete_edit" type="submit" value="Delete" class="btn btn-danger"/>
+          </span>
         </div>
       </div>
     </form>

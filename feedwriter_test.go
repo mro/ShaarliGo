@@ -80,9 +80,9 @@ func TestFeedUrlsForEntry(t *testing.T) {
 	uris := feedUrlsForEntry(itm)
 
 	assert.Equal(t, 2+1, len(uris), "Oha")
-	assert.Equal(t, "pub/posts", uris[0], "Oha")
-	assert.Equal(t, "pub/days/2010-12-31", uris[1], "Oha")
-	assert.Equal(t, "pub/tags/🐳", uris[2], "Oha")
+	assert.Equal(t, "pub/posts/", uris[0], "Oha")
+	assert.Equal(t, "pub/days/2010-12-31/", uris[1], "Oha")
+	assert.Equal(t, "pub/tags/🐳/", uris[2], "Oha")
 }
 
 func TestPathJoin(t *testing.T) {
@@ -92,8 +92,8 @@ func TestPathJoin(t *testing.T) {
 func TestAppendPageNumber(t *testing.T) {
 	s := "abc/"
 	assert.Equal(t, "/", s[len(s)-1:], "Oha")
-	assert.Equal(t, "pub/posts", appendPageNumber("pub/posts", 0), "Oha")
-	assert.Equal(t, "pub/posts-1", appendPageNumber("pub/posts", 1), "Oha")
+	assert.Equal(t, "pub/posts/", appendPageNumber("pub/posts/", 0), "Oha")
+	assert.Equal(t, "pub/posts-1/", appendPageNumber("pub/posts/", 1), "Oha")
 }
 
 type buff struct {
@@ -167,9 +167,9 @@ func TestWriteFeedsEmpty1(t *testing.T) {
 	sfw := saveFeedWriter{feeds: make(map[string]Feed), entries: make(map[string]Entry), bufs: make(map[string]buff)}
 	err := feed.writeFeeds(2, sfw)
 	assert.Nil(t, err, "soso")
-	assert.Equal(t, []string{"pub/days/0001-01-01", "pub/posts"}, keys4map(sfw.bufs), "soso")
+	assert.Equal(t, []string{"pub/days/0001-01-01/", "pub/posts/"}, keys4map(sfw.bufs), "soso")
 
-	assert.Equal(t, 1446, len(sfw.bufs["pub/days/0001-01-01"].b), "aha")
+	assert.Equal(t, 1457, len(sfw.bufs["pub/days/0001-01-01/"].b), "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../assets/default/de/posts.xslt'?>
 <!--
@@ -191,18 +191,18 @@ func TestWriteFeedsEmpty1(t *testing.T) {
   <title></title>
   <id></id>
   <updated>0001-01-01T00:00:00Z</updated>
-  <link href="pub/posts" rel="self" title="1"></link>
+  <link href="pub/posts/" rel="self" title="1"></link>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
     <title></title>
-    <id>http://example.com/pub/posts</id>
+    <id>http://example.com/pub/posts/</id>
     <updated>0001-01-01T00:00:00Z</updated>
     <published>0001-01-01T00:00:00Z</published>
-    <link href="pub/posts" rel="self"></link>
-    <link href="shaarligo.cgi/pub/posts" rel="edit"></link>
-    <link href=".." rel="up"></link>
+    <link href="pub/posts/" rel="self"></link>
+    <link href="shaarligo.cgi?post=pub/posts/" rel="edit"></link>
+    <link href="../" rel="up"></link>
   </entry>
 </feed>
-`, string(sfw.bufs["pub/posts"].b), "soso")
+`, string(sfw.bufs["pub/posts/"].b), "soso")
 }
 
 func TestWriteFeedsUnpaged(t *testing.T) {
@@ -221,13 +221,13 @@ func TestWriteFeedsUnpaged(t *testing.T) {
 	err := feed.writeFeeds(2, sfw)
 	assert.Nil(t, err, "soso")
 	assert.Equal(t, []string{
-		"pub/days/1990-12-31",
-		"pub/posts",
-		"pub/posts/e0",
-		"pub/tags/aha",
+		"pub/days/1990-12-31/",
+		"pub/posts/",
+		"pub/posts/e0/",
+		"pub/tags/aha/",
 	}, keys4map(sfw.bufs), "soso")
 
-	assert.Equal(t, 1605, len(sfw.bufs["pub/days/1990-12-31"].b), "aha")
+	assert.Equal(t, 1616, len(sfw.bufs["pub/days/1990-12-31/"].b), "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../assets/default/de/posts.xslt'?>
 <!--
@@ -249,19 +249,19 @@ func TestWriteFeedsUnpaged(t *testing.T) {
   <title>Hello, Atom!</title>
   <id>http://example.com/</id>
   <updated>1990-12-31T01:02:03+01:00</updated>
-  <link href="pub/posts" rel="self" title="1"></link>
+  <link href="pub/posts/" rel="self" title="1"></link>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
     <title>Hello, Entry!</title>
-    <id>http://example.com/pub/posts/e0</id>
+    <id>http://example.com/pub/posts/e0/</id>
     <updated>1990-12-31T01:02:03+01:00</updated>
     <published>0001-01-01T00:00:00Z</published>
-    <link href="pub/posts/e0" rel="self"></link>
-    <link href="shaarligo.cgi/pub/posts/e0" rel="edit"></link>
-    <link href=".." rel="up" title="Hello, Atom!"></link>
+    <link href="pub/posts/e0/" rel="self"></link>
+    <link href="shaarligo.cgi?post=pub/posts/e0/" rel="edit"></link>
+    <link href="../" rel="up" title="Hello, Atom!"></link>
     <category term="aha" scheme="http://example.com/pub/tags/"></category>
   </entry>
 </feed>
-`, string(sfw.bufs["pub/posts"].b), "soso")
+`, string(sfw.bufs["pub/posts/"].b), "soso")
 
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../../assets/default/de/posts.xslt'?>
@@ -282,15 +282,15 @@ func TestWriteFeedsUnpaged(t *testing.T) {
 -->
 <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
   <title>Hello, Entry!</title>
-  <id>http://example.com/pub/posts/e0</id>
+  <id>http://example.com/pub/posts/e0/</id>
   <updated>1990-12-31T01:02:03+01:00</updated>
   <published>0001-01-01T00:00:00Z</published>
-  <link href="pub/posts/e0" rel="self"></link>
-  <link href="shaarligo.cgi/pub/posts/e0" rel="edit"></link>
-  <link href=".." rel="up" title="Hello, Atom!"></link>
+  <link href="pub/posts/e0/" rel="self"></link>
+  <link href="shaarligo.cgi?post=pub/posts/e0/" rel="edit"></link>
+  <link href="../" rel="up" title="Hello, Atom!"></link>
   <category term="aha" scheme="http://example.com/pub/tags/"></category>
 </entry>
-`, string(sfw.bufs["pub/posts/e0"].b), "soso")
+`, string(sfw.bufs["pub/posts/e0/"].b), "soso")
 
 }
 
@@ -323,13 +323,13 @@ func TestWriteFeedsPaged(t *testing.T) {
 	err := feed.writeFeeds(2, sfw)
 	assert.Nil(t, err, "soso")
 	assert.Equal(t, []string{
-		"pub/days/1990-12-30",
-		"pub/days/1990-12-31",
-		"pub/posts",
-		"pub/posts-1",
-		"pub/posts/e0",
-		"pub/posts/e1",
-		"pub/posts/e2",
+		"pub/days/1990-12-30/",
+		"pub/days/1990-12-31/",
+		"pub/posts-1/",
+		"pub/posts/",
+		"pub/posts/e0/",
+		"pub/posts/e1/",
+		"pub/posts/e2/",
 	}, keys4map(sfw.bufs), "soso")
 
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
@@ -353,31 +353,31 @@ func TestWriteFeedsPaged(t *testing.T) {
   <title>Hello, Atom!</title>
   <id>http://example.com</id>
   <updated>1990-12-31T02:02:02+01:00</updated>
-  <link href="pub/posts" rel="self" title="1"></link>
-  <link href="pub/posts" rel="first" title="1"></link>
-  <link href="pub/posts-1" rel="next" title="2"></link>
-  <link href="pub/posts-1" rel="last" title="2"></link>
+  <link href="pub/posts/" rel="self" title="1"></link>
+  <link href="pub/posts/" rel="first" title="1"></link>
+  <link href="pub/posts-1/" rel="next" title="2"></link>
+  <link href="pub/posts-1/" rel="last" title="2"></link>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
     <title>Hello, Entry 2!</title>
-    <id>http://example.com/pub/posts/e2</id>
+    <id>http://example.com/pub/posts/e2/</id>
     <updated>1990-12-31T02:02:02+01:00</updated>
     <published>0001-01-01T00:00:00Z</published>
-    <link href="pub/posts/e2" rel="self"></link>
-    <link href="shaarligo.cgi/pub/posts/e2" rel="edit"></link>
-    <link href=".." rel="up" title="Hello, Atom!"></link>
+    <link href="pub/posts/e2/" rel="self"></link>
+    <link href="shaarligo.cgi?post=pub/posts/e2/" rel="edit"></link>
+    <link href="../" rel="up" title="Hello, Atom!"></link>
   </entry>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
     <title>Hello, Entry 1!</title>
-    <id>http://example.com/pub/posts/e1</id>
+    <id>http://example.com/pub/posts/e1/</id>
     <updated>1990-12-31T01:01:01+01:00</updated>
     <published>0001-01-01T00:00:00Z</published>
-    <link href="pub/posts/e1" rel="self"></link>
-    <link href="shaarligo.cgi/pub/posts/e1" rel="edit"></link>
-    <link href=".." rel="up" title="Hello, Atom!"></link>
+    <link href="pub/posts/e1/" rel="self"></link>
+    <link href="shaarligo.cgi?post=pub/posts/e1/" rel="edit"></link>
+    <link href="../" rel="up" title="Hello, Atom!"></link>
   </entry>
 </feed>
 `,
-		string(sfw.bufs["pub/posts"].b), "page 1")
+		string(sfw.bufs["pub/posts/"].b), "page 1")
 
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../assets/default/de/posts.xslt'?>
@@ -400,22 +400,22 @@ func TestWriteFeedsPaged(t *testing.T) {
   <title>Hello, Atom!</title>
   <id>http://example.com</id>
   <updated>1990-12-31T02:02:02+01:00</updated>
-  <link href="pub/posts-1" rel="self" title="2"></link>
-  <link href="pub/posts" rel="first" title="1"></link>
-  <link href="pub/posts" rel="previous" title="1"></link>
-  <link href="pub/posts-1" rel="last" title="2"></link>
+  <link href="pub/posts-1/" rel="self" title="2"></link>
+  <link href="pub/posts/" rel="first" title="1"></link>
+  <link href="pub/posts/" rel="previous" title="1"></link>
+  <link href="pub/posts-1/" rel="last" title="2"></link>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
     <title>Hello, Entry 0!</title>
-    <id>http://example.com/pub/posts/e0</id>
+    <id>http://example.com/pub/posts/e0/</id>
     <updated>1990-12-30T00:00:00+01:00</updated>
     <published>0001-01-01T00:00:00Z</published>
-    <link href="pub/posts/e0" rel="self"></link>
-    <link href="shaarligo.cgi/pub/posts/e0" rel="edit"></link>
-    <link href=".." rel="up" title="Hello, Atom!"></link>
+    <link href="pub/posts/e0/" rel="self"></link>
+    <link href="shaarligo.cgi?post=pub/posts/e0/" rel="edit"></link>
+    <link href="../" rel="up" title="Hello, Atom!"></link>
   </entry>
 </feed>
 `,
-		string(sfw.bufs["pub/posts-1"].b), "page 2")
+		string(sfw.bufs["pub/posts-1/"].b), "page 2")
 
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../../assets/default/de/posts.xslt'?>
@@ -436,13 +436,13 @@ func TestWriteFeedsPaged(t *testing.T) {
 -->
 <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
   <title>Hello, Entry 0!</title>
-  <id>http://example.com/pub/posts/e0</id>
+  <id>http://example.com/pub/posts/e0/</id>
   <updated>1990-12-30T00:00:00+01:00</updated>
   <published>0001-01-01T00:00:00Z</published>
-  <link href="pub/posts/e0" rel="self"></link>
-  <link href="shaarligo.cgi/pub/posts/e0" rel="edit"></link>
-  <link href=".." rel="up" title="Hello, Atom!"></link>
+  <link href="pub/posts/e0/" rel="self"></link>
+  <link href="shaarligo.cgi?post=pub/posts/e0/" rel="edit"></link>
+  <link href="../" rel="up" title="Hello, Atom!"></link>
 </entry>
 `,
-		string(sfw.bufs["pub/posts/e0"].b), "page 2")
+		string(sfw.bufs["pub/posts/e0/"].b), "page 2")
 }

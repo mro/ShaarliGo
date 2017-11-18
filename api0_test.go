@@ -24,6 +24,7 @@ import (
 	// "hash/crc32"
 	"io"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/stretchr/testify/assert"
@@ -50,6 +51,9 @@ func TestURLQuery(t *testing.T) {
 	assert.Equal(t, "http://example.com/foo?bar=baz#grr", par["post"][0], "Na klar")
 	assert.Equal(t, "A first post", par["title"][0], "Na klar")
 	assert.Equal(t, "me", par["source"][0], "Na klar")
+
+	assert.True(t, rexInternalId.MatchString("pub/posts/foo/"), "Na klar")
+	assert.Equal(t, "foo", strings.SplitN("pub/posts/foo/", "/", 4)[2], "Na klar")
 }
 
 func TestLfTimeFmt(t *testing.T) {

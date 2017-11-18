@@ -41,6 +41,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -51,9 +52,13 @@ const myselfNamespace = "http://purl.mro.name/ShaarliGo"
 const toSession = 30 * time.Minute
 
 var fileFeedStorage string
+var rexInternalId *regexp.Regexp
+var rexEditUrl *regexp.Regexp
 
 func init() {
 	fileFeedStorage = filepath.Join(dirApp, "feed.xml")
+	rexInternalId = regexp.MustCompile("^([^/]+)/posts/([^/]+)/$")
+	rexEditUrl = regexp.MustCompile("^/([^/]+)/posts/([^/]+)/$")
 }
 
 // even cooler: https://stackoverflow.com/a/8363629
@@ -163,15 +168,15 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	switch path_info {
-	case "/config":
+	switch {
+	case "/config" == path_info:
 		// make a 404 (fallthrough) if already configured but not currently logged in
 		if !app.cfg.IsConfigured() || app.IsLoggedIn(now) {
 			app.KeepAlive(w, r, now)
 			app.handleSettings(w, r)
 			return
 		}
-	case "/session":
+	case "/session" == path_info:
 		// maybe cache a bit, but never KeepAlive
 		if app.IsLoggedIn(now) {
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -183,7 +188,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			http.NotFound(w, r)
 		}
 		return
-	case "":
+	case "" == path_info:
 		app.KeepAlive(w, r, now)
 		params := r.URL.Query()
 		switch {
@@ -205,8 +210,11 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			app.handleDoCheckLoginAfterTheFact(w, r)
 			return
 		}
-	case "/search":
+	case "/search" == path_info:
 		app.KeepAlive(w, r, now)
+		return
+	case false && rexEditUrl.MatchString(path_info):
+		app.handleEditPost(w, r)
 		return
 	}
 	squealFailure(r, now)

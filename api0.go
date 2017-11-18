@@ -163,35 +163,36 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	switch r.Method {
 	case http.MethodGet:
+		// 'GET': send a form to the client
+		// must be compatible with https://github.com/mro/Shaarli-API-Test/...
+		// and https://github.com/mro/ShaarliOS/blob/master/ios/ShaarliOS/API/ShaarliCmd.m#L386
+
 		if !app.IsLoggedIn(now) {
 			http.Redirect(w, r, cgiName+"?do=login&returnurl="+url.QueryEscape(r.URL.String()), http.StatusFound)
 			return
 		}
 		app.KeepAlive(w, r, now)
 
-		// 'GET': send a form to the client
-		// must be compatible to https://github.com/mro/Shaarli-API-Test/...
-		// and https://github.com/mro/ShaarliOS/blob/master/ios/ShaarliOS/API/ShaarliCmd.m#L386
-
-		// 1. pull post= title= and source= and from GET
-		// 2. url or note?
-		// 3. if url:
-		//   a. already there? findEntryForLink
-		//   b. map post, title and source to a new (sparse?) atom entry - feasible in JavaScript as well?
-		//   c. turn atom entry to form map
-
 		params := r.URL.Query()
 		feed, _ := FeedFromFileName(fileFeedStorage)
 
 		var ent *Entry = nil
 		if 1 == len(params["post"]) {
-			lf_url := parseLinkUrl(params["post"][0])
-			if nil == lf_url || !lf_url.IsAbs() || "" == lf_url.Hostname() {
-				lf_url = nil
+			// decide what to to.
+			post := strings.TrimSpace(params["post"][0])
+			if rexInternalId.MatchString(post) {
+				_, ent = feed.findEntry(strings.SplitN(post, "/", 4)[2])
 			}
-			ent = feed.findOrCreateEntryForURL(lf_url, now, false)
-			if lf_url == nil {
-				ent.Title = HumanText{Body: params["post"][0]}
+			if nil == ent {
+				lf_url := parseLinkUrl(post)
+				if nil == lf_url || !lf_url.IsAbs() || "" == lf_url.Hostname() {
+					// post doesn't look like a url - must be a note
+					lf_url = nil
+				}
+				ent = feed.findOrCreateEntryByLinkURL(lf_url, now, false)
+				if lf_url == nil {
+					ent.Title = HumanText{Body: params["post"][0]}
+				}
 			}
 		}
 		if 1 == len(params["title"]) {
@@ -252,8 +253,6 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		location := path.Join(uriPub, uriPosts)
 
 		// https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1479
-		log.Println("save_edit: '" + r.FormValue("save_edit") + "'")
-		log.Println("cancel_edit: '" + r.FormValue("cancel_edit") + "'")
 		if r.FormValue("save_edit") != "" {
 			if lf_linkdate, err := time.ParseInLocation(fmtTimeLfTime, strings.TrimSpace(r.FormValue("lf_linkdate")), app.tz); err != nil {
 				squealFailure(r, now)
@@ -275,25 +274,21 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 						if nil == lf_url || !lf_url.IsAbs() || "" == lf_url.Hostname() {
 							lf_url = nil
 						}
-						log.Println("err", err)
-						log.Println("lf_linkdate", lf_linkdate)
-						log.Println("lf_url", lf_url)
-						log.Println("lf_title", lf_title)
-						log.Println("lf_description", lf_description)
-						log.Println("lf_tags", lf_tags)
-						log.Println("token", token)
-						log.Println("returnurl", returnurl)
 
-						// todo: check token.
+						log.Println("todo: check token ", token)
+						log.Println("todo: use returnurl ", returnurl)
 
 						feed, _ := FeedFromFileName(fileFeedStorage)
 						feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
 						feed.Id = feed.XmlBase
-						ent := feed.findOrCreateEntryForURL(lf_url, now, true)
+						ent := feed.findOrCreateEntryByLinkURL(lf_url, now, true)
 						ent.Authors = []Person{Person{Name: app.cfg.AuthorName}}
 						ent.Published = iso8601{lf_linkdate}
 						if "" == ent.Id {
 							ent.Id = smallDateHash(ent.Published.Time)
+						}
+						if lf_url != nil && lf_url.String() == ent.Id {
+							lf_url = nil
 						}
 						if nil == lf_url {
 							ent.Links = []Link{}
@@ -315,7 +310,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 						feed.Save(fileFeedStorage)
 
 						if err := feed.replaceFeeds(); err != nil {
-							log.Println("couldn't write feeds: " + err.Error())
+							log.Println("couldn't write feeds: ", err.Error())
 							http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
 							return
 						}
@@ -323,7 +318,26 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		} else if r.FormValue("cancel_edit") != "" {
+		} else if r.FormValue("delete_edit") != "" {
+			token := strings.TrimSpace(r.FormValue("token"))
+			log.Println("todo: check token ", token)
+			feed, _ := FeedFromFileName(fileFeedStorage)
+			id := strings.TrimSpace(r.FormValue("lf_url"))
+			if entry := feed.deleteEntry(id); nil != entry {
+				feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
+				feed.Id = feed.XmlBase
+				feed.Save(fileFeedStorage)
 
+				if err := feed.replaceFeeds(); err != nil {
+					log.Println("couldn't write feeds: ", err.Error())
+					http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
+					return
+				}
+			} else {
+				log.Println("entry not found: ", id)
+				http.Error(w, "StatusBadRequest", http.StatusBadRequest)
+				return
+			}
 		} else {
 			squealFailure(r, now)
 			http.Error(w, "StatusBadRequest", http.StatusBadRequest)
@@ -420,7 +434,10 @@ func (entry Entry) api0LinkFormMap() map[string]string {
 			break
 		}
 	}
-	if entry.Content != nil {
+	if "" == data["lf_url"] && "" != entry.Id {
+		data["lf_url"] = entry.Id
+	}
+	if nil != entry.Content {
 		data["lf_description"] = entry.Content.Body
 	}
 	return data

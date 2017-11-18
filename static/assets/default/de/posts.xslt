@@ -356,7 +356,7 @@ img.img-thumbnail {
         <span class="hidden-logged-out" title="Bearbeiten">
           <a href="{$xml_base_pub}/../{a:link[@rel='edit']/@href}">🔨</a><xsl:text> </xsl:text>
         </span>
-        <a class="time" title="Einzelansicht" href="{$xml_base_pub}/../{a:link[@rel='self']/@href}/"><xsl:value-of select="$entry_updated_human"/> ¶</a>
+        <a class="time" title="Einzelansicht" href="{$xml_base_pub}/../{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_updated_human"/> ¶</a>
         <xsl:if test="$link">
           <xsl:text> ~ </xsl:text>
           <a title="Archiv" href="https://web.archive.org/web/{$link}">@archive.org</a>
