@@ -200,7 +200,7 @@ Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lo
 		}
 
 		app.startSession(w, r, now)
-		http.Redirect(w, r, path.Join("..", uriPub, uriPosts)+"/", http.StatusFound)
+		http.Redirect(w, r, path.Join("..", "..", uriPub, uriPosts)+"/", http.StatusFound)
 	case http.MethodGet:
 		app.cfg.renderSettingsPage(w, http.StatusOK)
 	default:
@@ -226,7 +226,7 @@ func (cfg Config) renderSettingsPage(w http.ResponseWriter, code int) {
 		w.WriteHeader(code)
 
 		io.WriteString(w, "<?xml version='1.0' encoding='UTF-8'?>\n"+
-			"<?xml-stylesheet type='text/xsl' href='"+path.Join("..", "assets", "default", "de", "config.xslt")+"'?>\n")
+			"<?xml-stylesheet type='text/xsl' href='"+path.Join("..", "..", "assets", "default", "de", "config.xslt")+"'?>\n")
 		io.WriteString(w, `<!--
   The html you see here is for compatibilty with vanilla shaarli.
 

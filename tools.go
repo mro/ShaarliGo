@@ -47,7 +47,7 @@ func (app *App) handleTools(w http.ResponseWriter, r *http.Request) {
 <head><title>{{.title}}</title></head>
 <body>
   <ol>
-    <li class="config"><a href="../config">Config</a></li>
+    <li class="config"><a href="../config/">Config</a></li>
     
     <li class="bookmarklet">
       <a

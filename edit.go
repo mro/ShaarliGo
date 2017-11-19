@@ -32,7 +32,7 @@ func (app *App) handleEditPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !app.cfg.IsConfigured() {
-		http.Redirect(w, r, cgiName+"/config", http.StatusPreconditionFailed)
+		http.Redirect(w, r, cgiName+"/config/", http.StatusPreconditionFailed)
 		return
 	}
 

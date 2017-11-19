@@ -149,7 +149,7 @@ func TestGetConfigRaw(t *testing.T) {
 	teardownTest := setupTest(t)
 	defer teardownTest(t)
 
-	r, err := doGet("/config")
+	r, err := doGet("/config/")
 
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, http.StatusOK, r.StatusCode, "aha")
@@ -159,7 +159,7 @@ func TestGetConfigRaw(t *testing.T) {
 	body, err := ioutil.ReadAll(r.Body)
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, `<?xml version='1.0' encoding='UTF-8'?>
-<?xml-stylesheet type='text/xsl' href='../assets/default/de/config.xslt'?>
+<?xml-stylesheet type='text/xsl' href='../../assets/default/de/config.xslt'?>
 <!--
   The html you see here is for compatibilty with vanilla shaarli.
 
@@ -185,7 +185,7 @@ func TestGetConfigScraped(t *testing.T) {
 	teardownTest := setupTest(t)
 	defer teardownTest(t)
 
-	r, err := doGet("/config")
+	r, err := doGet("/config/")
 
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, http.StatusOK, r.StatusCode, "aha")
@@ -209,7 +209,7 @@ func TestPostConfig(t *testing.T) {
 	teardownTest := setupTest(t)
 	defer teardownTest(t)
 
-	r, err := doPost("/config", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
+	r, err := doPost("/config/", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
 
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
@@ -233,7 +233,7 @@ func TestGetLoginWithoutRedir(t *testing.T) {
 	teardownTest := setupTest(t)
 	defer teardownTest(t)
 
-	r, err := doPost("/config", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
+	r, err := doPost("/config/", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
 	assert.Equal(t, "/sub/pub/posts/", r.Header["Location"][0], "aha")
@@ -260,7 +260,7 @@ func TestGetLoginWithRedir(t *testing.T) {
 	defer teardownTest(t)
 
 	os.Unsetenv("COOKIE")
-	r, err := doPost("/config", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
+	r, err := doPost("/config/", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
 	assert.Equal(t, "/sub/pub/posts/", r.Header["Location"][0], "aha")

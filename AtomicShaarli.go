@@ -169,7 +169,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch path_info {
-	case "/config":
+	case "/config/":
 		// make a 404 (fallthrough) if already configured but not currently logged in
 		if !app.cfg.IsConfigured() || app.IsLoggedIn(now) {
 			app.KeepAlive(w, r, now)
@@ -193,7 +193,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
 		switch {
 		case "" == r.URL.RawQuery && !app.cfg.IsConfigured():
-			http.Redirect(w, r, path.Join(r.URL.Path, "config"), http.StatusSeeOther)
+			http.Redirect(w, r, path.Join(r.URL.Path, "config")+"/", http.StatusSeeOther)
 			return
 
 		// legacy API, https://github.com/mro/Shaarli-API-Test

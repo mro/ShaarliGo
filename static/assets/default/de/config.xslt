@@ -96,8 +96,8 @@
         <!-- http://www.quirksmode.org/blog/archives/2013/10/initialscale1_m.html -->
         <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
         <!-- meta name="viewport" content="width=400"/ -->
-        <link href="../assets/default/bootstrap.css" rel="stylesheet" type="text/css"/>
-        <link href="../assets/default/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
+        <link href="../../assets/default/bootstrap.css" rel="stylesheet" type="text/css"/>
+        <link href="../../assets/default/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
 
         <style type="text/css">
 .table {
