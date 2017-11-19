@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
+
 -->
 <xsl:stylesheet
   xmlns="http://www.w3.org/1999/xhtml"
@@ -33,14 +34,14 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:variable name="xml_base_pub">pub</xsl:variable>
+  <xsl:variable name="xml_base_pub">../../pub</xsl:variable>
 
   <xsl:template match="/">
     <xsl:apply-templates select="h:html"/>
   </xsl:template>
 
   <xsl:template match="h:html">
-    <html xmlns="http://www.w3.org/1999/xhtml" class="logged-out">
+    <html xmlns="http://www.w3.org/1999/xhtml">
       <xsl:apply-templates select="h:head"/>
       <xsl:apply-templates select="h:body"/>
     </html>
@@ -87,7 +88,7 @@ margin: 1.0ex 0;
 min-width: 40px;
 }
       </style>
-      <title>Shaaare!</title>
+      <title>Tools</title>
     </head>
   </xsl:template>
 
@@ -96,7 +97,7 @@ min-width: 40px;
       <tbody>
         <tr>
           <td class="text-left">
-            <a href="{$xml_base_pub}/posts/">
+            <a tabindex="10" href="{$xml_base_pub}/posts/">
               <xsl:value-of select="/h:html/h:head/h:title"/>
 <!--              <xsl:choose>
                 <xsl:when test="a:link[@rel = 'up']/@title">
@@ -123,64 +124,49 @@ min-width: 40px;
 
   <xsl:template match="h:body">
     <body>
+<!--
+   onload="document.getElementById('q').removeAttribute('autofocus');document.getElementById('post').setAttribute('autofocus', 'autofocus');"
+   onload="document.form_post.post.focus();"
+-->
+      <script>
+var xml_base_pub = '<xsl:value-of select="$xml_base_pub"/>';
+// <![CDATA[
+// check if we're logged-in (AJAX or Cookie?).
+var xhr = new XMLHttpRequest();
+xhr.onreadystatechange = function(data0) {
+  if (xhr.readyState == 4) {
+    console.log('xhr.status = ' + xhr.status);
+    document.documentElement.classList.add(xhr.status === 200 ? 'logged-in' : 'logged-out');
+    // store the result locally and use as initial value for later calls.
+  }
+}
+xhr.open('GET', xml_base_pub + '/../shaarligo.cgi/session');
+xhr.send(null);
+// ]]>
+      </script>
       <div class="container">
         <noscript><p>JavaScript ist aus, es geht zwar (fast) alles auch ohne, aber mit ist's <em>schöner</em>.</p></noscript>
 
-        <xsl:apply-templates select="h:form"/>
+        <xsl:call-template name="links_commands"/>
+ 
+        <ol>
+          <xsl:apply-templates select="h:ol/h:li"/>
+        </ol>
       </div>
     </body>
   </xsl:template>
 
-  <xsl:template match="h:form[@name='linkform']">
-    <form method="{@method}" name="{@name}" class="form-horizontal">
-      <input name="token" type="hidden" value="{h:input[@name='token']/@value}"/>
-      <input name="returnurl" type="hidden" value="{h:input[@name='returnurl']/@value}"/>
-      <input name="use_hashed_tags_from_text" type="hidden" value="on"/>
-      <input name="lf_linkdate" type="hidden" value="{h:input[@name='lf_linkdate']/@value}" class="form-control"/>
-      <div class="input-group">
-        <div class="col-sm-12">
-          <input name="lf_url" type="text" placeholder="https://..." value="{h:input[@name='lf_url']/@value}" class="form-control"/>
-        </div>
-      </div>
-      <div class="input-group">
-        <div class="col-sm-12">
-          <input autofocus="autofocus" name="lf_title" type="text" placeholder="Ein Titel, gerne mit #Schlagwort" value="{h:input[@name='lf_title']/@value}" class="form-control"/>
-        </div>
-      </div>
-      <div class="input-group">
-        <div class="col-sm-12">
-          <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="14" cols="25" class="form-control">
-            <xsl:value-of select="h:textarea[@name='lf_description']"/>
-            <xsl:call-template name="tags_with_hash">
-              <xsl:with-param name="string" select="h:input[@name='lf_tags']/@value"/>
-            </xsl:call-template>
-          </textarea>
-        </div>
-      </div>
-      <!-- div class="input-group">
-        <div class="col-sm-12">
-          <input name="lf_tags" type="text" placeholder="Schlagwort NochEinSchlagwort" data-multiple="data-multiple" value="{h:input[@name='lf_tags']/@value}" class="form-control"/>
-        </div>
-      </div -->
-      <!-- div class="input-group">
-        <div class="col-sm-12">
-          <input name="lf_private" type="checkbox" value="{h:input[@name='lf_private']/@value}" class="form-control"/>
-        </div>
-      </div -->
-      <div class="input-group">
-        <div class="col-sm-12">
-          <span class="input-group-btn">
-            <input name="save_edit" type="submit" value="Save" class="btn btn-primary"/>
-          </span>
-          <span class="input-group-btn">
-            <input name="cancel_edit" type="submit" value="Cancel" class="btn btn-primary"/>
-          </span>
-          <span class="input-group-btn">
-            <input name="delete_edit" type="submit" value="Delete" class="btn btn-danger"/>
-          </span>
-        </div>
-      </div>
-    </form>
+  <xsl:template match="h:li[@class='bookmarklet']">
+    <li>
+      <a class="btn btn-default btn-lg active" onclick="{h:a/@onclick}" href="{h:a/@href}">
+        <xsl:value-of select="h:a"/>
+      </a>
+      <xsl:copy-of select="h:span"/>
+    </li>
+  </xsl:template>
+
+  <xsl:template match="h:li">
+    <xsl:copy-of select="."/>
   </xsl:template>
 
 </xsl:stylesheet>

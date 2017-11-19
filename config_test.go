@@ -43,4 +43,5 @@ func TestXmlBaseFromRequestURL(t *testing.T) {
 	t.Parallel()
 	assert.Equal(t, "http://example.com/", xmlBaseFromRequestURL(mustParseURL("http://example.com/shaarligo.cgi"), "/shaarligo.cgi").String(), "soso")
 	assert.Equal(t, "http://example.com/b/", xmlBaseFromRequestURL(mustParseURL("http://example.com/b/shaarligo.cgi"), "/b/shaarligo.cgi").String(), "soso")
+	assert.Equal(t, "http://example.com/b/", xmlBaseFromRequestURL(mustParseURL("http://example.com/b/shaarligo.cgi/tools/?post=http://example.com/b/shaarligo.cgi/tools"), "/b/shaarligo.cgi").String(), "soso")
 }

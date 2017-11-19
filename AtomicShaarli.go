@@ -211,10 +211,10 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case "/search" == path_info:
-		app.KeepAlive(w, r, now)
+		// app.KeepAlive(w, r, now)
 		return
-	case false && rexEditUrl.MatchString(path_info):
-		app.handleEditPost(w, r)
+	case "/tools/" == path_info:
+		app.handleTools(w, r)
 		return
 	}
 	squealFailure(r, now)

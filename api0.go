@@ -345,8 +345,11 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "StatusBadRequest", http.StatusBadRequest)
 			return
 		}
-		// close bookmarklet popup in case!
-		http.Redirect(w, r, location, http.StatusFound)
+		if "bookmarklet" == r.FormValue("source") {
+			io.WriteString(w, "<script>self.close(); // close bookmarklet popup</script>")
+		} else {
+			http.Redirect(w, r, location, http.StatusFound)
+		}
 		return
 	default:
 		squealFailure(r, now)
