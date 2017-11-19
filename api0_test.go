@@ -52,7 +52,6 @@ func TestURLQuery(t *testing.T) {
 	assert.Equal(t, "A first post", par["title"][0], "Na klar")
 	assert.Equal(t, "me", par["source"][0], "Na klar")
 
-	assert.True(t, rexInternalId.MatchString("pub/posts/foo/"), "Na klar")
 	assert.Equal(t, "foo", strings.SplitN("pub/posts/foo/", "/", 4)[2], "Na klar")
 }
 

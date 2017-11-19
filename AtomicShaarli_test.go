@@ -74,13 +74,6 @@ func TestQueryParse(t *testing.T) {
 		assert.Equal(t, "", parts[0], "ja, genau")
 		assert.Equal(t, "config", parts[1], "ja, genau")
 	}
-	{
-		assert.True(t, rexEditUrl.MatchString("/pub/posts/foo/"), "gut")
-		assert.True(t, rexEditUrl.MatchString("/pab/posts/foo/"), "gut")
-		assert.False(t, rexEditUrl.MatchString("./pub/posts/foo/"), "gut")
-		assert.False(t, rexEditUrl.MatchString("/pub/posts/foo/."), "gut")
-		assert.False(t, rexEditUrl.MatchString("/pub/posts/foo"), "gut")
-	}
 }
 
 func doHttp(method, path_info string) (*http.Response, error) {

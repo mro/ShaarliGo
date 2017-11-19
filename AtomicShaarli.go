@@ -41,7 +41,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"time"
 
@@ -52,13 +51,9 @@ const myselfNamespace = "http://purl.mro.name/ShaarliGo"
 const toSession = 30 * time.Minute
 
 var fileFeedStorage string
-var rexInternalId *regexp.Regexp
-var rexEditUrl *regexp.Regexp
 
 func init() {
 	fileFeedStorage = filepath.Join(dirApp, "feed.xml")
-	rexInternalId = regexp.MustCompile("^([^/]+)/posts/([^/]+)/$")
-	rexEditUrl = regexp.MustCompile("^/([^/]+)/posts/([^/]+)/$")
 }
 
 // even cooler: https://stackoverflow.com/a/8363629
