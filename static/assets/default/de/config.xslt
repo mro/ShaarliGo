@@ -116,6 +116,7 @@ div.if_hasdiv_pwd { display:none; }
       <body onload="document.{@name}.title.focus();">
         <div class="container">
           <p><img
+            width="600px" height="100px"
             alt="Sehr schön, der Webserver ist gut eingestellt, ./app/ ist geschützt."
             title="Wenn hier ein Filmzitat sichtbar ist, liegt ./app/ ungeschützt im Netz."
             src="../app/i-must-be-403.svg"/></p>

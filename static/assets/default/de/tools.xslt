@@ -140,7 +140,7 @@ xhr.onreadystatechange = function(data0) {
     // store the result locally and use as initial value for later calls.
   }
 }
-xhr.open('GET', xml_base_pub + '/../shaarligo.cgi/session');
+xhr.open('GET', xml_base_pub + '/../shaarligo.cgi/session/');
 xhr.send(null);
 // ]]>
       </script>

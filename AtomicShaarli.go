@@ -168,15 +168,15 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	switch {
-	case "/config" == path_info:
+	switch path_info {
+	case "/config":
 		// make a 404 (fallthrough) if already configured but not currently logged in
 		if !app.cfg.IsConfigured() || app.IsLoggedIn(now) {
 			app.KeepAlive(w, r, now)
 			app.handleSettings(w, r)
 			return
 		}
-	case "/session" == path_info:
+	case "/session/":
 		// maybe cache a bit, but never KeepAlive
 		if app.IsLoggedIn(now) {
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -188,7 +188,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			http.NotFound(w, r)
 		}
 		return
-	case "" == path_info:
+	case "":
 		app.KeepAlive(w, r, now)
 		params := r.URL.Query()
 		switch {
@@ -210,10 +210,10 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			app.handleDoCheckLoginAfterTheFact(w, r)
 			return
 		}
-	case "/search" == path_info:
+	case "/search/":
 		// app.KeepAlive(w, r, now)
 		return
-	case "/tools/" == path_info:
+	case "/tools/":
 		app.handleTools(w, r)
 		return
 	}
