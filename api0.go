@@ -89,15 +89,15 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
 			returnurl = ru[0]
 		}
 		if tmpl, err := template.New("login").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
-<head><title>{{index . "title"}}</title></head>
+<head><title>{{.title}}</title></head>
 <body>
-  <form method="post" name="loginform" id="loginform">
+  <form method="post" name="loginform">
     <input type="text" name="login" />
     <input type="password" name="password" />
     <input type="submit" value="Login" />
-    <input type="checkbox" name="longlastingsession" id="longlastingsession" />
-    <input type="hidden" name="token" value="{{index . "token"}}" />
-    <input type="hidden" name="returnurl" value="{{index . "returnurl"}}" />
+    <input type="checkbox" name="longlastingsession" />
+    <input type="hidden" name="token" value="{{.token}}" />
+    <input type="hidden" name="returnurl" value="{{.returnurl}}" />
   </form>
 </body>
 </html>
