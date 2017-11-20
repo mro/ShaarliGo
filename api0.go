@@ -164,6 +164,9 @@ func urlFromPostParam(post string) *url.URL {
 		return url
 	} else {
 		if nil != url && !url.IsAbs() {
+			if !strings.ContainsRune(post, '.') {
+				return nil
+			}
 			post = strings.Join([]string{"http://", post}, "")
 			if url, err := url.Parse(post); err == nil && url != nil && url.IsAbs() && "" != url.Hostname() {
 				return url

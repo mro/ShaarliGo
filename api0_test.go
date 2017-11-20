@@ -159,4 +159,5 @@ func TestUrlFromPostParam(t *testing.T) {
 	assert.Nil(t, urlFromPostParam("#two"), "oha")
 	assert.Nil(t, urlFromPostParam("example.com und noch was"), "oha")
 	assert.Nil(t, urlFromPostParam("http://example.com und noch was"), "oha")
+	assert.Nil(t, urlFromPostParam("foohoo"), "oha")
 }
