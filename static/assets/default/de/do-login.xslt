@@ -116,13 +116,11 @@ min-width: 40px;
     <form method="{@method}" name="{@name}" class="form-horizontal">
       <input name="token" type="hidden" value="{h:input[@name='token']/@value}"/>
       <input name="returnurl" type="hidden" value="{h:input[@name='returnurl']/@value}"/>
-      <div class="input-group">
         <input tabindex="100" name="login" type="text" autofocus="autofocus" placeholder="Wer bist Du?" value="{h:input[@name='login']/@value}" class="form-control" />
         <input tabindex="200" name="password" type="password" placeholder="Kennst Du das Paßwort?" class="form-control"/>
-        <span class="input-group-btn">
+        <span>
           <button tabindex="300" type="submit" class="btn btn-primary">Los!</button>
         </span>
-      </div>
     </form>
   </xsl:template>
 

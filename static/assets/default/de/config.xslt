@@ -115,77 +115,77 @@ div.if_hasdiv_pwd { display:none; }
       </head>
       <body onload="document.{@name}.title.focus();">
         <div class="container">
-          <p><img
+          <p class="col-sm-10 col-sm-offset-2"><img
             width="600px" height="100px"
             alt="Sehr schön, der Webserver ist gut eingestellt, ./app/ ist geschützt."
             title="Wenn hier ein Filmzitat sichtbar ist, liegt ./app/ ungeschützt im Netz."
             src="../app/i-must-be-403.svg"/></p>
 
-          <xsl:if test="setlogin = ''">
-            <p>Huch, das sieht ja alles recht frisch aus hier.</p>
+          <xsl:if test="h:input[@name='setlogin']/@value = ''">
+            <p class="col-sm-10 col-sm-offset-2">Huch, das sieht ja noch recht frisch aus hier.</p>
           </xsl:if>
 
           <form id="{@id}" name="{@name}" class="form-horizontal" method="POST">
             <!-- https://www.tjvantoll.com/2012/08/05/html5-form-validation-showing-all-error-messages/ -->
 
             <div class="form-group">
-              <label for="title" class="control-label col-sm-1">Titel</label>
-              <div class="col-sm-11">
-                <input tabindex="100" name="title" autofocus="autofocus" type="text" placeholder="My ShaarliGo 🐳" required="required" pattern="\S(.*\S)?" value="{h:input[@name='title']/@value}" class="form-control"/>
+              <label for="title" class="control-label col-sm-2">Titel</label>
+              <div class="col-sm-8">
+                <input tabindex="100" name="title" autofocus="autofocus" type="text" placeholder="My ShaarliGo 🐳" required="true" pattern="\S(.*\S)?" value="{h:input[@name='title']/@value}" class="form-control"/>
               </div>
             </div>
             <div class="form-group">
-              <label for="setlogin" class="control-label col-sm-1">User</label>
-              <div class="col-sm-11">
-                <input tabindex="200" name="setlogin" type="text" placeholder="Benutzername dieses neuen ShaarliGo" required="required" pattern="\S(.*\S)?" _oninvalid="setCustomValidity('Das ist nicht Dein Ernst oder?')" value="{h:input[@name='setlogin']/@value}" class="form-control"/>
+              <label for="setlogin" class="control-label col-sm-2">User</label>
+              <div class="col-sm-8">
+                <input tabindex="200" name="setlogin" type="text" placeholder="Benutzername dieses neuen ShaarliGo" required="true" pattern="\S(.*\S)?" _oninvalid="setCustomValidity('Das ist nicht Dein Ernst oder?')" value="{h:input[@name='setlogin']/@value}" class="form-control"/>
               </div>
             </div>
 
             <xsl:if test="h:input[@name='oldpassword']/@value != ''">
               <div class="if_has_pwd form-group">
-                <label for="oldpassword" class="control-label col-sm-1">Pwd (bestehend)</label>
-                <div class="col-sm-11">
-                  <input tabindex="300" name="oldpassword" type="password" placeholder="Das bisherige Passwort" required="required" minlength="12" pattern="\S(.*\S)?" value="{h:input[@name='oldpassword']/@value}" class="form-control"/>
+                <label for="oldpassword" class="control-label col-sm-2">Pwd (bestehend)</label>
+                <div class="col-sm-8">
+                  <input tabindex="300" name="oldpassword" type="password" placeholder="Das bisherige Passwort" required="true" minlength="12" pattern="\S(.*\S)?" value="{h:input[@name='oldpassword']/@value}" class="form-control"/>
                 </div>
               </div>
             </xsl:if>
             <div class="form-group">
-              <label for="setpassword" class="control-label col-sm-1">Pwd</label>
-              <div class="col-sm-11">
-                <input tabindex="400" name="setpassword" type="password" placeholder="gute Passworte: xkcd.com/936" required="required" minlength="12" pattern="\S(.*\S)?" value="{h:input[@name='setpassword']/@value}" class="form-control"/>
+              <label for="setpassword" class="control-label col-sm-2">Pwd</label>
+              <div class="col-sm-8">
+                <input tabindex="400" name="setpassword" type="password" placeholder="gute Passworte: xkcd.com/936" required="true" minlength="12" pattern="\S(.*\S)?" value="{h:input[@name='setpassword']/@value}" class="form-control"/>
               </div>
             </div>
             <div class="if_has_pwd form-group">
-              <label for="confirmpassword" class="control-label col-sm-1">Pwd (Wiederholung)</label>
-              <div class="col-sm-11">
-                <input tabindex="500" name="confirmpassword" type="password" placeholder="dasselbe nochmal" required="required" minlength="12" pattern="\S(.*\S)?" class="form-control"/>
+              <label for="confirmpassword" class="control-label col-sm-2">Wiederholung</label>
+              <div class="col-sm-8">
+                <input tabindex="500" name="confirmpassword" type="password" placeholder="dasselbe nochmal" required="true" minlength="12" pattern="\S(.*\S)?" value="{h:input[@name='confirmpassword']/@value}" class="form-control"/>
               </div>
             </div>
             <!-- evtl. Zeitzone, continent / city? -->
 
-            <p>Mag man Material aus einem alten Shaarli übernehmen?</p>
+            <p class="col-sm-10 col-sm-offset-2">Soll ich Posts aus einem alten Shaarli übernehmen?</p>
 
             <div class="form-group">
-              <label for="import_shaarli_url" class="control-label col-sm-1">alte Shaarli Adresse</label>
-              <div class="col-sm-11">
+              <label for="import_shaarli_url" class="control-label col-sm-2">altes Shaarli</label>
+              <div class="col-sm-8">
                 <input tabindex="600" name="import_shaarli_url" type="url" placeholder="example.com/shaarli" pattern="\S+" class="form-control"/>
               </div>
             </div>
-            <div class="form-group">
-              <label for="import_shaarli_setlogin" class="control-label col-sm-1">Benutzer</label>
-              <div class="col-sm-11">
+            <div class="hidden form-group">
+              <label for="import_shaarli_setlogin" class="control-label col-sm-2">Benutzer</label>
+              <div class="col-sm-8">
                 <input tabindex="700" name="import_shaarli_setlogin" type="text" placeholder="Benutzername des alten Shaarli" class="form-control"/>
               </div>
             </div>
-            <div class="form-group">
-              <label for="import_shaarli_setpassword" class="control-label col-sm-1">Pwd</label>
-              <div class="col-sm-11">
+            <div class="hidden form-group">
+              <label for="import_shaarli_setpassword" class="control-label col-sm-2">Pwd</label>
+              <div class="col-sm-8">
                 <input tabindex="800" name="import_shaarli_password" type="password" placeholder="Passwort des alten Shaarli" class="form-control"/>
               </div>
             </div>
 
             <div class="form-group">
-              <div class="col-sm-11 col-sm-offset-1">
+              <div class="col-sm-8 col-sm-offset-2">
                 <button tabindex="900" type="submit" class="btn btn-primary">Loooooos!</button>
               </div>
             </div>

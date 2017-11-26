@@ -387,12 +387,12 @@
     "forms.less",
     "buttons.less",
     "responsive-utilities.less",
+    "button-groups.less",
+    "input-groups.less",
     "thumbnails.less",
     "media.less",
     "list-group.less"
   ],
-  "js": [
-    "transition.js"
-  ],
-  "customizerUrl": "https://getbootstrap.com/customize/?id=cef6a5102bb9d1d12565672d01639673"
+  "js": [],
+  "customizerUrl": "<none>"
 }

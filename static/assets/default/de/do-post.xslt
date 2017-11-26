@@ -137,26 +137,15 @@ min-width: 40px;
       <input name="returnurl" type="hidden" value="{h:input[@name='returnurl']/@value}"/>
       <input name="use_hashed_tags_from_text" type="hidden" value="on"/>
       <input name="lf_linkdate" type="hidden" value="{h:input[@name='lf_linkdate']/@value}" class="form-control"/>
-      <div class="input-group">
-        <div class="col-sm-12">
+
           <input name="lf_url" type="text" placeholder="https://..." value="{h:input[@name='lf_url']/@value}" class="form-control"/>
-        </div>
-      </div>
-      <div class="input-group">
-        <div class="col-sm-12">
           <input autofocus="autofocus" name="lf_title" type="text" placeholder="Ein Titel, gerne mit #Schlagwort" value="{h:input[@name='lf_title']/@value}" class="form-control"/>
-        </div>
-      </div>
-      <div class="input-group">
-        <div class="col-sm-12">
           <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="14" cols="25" class="form-control">
             <xsl:value-of select="h:textarea[@name='lf_description']"/>
             <xsl:call-template name="tags_with_hash">
               <xsl:with-param name="string" select="h:input[@name='lf_tags']/@value"/>
             </xsl:call-template>
           </textarea>
-        </div>
-      </div>
       <!-- div class="input-group">
         <div class="col-sm-12">
           <input name="lf_tags" type="text" placeholder="Schlagwort NochEinSchlagwort" data-multiple="data-multiple" value="{h:input[@name='lf_tags']/@value}" class="form-control"/>
@@ -167,8 +156,6 @@ min-width: 40px;
           <input name="lf_private" type="checkbox" value="{h:input[@name='lf_private']/@value}" class="form-control"/>
         </div>
       </div -->
-      <div class="input-group">
-        <div class="col-sm-12">
           <span class="input-group-btn">
             <input name="save_edit" type="submit" value="Save" class="btn btn-primary"/>
           </span>
@@ -178,8 +165,6 @@ min-width: 40px;
           <span class="input-group-btn">
             <input name="delete_edit" type="submit" value="Delete" class="btn btn-danger"/>
           </span>
-        </div>
-      </div>
     </form>
   </xsl:template>
 
