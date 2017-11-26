@@ -127,7 +127,10 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
 		err := bcrypt.CompareHashAndPassword([]byte(app.cfg.PwdBcrypt), []byte(pwd))
 		if uid != app.cfg.AuthorName || err == bcrypt.ErrMismatchedHashAndPassword {
 			squealFailure(r, now, "Unauthorised.")
-			http.Error(w, "<script>alert(\"Wrong login/password.\");document.location='?do=login&returnurl='"+url.QueryEscape(returnurl)+"';</script>", http.StatusUnauthorized)
+			// http.Error(w, "<script>alert(\"Wrong login/password.\");document.location='?do=login&returnurl='"+url.QueryEscape(returnurl)+"';</script>", http.StatusUnauthorized)
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Header().Set("Content-Type", "application/javascript")
+			io.WriteString(w, "<script>alert(\"Wrong login/password.\");document.location='?do=login&returnurl='"+url.QueryEscape(returnurl)+"';</script>")
 			return
 		}
 		if err == nil {
@@ -362,6 +365,9 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if "bookmarklet" == r.FormValue("source") {
+			// io.WriteString(w, "<script>self.close(); // close bookmarklet popup</script>")
+			w.WriteHeader(http.StatusOK)
+			w.Header().Set("Content-Type", "application/javascript")
 			io.WriteString(w, "<script>self.close(); // close bookmarklet popup</script>")
 		} else {
 			http.Redirect(w, r, location, http.StatusFound)
@@ -456,6 +462,7 @@ func (entry Entry) api0LinkFormMap() map[string]string {
 		}
 	}
 	if "" == data["lf_url"] && "" != entry.Id {
+		// todo: also if it's not a note
 		data["lf_url"] = entry.Id
 	}
 	if nil != entry.Content {
