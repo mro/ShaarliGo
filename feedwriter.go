@@ -146,6 +146,9 @@ func (feed *Feed) writeFeeds(entriesPerPage int, fw feedWriter) error {
 	catScheme := xmlBase.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String() + "/"
 	uri2entries := make(map[string][]*Entry)
 	for _, item := range feed.Entries {
+		if err0 := item.Validate(); err0 != nil {
+			return err0
+		}
 		item.XmlBase = xmlBase.String()
 		if item.Updated.IsZero() {
 			item.Updated = item.Published

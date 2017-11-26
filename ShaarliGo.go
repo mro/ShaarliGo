@@ -212,6 +212,6 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		app.handleTools(w, r)
 		return
 	}
-	squealFailure(r, now)
+	squealFailure(r, now, "404")
 	http.NotFound(w, r)
 }

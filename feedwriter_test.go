@@ -161,15 +161,15 @@ func keys4map(mymap map[string]buff) []string {
 func TestWriteFeedsEmpty1(t *testing.T) {
 	feed := &Feed{
 		XmlBase: mustParseURL("http://example.com/").String(),
-		Entries: []*Entry{new(Entry)}, // a single, but empty, entry
+		Entries: []*Entry{&Entry{Id: "abcd"}}, // a single, but almost empty, entry
 	}
 
 	sfw := saveFeedWriter{feeds: make(map[string]Feed), entries: make(map[string]Entry), bufs: make(map[string]buff)}
 	err := feed.writeFeeds(2, sfw)
 	assert.Nil(t, err, "soso")
-	assert.Equal(t, []string{"pub/days/0001-01-01/", "pub/posts/"}, keys4map(sfw.bufs), "soso")
+	assert.Equal(t, []string{"pub/days/0001-01-01/", "pub/posts/", "pub/posts/abcd/"}, keys4map(sfw.bufs), "soso")
 
-	assert.Equal(t, 1457, len(sfw.bufs["pub/days/0001-01-01/"].b), "aha")
+	assert.Equal(t, 1472, len(sfw.bufs["pub/days/0001-01-01/"].b), "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../assets/default/de/posts.xslt'?>
 <!--
@@ -194,11 +194,11 @@ func TestWriteFeedsEmpty1(t *testing.T) {
   <link href="pub/posts/" rel="self" title="1"></link>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
     <title></title>
-    <id>http://example.com/pub/posts/</id>
+    <id>http://example.com/pub/posts/abcd/</id>
     <updated>0001-01-01T00:00:00Z</updated>
     <published>0001-01-01T00:00:00Z</published>
-    <link href="pub/posts/" rel="self"></link>
-    <link href="shaarligo.cgi?post=pub/posts/" rel="edit"></link>
+    <link href="pub/posts/abcd/" rel="self"></link>
+    <link href="shaarligo.cgi?post=pub/posts/abcd/" rel="edit"></link>
     <link href="../" rel="up"></link>
   </entry>
 </feed>

@@ -1,7 +1,4 @@
-ShaarliGo-linux-amd64-0.0.1
-ShaarliGo
-shaarligo
-shaarligo.cgi
+ShaarliGo-linux-amd64-*.*.*
 testdata/links.atom.bak
 testdata/links.gob
 testdata/sebsauvage.atom

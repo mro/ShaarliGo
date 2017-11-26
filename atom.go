@@ -197,12 +197,12 @@ func (c *GeoRssPoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error
 	return nil
 }
 
-func xmlEncodeWithXslt(e interface{}, xslt string, enc *xml.Encoder) error {
+func xmlEncodeWithXslt(e interface{}, hrefXslt string, enc *xml.Encoder) error {
 	var err error
 	// preamble
 	if err = enc.EncodeToken(xml.ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)}); err == nil {
 		if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
-			if err = enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='" + xslt + "'")}); err == nil {
+			if err = enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='" + hrefXslt + "'")}); err == nil {
 				if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
 					if err = enc.EncodeToken(xml.Comment(lengthyAtomPreambleComment)); err == nil {
 						if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
@@ -218,9 +218,12 @@ func xmlEncodeWithXslt(e interface{}, xslt string, enc *xml.Encoder) error {
 	return err
 }
 
-func (feed *Feed) Append(e *Entry) *Feed {
+func (feed *Feed) Append(e *Entry) error {
+	if err := e.Validate(); err != nil {
+		return err
+	}
 	feed.Entries = append(feed.Entries, e)
-	return feed
+	return nil
 }
 
 // sort.Interface
@@ -308,6 +311,29 @@ func (feed Feed) Save(dst string) error {
 		}
 	}
 	return err
+}
+
+// Validate for storage
+func (entry *Entry) Validate() error {
+	if "" == entry.Id {
+		return errors.New("Entry may not have empty Id.")
+	}
+	if 1 < len(entry.Links) {
+		return fmt.Errorf("Entry may not have more than one link. Entry.Id='%s'", entry.Id)
+	}
+	if 1 == len(entry.Links) {
+		if "" == entry.Links[0].Href {
+			return fmt.Errorf("Entry may not have empty link. Entry.Id='%s'", entry.Id)
+		}
+		url := mustParseURL(entry.Links[0].Href)
+		if !url.IsAbs() {
+			return fmt.Errorf("Entry must have absolute Link. Entry.Id='%s'", entry.Id)
+		}
+		if "" == url.Host {
+			return fmt.Errorf("Entry must have Link with non-empty host. Entry.Id='%s'", entry.Id)
+		}
+	}
+	return nil
 }
 
 func (entry Entry) CategoriesMerged() []Category {

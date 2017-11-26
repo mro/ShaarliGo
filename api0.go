@@ -126,7 +126,7 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
 		// compute anyway (a bit more time constantness)
 		err := bcrypt.CompareHashAndPassword([]byte(app.cfg.PwdBcrypt), []byte(pwd))
 		if uid != app.cfg.AuthorName || err == bcrypt.ErrMismatchedHashAndPassword {
-			squealFailure(r, now)
+			squealFailure(r, now, "Unauthorised.")
 			http.Error(w, "<script>alert(\"Wrong login/password.\");document.location='?do=login&returnurl='"+url.QueryEscape(returnurl)+"';</script>", http.StatusUnauthorized)
 			return
 		}
@@ -142,7 +142,7 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
 		}
 		http.Error(w, "Fishy post: "+err.Error(), http.StatusInternalServerError)
 	default:
-		squealFailure(r, now)
+		squealFailure(r, now, "MethodNotAllowed "+r.Method)
 		http.Error(w, "MethodNotAllowed", http.StatusMethodNotAllowed)
 	}
 	//     NSString *xpath = [NSString stringWithFormat:@"/html/body//form[@name='%1$@']//input[(@type='text' or @type='password' or @type='hidden' or @type='checkbox') and @name] | /html/body//form[@name='%1$@']//textarea[@name]
@@ -259,7 +259,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		// 'POST' validate, respond error (and squeal) or post and redirect
 		if !app.IsLoggedIn(now) {
-			squealFailure(r, now)
+			squealFailure(r, now, "Unauthorised")
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
@@ -269,7 +269,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		// https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1479
 		if "" != r.FormValue("save_edit") {
 			if lf_linkdate, err := time.ParseInLocation(fmtTimeLfTime, strings.TrimSpace(r.FormValue("lf_linkdate")), app.tz); err != nil {
-				squealFailure(r, now)
+				squealFailure(r, now, "BadRequest: "+err.Error())
 				http.Error(w, "Looks like a forged request: "+err.Error(), http.StatusBadRequest)
 				return
 			} else {
@@ -283,8 +283,6 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 					log.Println("todo: use returnurl ", returnurl)
 
 					feed, _ := FeedFromFileName(fileFeedStorage)
-					feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
-					feed.Id = feed.XmlBase
 
 					lf_url := r.FormValue("lf_url")
 					_, ent := feed.findEntry(lf_url)
@@ -294,10 +292,18 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 							Published: iso8601{lf_linkdate},
 							Id:        smallDateHash(lf_linkdate),
 						}
-						feed.Append(ent)
+						if err := feed.Append(ent); err != nil {
+							http.Error(w, "couldn't add entry: "+err.Error(), http.StatusInternalServerError)
+							return
+						}
 					}
 					ent.Title = HumanText{Body: strings.TrimSpace(r.FormValue("lf_title")), Type: "text"}
-					ent.Links = []Link{Link{Href: lf_url}}
+					url := mustParseURL(lf_url)
+					if url.IsAbs() && "" != url.Host {
+						ent.Links = []Link{Link{Href: lf_url}}
+					} else {
+						ent.Links = []Link{}
+					}
 					ent.Content = &HumanText{Body: strings.TrimSpace(r.FormValue("lf_description")), Type: "text"}
 
 					{
@@ -311,7 +317,13 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 						ent.Categories = a // discard old categories and only use from POST.
 						ent.Categories = ent.CategoriesMerged()
 					}
+					if err := ent.Validate(); err != nil {
+						http.Error(w, "couldn't add entry: "+err.Error(), http.StatusInternalServerError)
+						return
+					}
 					location = strings.Join([]string{location, ent.Id}, "/?#")
+					feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
+					feed.Id = feed.XmlBase
 					feed.Save(fileFeedStorage)
 
 					if err := feed.replaceFeeds(); err != nil {
@@ -339,13 +351,14 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			} else {
+				squealFailure(r, now, "Not Found")
 				log.Println("entry not found: ", id)
-				http.Error(w, "StatusBadRequest", http.StatusBadRequest)
+				http.Error(w, "Not Found", http.StatusNotFound)
 				return
 			}
 		} else {
-			squealFailure(r, now)
-			http.Error(w, "StatusBadRequest", http.StatusBadRequest)
+			squealFailure(r, now, "BadRequest")
+			http.Error(w, "BadRequest", http.StatusBadRequest)
 			return
 		}
 		if "bookmarklet" == r.FormValue("source") {
@@ -355,7 +368,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	default:
-		squealFailure(r, now)
+		squealFailure(r, now, "MethodNotAllowed: "+r.Method)
 		http.Error(w, "MethodNotAllowed", http.StatusMethodNotAllowed)
 		return
 	}

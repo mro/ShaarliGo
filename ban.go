@@ -24,7 +24,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -68,14 +67,14 @@ func isBanned(r *http.Request, now time.Time) (bool, error) {
 	}
 }
 
-func squealFailure(r *http.Request, now time.Time) error {
+func squealFailure(r *http.Request, now time.Time, reason string) error {
 	key := remoteAddressToKey(r.RemoteAddr)
 	var err error
 	var data []byte
 	if data, err = ioutil.ReadFile(banFileName); err == nil || os.IsNotExist(err) {
 		bans := BanPenalties{Penalties: map[string]Penalty{}}
 		if err = yaml.Unmarshal(data, &bans); err == nil {
-			if bans.squealFailure(key, now) {
+			if bans.squealFailure(key, now, reason) {
 				if data, err = yaml.Marshal(bans); err == nil {
 					tmpFileName := fmt.Sprintf("%s~%d", banFileName, os.Getpid()) // want the mv to be atomic, so use the same dir
 					if err = ioutil.WriteFile(tmpFileName, data, 0600); err == nil {
@@ -98,7 +97,7 @@ func (bans BanPenalties) isRemoteAddrBanned(key string, now time.Time) bool {
 	return pen.End.After(now)
 }
 
-func (bans *BanPenalties) squealFailure(key string, now time.Time) bool {
+func (bans *BanPenalties) squealFailure(key string, now time.Time, reason string) bool {
 	pen := bans.Penalties[key]
 	if pen.Badness < 0 {
 		return false // we're known and welcome. So we do not ban.
@@ -118,7 +117,7 @@ func (bans *BanPenalties) squealFailure(key string, now time.Time) bool {
 	pen.Badness += 1
 	bans.Penalties[key] = pen
 
-	log.Println(strings.Join([]string{"squeal", key, strconv.Itoa(pen.Badness)}, " "))
+	log.Printf("squeal %d %s %s", pen.Badness, key, reason)
 
 	for ip, pen := range bans.Penalties {
 		if pen.End.Before(now) {
