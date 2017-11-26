@@ -119,7 +119,7 @@ div.if_hasdiv_pwd { display:none; }
             width="600px" height="100px"
             alt="Sehr schön, der Webserver ist gut eingestellt, ./app/ ist geschützt."
             title="Wenn hier ein Filmzitat sichtbar ist, liegt ./app/ ungeschützt im Netz."
-            src="../app/i-must-be-403.svg"/></p>
+            src="../../app/i-must-be-403.svg"/></p>
 
           <xsl:if test="h:input[@name='setlogin']/@value = ''">
             <p class="col-sm-10 col-sm-offset-2">Huch, das sieht ja noch recht frisch aus hier.</p>
