@@ -267,7 +267,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		app.KeepAlive(w, r, now)
-		location := path.Join(uriPub, uriPosts)
+		location := path.Join(uriPub, uriPosts) + "/"
 
 		// https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1479
 		if "" != r.FormValue("save_edit") {
@@ -324,7 +324,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 						http.Error(w, "couldn't add entry: "+err.Error(), http.StatusInternalServerError)
 						return
 					}
-					location = strings.Join([]string{location, ent.Id}, "/?#")
+					location = strings.Join([]string{location, ent.Id}, "?#")
 					feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
 					feed.Id = feed.XmlBase
 					feed.Save(fileFeedStorage)
