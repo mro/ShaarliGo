@@ -107,7 +107,7 @@
    onload="document.getElementById('q').removeAttribute('autofocus');document.getElementById('post').setAttribute('autofocus', 'autofocus');"
    onload="document.form_post.post.focus();"
 -->
-        <script>
+        <script type="text/javascript">
 var xml_base_pub = '<xsl:value-of select="$xml_base_pub"/>';
 // <![CDATA[
 // check if we're logged-in (AJAX or Cookie?).
@@ -116,7 +116,7 @@ xhr.onreadystatechange = function(data0) {
   if (xhr.readyState == 4) {
     console.log('xhr.status = ' + xhr.status);
     document.documentElement.classList.add(xhr.status === 200 ? 'logged-in' : 'logged-out');
-    // store the result locally and use as initial value for later calls.
+    // store the result locally and use as initial value for later calls?
   }
 }
 xhr.open('GET', xml_base_pub + '/../shaarligo.cgi/session/');
@@ -139,6 +139,9 @@ xhr.send(null);
       <!-- meta name="viewport" content="width=400"/ -->
       <link href="{$xml_base_pub}/../assets/default/bootstrap.css" rel="stylesheet" type="text/css"/>
       <link href="{$xml_base_pub}/../assets/default/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
+
+      <link  href="{$xml_base_pub}/../assets/default/awesomplete.css" rel="stylesheet" />
+      <script src="{$xml_base_pub}/../assets/default/awesomplete.js"><!-- async="true" fails --></script>
 
       <link href="." rel="alternate" type="application/atom+xml"/>
       <link href="." rel="self" type="application/xhtml+xml"/>
@@ -198,6 +201,10 @@ img.img-thumbnail {
  * See http://purl.mro.name/safari-xslt-br-bug */
 .rendered.type-text br { display:none; }
 .rendered.type-text br.br { display:inline; }
+
+/* I'm surprised, that I need to fiddle: */
+.awesomplete > ul { top: 5ex; z-index: 3; }
+div.awesomplete { display: block; }
       </style>
       <title><xsl:value-of select="a:*/a:title"/></title>
     </head>
@@ -209,10 +216,14 @@ img.img-thumbnail {
 
       <xsl:call-template name="links_commands"/>
 
+      <ul id="taglist" style="display:none">
+        <xsl:for-each select="a:category"><li>#<xsl:value-of select="@term"/></li></xsl:for-each>
+      </ul>
+
       <xsl:comment> https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ </xsl:comment>
       <form id="form_search" name="form_search" class="form-horizontal form-search" action="{$xml_base_pub}/../shaarligo.cgi/search">
         <div class="input-group">
-          <input tabindex="100" name="q" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="form-control search-query"/>
+          <input tabindex="100" name="q" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="awesomplete form-control search-query" data-multiple="true" data-list="#taglist"/>
           <span class="input-group-btn">
             <button tabindex="200" type="submit" class="btn btn-primary">Suche</button>
           </span>
@@ -221,12 +232,28 @@ img.img-thumbnail {
 
       <form id="form_post" name="form_post" class="form-horizontal hidden-logged-out" action="{$xml_base_pub}/../shaarligo.cgi">
         <div class="input-group">
-          <input tabindex="300" name="post" type="text" placeholder="Was gibt's Neues? (Notiz oder URL)" class="form-control"/>
+          <input tabindex="300" name="post" type="text" placeholder="Was gibt's #Neues? (Notiz oder URL)" class="awesomplete form-control" data-multiple="true" data-list="#taglist"/>
           <span class="input-group-btn">
             <button tabindex="400" type="submit" class="btn btn-primary">Shaaaare!</button>
           </span>
         </div>
       </form>
+
+      <script type="text/javascript">
+//<![CDATA[
+// inspired by http://leaverou.github.io/awesomplete/#extensibility
+new Awesomplete('input[data-multiple]', {
+  minChars: 3,
+  maxItems: 15,
+  filter: function(text, input) { return Awesomplete.FILTER_CONTAINS(text, input.match(/\S*$/)[0]); /* match */ },
+  item: function(text, input) { return Awesomplete.ITEM(text, input.match(/\S*$/)[0]); /* highlight */ },
+  replace: function(text) {
+    var before = this.input.value.match(/^.+\s+|/)[0]; // ends with a whitespace
+    this.input.value = before + text + " ";
+  }
+});
+//]]>
+      </script>
 
       <xsl:call-template name="prev-next"/>
 
