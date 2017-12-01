@@ -53,7 +53,7 @@ const toSession = 30 * time.Minute
 var fileFeedStorage string
 
 func init() {
-	fileFeedStorage = filepath.Join(dirApp, "feed.xml")
+	fileFeedStorage = filepath.Join(dirApp, "var", "feed.xml")
 }
 
 // even cooler: https://stackoverflow.com/a/8363629
@@ -65,9 +65,9 @@ func un(name string, start time.Time)       { log.Printf("%s took %s", name, tim
 // evtl. as a server, too: http://www.dav-muz.net/blog/2013/09/how-to-use-go-and-fastcgi/
 func main() {
 	{ // log to custom logfile rather than stderr (which may not be accessible on shared hosting)
-		dst := filepath.Join("app", "var", "error.log")
+		dst := filepath.Join("app", "var", "log", "error.log")
 		if err := os.MkdirAll(filepath.Dir(dst), 0770); err != nil {
-			log.Fatal("Couldn't create app/var dir: " + err.Error())
+			log.Fatal("Couldn't create app/var/log dir: " + err.Error())
 			return
 		}
 		if w, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0660); err != nil {

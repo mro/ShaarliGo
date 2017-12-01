@@ -81,8 +81,12 @@ func (feed *Feed) replaceFeeds() error {
 	if path.Join("a", "b") != filepath.Join("a", "b") {
 		return errors.New("Go, get an OS.")
 	}
+	const strFileLock = "app/var/lock"
+	const strDirStage = "app/var/stage"
+	const strDirOld = "app/var/old"
+	const dirPub = "pub"
 	// check race: if .lock exists kill pid?
-	if byPid, err := ioutil.ReadFile("./app/var/lock"); err == nil {
+	if byPid, err := ioutil.ReadFile(strFileLock); err == nil {
 		if pid, err := strconv.Atoi(string(byPid)); err == nil {
 			if proc, err := os.FindProcess(pid); err == nil {
 				err = proc.Kill()
@@ -91,45 +95,41 @@ func (feed *Feed) replaceFeeds() error {
 		if err != nil {
 			return err
 		}
-		if err = os.Remove("./app/var/lock"); err != nil {
+		if err = os.Remove(strFileLock); err != nil {
 			return err
 		}
 	}
 	// create .lock file with pid
 	var err error
-	if err = os.MkdirAll("./app/var", newDirPerms); err == nil {
-		if err = ioutil.WriteFile("./app/var/lock", []byte(string(os.Getpid())), os.ModeExclusive); err == nil {
-			defer os.Remove("./app/var/lock")
-			os.RemoveAll("./app/var/stage")
-			os.RemoveAll("./app/var/old")
-			if err = feed.writeFeeds(100, fileFeedWriter{baseDir: "./app/var/stage"}); err == nil {
-				if _, err = os.Stat("./pub"); os.IsNotExist(err) {
-					err = nil // ignore nonexisting pub dir. That's fine for first launch.
-				} else {
-					err = os.Rename("./pub", "./app/var/old")
-				}
-				if err == nil {
-					if err = os.Rename("./app/var/stage/pub", "./pub"); err == nil {
-						os.RemoveAll("./app/var/stage")
-						if err = os.RemoveAll("./app/var/old"); err == nil {
-							err = os.Remove("./app/var/lock")
-						} else {
-							log.Printf("Cannot remove old: %s", err.Error())
-						}
+	if err = ioutil.WriteFile(strFileLock, []byte(string(os.Getpid())), os.ModeExclusive); err == nil {
+		defer os.Remove(strFileLock)
+		os.RemoveAll(strDirStage)
+		os.RemoveAll(strDirOld)
+		if err = feed.writeFeeds(100, fileFeedWriter{baseDir: strDirStage}); err == nil {
+			if _, err = os.Stat(dirPub); os.IsNotExist(err) {
+				err = nil // ignore nonexisting pub dir. That's fine for first launch.
+			} else {
+				err = os.Rename(dirPub, strDirOld)
+			}
+			if err == nil {
+				if err = os.Rename(filepath.Join(strDirStage, dirPub), dirPub); err == nil {
+					os.RemoveAll(strDirStage)
+					if err = os.RemoveAll(strDirOld); err == nil {
+						err = os.Remove(strFileLock)
 					} else {
-						log.Printf("Cannot move new: %s", err.Error())
+						log.Printf("Cannot remove old: %s", err.Error())
 					}
 				} else {
-					log.Printf("Cannot move old: %s", err.Error())
+					log.Printf("Cannot move new: %s", err.Error())
 				}
 			} else {
-				log.Printf("Cannot write ./app/var/stage: %s", err.Error())
+				log.Printf("Cannot move old: %s", err.Error())
 			}
 		} else {
-			log.Printf("Cannot write ./app/var/lock: %s", err.Error())
+			log.Printf("Cannot write %s: %s", strDirStage, err.Error())
 		}
 	} else {
-		log.Printf("Cannot mkdir ./app/var: %s", err.Error())
+		log.Printf("Cannot write %s: %s", strFileLock, err.Error())
 	}
 	return err
 }
