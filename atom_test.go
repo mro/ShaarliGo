@@ -87,14 +87,10 @@ func TestFeedFromFileName_Atom(t *testing.T) {
 	assert.Nil(t, err, "soso")
 	assert.Equal(t, "🔗 mro", feed.Title.Body, "soso")
 	assert.Equal(t, "2017-02-09T22:44:52+01:00", feed.Updated.Format(time.RFC3339), "soso")
-	assert.Equal(t, 2, len(feed.Links), "soso")
-	assert.Equal(t, "self", feed.Links[0].Rel, "soso")
-	assert.Equal(t, "https://links.mro.name/?do=atom&nb=all", feed.Links[0].Href, "soso")
-	assert.Equal(t, "hub", feed.Links[1].Rel, "soso")
-	assert.Equal(t, "http://blog.mro.name/?pushpress=hub", feed.Links[1].Href, "soso")
-	assert.Equal(t, "https://links.mro.name/", feed.Authors[0].Name, "soso")
-	assert.Equal(t, "https://links.mro.name/", feed.Authors[0].Uri, "soso")
-	assert.Equal(t, "https://links.mro.name/", feed.Id, "soso")
+	assert.Equal(t, 0, len(feed.Links), "soso")
+	assert.Equal(t, "m", feed.Authors[0].Name, "soso")
+	assert.Equal(t, "", feed.Authors[0].Uri, "soso")
+	assert.Equal(t, "", feed.Id, "soso")
 
 	assert.Equal(t, "html", feed.Entries[0].Content.Type, "soso")
 	txt := `&quot;… Ein Vertreter der Bundesanwaltschaft (BAW) erklärte vor dem U-Ausschuss des Bundestages, Marschners Akte sei selbst für die BAW gesperrt. …&quot;<br />
