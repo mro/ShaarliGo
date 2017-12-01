@@ -58,6 +58,9 @@
       <link href="{$xml_base_pub}/../assets/default/bootstrap.css" rel="stylesheet" type="text/css"/>
       <link href="{$xml_base_pub}/../assets/default/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
 
+      <link  href="{$xml_base_pub}/../assets/default/awesomplete.css" rel="stylesheet" />
+      <script src="{$xml_base_pub}/../assets/default/awesomplete.js"><!-- async="true" fails --></script>
+
       <style type="text/css">
 .hidden-logged-in { display:initial; }
 .logged-in .hidden-logged-in { display:none; }
@@ -86,6 +89,10 @@ margin: 1.0ex 0;
 #links_commands td {
 min-width: 40px;
 }
+
+/* I'm surprised, that I need to fiddle: */
+.awesomplete > ul { top: 5ex; z-index: 3; }
+div.awesomplete { display: block; }
       </style>
       <title>Shaaare!</title>
     </head>
@@ -126,6 +133,7 @@ min-width: 40px;
       <div class="container">
         <noscript><p>JavaScript ist aus, es geht zwar (fast) alles auch ohne, aber mit ist's <em>schöner</em>.</p></noscript>
 
+        <xsl:copy-of select="h:ul"/>
         <xsl:apply-templates select="h:form"/>
       </div>
     </body>
@@ -137,10 +145,9 @@ min-width: 40px;
       <input name="returnurl" type="hidden" value="{h:input[@name='returnurl']/@value}"/>
       <input name="use_hashed_tags_from_text" type="hidden" value="on"/>
       <input name="lf_linkdate" type="hidden" value="{h:input[@name='lf_linkdate']/@value}" class="form-control"/>
-
           <input name="lf_url" type="text" placeholder="https://..." value="{h:input[@name='lf_url']/@value}" class="form-control"/>
-          <input autofocus="autofocus" name="lf_title" type="text" placeholder="Ein Titel, gerne mit #Schlagwort" value="{h:input[@name='lf_title']/@value}" class="form-control"/>
-          <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="14" cols="25" class="form-control">
+          <input autofocus="autofocus" name="lf_title" type="text" placeholder="Ein Titel, gerne mit #Schlagwort" value="{h:input[@name='lf_title']/@value}" class="awesomplete form-control" data-multiple="true" data-list="#taglist"/>
+          <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="14" cols="25" class="form-control" data-multiple="true" data-list="#taglist">
             <xsl:value-of select="h:textarea[@name='lf_description']"/>
             <xsl:call-template name="tags_with_hash">
               <xsl:with-param name="string" select="h:input[@name='lf_tags']/@value"/>
@@ -166,6 +173,21 @@ min-width: 40px;
             <input name="delete_edit" type="submit" value="Delete" class="btn btn-danger"/>
           </span>
     </form>
+    <script type="text/javascript">
+//<![CDATA[
+// inspired by http://leaverou.github.io/awesomplete/#extensibility
+new Awesomplete('input[data-multiple]', {
+  minChars: 3,
+  maxItems: 15,
+  filter: function(text, input) { return Awesomplete.FILTER_CONTAINS(text, input.match(/\S*$/)[0]); /* match */ },
+  item: function(text, input) { return Awesomplete.ITEM(text, input.match(/\S*$/)[0]); /* highlight */ },
+  replace: function(text) {
+    var before = this.input.value.match(/^.+\s+|/)[0]; // ends with a whitespace
+    this.input.value = before + text + " ";
+  }
+});
+//]]>
+    </script>
   </xsl:template>
 
 </xsl:stylesheet>

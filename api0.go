@@ -238,6 +238,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		if tmpl, err := template.New("linkform").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
 <head><title>{{.title}}</title></head>
 <body>
+  <ul id="taglist" style="display:none">{{ range $idx, $cat := .categories }}<li>#{{ $cat.Term }}</li>{{ end }}</ul>
   <form method="post" name="linkform">
     <input name="lf_linkdate" type="hidden" value="{{.lf_linkdate}}"/>
     <input name="lf_url" type="text" value="{{.lf_url}}"/>
@@ -263,6 +264,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 `)
 			data := ent.api0LinkFormMap()
 			data["title"] = app.cfg.Title
+			data["categories"] = feed.Categories
 			bTok := make([]byte, 20) // keep in local session or encrypted cookie
 			io.ReadFull(rand.Reader, bTok)
 			data["token"] = hex.EncodeToString(bTok)
@@ -439,8 +441,8 @@ func (app *App) handleDoCheckLoginAfterTheFact(w http.ResponseWriter, r *http.Re
 }
 
 // Aggregate all tags from #title, #description and <category and remove the first two groups from the set.
-func (entry Entry) api0LinkFormMap() map[string]string {
-	data := map[string]string{
+func (entry Entry) api0LinkFormMap() map[string]interface{} {
+	data := map[string]interface{}{
 		"lf_linkdate": entry.Published.Format(fmtTimeLfTime),
 		"lf_title":    entry.Title.Body,
 	}
