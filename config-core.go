@@ -35,12 +35,18 @@ func init() {
 	configFileName = filepath.Join(dirApp, "config.yaml")
 }
 
+type RegexpReplaceAllString struct {
+	Regexp           string `yaml:"regexp"`
+	ReplaceAllString string `yaml:"replace_all_string"`
+}
+
 type Config struct {
-	Title             string `yaml:"title"`
-	AuthorName        string `yaml:"author_name"`
-	PwdBcrypt         string `yaml:"pwd_bcrypt"`
-	CookieStoreSecret string `yaml:"cookie_secret"`
-	TimeZone          string `yaml:"timezone"`
+	Title             string                   `yaml:"title"`
+	AuthorName        string                   `yaml:"author_name"`
+	PwdBcrypt         string                   `yaml:"pwd_bcrypt"`
+	CookieStoreSecret string                   `yaml:"cookie_secret"`
+	TimeZone          string                   `yaml:"timezone"`
+	UrlCleaner        []RegexpReplaceAllString `yaml:"url_cleaner"`
 }
 
 func LoadConfig() (Config, error) {
@@ -57,6 +63,14 @@ func LoadConfig() (Config, error) {
 			return ret, err
 		}
 		ret.CookieStoreSecret = base64.StdEncoding.EncodeToString(buf)
+		ret.UrlCleaner = []RegexpReplaceAllString{
+			{Regexp: "[\\?&]utm_source=.*$", ReplaceAllString: ""}, // We remove the annoying parameters added by FeedBurner and GoogleFeedProxy (?utm_source=...)
+			{Regexp: "#xtor=RSS-.*$", ReplaceAllString: ""},
+			{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?heise\\.de/.*?(-\\d+)(?:\\.html)?(?:[\\?#].*)?$", ReplaceAllString: "https://heise.de/${1}"},
+			{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?spiegel\\.de/.*?-(\\d+)(?:\\.html.*)?", ReplaceAllString: "https://spiegel.de/article.do?id=${1}"},
+			{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?sueddeutsche\\.de/.*?-(\\d+\\.\\d+)(?:\\.html.*)?$", ReplaceAllString: "https://sz.de/${1}"},
+			{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?youtube.com/watch\\?v=([^&]+)(?:.*&(t=[^&]+))?(?:.*)$", ReplaceAllString: "https://youtu.be/${1}?${2}"},
+		}
 
 		return ret, nil
 	} else {

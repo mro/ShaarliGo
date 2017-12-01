@@ -31,6 +31,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -162,6 +163,17 @@ func (app *App) handleDoLogout(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func sanitiseURLString(raw string, lst []RegexpReplaceAllString) string {
+	for idx, row := range lst {
+		if rex, err := regexp.Compile(row.Regexp); err != nil {
+			log.Printf("Invalid regular expression #%d '%s': %s", idx, row.Regexp, err)
+		} else {
+			raw = rex.ReplaceAllString(raw, row.ReplaceAllString)
+		}
+	}
+	return raw
+}
+
 func urlFromPostParam(post string) *url.URL {
 	if url, err := url.Parse(post); err == nil && url != nil && url.IsAbs() && "" != url.Hostname() {
 		return url
@@ -199,7 +211,8 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 
 		app.KeepAlive(w, r, now)
 		feed, _ := FeedFromFileName(fileFeedStorage)
-		post := params["post"][0]
+		post := sanitiseURLString(params["post"][0], app.cfg.UrlCleaner)
+
 		_, ent := feed.findEntry(post)
 		if nil == ent {
 			// nothing found, so we need a new (dangling, unsaved) entry:

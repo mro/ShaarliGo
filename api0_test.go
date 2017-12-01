@@ -161,3 +161,24 @@ func TestUrlFromPostParam(t *testing.T) {
 	assert.Nil(t, urlFromPostParam("http://example.com und noch was"), "oha")
 	assert.Nil(t, urlFromPostParam("foohoo"), "oha")
 }
+
+func TestSanitiseURLString(t *testing.T) {
+	// sanitizeUrl
+	t.Parallel()
+
+	sanitizers := []RegexpReplaceAllString{
+		{Regexp: "[\\?&]utm_source=.*$", ReplaceAllString: ""}, // We remove the annoying parameters added by FeedBurner and GoogleFeedProxy (?utm_source=...)
+		{Regexp: "#xtor=RSS-.*$", ReplaceAllString: ""},
+		{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?heise\\.de/.*?(-\\d+)(?:\\.html)?(?:[\\?#].*)?$", ReplaceAllString: "https://heise.de/${1}"},
+		{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?spiegel\\.de/.*?-(\\d+)(?:\\.html.*)?", ReplaceAllString: "https://spiegel.de/article.do?id=${1}"},
+		{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?sueddeutsche\\.de/.*?-(\\d+\\.\\d+)(?:\\.html.*)?$", ReplaceAllString: "https://sz.de/${1}"},
+		{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?youtube.com/watch\\?v=([^&]+)(?:.*&(t=[^&]+))?(?:.*)$", ReplaceAllString: "https://youtu.be/${1}?${2}"},
+	}
+
+	assert.Equal(t, "https://heise.de/-3905244", sanitiseURLString("www.heise.de/newsticker/meldung/Finanzaufsicht-warnt-vor-Bitcoin-Investment-Kurs-sackt-wieder-unter-10-000-US-Dollar-3905244.html", sanitizers), "oha")
+	assert.Equal(t, "https://spiegel.de/article.do?id=1181168", sanitiseURLString("https://www.spiegel.de/politik/ausland/glyphosat-barbara-hendricks-und-christian-schmidt-sprechen-sich-aus-a-1181168.html", sanitizers), "oha")
+	assert.Equal(t, "https://sz.de/1.3772485", sanitiseURLString("http://www.sueddeutsche.de/politik/exklusiv-spd-ministerpraesident-weil-warnt-vor-instabilitaet-in-deutschland-1.3772485", sanitizers), "oha")
+	assert.Equal(t, "https://youtu.be/hzf3hTUKk8U?", sanitiseURLString("https://www.youtube.com/watch?v=hzf3hTUKk8U&feature=youtu.be", sanitizers), "oha")
+	assert.Equal(t, "https://youtu.be/hzf3hTUKk8U?t=14m4s", sanitiseURLString("youtube.com/watch?v=hzf3hTUKk8U&feature=youtu.be&t=14m4s", sanitizers), "oha")
+	assert.Equal(t, "https://youtu.be/e-5obm1G_FY?t=14m4s", sanitiseURLString("https://youtu.be/e-5obm1G_FY?t=14m4s", sanitizers), "oha")
+}
