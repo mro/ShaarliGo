@@ -141,37 +141,34 @@ div.awesomplete { display: block; }
 
   <xsl:template match="h:form[@name='linkform']">
     <form method="{@method}" name="{@name}" class="form-horizontal">
-      <input name="token" type="hidden" value="{h:input[@name='token']/@value}"/>
-      <input name="returnurl" type="hidden" value="{h:input[@name='returnurl']/@value}"/>
-      <input name="use_hashed_tags_from_text" type="hidden" value="on"/>
-      <input name="lf_linkdate" type="hidden" value="{h:input[@name='lf_linkdate']/@value}" class="form-control"/>
-          <input name="lf_url" type="text" placeholder="https://..." value="{h:input[@name='lf_url']/@value}" class="form-control"/>
-          <input autofocus="autofocus" name="lf_title" type="text" placeholder="Ein Titel, gerne mit #Schlagwort" value="{h:input[@name='lf_title']/@value}" class="awesomplete form-control" data-multiple="true" data-list="#taglist"/>
-          <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="14" cols="25" class="form-control" data-multiple="true" data-list="#taglist">
-            <xsl:value-of select="h:textarea[@name='lf_description']"/>
-            <xsl:call-template name="tags_with_hash">
-              <xsl:with-param name="string" select="h:input[@name='lf_tags']/@value"/>
-            </xsl:call-template>
-          </textarea>
-      <!-- div class="input-group">
-        <div class="col-sm-12">
-          <input name="lf_tags" type="text" placeholder="Schlagwort NochEinSchlagwort" data-multiple="data-multiple" value="{h:input[@name='lf_tags']/@value}" class="form-control"/>
-        </div>
-      </div -->
-      <!-- div class="input-group">
-        <div class="col-sm-12">
-          <input name="lf_private" type="checkbox" value="{h:input[@name='lf_private']/@value}" class="form-control"/>
-        </div>
-      </div -->
-          <span class="input-group-btn">
-            <input name="save_edit" type="submit" value="Save" class="btn btn-primary"/>
-          </span>
-          <span class="input-group-btn">
-            <input name="cancel_edit" type="submit" value="Cancel" class="btn btn-primary"/>
-          </span>
-          <span class="input-group-btn">
-            <input name="delete_edit" type="submit" value="Delete" class="btn btn-danger"/>
-          </span>
+      <xsl:copy-of select=".//h:input[@type='hidden']"/>
+      <input name="lf_url" type="text" placeholder="https://..." value="{h:input[@name='lf_url']/@value}" class="form-control"/>
+      <input autofocus="autofocus" name="lf_title" type="text" placeholder="Ein Titel, gerne mit #Schlagwort" value="{h:input[@name='lf_title']/@value}" class="awesomplete form-control" data-multiple="true" data-list="#taglist"/>
+      <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="14" cols="25" class="form-control" data-multiple="true" data-list="#taglist">
+        <xsl:value-of select="h:textarea[@name='lf_description']"/>
+        <xsl:call-template name="tags_with_hash">
+          <xsl:with-param name="string" select="h:input[@name='lf_tags']/@value"/>
+        </xsl:call-template>
+      </textarea>
+  <!-- div class="input-group">
+    <div class="col-sm-12">
+      <input name="lf_tags" type="text" placeholder="Schlagwort NochEinSchlagwort" data-multiple="data-multiple" value="{h:input[@name='lf_tags']/@value}" class="form-control"/>
+    </div>
+  </div -->
+  <!-- div class="input-group">
+    <div class="col-sm-12">
+      <input name="lf_private" type="checkbox" value="{h:input[@name='lf_private']/@value}" class="form-control"/>
+    </div>
+  </div -->
+      <span class="input-group-btn">
+        <input name="save_edit" type="submit" value="Save" class="btn btn-primary"/>
+      </span>
+      <span class="input-group-btn">
+        <input name="cancel_edit" type="submit" value="Cancel" class="btn btn-primary"/>
+      </span>
+      <span class="input-group-btn">
+        <input name="delete_edit" type="submit" value="Delete" class="btn btn-danger"/>
+      </span>
     </form>
     <script type="text/javascript">
 //<![CDATA[

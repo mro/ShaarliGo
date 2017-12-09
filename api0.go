@@ -22,7 +22,6 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
-	"fmt"
 	"hash/crc32"
 	"html/template"
 	"io"
@@ -77,6 +76,12 @@ func smallDateHash(tt time.Time) string {
 	bs := make([]byte, 4) // https://stackoverflow.com/a/16889357
 	// unix time in seconds as uint32
 	binary.LittleEndian.PutUint32(bs, uint32(tt.Unix()&0xFFFFFFFF))
+	return base64.RawURLEncoding.EncodeToString(bs)
+}
+
+func smallHashRandom() string {
+	bs := make([]byte, 4)
+	io.ReadFull(rand.Reader, bs)
 	return base64.RawURLEncoding.EncodeToString(bs)
 }
 
@@ -155,7 +160,6 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *App) handleDoLogout(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("ses_timeout_logout", fmt.Sprintf("%v", app.ses.Values["timeout"]))
 	if err := app.stopSession(w, r); err != nil {
 		http.Error(w, "Couldn't end session: "+err.Error(), http.StatusInternalServerError)
 	} else {
@@ -209,11 +213,10 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		app.KeepAlive(w, r, now)
 		feed, _ := FeedFromFileName(fileFeedStorage)
 		post := sanitiseURLString(params["post"][0], app.cfg.UrlCleaner)
 
-		_, ent := feed.findEntry(post)
+		_, ent := feed.findEntryByIdSelfOrUrl(post)
 		if nil == ent {
 			// nothing found, so we need a new (dangling, unsaved) entry:
 			if url := urlFromPostParam(post); url != nil {
@@ -237,9 +240,13 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 				ent.Published = ent.Updated
 			}
 			// do not append to feed yet, keep dangling
+		} else {
+			log.Printf("storing Id in cookie: ", ent.Id)
+			app.ses.Values["identifier"] = ent.Id
 		}
+		app.KeepAlive(w, r, now)
 
-		if 1 == len(params["title"]) && "" != params["description"][0] {
+		if 1 == len(params["title"]) && "" != params["title"][0] {
 			ent.Title = HumanText{Body: params["title"][0]}
 		}
 		if 1 == len(params["description"]) && "" != params["description"][0] {
@@ -265,7 +272,6 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
     <input name="token" type="hidden" value="{{.token}}"/>
     <input name="returnurl" type="hidden" value="{{.returnurl}}"/>
     <input name="lf_image" type="hidden" value="{{.lf_image}}"/>
-    <input name="lf_identifier" type="hidden" value="{{.lf_identifier}}"/>
   </form>
 </body>
 </html>
@@ -297,6 +303,13 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
+		identifier, ok := app.ses.Values["identifier"].(string)
+		if ok {
+			delete(app.ses.Values, "identifier")
+		} else {
+			identifier = smallHashRandom()
+		}
+		log.Printf("pulled Id from cookie: ", app.ses.Values["identifier"], identifier)
 		app.KeepAlive(w, r, now)
 		location := path.Join(uriPub, uriPosts) + "/"
 
@@ -319,12 +332,12 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 					feed, _ := FeedFromFileName(fileFeedStorage)
 
 					lf_url := r.FormValue("lf_url")
-					_, ent := feed.findEntry(lf_url)
+					_, ent := feed.findEntryById(identifier)
 					if nil == ent {
 						ent = &Entry{
 							Authors:   []Person{Person{Name: app.cfg.AuthorName}},
 							Published: iso8601{lf_linkdate},
-							Id:        smallDateHash(lf_linkdate),
+							Id:        identifier,
 						}
 						if err := feed.Append(ent); err != nil {
 							http.Error(w, "couldn't add entry: "+err.Error(), http.StatusInternalServerError)
@@ -377,8 +390,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			token := r.FormValue("token")
 			log.Println("todo: check token ", token)
 			feed, _ := FeedFromFileName(fileFeedStorage)
-			id := strings.TrimSpace(r.FormValue("lf_url"))
-			if entry := feed.deleteEntry(id); nil != entry {
+			if entry := feed.deleteEntry(identifier); nil != entry {
 				feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
 				feed.Id = feed.XmlBase
 				feed.Save(fileFeedStorage)
@@ -390,7 +402,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 				}
 			} else {
 				squealFailure(r, now, "Not Found")
-				log.Println("entry not found: ", id)
+				log.Println("entry not found: ", identifier)
 				http.Error(w, "Not Found", http.StatusNotFound)
 				return
 			}
@@ -463,9 +475,8 @@ func (app *App) handleDoCheckLoginAfterTheFact(w http.ResponseWriter, r *http.Re
 // Aggregate all tags from #title, #description and <category and remove the first two groups from the set.
 func (entry Entry) api0LinkFormMap() map[string]interface{} {
 	data := map[string]interface{}{
-		"lf_identifier": entry.Id,
-		"lf_linkdate":   entry.Published.Format(fmtTimeLfTime),
-		"lf_title":      entry.Title.Body,
+		"lf_linkdate": entry.Published.Format(fmtTimeLfTime),
+		"lf_title":    entry.Title.Body,
 	}
 	{
 		// 1. get all atom categories

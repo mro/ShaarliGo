@@ -236,30 +236,53 @@ func (a ByPublishedDesc) Less(i, j int) bool { return !a[i].Published.Time.Befor
 
 // custom interface
 
-func (feed *Feed) findEntry(id_self_or_link string) (int, *Entry) {
-	defer un(trace(strings.Join([]string{"Feed.findEntry('", id_self_or_link, "')"}, "")))
-	if "" != id_self_or_link {
-		if parts := strings.SplitN(id_self_or_link, "/", 4); 4 == len(parts) && "" == parts[3] && uriPub == parts[0] && uriPosts == parts[1] {
-			// looks like an internal id, so treat it as such.
-			id_self_or_link = parts[2]
-		}
-
+func (feed *Feed) findEntry(doesMatch func(*Entry) bool) (int, *Entry) {
+	defer un(trace(strings.Join([]string{"Feed.findEntry(f(*Entry))"}, "")))
+	if nil != doesMatch {
 		for idx, entry := range feed.Entries {
-			if id_self_or_link == entry.Id {
+			if doesMatch(entry) {
 				return idx, entry
-			}
-			for _, l := range entry.Links {
-				if ("" == l.Rel || "self" == l.Rel) && (id_self_or_link == l.Href /* todo: url equal */) {
-					return idx, entry
-				}
 			}
 		}
 	}
 	return -1, nil
 }
 
-func (feed *Feed) deleteEntry(id_self_or_link string) *Entry {
-	if i, entry := feed.findEntry(id_self_or_link); i >= 0 {
+func (feed *Feed) findEntryById(id string) (int, *Entry) {
+	defer un(trace(strings.Join([]string{"Feed.findEntryById('", id, "')"}, "")))
+	if "" != id {
+		return feed.findEntry(func(entry *Entry) bool { return id == entry.Id })
+	}
+	return feed.findEntry(nil)
+}
+
+func (feed *Feed) findEntryByIdSelfOrUrl(id_self_or_link string) (int, *Entry) {
+	defer un(trace(strings.Join([]string{"Feed.findEntryByIdSelfOrUrl('", id_self_or_link, "')"}, "")))
+	if "" != id_self_or_link {
+		if parts := strings.SplitN(id_self_or_link, "/", 4); 4 == len(parts) && "" == parts[3] && uriPub == parts[0] && uriPosts == parts[1] {
+			// looks like an internal id, so treat it as such.
+			id_self_or_link = parts[2]
+		}
+
+		doesMatch := func(entry *Entry) bool {
+			if id_self_or_link == entry.Id {
+				return true
+			}
+			for _, l := range entry.Links {
+				if ("" == l.Rel || "self" == l.Rel) && (id_self_or_link == l.Href /* todo: url equal */) {
+					return true
+				}
+			}
+			return false
+		}
+
+		return feed.findEntry(doesMatch)
+	}
+	return feed.findEntry(nil)
+}
+
+func (feed *Feed) deleteEntry(id string) *Entry {
+	if i, entry := feed.findEntryById(id); i >= 0 {
 		a := feed.Entries
 		// https://github.com/golang/go/wiki/SliceTricks
 		copy(a[i:], a[i+1:])
