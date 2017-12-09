@@ -88,6 +88,7 @@ func squealFailure(r *http.Request, now time.Time, reason string) error {
 }
 
 const banThreshold = 4
+const banDuration = 4 * time.Hour
 
 func (bans BanPenalties) isRemoteAddrBanned(key string, now time.Time) bool {
 	pen := bans.Penalties[key]
@@ -113,7 +114,7 @@ func (bans *BanPenalties) squealFailure(key string, now time.Time, reason string
 		return false
 	}
 
-	pen.End = pen.End.Add(4 * time.Hour)
+	pen.End = pen.End.Add(banDuration)
 	pen.Badness += 1
 	bans.Penalties[key] = pen
 

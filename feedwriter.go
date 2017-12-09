@@ -242,11 +242,11 @@ func (seed Feed) writeFeed(uri string, entries []*Entry, entriesPerPage int, fw 
 	case strings.HasPrefix(uri, path.Join(uriPub, uriPosts)):
 		// leave as is
 	case strings.HasPrefix(uri, path.Join(uriPub, uriTags)):
-		seed.Subtitle = &HumanText{Body: "#" + uri[len(uriPub)+len(uriTags)+2:]}
+		seed.Subtitle = &HumanText{Body: "#" + uri[len(uriPub)+len(uriTags)+2:]} // todo remove trailing slash
 	case strings.HasPrefix(uri, path.Join(uriPub, uriDays)):
-		seed.Subtitle = &HumanText{Body: uri[len(uriPub)+len(uriDays)+2:]}
+		seed.Subtitle = &HumanText{Body: uri[len(uriPub)+len(uriDays)+2:]} // todo remove trailing slash
 	default:
-		seed.Subtitle = &HumanText{Body: "Oha"}
+		seed.Subtitle = &HumanText{Body: "Fallthrough"}
 	}
 
 	for page := 0; page <= lastPage; page++ {

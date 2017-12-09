@@ -101,6 +101,7 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "couldn't crypt pwd: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
+		authors := []Person{Person{Name: app.cfg.AuthorName}}
 
 		// fork that one?
 		//_, err := feedFromLegacyShaarli(r.FormValue("import_shaarli_url"), r.FormValue("import_shaarli_uid"), r.FormValue("import_shaarli_pwd"))
@@ -118,7 +119,6 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 			// urlPost, err := url.Parse(strURL[:idxPost] + "/" + uriPub + "/" + uriPosts)
 			// load template feed, set Id and birthday.
 			// tagScheme := baseURL.ResolveReference(mustParseURL(uriPub, uriTags, "#")).String()
-			authors := []Person{Person{Name: app.cfg.AuthorName}}
 			feed = Feed{}
 
 			feed.Append(&Entry{
@@ -127,7 +127,6 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 				Links: []Link{
 					Link{Href: mustParseURL("http://www.loremipsum.de/").String()},
 				},
-				Authors: authors,
 				Categories: []Category{
 					Category{Term: "🐳"},
 					Category{Term: "Atom"},
@@ -183,13 +182,14 @@ Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lo
 				Categories:     []Category{Category{Term: "opensource"}, Category{Term: "Software"}},
 				Published:      iso8601{mustParseRFC3339("2011-09-13T15:45:00+02:00")},
 				Content:        &HumanText{Body: "Welcome to Shaarli ! This is a bookmark. To edit or delete me, you must first login."},
-				MediaThumbnail: &MediaThumbnail{Url: mustParseURL("http://cdn.rawgit.com/mro/ShaarliOS/master/shaarli-petal.svg").String()},
+				MediaThumbnail: &MediaThumbnail{Url: mustParseURL("https://cdn.rawgit.com/mro/ShaarliOS/master/shaarli-petal.svg").String()},
 			})
 		}
 
 		feed.Title = HumanText{Body: app.cfg.Title}
 		feed.XmlBase = urlBase.String()
 		feed.Id = urlBase.String() // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
+		feed.Authors = authors
 		feed.Generator = &Generator{Uri: myselfNamespace, Version: "0.0.2", Body: "ShaarliGo"}
 		feed.Links = []Link{
 			Link{Rel: relEdit, Href: path.Join(cgiName, uriPub, uriPosts), Title: "PostURI, maybe better a app:collection https://tools.ietf.org/html/rfc5023#section-8.3.3"},

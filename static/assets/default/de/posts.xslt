@@ -174,6 +174,7 @@ li {
 form {
   margin: 1.0ex 0;
 }
+form button { min-width: 14ex; }
 
 #links_commands td {
   min-width: 40px;
@@ -230,7 +231,7 @@ div.awesomplete { display: block; }
         </div>
       </form>
 
-      <form id="form_post" name="form_post" class="form-horizontal hidden-logged-out" action="{$xml_base_pub}/../shaarligo.cgi">
+      <form id="form_post" name="form_post" class="form-horizontal" action="{$xml_base_pub}/../shaarligo.cgi">
         <div class="input-group">
           <input tabindex="300" name="post" type="text" placeholder="Was gibt's #Neues? (Notiz oder URL)" class="awesomplete form-control" data-multiple="true" data-list="#taglist"/>
           <span class="input-group-btn">
