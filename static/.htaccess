@@ -1,4 +1,12 @@
 
+# Requires:
+#   mod_cgi.so
+#   mod_rewrite.so
+
+# mandatory, already before first run of cgi (usually a webserver default):
+AddHandler cgi-script .cgi
+Options ExecCGI
+
 # mandatory
 DirectoryIndex index.xml
 
@@ -6,6 +14,7 @@ DirectoryIndex index.xml
 AddOutputFilter DEFLATE xml xslt css js svg
 
 # https://stackoverflow.com/questions/21062290/set-rewritebase-to-the-current-folder-path-dynamically/21063276#21063276
+RewriteEngine On
 RewriteCond %{REQUEST_URI}::$1 ^(.*?/)(.*)::\2$
 RewriteRule ^(.*)$ - [E=BASE:%1]
 
