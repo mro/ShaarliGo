@@ -89,7 +89,9 @@ func entryFromNode(root *html.Node, ur *url.URL) (Entry, error) {
 
 		case "keywords" == strName:
 			for _, txt := range strings.Split(strContent, ",") {
-				ret.Categories = append(ret.Categories, Category{Term: strings.Replace(strings.TrimSpace(txt), " ", "_", -1)})
+				if t := strings.Replace(strings.TrimSpace(txt), " ", "_", -1); "" != t {
+					ret.Categories = append(ret.Categories, Category{Term: t})
+				}
 			}
 
 		case "og:title" == strProp:

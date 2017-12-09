@@ -50,6 +50,7 @@ import (
 const myselfNamespace = "http://purl.mro.name/ShaarliGo"
 const toSession = 30 * time.Minute
 
+var GitSHA1 = "Please set -ldflags \"-X main.GitSHA1=$(git rev-parse --short HEAD)\"" // https://medium.com/@joshroppo/setting-go-1-5-variables-at-compile-time-for-versioning-5b30a965d33e
 var fileFeedStorage string
 
 func init() {
@@ -117,7 +118,7 @@ func (app App) IsLoggedIn(now time.Time) bool {
 }
 
 func handleMux(w http.ResponseWriter, r *http.Request) {
-	defer un(trace(strings.Join([]string{r.RemoteAddr, r.Method, r.URL.String()}, " ")))
+	defer un(trace(strings.Join([]string{"v", version, "+", GitSHA1, " ", r.RemoteAddr, " ", r.Method, " ", r.URL.String()}, "")))
 	// w.Header().Set("Server", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
 	// w.Header().Set("X-Powered-By", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
 	now := time.Now()

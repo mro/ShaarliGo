@@ -3,9 +3,9 @@
 #   mod_cgi.so
 #   mod_rewrite.so
 
-# mandatory, already before first run of cgi (usually a webserver default):
+# mandatory, already before first run of cgi (hopefully a webserver default or place .htaccess manually...):
 AddHandler cgi-script .cgi
-Options ExecCGI
+Options FollowSymLinks ExecCGI
 
 # mandatory
 DirectoryIndex index.xml
@@ -21,4 +21,4 @@ RewriteRule ^(.*)$ - [E=BASE:%1]
 RewriteRule ^/?$ %{ENV:BASE}pub/posts/ [redirect=301,last]
 
 # nice
-Header add X-Powered-By "http://purl.mro.name/ShaarliGo#0.0.1"
+Header add X-Powered-By "http://purl.mro.name/ShaarliGo#0.0.2"

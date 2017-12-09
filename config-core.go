@@ -46,15 +46,18 @@ type Config struct {
 	PwdBcrypt         string                   `yaml:"pwd_bcrypt"`
 	CookieStoreSecret string                   `yaml:"cookie_secret"`
 	TimeZone          string                   `yaml:"timezone"`
-	UrlCleaner        []RegexpReplaceAllString `yaml:"url_cleaner"`
 	LinksPerPage      int                      `yaml:"links_per_page"` // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L18
 	BanAfter          int                      `yaml:"ban_after"`      // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L20
 	BanSeconds        int                      `yaml:"ban_seconds"`    // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L21
+	UrlCleaner        []RegexpReplaceAllString `yaml:"url_cleaner"`
 }
 
 func LoadConfig() (Config, error) {
 	ret := Config{
-		TimeZone: "Europe/Paris",
+		TimeZone:     "Europe/Paris",
+		LinksPerPage: 100,   // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L18
+		BanAfter:     4,     // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L20
+		BanSeconds:   14400, // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L21
 		UrlCleaner: []RegexpReplaceAllString{
 			{Regexp: "[\\?&]utm_source=.*$", ReplaceAllString: ""}, // We remove the annoying parameters added by FeedBurner and GoogleFeedProxy (?utm_source=...)
 			{Regexp: "#xtor=RSS-.*$", ReplaceAllString: ""},
@@ -63,9 +66,6 @@ func LoadConfig() (Config, error) {
 			{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?sueddeutsche\\.de/.*?-(\\d+\\.\\d+)(?:\\.html.*)?$", ReplaceAllString: "https://sz.de/${1}"},
 			{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?youtube.com/watch\\?v=([^&]+)(?:.*&(t=[^&]+))?(?:.*)$", ReplaceAllString: "https://youtu.be/${1}?${2}"},
 		},
-		LinksPerPage: 100,   // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L18
-		BanAfter:     4,     // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L20
-		BanSeconds:   14400, // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L21
 	}
 	// seed the cookie store secret
 	buf := make([]byte, 32)

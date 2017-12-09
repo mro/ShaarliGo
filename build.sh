@@ -8,6 +8,7 @@ cd "$(dirname "${0}")"
 # Linux x86_64
 # Linux armv6l
 
+say "go get"
 go get -u golang.org/x/tools/blog/atom
 go get -u golang.org/x/crypto/bcrypt
 go get -u gopkg.in/yaml.v2
@@ -17,6 +18,7 @@ go get -u github.com/gorilla/sessions
 go get -u github.com/yhat/scrape
 go get -u golang.org/x/net/html
 go get -u golang.org/x/net/html/atom
+say "ok"
 
 # ssh vario find mro.name/vorschau.blog/assets -type f
 
@@ -24,17 +26,26 @@ go get -u golang.org/x/net/html/atom
 go-bindata -ignore=\\.DS_Store -prefix static static/...
 
 PROG_NAME="ShaarliGo"
-VERSION="0.0.1"
+VERSION=`fgrep 'version = ' version.go | cut -d '"' -f 2`
 
 rm "${PROG_NAME}"-*-"${VERSION}" 2>/dev/null
 
-# go test || exit $?
+say "test"
+go fmt && go test --short || { exit $?; }
+say "ok"
 
+say "ithneen"
+go build -ldflags "-X main.GitSHA1=$(git rev-parse --short HEAD)" -o ~/Sites/b/shaarligo.cgi || { echo "Aua" 1>&2 && exit 1; }
+say "ok"
+# open "http://localhost/~$(whoami)/b/shaarligo.cgi"
+
+say "linux"
 # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
 # env GOOS=linux GOARCH=arm GOARM=6 go build -o "${PROG_NAME}-linux-arm-${VERSION}"
-env GOOS=linux GOARCH=amd64 go build -ldflags "-s" -o "${PROG_NAME}-linux-amd64-${VERSION}" || { echo "Aua" 1>&2 && exit 1; }
+env GOOS=linux GOARCH=amd64 go build -ldflags "-s" -ldflags "-X main.GitSHA1=$(git rev-parse --short HEAD)" -o "${PROG_NAME}-linux-amd64-${VERSION}" || { echo "Aua" 1>&2 && exit 1; }
 # env GOOS=linux GOARCH=386 GO386=387 go build -o "${PROG_NAME}-linux-386-${VERSION}" # https://github.com/golang/go/issues/11631
 # env GOOS=darwin GOARCH=amd64 go build -o "${PROG_NAME}-darwin-amd64-${VERSION}"
+say "ok"
 
 # https://lager.mro.name/as/shaarligo.cgi
 # scp "${PROG_NAME}-linux-amd64-${VERSION}" simply:/var/www/lighttpd/lager.mro.name/public_html/as/"shaarligo.cgi"
@@ -46,8 +57,19 @@ env GOOS=linux GOARCH=amd64 go build -ldflags "-s" -o "${PROG_NAME}-linux-amd64-
 # ssh vario rm -vrf mro.name/webroot/b/app
 # ssh vario rm -vrf mro.name/webroot/b/assets
 # ssh vario rm -vrf mro.name/webroot/b/pub
-scp "${PROG_NAME}-linux-amd64-${VERSION}" vario:~/mro.name/webroot/b/"shaarligo.cgi"
-scp "ServerInfo.cgi" vario:~/mro.name/webroot/b/"info.cgi"
+
+say "simply"
+scp "${PROG_NAME}-linux-amd64-${VERSION}" simply:/var/www/lighttpd/h4u.r-2.eu/public_html/"shaarligo.cgi"
+say "ok"
+# scp "ServerInfo.cgi" simply:/var/www/lighttpd/h4u.r-2.eu/public_html/"info.cgi"
+
+# scp "${PROG_NAME}-linux-amd64-${VERSION}" vario:~/mro.name/webroot/b/"shaarligo.cgi"
+# scp "ServerInfo.cgi" vario:~/mro.name/webroot/b/"info.cgi"
+
+say "vario"
+ssh simply scp /var/www/lighttpd/h4u.r-2.eu/public_html/shaarligo.cgi vario:~/mro.name/webroot/b/
+ssh vario ls -Al mro.name/webroot/b/shaarligo.cgi
+say "ok"
 
 exit 0
 

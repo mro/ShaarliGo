@@ -152,11 +152,6 @@ div.awesomplete { display: block; }
       </textarea>
   <!-- div class="input-group">
     <div class="col-sm-12">
-      <input name="lf_tags" type="text" placeholder="Schlagwort NochEinSchlagwort" data-multiple="data-multiple" value="{h:input[@name='lf_tags']/@value}" class="form-control"/>
-    </div>
-  </div -->
-  <!-- div class="input-group">
-    <div class="col-sm-12">
       <input name="lf_private" type="checkbox" value="{h:input[@name='lf_private']/@value}" class="form-control"/>
     </div>
   </div -->
