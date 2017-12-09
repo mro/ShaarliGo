@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+<html lang="de">
+
+  <head>
+    <title>Notfall-Patch für Windows &amp; Co.: Kritische Sicherheitslücke im Virenscanner von Microsoft |
+    heise Security
+</title>
+
+
+
+
+
+
+
+<meta charset="utf-8">
+<meta name="publisher" content="Heise Medien">
+
+
+
+  <meta name="viewport" content="width=1175">
+
+
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+
+<link rel="dns-prefetch" href="//1.f.ix.de">
+<link rel="dns-prefetch" href="//m.heise.de">
+<link rel="dns-prefetch" href="//script.ioam.de">
+<link rel="dns-prefetch" href="//ad.yieldlab.net">
+<link rel="dns-prefetch" href="//www.googletagservices.com">
+
+
+  <link rel="canonical" href="/security/meldung/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft-3913800.html">
+
+
+  <link rel="alternate" media="only screen and (max-width: 640px)" href="http://m.heise.de/meldung/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft-3913800.html" id="mobil_variante">
+
+
+
+
+
+
+  <link rel="amphtml" href="https://www.heise.de/amp/meldung/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft-3913800.html">
+
+
+
+
+  <meta name="date" content="2017-12-08T09:57:00">
+
+
+  <meta name="author" content="Dennis Schirrmacher">
+
+
+  <meta name="title" content="Notfall-Patch für Windows &amp; Co.: Kritische Sicherheitslücke im Virenscanner von Microsoft">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <meta name="description" content="Die Malware Protection Engine von Microsoft weist eine Schwachstelle auf, über die Angreifer Schadcode auf Computer schieben könnten. Die Engine kommt unter anderem bei…">
+
+
+  <meta name="keywords" content="Malware Protection Engine, Microsoft, Sicherheitslücken, Windows, Windows Defender">
+
+
+  <meta name="DC.identifier" content="https://heise.de/-3913800">
+
+
+
+    <meta property="og:title"          content="Notfall-Patch für Windows &amp; Co.: Kritische Sicherheitslücke im Virenscanner von Microsoft">
+  <meta property="og:type"             content="website">
+  <meta property="og:locale"           content="de_DE">
+  <meta property="og:url"              content="https://www.heise.de/security/meldung/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft-3913800.html">
+  <meta property="og:site_name"        content="Security">
+      <meta property="og:image"        content="https://www.heise.de/imgs/18/2/3/3/3/6/5/2/ms-27f2d5b32536ec59.png">
+      <meta property="og:image"        content="https://www.heise.de/imgs/18/2/3/3/3/6/5/2/ms-70f5eda95fd801f7.png">
+      <meta property="og:description"  content="Die Malware Protection Engine von Microsoft weist eine Schwachstelle auf, über die Angreifer Schadcode auf Computer schieben könnten. Die Engine kommt unter anderem bei Windows Defender zum Einsatz.">
+
+  
+    <meta name="twitter:card"   content="summary">
+    <meta name="twitter:site"   content="@heisec">
+    <meta name="twitter:domain" content="heise.de">
+
+
+
+
+
+<link rel="home" type="text/html" title="Startseite" href="/security/">
+<link rel="copyright" title="Copyright" href="">
+<meta name="generator" content="InterRed V16.6, http://www.interred.de/, InterRed GmbH" />
+
+
+
+
+
+<script type="text/javascript" src="/js/mobile-deflect.min.js?ea85dfed7d6dc25326c5"></script>
+
+
+<script type="text/javascript">var _sf_startpt=(new Date()).getTime()</script>
+
+
+    <script type="text/javascript" src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="/js/plugins/jquery_fieldselection.js?2c05ccd1556e7c04f3fa"></script>
+
+    <script type="text/javascript" src="/js/forum/bb-code-buttons.js?b5a062e41b36da300e7b"></script>
+
+
+<script type="text/javascript" src="/js/ho/artikelGrossbild.js?5a2f85331c87ad867845"></script>
+
+
+
+
+<script type="text/javascript" src="//script.ioam.de/iam.js"></script>
+<script type="text/javascript" src="//ad.yieldlab.net/yp/66424,66430,66442,66444,66446?ts=20171208215618"></script>
+
+
+<script type="text/javascript" src="/js/ho/login.min.js?9b8364654a5c82621afd"></script>
+
+
+<link href="/stil/heise.css?3bf58bddc00426ff76a8" rel="stylesheet" type="text/css">
+
+
+<link href="/favicon_security.ico" rel="shortcut icon">
+
+
+<!--googleon: all-->
+
+
+
+<!--googleoff: all-->
+
+<link rel="author" title="Kontakt" href="mailto:kontakt%40heise.de?subject=heise%20online">
+<link rel="search" title="Suche" href="https://www.heise.de/suche/">
+
+
+<link rel="alternate" type="application/atom+xml" title="Security News" href="https://www.heise.de/security/news/news-atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="Security News (f&uuml;r &auml;ltere RSS-Reader)" href="https://www.heise.de/security/news/news.rdf">
+
+
+<link rel="apple-touch-icon" sizes="60x60" href="/security/icons/apple-touch-icon-60.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/security/icons/apple-touch-icon-120.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/security/icons/apple-touch-icon-76.png">
+<link rel="apple-touch-icon-precomposed" sizes="152x152" href="/security/icons/apple-touch-icon-152.png">
+
+<meta name="application-name" content="News zur Computer-Sicherheit">
+<meta name="msapplication-tooltip" content="heise Security">
+<meta name="msapplication-starturl" content="/security/">
+<meta name="msapplication-TileColor" content="#00408a">
+<meta name="msapplication-square70x70logo" content="/security/icons/windows_tiny.png">
+<meta name="msapplication-square150x150logo" content="/security/icons/windows_square.png">
+<meta name="msapplication-wide310x150logo" content="/security/icons/windows_wide.png">
+<meta name="msapplication-square310x310logo" content="/security/icons/windows_large.png">
+<meta name="msapplication-notification" content="frequency=30;polling-uri=http://notifications.buildmypinnedsite.com/?feed=https://www.heise.de/security/news/news-atom.xml&amp;id=1;polling-uri2=http://notifications.buildmypinnedsite.com/?feed=https://www.heise.de/security/news/news-atom.xml&amp;id=2;polling-uri3=http://notifications.buildmypinnedsite.com/?feed=https://www.heise.de/security/news/news-atom.xml&amp;id=3;polling-uri4=http://notifications.buildmypinnedsite.com/?feed=https://www.heise.de/security/news/news-atom.xml&amp;id=4;polling-uri5=http://notifications.buildmypinnedsite.com/?feed=http//www.heise.de/security/news/news-atom.xml&amp;id=5; cycle=1">
+<meta name="DC.creator" content="heise Security">
+
+<link rel="publisher" href="https://plus.google.com/+heiseonline">
+
+
+
+<link href="/stil/security/security.css?576889bb6791ad747d21" rel="stylesheet" type="text/css">
+
+
+
+
+
+    <!-- Start nugg.ad tag -->
+    <script type="text/javascript">
+    var NUGGjson;
+    var nuggrid      = encodeURIComponent(top.location.href);
+    var nuggadios    = navigator.userAgent.match(/iPhone|iPad|iPod/i);
+    var nuggadmobile = navigator.userAgent.match(/mobile/i);
+    var nugghost     = "https://heise.nuggad.net";
+    var nuggn        = 923071392;
+    var nuggsid      = 1216322088;
+    var nuggtg       = encodeURIComponent("www.heise.de/security/sec-news");
+
+    if (nuggadmobile) {
+        nugghost = "https://heise.nuggad.net";
+        nuggn    = 777637131;
+        nuggsid  = 1216322088;
+    }
+
+    var nugguri = "";
+    var nuggscr = document.createElement('script');
+    nuggscr.type = 'text/javascript';
+
+    if (nuggadios) {
+        nugguri += "/javascripts/nuggad-ls.js";
+    }
+    else {
+        nugguri += "/rc?nuggn=" + nuggn + "&nuggsid=" + nuggsid + "&nuggtg=" + nuggtg + "&nuggrid=" + nuggrid;
+    }
+    nuggscr.src = nugghost + nugguri;
+    var n = document.getElementsByTagName('script')[0];
+    n.parentNode.insertBefore(nuggscr, n);
+    </script>
+
+    <script type="text/javascript">
+    if (nuggadios) {
+        nuggad.init({"rptn-url": nugghost}, function(api) {
+            api.rc({"nuggn": nuggn, "nuggsid": nuggsid, "nuggtg": nuggtg });
+        });
+    }
+    </script>
+    <!-- End nugg.ad tag -->
+    
+<script src="https://www.googletagservices.com/tag/js/gpt.js"></script>
+<script type="text/javascript" src="//ad.yieldlab.net/yp/66430,66444,223159,505108,591208,66424,66446,66442?ts=9513987527;formats_223159=101,102,103,108,117,119"></script>
+
+<script type="text/javascript">
+    function ypGetInfo(yield_id, param) {
+        if (typeof yl === "undefined" || yl.YpResult === "undefined") {
+            return;
+        }
+        var yp_res = yl.YpResult.get(yield_id);
+        if (yp_res) {
+            if (param == "format") {
+                return yp_res.format;
+            }
+            else if (param == "pid") {
+                return yp_res.pid;
+            }
+            else {
+                return yp_res.pricerange;
+            }
+        }
+    }
+
+
+    googletag.defineSlot("/6514/www.heise.de/security/sec-news", [[468,60],[728,90],[800,250],[960,250],[970,250]], "div-gpt-ad-2")
+        .addService(googletag.pubads())
+                .setTargeting("pricerange_66430", ypGetInfo("66430"))
+                .setTargeting("pid_66430", ypGetInfo("66430", "pid"))
+                .setTargeting("pricerange_66444", ypGetInfo("66444"))
+                .setTargeting("pid_66444", ypGetInfo("66444", "pid"))
+                .setTargeting("pricerange_223159", ypGetInfo("223159"))
+                .setTargeting("pid_223159", ypGetInfo("223159", "pid"))
+                .setTargeting("pricerange_505108", ypGetInfo("505108"))
+                .setTargeting("pid_505108", ypGetInfo("505108", "pid"))
+                .setTargeting("pricerange_591208", ypGetInfo("591208"))
+                .setTargeting("pid_591208", ypGetInfo("591208", "pid"))
+                .setTargeting("yl_format", ypGetInfo("223159", "format"))
+            .setTargeting("pos", ["top"]);
+
+    googletag.defineSlot("/6514/www.heise.de/security/sec-news", [[120,600],[120,800],[160,600],[160,800],[200,800]], "div-gpt-ad-3")
+        .addService(googletag.pubads())
+                .setTargeting("pricerange_66424", ypGetInfo("66424"))
+                .setTargeting("pid_66424", ypGetInfo("66424", "pid"))
+                .setTargeting("pricerange_223159", ypGetInfo("223159"))
+                .setTargeting("pid_223159", ypGetInfo("223159", "pid"))
+                .setTargeting("yl_format", ypGetInfo("223159", "format"))
+            .setTargeting("pos", ["top"]);
+
+    googletag.defineSlot("/6514/www.heise.de/security/sec-news", [[695,190]], "div-gpt-ad-1")
+        .addService(googletag.pubads())
+            .setTargeting("pos", ["native"]);
+
+    googletag.defineSlot("/6514/www.heise.de/security/sec-news", [[500,500],[540,65],[300,600],[300,250],[336,280]], "div-gpt-ad-4")
+        .addService(googletag.pubads())
+            .setTargeting("pos", ["bottom"]);
+                    var gallery_adUnit = "/6514/www.heise.de/security/sec-news";
+
+    googletag.defineSlot("/6514/www.heise.de/security/sec-news", [[300,250],[300,600],[336,280]], "div-gpt-ad-5")
+        .addService(googletag.pubads())
+                .setTargeting("pricerange_66446", ypGetInfo("66446"))
+                .setTargeting("pid_66446", ypGetInfo("66446", "pid"))
+                .setTargeting("pricerange_66442", ypGetInfo("66442"))
+                .setTargeting("pid_66442", ypGetInfo("66442", "pid"))
+            .setTargeting("pos", ["top"]);
+                    var gallery_adUnit = "/6514/www.heise.de/security/sec-news";
+
+if (typeof NUGGjson === "object") {
+    for (var nuggkey in NUGGjson) {
+        googletag.pubads().setTargeting(nuggkey, NUGGjson[nuggkey]);
+    }
+}
+googletag.pubads().setTargeting("kw", ["Malware Protection Engine","Microsoft","Sicherheitsl\u00fccken","Windows","Windows Defender"]);
+googletag.pubads().setTargeting("themenhub", "yes");
+googletag.pubads().enableSyncRendering();
+googletag.pubads().enableSingleRequest();
+googletag.enableServices();
+</script>
+
+
+
+
+  </head>
+
+  <body
+          class=" security"
+          id="pre-akwa">
+
+	              
+        
+    
+
+
+
+
+
+	  <div class="heisetopnavi no-touch v14">
+    <div class="heisetopnavi_header">
+        <header role="banner">
+            <div class="heisetopnavi_login">
+                <div id="navi_login">
+                    <p>
+                    <a href="https://www.heise.de/userdb/sso?rm=show_login&amp;dirid=1&amp;objekt=/">Einloggen</a>
+                    auf heise online</p>
+                </div>
+            </div>
+            <div class="heisetopnavi_hover_legacy">
+                <nav role="navigation">
+                    <a href="/" class="heisetopnavi_logo akwa-heisetopnavi_logo" title="heise online">
+                        <svg preserveAspectRatio="xMinYMin" xmlns="http://www.w3.org/2000/svg" viewBox="0 841.9 1057.3 200" class="akwa-topnavi-logo"><g fill="#888"><path d="M0 944c0-58.2 42.5-102.2 101.1-102.2 48.4 0 88.7 30.5 88.7 81.5 0 18.8-10 39.8-23.8 52.5l-7.2-6.2c9-10.7 14.5-26.4 14.5-40.3 0-41.9-32.7-69.1-73.2-69.1-54.3 0-73.2 42.9-73.2 90.8 0 42.4 31.2 77.3 74.2 77.3 22.7 0 42.7-6.9 61.3-19.5 3.4-2.4 6.9-5.3 9.8-8.4l4.1 6.2c-17.4 21.2-46.9 35.1-74.2 35.1C46.2 1042.1 0 1001.4 0 944"/><path d="M114.6 906.3L82.2 980c-2.8 6.2-6.9 13.4-14.6 13.4-5.9 0-10.2-4.1-10.2-9.8 0-4.5 2.2-8.6 4-12.6l35.1-80c2.8-6 6-10.5 12.9-10.5 5.9 0 9.8 4.1 9.8 9.8 0 5.7-2.4 11-4.6 16zM140.2 951.3l-12.9 29.1c-2.9 6.2-7.1 13.1-14.8 13.1-5.9 0-9.8-4.1-9.8-9.8 0-4.3 2.1-8.4 4-12.4l15.7-35.3c2.8-5.9 6-10.5 12.9-10.5 5.9 0 9.8 4.1 9.8 9.8-.1 5.6-2.5 11-4.9 16z"/><path d="M0 944c0-58.2 42.5-102.2 101.1-102.2 48.4 0 88.7 30.5 88.7 81.5 0 18.8-10 39.8-23.8 52.5l-7.2-6.2c9-10.7 14.5-26.4 14.5-40.3 0-41.9-32.7-69.1-73.2-69.1-54.3 0-73.2 42.9-73.2 90.8 0 42.4 31.2 77.3 74.2 77.3 22.7 0 42.7-6.9 61.3-19.5 3.4-2.4 6.9-5.3 9.8-8.4l4.1 6.2c-17.4 21.2-46.9 35.1-74.2 35.1C46.2 1042.1 0 1001.4 0 944"/><path d="M114.6 906.3L82.2 980c-2.8 6.2-6.9 13.4-14.6 13.4-5.9 0-10.2-4.1-10.2-9.8 0-4.5 2.2-8.6 4-12.6l35.1-80c2.8-6 6-10.5 12.9-10.5 5.9 0 9.8 4.1 9.8 9.8 0 5.7-2.4 11-4.6 16zM140.2 951.3l-12.9 29.1c-2.9 6.2-7.1 13.1-14.8 13.1-5.9 0-9.8-4.1-9.8-9.8 0-4.3 2.1-8.4 4-12.4l15.7-35.3c2.8-5.9 6-10.5 12.9-10.5 5.9 0 9.8 4.1 9.8 9.8-.1 5.6-2.5 11-4.9 16z"/></g><path fill="#888" d="M239.7 880.5h19.6v46h.2c2.3-3.6 5.7-6.8 9.7-8.8 4-2.3 8.4-3.4 13.3-3.4 13.1 0 26.9 8.6 26.9 33.4v45.4h-19.6v-43.3c0-11.3-4.1-19.6-14.9-19.6-7.5 0-12.9 5-15.1 11-.7 1.6-.7 3.6-.7 5.9v46.2h-19.6V880.7h.2v-.2zM344 959.9c.5 13.8 11.3 19.9 23.7 19.9 9.2 0 15.4-1.3 21.4-3.4l2.9 13.5c-6.6 2.7-16 5-26.9 5-25 0-39.7-15.4-39.7-39.2 0-21.4 12.9-41.5 37.7-41.5 25.1 0 33.2 20.7 33.2 37.5 0 3.6-.2 6.5-.7 8.3l-51.6-.1zm34-13.7c.2-7-3.1-18.9-16-18.9-12 0-17.1 11-18 18.9h34zm58-51.9c0 5.9-4.3 10.4-11.1 10.4-6.5 0-10.8-4.5-10.8-10.4s4.5-10.6 11-10.6c6.6 0 10.5 4.5 10.9 10.6zm-20.9 98.6v-77.1h19.6v77.1h-19.6zm43-17.7c4.5 2.7 12.8 5.6 19.8 5.6 8.6 0 12.2-3.4 12.2-8.6 0-5.2-3.2-7.9-12.8-11.3-15.1-5.2-21.4-13.5-21.2-22.5 0-13.7 11.3-24.2 29.1-24.2 8.6 0 16 2.3 20.5 4.5l-4 13.8c-3.4-1.8-9.5-4.5-16.3-4.5-7 0-10.8 3.4-10.8 8.1 0 5 3.6 7.4 13.5 10.8 13.8 5 20.5 12.2 20.7 23.7 0 13.8-11 24.2-31.4 24.2-9.3 0-17.8-2.3-23.4-5.6l4.1-14zm83.9-15.3c.5 13.8 11.3 19.9 23.7 19.9 9.2 0 15.4-1.3 21.4-3.4l2.9 13.5c-6.6 2.7-16 5-26.9 5-25.1-.2-39.9-15.6-39.9-39.2 0-21.4 12.9-41.5 37.7-41.5 25.1 0 33.2 20.7 33.2 37.5 0 3.6-.2 6.5-.7 8.3l-51.4-.1zm33.9-13.7c.2-7-3.1-18.9-16-18.9-12 0-17.1 11-18 18.9h34zm140.1 7.6c0 28.4-19.9 41-39.5 41-21.9-.2-38.6-15.1-38.6-39.9 0-25.3 16.7-41 39.9-41 22.8.2 38.2 16.4 38.2 39.9zm-58.2.7c0 14.9 7.4 26 19.2 26 11.1 0 18.9-11 18.9-26.4 0-12-5.4-25.9-18.7-25.9-13.8.3-19.4 13.5-19.4 26.3zm74.2-15.6c0-8.8-.2-16.3-.7-23h17.1l.9 11.5h.5c3.4-5.9 11.7-13.3 24.6-13.3 13.5 0 27.5 8.6 27.5 33.2v45.8h-19.6v-43.6c0-11.1-4.1-19.6-14.7-19.6-7.7 0-13.1 5.6-15.3 11.3-.7 1.8-.7 4.1-.7 6.3v45.3H732v-53.9zm90.5-58.4h19.6v112.6h-19.6V880.5zm61.6 13.8c0 5.9-4.3 10.4-11.1 10.4-6.5 0-10.8-4.5-10.8-10.4s4.5-10.6 11-10.6c6.6 0 10.8 4.5 10.9 10.6zm-20.8 98.6v-77.1h19.6v77.1h-19.6zm40.6-54c0-8.8-.2-16.3-.7-23h17.1l.9 11.5h.5c3.4-5.9 11.7-13.3 24.6-13.3 13.5 0 27.5 8.6 27.5 33.2v45.8h-19.6v-43.6c0-11.1-4.1-19.6-14.7-19.6-7.7 0-13.1 5.6-15.3 11.3-.7 1.8-.7 4.1-.7 6.3v45.3h-19.6v-53.9zm101.1 21c.5 13.8 11.3 19.9 23.7 19.9 9.2 0 15.4-1.3 21.4-3.4l2.9 13.5c-6.6 2.7-16 5-26.9 5-25 0-39.7-15.4-39.7-39.2 0-21.4 12.9-41.5 37.7-41.5 25.1 0 33.2 20.7 33.2 37.5 0 3.6-.2 6.5-.7 8.3l-51.6-.1zm34-13.7c.2-7-3.1-18.9-16-18.9-12 0-17.1 11-18 18.9h34z"/></svg>
+                    </a>
+                    <a href="#heisetopnavi_sub_container" class="heisetopnavi_button" aria-haspopup="true"></a>
+                    <div id="heisetopnavi_sub_container">
+                        <ul id="heisetopnavi_sub">
+                            <li class="new_list one">
+                                <ul>
+                                    <li class="heisetopnavi_ho"><a href="/" title="heise online – IT-News" name="dachzeile.ho.ho">News</a></li>
+                                    <li class="heisetopnavi_dev"><a href="/developer/" title="heise Developer – Informationen für Entwickler" name="dachzeile.ho.developer">heise Developer</a></li>
+                                    <li class="heisetopnavi_net"><a href="https://www.heise.de/thema/Netze" title="Themenseite Netze" name="dachzeile.ho.netze">heise Netze</a></li>
+                                    <li class="heisetopnavi_op"><a href="https://www.heise.de/thema/Linux-und-Open-Source" title="Themenseite Linux und Open Source" name="dachzeile.ho.open">heise Open Source</a></li>
+                                    <li class="heisetopnavi_sec"><a href="/security/" title="heise Security – News, Dienste und Foren zum Thema Computer-Sicherheit" name="dachzeile.ho.security">heise Security</a></li>
+                                </ul>
+                            </li>
+                            <li class="new_list two">
+                                <ul>
+                                    <li class="heisetopnavi_ct"><a href="/ct/" title="c't – Magazin für Computertechnik" name="dachzeile.ho.ct">c't</a></li>
+                                    <li class="heisetopnavi_ix"><a href="/ix/" title="iX – Magazin für professionelle Informationstechnik" name="dachzeile.ho.ix">iX</a></li>
+                                    <li class="heisetopnavi_tr"><a href="/tr/" title="Technology Review – Das M.I.T.-Magazin für Innovation" name="dachzeile.ho.tr">Technology Review</a></li>
+                                    <li class="heisetopnavi_df"><a href="/foto/" title="c't Fotografie" name="dachzeile.ho.ct-fotografie">c't Fotografie</a></li>
+                                    <li class="heisetopnavi_mac"><a href="/mac-and-i/" title="Mac &amp; i – Nachrichten, Tests, Tipps und Meinungen rund um Apple" name="dachzeile.ho.mac-and-i">Mac &amp; i</a></li>
+                                    <li class="heisetopnavi_hh"><a href="/make/" title="Make – Kreativ mit Technik" name="dachzeile.ho.make">Make</a></li>
+                                </ul>
+                            </li>
+                            <li class="new_list three">
+                                <ul>
+                                    <li class="heisetopnavi_tp"><a href="/tp/" title="Telepolis" name="dachzeile.ho.tp">Telepolis</a></li>
+                                    <li class="heisetopnavi_aut"><a href="/autos/" title="heise Autos – News, Tests, Technik, Service rund ums Auto" name="dachzeile.ho.autos">heise Autos</a></li>
+                                    <li class="heisetopnavi_tech"><a href="//www.techstage.de/" title="TechStage – News, Tests &amp; Praxis zu Smartphones und Tablets mit Android, iOS, Windows Phone &amp; Co." name="dachzeile.ho.techstage">TechStage</a></li>
+                                    <li class="heisetopnavi_tipps-tricks"><a href="/tipps-tricks/" title="Tipps & Tricks" name="dachzeile.ho.tipps-tricks">Tipps & Tricks</a></li>
+                                </ul>
+                            </li>
+                            <li class="new_list four">
+                                <ul>
+                                    <li class="heisetopnavi_swv"><a href="/download/" title="heise Download – Software zum Download fuer Windows, Mac, Linux, iPhone, Symbian, Android" name="dachzeile.ho.download">heise Download</a></li>
+                                    <li class="heisetopnavi_pvg"><a href="/preisvergleich/" title="Preisvergleich – Günstige Preise, Meinungen und Bewertungen zu vielen Produkten" name="dachzeile.ho.preisvergleich">Preisvergleich</a></li>
+                                    <li class="heisetopnavi_hbs"><a href="https://business-services.heise.de/" title="heise Business Services – Produkte und Lösungen namhafter IT-Hersteller" name="dachzeile.ho.whitepapers">Whitepapers</a></li>
+                                    <li class="heisetopnavi_hbs"><a href="https://business-services.heise.de/" title="heise Business Services – Produkte und Lösungen namhafter IT-Hersteller" name="dachzeile.ho.webcasts">Webcasts</a></li>
+                                    <li class="heisetopnavi_job"><a href="/jobs/" title="heise jobs – Jobbörse für qualifizierte Fach- und Führungskräfte aus der IT-Branche" name="dachzeile.ho.jobs">Stellenmarkt</a></li>
+                                    <li class="heisetopnavi_gutscheine"><a href="https://gutscheine.heise.de/" title="heise Gutscheine – Online-Gutscheine helfen dir schnell und einfach Geld zu sparen" name="dachzeile.ho.gutscheine">Gutscheine</a></li>
+                                    <li class="heisetopnavi_itm"><a href="/itmarkt/" title="IT-Markt – Branchenverzeichnis der IT-Fachhändler" name="dachzeile.ho.itmarkt">IT-Markt</a></li>
+                                    <li class="heisetopnavi_tarifr"><a href="/tarifrechner/" title="Tarifrechner – DSL, Mobiles Internet, Handy, Telefon, Strom, Gas" name="dachzeile.ho.tarifrechner">Tarifrechner</a></li>
+                                    <li class="heisetopnavi_tools"><a href="/tools/" title="Netzwerk-Tools" name="dachzeile.ho.tools">Netzwerk-Tools</a></li>
+                                    <li class="heisetopnavi_spiele"><a href="//spiele.heise.de/" title="Spielen bei Heise" name="dachzeile.ho.spiele">Spielen bei Heise</a></li>
+                                </ul>
+                            </li>
+                            <li class="new_list five">
+                                <ul>
+                                    <li class="heisetopnavi_shop"><a href="https://shop.heise.de/" title="heise shop – IT Fachzeitschriften, Bücher, CD/DVD/Blu-ray" name="dachzeile.ho.shop">heise shop</a></li>
+                                    <li class="heisetopnavi_select"><a href="/select/" title="Heise Select" name="dachzeile.ho.select">heise Select</a></li>
+                                    <li class="heisetopnavi_kio"><a href="https://shop.heise.de/artikel-archiv/" title="Artikel-Archiv – c't, iX, Technology Review, c't Fotografie, Mac &amp; i, Make, Sonderhefte" name="dachzeile.ho.artikel-archiv">Artikel-Archiv</a></li>
+                                    <li class="heisetopnavi_abo"><a href="https://shop.heise.de/abo" title="Abo – c't, iX, Technology Review, c't Fotografie, Mac &amp; i" name="dachzeile.ho.abo">Zeitschriften-Abo</a></li>
+                                    <li class="heisetopnavi_eve"><a href="/events/" title="heise Events – Konferenzen, Seminare, Workshops" name="dachzeile.ho.events">Veranstaltungen</a></li>
+                                    <li class="heisetopnavi_hmg"><a href="https://heise-gruppe.de/-1812545" title="Arbeiten bei heise – Heise als Arbeitgeber" name="dachzeile.ho.hmg">Arbeiten bei Heise</a></li>
+                                    <li class="heisetopnavi_media"><a href="/mediadaten/" title="Mediadaten Heise Medien" name="dachzeile.ho.mediadaten">Mediadaten</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+
+                    
+                    
+
+            <form accept-charset="utf-8" method="get" action="/security/suche/" id="heisetopnavi_search" role="search">
+                <fieldset>
+                    <input type="search" class="search_text" value="" name="q" placeholder="in heise Security suchen" data-autocomplete="true" data-searchpath="/security/suche/" ><input type="image" src="//www.heise.de/icons/ho/heise_online_lupe.gif" alt="Los" class="search_submit" name="search_submit">
+                    <input type="hidden" class="search_hidden" value="search" name="rm">
+                </fieldset>
+            </form>
+        </header>
+    </div>
+    <div class="clear"></div>
+</div>
+
+<script type="text/javascript">
+if (typeof jQuery !== "undefined") {
+    jQuery(document).ready(function($) {
+        // Support Touch-Devices
+        $('.heisetopnavi_button').bind('touchstart', function(e) {
+            e.preventDefault();
+            if ($(e.target).is('a.heisetopnavi_button')) {
+                $(this).toggleClass('active');
+                $('.heisetopnavi header > nav').toggleClass('hover');
+            }
+        });
+
+        $('.heisetopnavi .heisetopnavi_button').click(function(e) {
+            e.preventDefault();
+        });
+
+        // Support Keyboard
+        $('.heisetopnavi .heisetopnavi_button').keyup(function(e) {
+            if (e.which == 13 && $(e.target).is('a.heisetopnavi_button')) {
+                $('.heisetopnavi .heisetopnavi_button').toggleClass('active');
+                $('.heisetopnavi header > nav').toggleClass('hover');
+            }
+        });
+
+        /*
+         * Open/Close Menu with JavaScript for more Usability
+         */
+
+        $('.heisetopnavi').removeClass('no-touch');
+
+        // Logo + Icon
+        $('.heisetopnavi .heisetopnavi_hover_legacy').mouseenter(function() {
+            var timeout_id = window.setTimeout(function() {
+                $('.heisetopnavi .heisetopnavi_button').addClass('active');
+                $('.heisetopnavi nav').addClass('hover');
+                $('body').addClass('refreshDOM');
+                $('body').removeClass('refreshDOM');
+            }, 300);
+            $(this).data('timeout_id', timeout_id);
+        });
+        $('.heisetopnavi .heisetopnavi_hover_legacy').mouseleave(function() {
+            var timeout_id = $(this).data('timeout_id');
+            window.clearTimeout(timeout_id);
+            timeout_id = window.setTimeout(function() {
+                $('.heisetopnavi .heisetopnavi_button').removeClass('active');
+                $('.heisetopnavi nav').removeClass('hover');
+                $('body').addClass('refreshDOM');
+                $('body').removeClass('refreshDOM');
+            }, 0);
+            $(this).data('timeout_id', timeout_id);
+        });
+    });
+
+    if (typeof heiseLogin != "undefined") {
+        heiseLogin.login_fill_navigation({});
+    }
+}
+</script>
+
+
+
+    <div id="container">
+      
+
+
+  <div class="ad-container">
+      <div class="ad-container__leaderboard">  <div id='div-gpt-ad-2'>
+    
+    <script type='text/javascript'>
+      googletag.display("div-gpt-ad-2");
+    </script>
+    <noscript><div><a href="//pubads.g.doubleclick.net/gampad/jump?iu=%2F6514%2Fwww.heise.de%2Fsecurity%2Fsec-news%2F&kw=Malware%2520Protection%2520Engine%2CMicrosoft%2CSicherheitsl%25C3%25BCcken%2CWindows%2CWindows%2520Defender&c=9513987527&sz=468x60%7C728x90%7C800x250%7C960x250%7C970x250&tile=2" target="_blank"><img alt="" src="//pubads.g.doubleclick.net/gampad/ad?iu=%2F6514%2Fwww.heise.de%2Fsecurity%2Fsec-news%2F&kw=Malware%2520Protection%2520Engine%2CMicrosoft%2CSicherheitsl%25C3%25BCcken%2CWindows%2CWindows%2520Defender&c=9513987527&sz=468x60%7C728x90%7C800x250%7C960x250%7C970x250&tile=2" /></a></div></noscript>
+  </div>
+</div>
+
+
+    <div class="ad-container__skyscraper ad-container__skyscraper--right">  <div id='div-gpt-ad-3'>
+    
+    <script type='text/javascript'>
+      googletag.display("div-gpt-ad-3");
+    </script>
+    <noscript><div><a href="//pubads.g.doubleclick.net/gampad/jump?iu=%2F6514%2Fwww.heise.de%2Fsecurity%2Fsec-news%2F&kw=Malware%2520Protection%2520Engine%2CMicrosoft%2CSicherheitsl%25C3%25BCcken%2CWindows%2CWindows%2520Defender&c=9513987527&sz=120x600%7C120x800%7C160x600%7C160x800%7C200x800&tile=3" target="_blank"><img alt="" src="//pubads.g.doubleclick.net/gampad/ad?iu=%2F6514%2Fwww.heise.de%2Fsecurity%2Fsec-news%2F&kw=Malware%2520Protection%2520Engine%2CMicrosoft%2CSicherheitsl%25C3%25BCcken%2CWindows%2CWindows%2520Defender&c=9513987527&sz=120x600%7C120x800%7C160x600%7C160x800%7C200x800&tile=3" /></a></div></noscript>
+  </div>
+</div>
+  </div>
+
+
+      <div id="container_content">
+
+        <header id="logo_bereich">
+
+  <figure id="logo">
+    <a href="/security/"
+       title="heise Security"
+       name="header.security.logo">
+        heise Security
+    </a>
+  </figure>
+
+  <nav id="security" class="securtiy-navigation">
+    <ul class="navigation_main">
+      
+
+      <li class="aktiv 
+        sub">
+
+        <a href="/security/news/"
+           title="News"
+           name="navi.security.News">
+            News
+        </a>
+        <ul class="subnavi">
+
+          <li >
+            <a href="/security/news/archiv/"
+               title="Archiv"
+               name="subnavi.security.Archiv">
+                Archiv
+            </a>
+          </li>
+
+          <li >
+            <a href="/security/news/7_tage_news/"
+               title="7-Tage-News"
+               name="subnavi.security.7-Tage-News">
+                7-Tage-News
+            </a>
+          </li>
+        </ul>
+
+      </li>
+      
+
+      <li class="
+        ">
+
+        <a href="/security/artikel/"
+           title="Hintergrund"
+           name="navi.security.Hintergrund">
+            Hintergrund
+        </a>
+
+      </li>
+      
+      
+
+      <li class="
+        ">
+
+        <a href="/security/Events-von-heise-Security-3298035.html"
+           title="Events"
+           name="navi.security.Events">
+            Events
+        </a>
+
+      </li>
+      
+
+      <li class="
+        ">
+
+        <a href="http://www.heise.de/forum/heise-Security/Themen-Hilfe/forum-33385/"
+           title="Foren"
+           name="navi.security.Foren">
+            Foren
+        </a>
+
+      </li>
+
+      <li class="kontakt">
+        <a href="/security/kontakt/"
+           title="heise Security Kontakt"
+           name="navi.security.kontakt">Kontakt</a>
+      </li>
+    </ul>
+
+    <ul class="sub_navigation_new">
+      <li class="rss">
+        <a href="/news-extern/news.html#security" name="header.security.sm.rss" title="RSS-Feeds abonnieren">
+          <svg class="rss">
+              <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/icons/svg/heise_icons/svg-symbols/svg/sprite.symbol.svg#rss"></use>
+          </svg>
+        </a>
+      </li>
+
+      <li class="newsletter">
+        <a href="/newsletter/manage/heisec-summary"
+           name="header.security.sm.newsletter"
+           title="Newsletter abonnieren">
+          <svg class="newsletter">
+              <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/icons/svg/heise_icons/svg-symbols/svg/sprite.symbol.svg#envelope"></use>
+          </svg>
+        </a>
+      </li>
+
+      <li class="google">
+        <a href="https://plus.google.com/+heisesecurity"
+           name="header.security.sm.google"
+           title="heise Security auf Google+ folgen"
+           target="_blank">
+          <svg class="google">
+              <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/icons/svg/heise_icons/svg-symbols/svg/sprite.symbol.svg#google-plus"></use>
+          </svg>
+        </a>
+      </li>
+
+      <li class="facebook">
+        <a href="https://www.facebook.com/heisec.de"
+           name="header.security.sm.facebook"
+           title="heise Security auf Facebook folgen"
+           target="_blank">
+          <svg class="facebook">
+              <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/icons/svg/heise_icons/svg-symbols/svg/sprite.symbol.svg#facebook-f"></use>
+          </svg>
+        </a>
+      </li>
+      <li class="twitter">
+        <a href="https://twitter.com/heisec"
+           name="header.security.sm.twitter"
+           title="heise Security auf Twitter folgen"
+           target="_blank">
+          <svg class="twitter">
+              <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/icons/svg/heise_icons/svg-symbols/svg/sprite.symbol.svg#twitter"></use>
+          </svg>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+
+    
+    <ol class="breadcrumb" itemscope itemtype="http://schema.org/BreadcrumbList">
+            <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                <a itemprop="item" href="/security/" title="Security">
+                    <span itemprop="name">Security</span>
+                </a>
+                <meta itemprop="position" content="1">
+            </li>
+            <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                <a itemprop="item" href="/security/news/7_tage_news/" title="7-Tage-News">
+                    <span itemprop="name">7-Tage-News</span>
+                </a>
+                <meta itemprop="position" content="2">
+            </li>
+            <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                <a itemprop="item" href="/security/news/archiv/2017/12" title="12/2017">
+                    <span itemprop="name">12/2017</span>
+                </a>
+                <meta itemprop="position" content="3">
+            </li>
+                <li class="active">
+                    <h1 class="breadcrumb-headline inline">
+                        Notfall-Patch für Windows & Co.: Kritische Sicherheitslücke im…
+                    </h1>
+                </li>
+    </ol>
+
+
+
+
+        <div id="mitte">
+          
+
+          
+<!--googleoff: all-->
+
+
+<div id="mitte_links">
+
+  <div id="mitte_news">
+    <article
+      class="akwa-article"
+      id="meldung"
+      itemscope
+      itemtype="http://schema.org/CreativeWork"
+      data-article-type="meldung"
+    >
+      
+
+      <!-- RSPEAK_START -->
+      <!--googleon: all-->
+      
+<header class="article-header">
+
+  
+  
+
+
+
+  
+    <h2 class="article__heading" itemprop="headline">
+  
+
+      Notfall-Patch für Windows &amp; Co.: Kritische Sicherheitslücke im Virenscanner von Microsoft
+
+      
+
+      
+
+      </h2>
+    
+
+  <!-- RSPEAK_STOP -->
+
+    <div class="publish-info">
+        <a href="/security/alerts" class="publish-info__special akwa-article-meta__item--alert">
+          Alert!
+        </a>
+        <time class="publish-info__date" datetime="2017-12-08T09:57:00" itemprop="datePublished">08.12.2017&emsp;09:57 Uhr
+        </time>
+        <span class="publish-info__author" itemprop="author">Dennis Schirrmacher</span>
+        <div class="readspeaker-link">
+          <a href="/security/meldung/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft-3913800.html?view=audio" title="Meldung vorlesen und MP3-Download">vorlesen</a>
+        </div>
+
+    </div>
+
+</header>
+
+      <div class="article-content">
+          
+    
+    <!-- RSPEAK_STOP -->
+    <figure class="aufmacherbild">
+            
+            <img src="//1.f.ix.de/scale/geometry/700/q75/imgs/18/2/3/3/3/6/5/2/ms-70f5eda95fd801f7.png"
+              alt="Notfall-Patch für Windows &amp; Co.: Kritische Sicherheitslücke im Virenscanner von Microsoft"
+            >
+        
+    </figure>
+    <!-- RSPEAK_START -->
+
+
+
+        
+
+
+
+
+
+            <p class="article-content__lead">
+             Die Malware Protection Engine von Microsoft weist eine Schwachstelle auf, über die Angreifer Schadcode auf Computer schieben könnten. Die Engine kommt unter anderem bei Windows Defender zum Einsatz.
+            </p>
+
+        
+
+        <p>Microsofts Malware Protection Enigne (MPE) kann sich an einer präparierten Datei verschlucken und so Angreifern Tür und Tor öffnen. Verschiedene Sicherheitslösungen von Microsoft setzen auf MPE, darunter etwa Windows Defender, der bei Windows 7, 8.1 und 10 zum Einsatz kommt. Microsoft zufolge gibt es derzeit keine aktiven Angriffe. </p>
+<p>Auch Microsoft Endpoint Protection, Exchange Server, Forefront Endpoint Protection, Security Essentials und Windows Server 2016 sind durch die kritische Lücke (CVE-2017-11937) gefährdet. Eine vollständige Liste von bedrohten Produkten findet sich in der <a href="https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2017-11937" target="_blank" rel="external">offiziellen Warnmeldung</a>. </p>
+<h3 class="subheading" id="nav_abgesicherte__1">Abgesicherte Version installiert?</h3><p>Der Sicherheitspatch für MPE sollte sich automatisch installieren. Das ist zum Beispiel der Fall, wenn sich der Windows Defender aktuelle Signaturupdates holt. Nutzer sollten sicherstellen, dass mindestens die abgesicherte MPE-Version 1.1.14405.2 installiert ist. </p>
+<p>Zum Beispiel unter Windows 10 kann man das prüfen, indem man "Defender" in die Suche eingibt und "Windows Defender-Einstellungen" öffnet. Dort findet man die installierte MPE-Ausgabe unter "Modulversion". Ist diese nicht aktuell, kann man Windows Defender unter Windows via Windows Update auf den aktuellen Stand bringen. </p>
+<h3 class="subheading" id="nav_angriffe_leicht__2">Angriffe leicht gemacht</h3><p>Um die Schwachstelle auszunutzen, müssen Angreifer MPE lediglich eine präparierte Datei zum Scannen unterjubeln. Der Überprüfung findet entweder automatisch durch die Echtzeitüberwachung statt oder während eines manuell ausgelösten Scans. </p>
+<p>Das Ergebnis ist in beiden Fälle ein Speicherfehler, der letztlich zur Ausführung von Schadcode führt, warnt Microsoft. Anschließend könnten Angreifer die volle Kontrolle über Computer erlangen. </p>
+<p>Eine präparierte Datei können Angreifer Opfern auf vielen Wegen unterschieben: Etwa durch die Platzierung auf einer Webseite oder das Zusenden per E-Mail. Auch ein Angriff auf Web-Server ist vorstellbar, wenn gehostete Webseiten Besuchern eine Uploadmöglichkeit für Dateien anbieten, die MPE scannt. <!-- AUTHOR-DATA-MARKER-BEGIN -->
+
+
+
+<!-- RSPEAK_STOP -->
+<span class="ISI_IGNORE">(<a href="mailto:des@heise.de" title="Dennis Schirrmacher">des</a>)</span>
+<br class="clear" />
+<!-- RSPEAK_START -->
+<!-- AUTHOR-DATA-MARKER-END -->
+</p>
+
+      </div>
+
+      <!--googleoff: all-->
+      <!-- RSPEAK_STOP -->
+      
+<footer class="beitragsfooter">
+
+  
+
+  
+
+    
+
+
+
+
+
+ 
+
+      <a href="/forum/heise-Security/News-Kommentare/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft/forum-393362/comment/" class="kommentare_lesen_link">Kommentare lesen (141
+      
+          Beitr&auml;ge)
+      
+  </a>
+  
+
+
+
+
+
+
+
+
+  
+    <p class="beitragsfooter_themen_foren">
+        Forum zum Thema:
+        <a href="/forum/heise-Security/Themen-Hilfe/Desktopsicherheit/forum-33376/comment/" title="Zum Themenforum Desktopsicherheit">Desktopsicherheit
+        </a>
+    </p>
+
+  <div data-backend-url="/shariff-backend/" class="shariff clear" data-services="[&quot;facebook&quot;,&quot;twitter&quot;,&quot;googleplus&quot;,&quot;mail&quot;,&quot;info&quot;]" data-mail-url="/security/meldung/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft-3913800.html?view=mail"></div>
+
+  
+    <a href="https://heise.de/-3913800" class="beitragsfooter_permalink">https://heise.de/-3913800</a>
+
+
+  
+     <a href="/security/meldung/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft-3913800.html?view=print" rel="nofollow" class="beitragsfooter_printversion">Drucken</a>
+
+    <aside class="beitragsfooter-themenseiten">
+      <header class="beitragsfooter-themenseiten__header">
+        <span class="beitragsfooter-themenseiten__lable">Mehr zum Thema:</span>
+      </header>
+      <nav class="beitragsfooter-themenseiten__nav">
+          <a href="/security/thema/Microsoft" title="News und Artikel zum Thema Microsoft" class="beitragsfooter-themenseiten__link">
+            Microsoft
+          </a>
+          <a href="/security/thema/Sicherheitsl%C3%BCcken" title="News und Artikel zum Thema Sicherheitslücken" class="beitragsfooter-themenseiten__link">
+            Sicherheitslücken
+          </a>
+          <a href="/security/thema/Windows" title="News und Artikel zum Thema Windows" class="beitragsfooter-themenseiten__link">
+            Windows
+          </a>
+
+        
+            <a href="/security/alerts/" class="beitragsfooter-themenseiten__link akwa-article-meta__item--alert">
+              Alert!
+            </a>
+      </nav>
+    </aside>
+</footer>
+
+
+    </article>
+
+    
+      
+
+    
+
+      <div id='div-gpt-ad-1'>
+    
+    <script type='text/javascript'>
+      googletag.display("div-gpt-ad-1");
+    </script>
+    <noscript><div><a href="//pubads.g.doubleclick.net/gampad/jump?iu=%2F6514%2Fwww.heise.de%2Fsecurity%2Fsec-news%2F&kw=Malware%2520Protection%2520Engine%2CMicrosoft%2CSicherheitsl%25C3%25BCcken%2CWindows%2CWindows%2520Defender&c=9513987527&sz=695x190&tile=1" target="_blank"><img alt="" src="//pubads.g.doubleclick.net/gampad/ad?iu=%2F6514%2Fwww.heise.de%2Fsecurity%2Fsec-news%2F&kw=Malware%2520Protection%2520Engine%2CMicrosoft%2CSicherheitsl%25C3%25BCcken%2CWindows%2CWindows%2520Defender&c=9513987527&sz=695x190&tile=1" /></a></div></noscript>
+  </div>
+
+
+    <div class="adbottom"><!--googleoff: index-->
+<!-- RSPEAK_STOP -->
+<a href="http://www.heise.de/mediadaten/online/" target="_blank" class="hinweis_anzeige">Anzeige</a><br>  <div id='div-gpt-ad-4'>
+    
+    <script type='text/javascript'>
+      googletag.display("div-gpt-ad-4");
+    </script>
+    <noscript><div><a href="//pubads.g.doubleclick.net/gampad/jump?iu=%2F6514%2Fwww.heise.de%2Fsecurity%2Fsec-news%2F&kw=Malware%2520Protection%2520Engine%2CMicrosoft%2CSicherheitsl%25C3%25BCcken%2CWindows%2CWindows%2520Defender&c=9513987527&sz=500x500%7C540x65%7C300x600%7C300x250%7C336x280&tile=4" target="_blank"><img alt="" src="//pubads.g.doubleclick.net/gampad/ad?iu=%2F6514%2Fwww.heise.de%2Fsecurity%2Fsec-news%2F&kw=Malware%2520Protection%2520Engine%2CMicrosoft%2CSicherheitsl%25C3%25BCcken%2CWindows%2CWindows%2520Defender&c=9513987527&sz=500x500%7C540x65%7C300x600%7C300x250%7C336x280&tile=4" /></a></div></noscript>
+  </div>
+
+<!-- RSPEAK_START -->
+<!--googleon: index--></div>
+
+    <!--googleoff: all-->
+  </div>
+
+</div>
+
+
+    <!--googleoff: all-->
+  <aside id="mitte_rechts" class="beitrag-rechts">
+
+    
+      <aside class="securityteaser">
+  <header class="akwa-container__header">
+    Dienste
+  </header>
+  <nav class="dienste_liste">
+  <ul>
+    <li><a href="/security/dienste/Der-heise-Security-Consulter-2126442.html"
+           name="spalte.security.dienste.consulter">Security Consulter</a></li>
+    <li><a href="/security/dienste/Netzwerkcheck-2114.html"
+           name="spalte.security.dienste.netzwerkcheck">Netzwerkcheck</a></li>
+    <li><a href="/security/dienste/AntiVirus-2071.html"
+           name="spalte.security.dienste.antivirus">Anti-Virus</a></li>
+  </ul>
+  <ul>
+    <li><a href="/security/dienste/Emailcheck-2109.html"
+           name="spalte.security.dienste.emailcheck">Emailcheck</a></li>
+    <li><a href="/security/dienste/Browsercheck-2107.html"
+           name="spalte.security.dienste.browsercheck">Browsercheck</a></li>
+    <li><a href="/security/dienste/Krypto-Kampagne-2111.html"
+           name="spalte.security.dienste.krypto">Krypto-Kampagne</a> </li>
+  </ul>
+  </nav>
+</aside>
+
+    
+
+    
+        <!--googleoff: index-->
+<!-- RSPEAK_STOP -->
+<div  class="bcadv ISI_IGNORE bcadv_oben"><a href="http://www.heise.de/mediadaten/online/" target="_blank" class="hinweis_anzeige">Anzeige</a><br>  <div id='div-gpt-ad-5'>
+    
+    <script type='text/javascript'>
+      googletag.display("div-gpt-ad-5");
+    </script>
+    <noscript><div><a href="//pubads.g.doubleclick.net/gampad/jump?iu=%2F6514%2Fwww.heise.de%2Fsecurity%2Fsec-news%2F&kw=Malware%2520Protection%2520Engine%2CMicrosoft%2CSicherheitsl%25C3%25BCcken%2CWindows%2CWindows%2520Defender&c=9513987527&sz=300x250%7C300x600%7C336x280&tile=5" target="_blank"><img alt="" src="//pubads.g.doubleclick.net/gampad/ad?iu=%2F6514%2Fwww.heise.de%2Fsecurity%2Fsec-news%2F&kw=Malware%2520Protection%2520Engine%2CMicrosoft%2CSicherheitsl%25C3%25BCcken%2CWindows%2CWindows%2520Defender&c=9513987527&sz=300x250%7C300x600%7C336x280&tile=5" /></a></div></noscript>
+  </div>
+</div>
+<!-- RSPEAK_START -->
+<!--googleon: index--><!--googleoff: all--><!-- RSPEAK_STOP -->
+      
+
+
+  
+<aside class="security-alert-teaser ">
+  <header class="security-alert-teaser__header akwa-container__header">
+      <a href="/security/alerts/"
+         class="security-alert-teaser__headline"
+         name="spalte.security.alert.allemeldungen">
+        Alerts!
+
+        <span class="security-alert-teaser__linktext">
+          alle Alert-Meldungen
+        </span>
+      </a>
+  </header>
+  <nav class="security-alert-teaser__nav">
+
+    
+      
+    
+
+      
+
+      
+
+
+
+  
+  <article class="akwa-article-teaser
+                  
+                  akwa-article-teaser--no-image
+                  akwa-article-teaser--alert">
+      <a href="/security/meldung/Sicherheits-Updates-fuer-Firefox-Quantum-und-ESR-3913951.html"
+         title="Firefox Quantum / ESR"
+         class="akwa-article-teaser__link"
+         name="spalte.security.alert.1"
+      >
+
+          <div class="akwa-article-teaser__content-container">
+
+            <header>
+              <h1 class="akwa-article-teaser__title akwa-article-teaser__title--smaller">
+                
+
+                Firefox Quantum / ESR</h1>
+            </header>
+
+            
+
+            
+
+<ul class="akwa-article-meta">
+
+
+
+
+
+
+
+
+
+</ul>
+
+
+          </div>
+      </a>
+
+
+  </article>
+
+
+
+
+      
+
+      
+
+
+
+  
+  <article class="akwa-article-teaser
+                  
+                  akwa-article-teaser--no-image
+                  akwa-article-teaser--alert">
+      <a href="/security/meldung/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft-3913800.html"
+         title="Windows Defender &amp; Co."
+         class="akwa-article-teaser__link"
+         name="spalte.security.alert.2"
+      >
+
+          <div class="akwa-article-teaser__content-container">
+
+            <header>
+              <h1 class="akwa-article-teaser__title akwa-article-teaser__title--smaller">
+                
+
+                Windows Defender &amp; Co.</h1>
+            </header>
+
+            
+
+            
+
+<ul class="akwa-article-meta">
+
+
+
+
+
+
+
+
+
+</ul>
+
+
+          </div>
+      </a>
+
+
+  </article>
+
+
+
+
+      
+
+      
+
+
+
+  
+  <article class="akwa-article-teaser
+                  
+                  akwa-article-teaser--no-image
+                  akwa-article-teaser--alert">
+      <a href="/security/meldung/37-Sicherheitsluecken-in-Chrome-geschlossen-3912131.html"
+         title="Chrome"
+         class="akwa-article-teaser__link"
+         name="spalte.security.alert.3"
+      >
+
+          <div class="akwa-article-teaser__content-container">
+
+            <header>
+              <h1 class="akwa-article-teaser__title akwa-article-teaser__title--smaller">
+                
+
+                Chrome</h1>
+            </header>
+
+            
+
+            
+
+<ul class="akwa-article-meta">
+
+
+
+
+
+
+
+
+
+</ul>
+
+
+          </div>
+      </a>
+
+
+  </article>
+
+
+
+  </nav>
+
+</aside>
+
+
+      
+
+
+      
+            <aside class="us_ad akwa-ad-container akwa-ad-container__us-ad">
+                <a href="/mediadaten/heise-online/" target="_blank" class="hinweis_anzeige">Anzeige</a>
+                <a href="http://pubads.g.doubleclick.net/gampad/clk?id=4513010108&amp;iu=/6514/www.heise.de/clicktracking/usAd" target="_blank">
+                    <img src="//1.f.ix.de/security/imgs/07/2/3/3/2/6/3/9/Breach_Readiness_Cisco2-46a7ecb0636d16aa.jpg" width="300" height="250" alt="">
+                </a>
+                <script type="text/javascript">
+                <!--//--><![CDATA[//><!--
+                    (function (){
+                        var AVW = '<' + 'img id="avw_pixel_intern" src="/avw-bin/ivw/CP/barfoo/ho/3912349/0.gif?d=_ORD_" width="1" height="1" alt="">'.replace('_ORD_', Math.floor(Math.random()*1000000000)+1000000000);
+                        document.write(AVW);
+                    })();
+                //--><!]]>
+                </script>
+                <noscript>
+                    <img id="avw_pixel_intern" src="/avw-bin/ivw/CP/barfoo/ho/3912349/0.gif" width="1" height="1" alt="">
+                </noscript>
+            </aside>
+
+      
+    <aside class="teaser_adliste akwa-ad-container akwa-ad-container__microsite-list securityteaser">
+        <a href="/mediadaten/heise-online/" target="_blank" class="hinweis_anzeige">Anzeige</a>
+        <ul class="microsites">
+            <li><a href="http://pubads.g.doubleclick.net/gampad/clk?id=4369415226&amp;iu=/6514/www.heise.de/clicktracking/textlink" rel="nofollow" target="_blank">Live Webcast: Microsoft Small Business Services</a></li>
+            <li><a href="http://pubads.g.doubleclick.net/gampad/clk?id=4465540968&amp;iu=/6514/www.heise.de/clicktracking/textlink" rel="nofollow" target="_blank">Begeistert mit Leichtigkeit: ASUS ZenBook Flip S</a></li>
+            <li><a href="http://pubads.g.doubleclick.net/gampad/clk?id=4349328693&amp;iu=/6514/www.heise.de/clicktracking/textlink" rel="nofollow" target="_blank">Erfolg im Datenschutz mit Verschlüsselung und 2FA</a></li>
+            <li><a href="http://pubads.g.doubleclick.net/gampad/clk?id=4477626926&amp;iu=/6514/www.heise.de/clicktracking/textlink" rel="nofollow" target="_blank">GDPR: Sicherheitsverletzungen verhinden</a></li>
+            <li><a href="http://pubads.g.doubleclick.net/gampad/clk?id=33650150&amp;iu=/6514/www.heise.de/clicktracking/textlink" rel="nofollow" target="_blank">Kostenlos: Nützliche eBooks für Bildung und Beruf!</a></li>
+            <li><a href="http://pubads.g.doubleclick.net/gampad/clk?id=4514221187&amp;iu=/6514/www.heise.de/clicktracking/textlink" rel="nofollow" target="_blank">Firewall-Test: Das sagen die Leser!</a></li>
+        </ul>
+    </aside>
+
+      
+
+
+<aside class="securityteaser teaser-topical artikel_aktuell">
+
+  <header class="akwa-container__header">
+    Artikel
+  </header>
+
+  
+
+
+
+  
+  <article class="akwa-article-teaser
+                  ">
+      <a href="/security/artikel/Cardiac-Scan-Herzbewegung-als-biometrisches-Authentifizierungsmerkmal-3842874.html"
+         title="Cardiac Scan: Herzbewegung als biometrisches Authentifizierungsmerkmal"
+         class="akwa-article-teaser__link"
+         name="spalte.security.artikel-aktuell-liste.1"
+      >
+
+            <figure class="akwa-article-teaser__image-container">
+                <img src="//1.f.ix.de/scale/geometry/336/q75/security/imgs/07/2/2/8/6/2/4/3/hearts-1392575_1280-8c1c45b67021c710.jpeg" alt="Sicherheit bei jedem Herzschlag: Forscher entwickeln neues biometrisches Verfahren" class="akwa-article-teaser__image">
+            </figure>
+          <div class="akwa-article-teaser__content-container">
+
+            <header>
+              <h1 class="akwa-article-teaser__title akwa-article-teaser__title--smaller">
+                
+
+                Cardiac Scan: Herzbewegung als biometrisches Authentifizierungsmerkmal</h1>
+            </header>
+
+            
+            <p class="akwa-article-teaser__synopsis">Zu Fingerabdrücken, Iris-Scans und Gesichtserkennung als gängige biometrische Identifikationsmerkmale könnte sich bald auch das menschliche Herz gesellen. Denn keines bewegt sich wie das andere.
+            </p>
+
+            
+
+<ul class="akwa-article-meta">
+
+
+
+
+
+
+
+
+
+</ul>
+
+
+          </div>
+      </a>
+
+
+  </article>
+
+
+  
+
+
+
+  
+  <article class="akwa-article-teaser
+                  ">
+      <a href="/security/artikel/KRACK-so-funktioniert-der-Angriff-auf-WPA2-3865019.html"
+         title="KRACK - so funktioniert der Angriff auf WPA2"
+         class="akwa-article-teaser__link"
+         name="spalte.security.artikel-aktuell-liste.2"
+      >
+
+            <figure class="akwa-article-teaser__image-container">
+                <img src="//1.f.ix.de/scale/geometry/336/q75/security/imgs/07/2/3/0/0/6/6/4/xor-dfcf34ffeea39740.jpeg" alt="KRACK - so funktioniert der Angriff" class="akwa-article-teaser__image">
+            </figure>
+          <div class="akwa-article-teaser__content-container">
+
+            <header>
+              <h1 class="akwa-article-teaser__title akwa-article-teaser__title--smaller">
+                
+
+                KRACK - so funktioniert der Angriff auf WPA2</h1>
+            </header>
+
+            
+            <p class="akwa-article-teaser__synopsis">Das Prinzip des KRACK-Angriffs ist eigentlich ganz einfach. Es beruht auf einem allgemein bekannten Problem der Verschlüsselung, das die Designer von WPA2 eigentlich sogar umschifft hatten. Doch sie rechneten dabei nicht mit trickreichen Angreifern.
+            </p>
+
+            
+
+<ul class="akwa-article-meta">
+
+
+
+    <li class="akwa-article-meta__item media-icon media-icon--comments">
+      341<span class="hidden"> Kommentare</span>
+    </li>
+
+
+
+
+
+
+</ul>
+
+
+          </div>
+      </a>
+
+
+  </article>
+
+
+  
+
+
+
+  
+  <article class="akwa-article-teaser
+                  ">
+      <a href="/security/artikel/PrivateBin-Pastebin-Alternative-fuer-Vertrauliches-3844615.html"
+         title="PrivateBin: Pastebin-Alternative für Vertrauliches"
+         class="akwa-article-teaser__link"
+         name="spalte.security.artikel-aktuell-liste.3"
+      >
+
+            <figure class="akwa-article-teaser__image-container">
+                <img src="//1.f.ix.de/scale/geometry/336/q75/security/imgs/07/2/2/8/7/2/9/6/PrivateBin_weiss-b0ea23b6730be7c1.png" alt="PrivateBin: Pastebin-Alternative für Vertauliches" class="akwa-article-teaser__image">
+            </figure>
+          <div class="akwa-article-teaser__content-container">
+
+            <header>
+              <h1 class="akwa-article-teaser__title akwa-article-teaser__title--smaller">
+                
+
+                PrivateBin: Pastebin-Alternative für Vertrauliches</h1>
+            </header>
+
+            
+            <p class="akwa-article-teaser__synopsis">PrivateBin verschlüsselt Inhalte, ist über das Tor-Netzwerk erreichbar und bietet einen Selbstzerstörungsmodus. Wer möchte, kann das Tool auch selbst auf seinem Server hosten.
+            </p>
+
+            
+
+<ul class="akwa-article-meta">
+
+
+
+
+
+
+
+
+
+</ul>
+
+
+          </div>
+      </a>
+
+
+  </article>
+
+
+  
+
+</aside>
+
+
+      
+
+
+      
+
+
+      
+
+
+<section class="col-md-4 col-sm-6 col-xs-12 forum_latest_posting_teaser securityteaser print-avoid-pagebreak-inside">
+    <header class="akwa-container__header">
+        
+            Neueste Forenbeiträge
+        
+    </header>
+    
+    
+        
+    
+    <ol class="forum_latest_posting_list">
+        <li>
+            <article class="latest_posting_snippet">
+                <header class="title">
+                    <a href="/forum/heise-Security/News-Kommentare/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft/Schon-seit-dem-3-12-gestopft/posting-31500499/show/"
+                       name="spalte.security.forenbeitrag.1.titel">
+                       Schon seit dem 3.12 gestopft?
+                    </a>
+                </header>
+                <a href="/forum/heise-Security/News-Kommentare/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft/Schon-seit-dem-3-12-gestopft/posting-31500499/show/"
+                   class="comment"
+                   name="spalte.security.forenbeitrag.1"
+                   >
+                    Da kam unerwarteterweise ein Sicherheitsupedate rein, was mich insofern verwunderte, als dass es nicht den zweiten Dienstag im Monat war und…
+                </a>
+                <p class="forum">
+                    <span>Forum:&nbsp;</span>
+                    <a class="comments_forum"
+                       href="/forum/forum-393362/"
+                       name="spalte.security.forenbeitrag.1.forenlink">Notfall-Patch für Windows &amp; Co.: Kritische Sicherheitslücke im Virenscanner von Microsoft</a>
+                </p>
+            </article>
+
+            <figure class="latest_posting_meta clearfix">
+                
+                    <img class="avatar" src="/imagine/c8hWrwjv8GYAKLi1i1dLRSgLH2A/preview/" alt="Avatar von Todeskraut">
+                
+                <figcaption class="forum_latest_posting_meta">
+                    <span class="user">von Todeskraut;</span>
+                    <time datetime="2017-12-08T21:55:45+01:00" title="08.12.2017 21:55" class="comments_time">vor 33 Sekunden</time>
+                </figcaption>
+            </figure>
+
+        </li>
+    
+    
+    
+        
+    
+    
+        <li>
+            <article class="latest_posting_snippet">
+                <header class="title">
+                    <a href="/forum/heise-Security/News-Kommentare/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft/Re-Warum-benutzt-man-so-etwas-ueberhaupt-noch/posting-31500464/show/"
+                       name="spalte.security.forenbeitrag.2.titel">
+                       Re: Warum benutzt man so etwas überhaupt noch?
+                    </a>
+                </header>
+                <a href="/forum/heise-Security/News-Kommentare/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft/Re-Warum-benutzt-man-so-etwas-ueberhaupt-noch/posting-31500464/show/"
+                   class="comment"
+                   name="spalte.security.forenbeitrag.2"
+                   >
+                    BlueLaser schrieb am 08.12.2017 11:08:
+
+Idealerweise läuft deren MUA in einem Jail -- aber auch nicht unter Windows.
+                </a>
+                <p class="forum">
+                    <span>Forum:&nbsp;</span>
+                    <a class="comments_forum"
+                       href="/forum/forum-393362/"
+                       name="spalte.security.forenbeitrag.2.forenlink">Notfall-Patch für Windows &amp; Co.: Kritische Sicherheitslücke im Virenscanner von Microsoft</a>
+                </p>
+            </article>
+
+            <figure class="latest_posting_meta clearfix">
+                
+                    <img class="avatar" src="/imagine/lIwY9sfIgTEweRa7xlFqOdLurms/preview/" alt="Avatar von Estrella de Levante">
+                
+                <figcaption class="forum_latest_posting_meta">
+                    <span class="user">von Estrella de Levante;</span>
+                    <time datetime="2017-12-08T21:42:36+01:00" title="08.12.2017 21:42" class="comments_time">vor 13 Minuten</time>
+                </figcaption>
+            </figure>
+
+        </li>
+    
+    
+    
+        
+    
+    
+        <li>
+            <article class="latest_posting_snippet">
+                <header class="title">
+                    <a href="/forum/heise-Security/News-Kommentare/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft/Re-Schon-wieder/posting-31500450/show/"
+                       name="spalte.security.forenbeitrag.3.titel">
+                       Re: Schon wieder?
+                    </a>
+                </header>
+                <a href="/forum/heise-Security/News-Kommentare/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft/Re-Schon-wieder/posting-31500450/show/"
+                   class="comment"
+                   name="spalte.security.forenbeitrag.3"
+                   >
+                    BastiK1979 schrieb am 08.12.2017 16:57:
+
+Aber mit Systemrechten natürlich mehr. Man könnte das also besser machen. am besten ist natürlich, das…
+                </a>
+                <p class="forum">
+                    <span>Forum:&nbsp;</span>
+                    <a class="comments_forum"
+                       href="/forum/forum-393362/"
+                       name="spalte.security.forenbeitrag.3.forenlink">Notfall-Patch für Windows &amp; Co.: Kritische Sicherheitslücke im Virenscanner von Microsoft</a>
+                </p>
+            </article>
+
+            <figure class="latest_posting_meta clearfix">
+                
+                    <img class="avatar" src="/imagine/lIwY9sfIgTEweRa7xlFqOdLurms/preview/" alt="Avatar von Estrella de Levante">
+                
+                <figcaption class="forum_latest_posting_meta">
+                    <span class="user">von Estrella de Levante;</span>
+                    <time datetime="2017-12-08T21:39:16+01:00" title="08.12.2017 21:39" class="comments_time">vor 17 Minuten</time>
+                </figcaption>
+            </figure>
+
+        </li>
+    </ol>
+</section>
+
+
+      
+
+
+      
+
+
+      
+
+
+      
+
+
+      
+
+
+      
+
+
+  </aside>
+
+
+
+
+
+    
+
+
+
+
+
+          
+
+          
+        </div>
+
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+    
+    
+
+        
+
+      	<div class="akwa-ad-container akwa-ad-container--bottom">
+		      <!--googleoff: all-->
+	      </div>
+
+        
+				<div class="bottom_up">
+          <!-- RSPEAK_STOP -->
+					<a href="#container_content" name="ticker.ho.bottom.up">
+					<span class="arrow"></span>nach oben</a>
+				</div>
+        
+
+        <footer id="sitemap">
+    <dl>
+        <dt>News und Artikel</dt>
+        <dd>
+          <ul>
+            <li>
+              <a href="/security/news/"
+                 name="footer.security.News">News</a>
+            </li>
+            <li>
+              <a href="/security/news/7_tage_news/"
+                 name="footer.security.siebentage">7-Tage-News</a></li>
+            <li>
+              <a href="/security/news/archiv/"
+                 name="footer.security.archiv">News-Archiv</a></li>
+            <li>
+              <a href="/security/artikel/"
+                 name="footer.security.hintergrund-artikel">Hintergrund-Artikel</a>
+            </li>
+            <li>
+              <a href="/security/alerts/"
+                 name="footer.security.alert-meldungen">Alert-Meldungen</a>
+            </li>
+        </ul>
+      </dd>
+    </dl>
+    <dl>
+        <dt>Service</dt>
+        <dd><ul>
+            <li>
+              <a href="/newsletter/manage/heisec-summary"
+                 name="footer.security.newsletter"
+              >Newsletter</a>
+            </li>
+            <li>
+              <a href="/security/tools/"
+                 name="footer.security.tools">Tools</a>
+            </li>
+            <li>
+              <a href="/forum/heise-Security/Themen-Hilfe/forum-33385/"
+                 name="footer.security.foren">Foren</a>
+            </li>
+            <li>
+              <a href="/news-extern/news.html#security/"
+                 name="footer.security.rss">RSS</a>
+            </li>
+            <li>
+              <a href="http://m.heise.de/security/"
+                name="footer.security.mobil">mobil</a>
+            </li>
+        </ul></dd>
+    </dl>
+    <dl>
+        <dt>Dienste</dt>
+        <dd><ul>
+            <li>
+              <a href="/security/dienste/Der-heise-Security-Consulter-2126442.html"
+                 name="footer.security.consulter">Security Consulter</a>
+            </li>
+            <li>
+              <a href="/security/dienste/Netzwerkcheck-2114.html"
+                 name="footer.security.netzwerkcheck">
+              Netzwerkcheck</a>
+            </li>
+            <li>
+              <a href="/security/dienste/AntiVirus-2071.html"
+                 name="footer.security.anti-virus">Anti-Virus</a>
+            </li>
+            <li>
+              <a href="/security/dienste/Emailcheck-2109.html"
+                 name="footer.security.emailcheck">Emailcheck</a>
+            </li>
+            <li>
+              <a href="/security/dienste/Browsercheck-2107.html"
+                 name="footer.security.browsercheck">Browsercheck</a>
+            </li>
+            <li>
+              <a href="/security/dienste/Krypto-Kampagne-2111.html"
+                 name="footer.security.krypto">Krypto-Kampagne</a>
+            </li>
+        </ul></dd>
+    </dl>
+</footer>
+
+      </div>
+    </div>
+
+    	<ul id="navi_bottom" class="nav navbar-nav"><li role="presentation" class="left"><a href="/Privacy-Policy-der-Heise-Medien-GmbH-Co-KG-4860.html">Datenschutzhinweis</a> </li><li role="presentation" class="left"><a href="/security/impressum.html">Impressum</a></li><li role="presentation" class="left"><a href="/security/kontakt/">Kontakt</a></li><li role="presentation" class="left"><a href="/mediadaten/online/">Mediadaten</a> </li>
+            <li role="presentation" class="bid_anzeige">2333652</li>
+    <li role="presentation" class="right container_ho_footer_copyright"><a href="http://www.interred.de/" target="_blank">Content Management by <b>Inter<span class="tx_red interred_red">Red</span></b></a></li>
+        <li role="presentation" class="right container_ho_footer_copyright"><a href="https://www.heise-medien.de/">Copyright © 2017 Heise Medien</a></li>
+</ul>
+
+
+    
+
+
+
+
+
+
+
+<script src="/js/suche/suche.js?68f609da99d5e5f71b68"></script>
+
+<script src="/js/heise.min.js?340deff91a6dce3cffb1"></script>
+
+    
+        <div style="display: inline;"><img id="ivw_pixel_intern" src="/ivw-bin/ivw/CP" width="1" height="1" alt="" /></div>
+
+        
+
+        
+        <script type="text/javascript">
+            var iam_data = {
+                "st":"heise",
+                "cp":"sec_news",
+                "sv":"in",
+                "co":""
+            }
+            iom.c(iam_data);
+        </script>
+
+        <script type="text/javascript">
+            <!--//--><![CDATA[//><!--
+            // VGWORT-CROP-MARKER
+            var vgwort_token='9ab07fb595cd42eaa61347fc2d542118';
+            document.write('<div style="display: inline;"><img src="https://ssl-heise.met.vgwort.de/na/' +  vgwort_token);
+            document.write('" width="1" height="1" alt="" /><' + '/div>');
+            //--><!]]>
+        </script>
+    <!-- Webtrekk 4.4.1, (c) www.webtrekk.com -->
+            <script type="text/javascript" src="/js/ho/webtrekk-v4.4.1-bundle-heise-2017-09-15.js"></script>
+
+                <script type="text/javascript">
+        <!--
+        var pageConfig = {
+            linkTrack : "standard", // Activate Link Tracking    [link or standard]
+            heatmap : "0",          // Activate Heatmap Tracking [1 = on | 0 = off]
+            form : "0",             // Activate Form Tracking    [1 = on | 0 = off]
+            trackId: "288689636920174",
+            pixelSampling : "",
+            contentId: "www.heise.de.security.meldung.notfall-patch-fuer-windows-co-kritische-sicherheitsluecke-im-virenscanner-von-microsoft-3913800"
+        };
+        var wt = new webtrekkV3(pageConfig);
+        wt.contentGroup = {};
+        wt.contentGroup['1']  = "www.heise.de";
+        wt.contentGroup['2']  = "security";
+        wt.contentGroup['3']  = "meldung";
+        wt.contentGroup['4']  = "notfall-patch-fuer-windows-co-kritische-sicherheitsluecke-im-virenscanner-von-microsoft-3913800";
+        wt.contentGroup['9']  = "notfall-patch-fuer-windows-co-kritische-sicherheitsluecke-im-virenscanner-von-microsoft-3913800";
+        wt.contentGroup['10']  = "meldung";
+        wt.customParameter = {};
+        wt.customParameter['2']  = "malware protection engine;microsoft;sicherheitsluecken;windows;windows defender";
+        wt.customParameter['6']  = "malware protection engine;microsoft;sicherheitsluecken;windows;windows defender";
+        wt.customParameter['8']  = "2017-12-08T09:57:00";
+        wt.customParameter['9']  = "security";
+        wt.customParameter['10']  = "newsticker;security";
+        wt.customParameter['15']  = "Dennis Schirrmacher";
+        wt.customParameter['17']  = "undefiniert";
+        wt.customParameter['23']  = "it";
+        
+        
+        if (document.getElementsByTagName('body')[0].getAttribute("data-device")) {
+            wt.customParameter['17'] = document.getElementsByTagName('body')[0].getAttribute("data-device");
+        }
+        
+        wt.customSessionParameter = {};
+        try {
+            if (window.heiseLogin) {
+                wt.customSessionParameter['1'] =
+                    window.heiseLogin.sso_logged_in ? "1" : "0";
+            }
+        } catch(e) { }
+        
+        
+        
+        
+        wt.heatmapRefpoint = 'container_content';
+        wt.sendinfo();
+        
+        
+        
+        wt.executePluginFunction = "wt_teaserTracking";
+        window.wt_ttv2 = window.wt_ttv2 || [];
+        $('.widget-werbung[data-widget-werbung-name]').each(function(i, el) {
+            var elj = $(el);
+            var teaser_config = {
+                selector: "#" + elj.attr('id'),
+                data: {
+                    name: elj.attr('data-widget-werbung-name'),
+                    rank: elj.attr('data-widget-werbung-rank'),
+                    content: elj.attr('data-widget-werbung-content')
+                }
+            };
+            window.wt_ttv2.push(teaser_config);
+        });
+        $('[data-teaser-tracking-id]').each(function(i, el) {
+            var elj = $(el);
+            var teaser_config = {
+                selector: '[data-teaser-tracking-id="' + elj.attr('data-teaser-tracking-id') + '"]',
+                data: {
+                    name: elj.attr('data-teaser-tracking-name'),
+                    rank: elj.attr('data-teaser-tracking-rank'),
+                    content: elj.attr('data-teaser-tracking-content')
+                }
+            };
+            window.wt_ttv2.push(teaser_config);
+        });
+        
+        //-->
+        </script>
+        <noscript><div><img src="//prophet.heise.de/288689636920174/wt.pl?p=441,www.heise.de.security.meldung.notfall-patch-fuer-windows-co-kritische-sicherheitsluecke-im-virenscanner-von-microsoft-3913800&cg1=www.heise.de&cg10=meldung&cg2=security&cg3=meldung&cg4=notfall-patch-fuer-windows-co-kritische-sicherheitsluecke-im-virenscanner-von-microsoft-3913800&cg9=notfall-patch-fuer-windows-co-kritische-sicherheitsluecke-im-virenscanner-von-microsoft-3913800&cp10=newsticker%3Bsecurity&cp15=Dennis%20Schirrmacher&cp17=undefiniert&cp2=malware%20protection%20engine%3Bmicrosoft%3Bsicherheitsluecken%3Bwindows%3Bwindows%20defender&cp23=it&cp6=malware%20protection%20engine%3Bmicrosoft%3Bsicherheitsluecken%3Bwindows%3Bwindows%20defender&cp8=2017-12-08T09%3A57%3A00&cp9=security" height="1" width="1" alt="" /></div></noscript>
+
+        
+        
+
+    <!-- /Webtrekk -->
+    
+
+    
+    <script type="text/javascript">
+      function _heise_sf_section_from_pathname() {
+        var path    = window.location.pathname;
+        var section = path.split('/')[1] || 'homepage';
+        if ( path === '/newsticker/' || path === '/newsticker/classic/' || path === '/newsticker/archiv/' ) {
+          section = 'homepage';
+        }
+        return section;
+      }
+    </script>
+
+      <script type="text/javascript">
+        var _sf_async_config={};
+        /** CONFIGURATION START **/
+        _sf_async_config.uid = 59838;
+        _sf_async_config.domain = 'heise.de';
+        _sf_async_config.useCanonical = false;
+        _sf_async_config.path = window.location.pathname;
+        _sf_async_config.sections = _heise_sf_section_from_pathname();
+        _sf_async_config.authors = 'die Redaktionen';
+        /** CONFIGURATION END **/
+      </script>
+
+    <script type="text/javascript">
+      (function(){
+        function loadChartbeat() {
+          window._sf_endpt=(new Date()).getTime();
+          var e = document.createElement('script');
+          e.setAttribute('language', 'javascript');
+          e.setAttribute('type', 'text/javascript');
+          e.setAttribute('src', '//static.chartbeat.com/js/chartbeat_video.js');
+          document.body.appendChild(e);
+        }
+        var oldonload = window.onload;
+        window.onload = (typeof window.onload != 'function') ?
+          loadChartbeat : function() { oldonload(); loadChartbeat(); };
+      })();
+    </script>
+
+    
+
+    
+    
+
+    <!--JSON-D treenode: 121 -->
+  </body>
+</html>
+<!-- Created with InterRed V16.6, http://www.interred.de/, by InterRed GmbH -->
+<!-- BID: 2333652, iBID: 2333684, CID: 3913800, iCID: 3913839 -->
+<!-- Link: $(LB2333652:Linktext)$ $(LC3913800:Linktext)$ -->
+<!-- Generiert: 2017-12-08 10:07:02 -->
+
