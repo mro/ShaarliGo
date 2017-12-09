@@ -216,19 +216,33 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		_, ent := feed.findEntry(post)
 		if nil == ent {
 			// nothing found, so we need a new (dangling, unsaved) entry:
-			ent = &Entry{Published: iso8601{now}}
 			if url := urlFromPostParam(post); url != nil {
+				{
+					ee, err := entryFromURL(url, time.Second*3/2)
+					if nil != err {
+						ee.Title.Body = err.Error()
+					}
+					ent = &ee
+				}
+				if nil == ent.Content || "" == ent.Content.Body {
+					ent.Content = ent.Summary
+				}
 				ent.Links = []Link{Link{Href: url.String()}}
 			} else {
+				ent = &Entry{}
 				ent.Title = HumanText{Body: post}
+			}
+			ent.Updated = iso8601{now}
+			if ent.Published.IsZero() {
+				ent.Published = ent.Updated
 			}
 			// do not append to feed yet, keep dangling
 		}
 
-		if 1 == len(params["title"]) {
+		if 1 == len(params["title"]) && "" != params["description"][0] {
 			ent.Title = HumanText{Body: params["title"][0]}
 		}
-		if 1 == len(params["description"]) {
+		if 1 == len(params["description"]) && "" != params["description"][0] {
 			ent.Content = &HumanText{Body: params["description"][0]}
 		}
 		if 1 == len(params["source"]) {
@@ -250,6 +264,8 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
     <input name="cancel_edit" type="submit" value="Cancel"/>
     <input name="token" type="hidden" value="{{.token}}"/>
     <input name="returnurl" type="hidden" value="{{.returnurl}}"/>
+    <input name="lf_image" type="hidden" value="{{.lf_image}}"/>
+    <input name="lf_identifier" type="hidden" value="{{.lf_identifier}}"/>
   </form>
 </body>
 </html>
@@ -315,6 +331,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 							return
 						}
 					}
+					ent.Updated = iso8601{now}
 					ent.Title = HumanText{Body: strings.TrimSpace(r.FormValue("lf_title")), Type: "text"}
 					url := mustParseURL(lf_url)
 					if url.IsAbs() && "" != url.Host {
@@ -323,6 +340,9 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 						ent.Links = []Link{}
 					}
 					ent.Content = &HumanText{Body: strings.TrimSpace(r.FormValue("lf_description")), Type: "text"}
+					if img := strings.TrimSpace(r.FormValue("lf_image")); "" != img {
+						ent.MediaThumbnail = &MediaThumbnail{Url: img}
+					}
 
 					{
 						tags := strings.Split(r.FormValue("lf_tags"), " ")
@@ -443,8 +463,9 @@ func (app *App) handleDoCheckLoginAfterTheFact(w http.ResponseWriter, r *http.Re
 // Aggregate all tags from #title, #description and <category and remove the first two groups from the set.
 func (entry Entry) api0LinkFormMap() map[string]interface{} {
 	data := map[string]interface{}{
-		"lf_linkdate": entry.Published.Format(fmtTimeLfTime),
-		"lf_title":    entry.Title.Body,
+		"lf_identifier": entry.Id,
+		"lf_linkdate":   entry.Published.Format(fmtTimeLfTime),
+		"lf_title":      entry.Title.Body,
 	}
 	{
 		// 1. get all atom categories
@@ -482,6 +503,9 @@ func (entry Entry) api0LinkFormMap() map[string]interface{} {
 	}
 	if nil != entry.Content {
 		data["lf_description"] = entry.Content.Body
+	}
+	if nil != entry.MediaThumbnail && len(entry.MediaThumbnail.Url) > 0 {
+		data["lf_image"] = entry.MediaThumbnail.Url
 	}
 	return data
 }
