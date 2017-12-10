@@ -22,4 +22,4 @@ RewriteRule ^(.*)$ - [E=BASE:%1]
 RewriteRule ^/?$ %{ENV:BASE}pub/posts/ [redirect=301,last]
 
 # nice
-Header add X-Powered-By "http://purl.mro.name/ShaarliGo#0.0.2"
+Header add X-Powered-By "http://purl.mro.name/ShaarliGo#v0.0.2"

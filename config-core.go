@@ -41,8 +41,8 @@ type RegexpReplaceAllString struct {
 }
 
 type Config struct {
-	Title             string                   `yaml:"title"`
-	AuthorName        string                   `yaml:"author_name"`
+	Title             string                   `yaml:"title"` // title for cheap non-feed screens (login, tools, etc)
+	Uid               string                   `yaml:"uid"`   // for login
 	PwdBcrypt         string                   `yaml:"pwd_bcrypt"`
 	CookieStoreSecret string                   `yaml:"cookie_secret"`
 	TimeZone          string                   `yaml:"timezone"`

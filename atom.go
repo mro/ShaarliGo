@@ -54,21 +54,17 @@ const lengthyAtomPreambleComment string = `
 const atomNamespace = "http://www.w3.org/2005/Atom"
 
 func FeedFromFileName(file string) (Feed, error) {
-	read, err := os.Open(file)
-	if read == nil {
+	if read, err := os.Open(file); nil == read || nil != err {
 		return Feed{}, err
+	} else {
+		defer read.Close()
+		return FeedFromReader(read)
 	}
-	defer read.Close()
-	// read, err := bufio.NewReader(file)
-	return FeedFromReader(read)
 }
 
 func FeedFromReader(file io.Reader) (Feed, error) {
 	ret := Feed{}
 	err := xml.NewDecoder(file).Decode(&ret)
-	if nil != err {
-		return Feed{}, err
-	}
 	return ret, err
 }
 
@@ -106,12 +102,12 @@ type iso8601 struct{ time.Time }
 func (c *iso8601) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var v string
 	d.DecodeElement(&v, &start)
-	parse, err := time.Parse(time.RFC3339, v)
-	if err != nil {
+	if parse, err := time.Parse(time.RFC3339, v); err != nil {
 		return err
+	} else {
+		*c = iso8601{parse}
+		return nil
 	}
-	*c = iso8601{parse}
-	return nil
 }
 
 // see also https://godoc.org/golang.org/x/tools/blog/atom#Link
@@ -169,8 +165,7 @@ type MediaThumbnail struct {
 }
 
 type GeoRssPoint struct {
-	Lat float32
-	Lon float32
+	Lat, Lon float32
 }
 
 func (v GeoRssPoint) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
@@ -218,12 +213,13 @@ func xmlEncodeWithXslt(e interface{}, hrefXslt string, enc *xml.Encoder) error {
 	return err
 }
 
-func (feed *Feed) Append(e *Entry) error {
+func (feed *Feed) Append(e *Entry) (*Entry, error) {
 	if err := e.Validate(); err != nil {
-		return err
+		return nil, err
 	}
+	// todo: pre-check uniqueness of Id
 	feed.Entries = append(feed.Entries, e)
-	return nil
+	return e, nil
 }
 
 // sort.Interface
@@ -256,31 +252,6 @@ func (feed *Feed) findEntryById(id string) (int, *Entry) {
 	return feed.findEntry(nil)
 }
 
-func (feed *Feed) findEntryByIdSelfOrUrl(id_self_or_link string) (int, *Entry) {
-	defer un(trace(strings.Join([]string{"Feed.findEntryByIdSelfOrUrl('", id_self_or_link, "')"}, "")))
-	if "" != id_self_or_link {
-		if parts := strings.SplitN(id_self_or_link, "/", 4); 4 == len(parts) && "" == parts[3] && uriPub == parts[0] && uriPosts == parts[1] {
-			// looks like an internal id, so treat it as such.
-			id_self_or_link = parts[2]
-		}
-
-		doesMatch := func(entry *Entry) bool {
-			if id_self_or_link == entry.Id {
-				return true
-			}
-			for _, l := range entry.Links {
-				if ("" == l.Rel || "self" == l.Rel) && (id_self_or_link == l.Href /* todo: url equal */) {
-					return true
-				}
-			}
-			return false
-		}
-
-		return feed.findEntry(doesMatch)
-	}
-	return feed.findEntry(nil)
-}
-
 func (feed *Feed) deleteEntry(id string) *Entry {
 	if i, entry := feed.findEntryById(id); i >= 0 {
 		a := feed.Entries
@@ -294,27 +265,7 @@ func (feed *Feed) deleteEntry(id string) *Entry {
 }
 
 func (feed Feed) Save(dst string) error {
-	defer un(trace("Feed.Save"))
-	// sort.Sort(ByPublishedDesc(feed.Entries))
-	sort.Slice(feed.Entries, func(i, j int) bool { return !feed.Entries[i].Published.Time.Before(feed.Entries[j].Published.Time) })
-	{
-		// aggregate feed categories
-		cats := make(map[string]int, len(feed.Entries)) // raw len guess
-		for _, ent := range feed.Entries {
-			for _, cat := range ent.Categories {
-				cats[cat.Term] += 1
-			}
-		}
-		cs := make([]Category, 0, len(cats))
-		for term, count := range cats {
-			if term != "" && count != 0 {
-				cs = append(cs, Category{Term: term, Label: strconv.Itoa(count)})
-			}
-		}
-		sort.Slice(cs, func(i, j int) bool { return strings.Compare(cs[i].Term, cs[j].Term) < 0 })
-		feed.Categories = cs
-	}
-
+	defer un(trace("Feed.SortAndSave"))
 	tmp := dst + "~"
 	var err error
 	var w *os.File

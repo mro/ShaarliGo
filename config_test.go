@@ -45,3 +45,14 @@ func TestXmlBaseFromRequestURL(t *testing.T) {
 	assert.Equal(t, "http://example.com/b/", xmlBaseFromRequestURL(mustParseURL("http://example.com/b/shaarligo.cgi"), "/b/shaarligo.cgi").String(), "soso")
 	assert.Equal(t, "http://example.com/b/", xmlBaseFromRequestURL(mustParseURL("http://example.com/b/shaarligo.cgi/tools/?post=http://example.com/b/shaarligo.cgi/tools"), "/b/shaarligo.cgi").String(), "soso")
 }
+
+func TestLoadFeedSeed(t *testing.T) {
+	t.Parallel()
+	feed, err := FeedFromFileName("testdata/config-feed-seed.xml")
+	assert.Nil(t, err, "soso")
+	assert.Equal(t, "Seed entries for new feeds", feed.Title.Body, "soso")
+	assert.Equal(t, 3, len(feed.Entries), "soso")
+	assert.Equal(t, "Hello, #Atom!", feed.Entries[0].Title.Body, "soso")
+	assert.Equal(t, "Was noch alles fehlt", feed.Entries[1].Title.Body, "soso")
+	assert.Equal(t, "Shaarli — sebsauvage.net", feed.Entries[2].Title.Body, "soso")
+}

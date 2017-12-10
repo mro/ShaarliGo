@@ -131,7 +131,7 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
 		returnurl := strings.TrimSpace(r.FormValue("returnurl"))
 		// compute anyway (a bit more time constantness)
 		err := bcrypt.CompareHashAndPassword([]byte(app.cfg.PwdBcrypt), []byte(pwd))
-		if uid != app.cfg.AuthorName || err == bcrypt.ErrMismatchedHashAndPassword {
+		if uid != app.cfg.Uid || err == bcrypt.ErrMismatchedHashAndPassword {
 			squealFailure(r, now, "Unauthorised.")
 			// http.Error(w, "<script>alert(\"Wrong login/password.\");document.location='?do=login&returnurl='"+url.QueryEscape(returnurl)+"';</script>", http.StatusUnauthorized)
 			w.WriteHeader(http.StatusUnauthorized)
@@ -195,6 +195,8 @@ func urlFromPostParam(post string) *url.URL {
 	}
 }
 
+/* Store identifier of edited entry in cookie.
+ */
 func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	switch r.Method {
@@ -213,7 +215,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		feed, _ := FeedFromFileName(fileFeedStorage)
+		feed, _ := app.LoadFeed()
 		post := sanitiseURLString(params["post"][0], app.cfg.UrlCleaner)
 
 		_, ent := feed.findEntryByIdSelfOrUrl(post)
@@ -285,7 +287,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 -->
 `)
 			data := ent.api0LinkFormMap()
-			data["title"] = app.cfg.Title
+			data["title"] = feed.Title
 			data["categories"] = feed.Categories
 			bTok := make([]byte, 20) // keep in local session or encrypted cookie
 			io.ReadFull(rand.Reader, bTok)
@@ -306,8 +308,6 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		identifier, ok := app.ses.Values["identifier"].(string)
 		if ok {
 			delete(app.ses.Values, "identifier")
-		} else {
-			identifier = smallHashRandom()
 		}
 		log.Printf("pulled Id from cookie: ", app.ses.Values["identifier"], identifier)
 		app.KeepAlive(w, r, now)
@@ -329,17 +329,17 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 				} else {
 					log.Println("todo: use returnurl ", returnurl)
 
-					feed, _ := FeedFromFileName(fileFeedStorage)
+					feed, _ := app.LoadFeed()
 
 					lf_url := r.FormValue("lf_url")
 					_, ent := feed.findEntryById(identifier)
 					if nil == ent {
 						ent = &Entry{
-							Authors:   []Person{Person{Name: app.cfg.AuthorName}},
+							Authors:   feed.Authors,
 							Published: iso8601{lf_linkdate},
-							Id:        identifier,
+							Id:        smallHashRandom(),
 						}
-						if err := feed.Append(ent); err != nil {
+						if _, err := feed.Append(ent); err != nil {
 							http.Error(w, "couldn't add entry: "+err.Error(), http.StatusInternalServerError)
 							return
 						}
@@ -375,7 +375,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 					location = strings.Join([]string{location, ent.Id}, "?#")
 					feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
 					feed.Id = feed.XmlBase
-					feed.Save(fileFeedStorage)
+					app.SaveFeed(feed)
 
 					if err := feed.replaceFeeds(); err != nil {
 						log.Println("couldn't write feeds: ", err.Error())
@@ -389,11 +389,11 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		} else if "" != r.FormValue("delete_edit") {
 			token := r.FormValue("token")
 			log.Println("todo: check token ", token)
-			feed, _ := FeedFromFileName(fileFeedStorage)
+			feed, _ := app.LoadFeed()
 			if entry := feed.deleteEntry(identifier); nil != entry {
 				feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
 				feed.Id = feed.XmlBase
-				feed.Save(fileFeedStorage)
+				app.SaveFeed(feed)
 
 				if err := feed.replaceFeeds(); err != nil {
 					log.Println("couldn't write feeds: ", err.Error())
@@ -519,4 +519,29 @@ func (entry Entry) api0LinkFormMap() map[string]interface{} {
 		data["lf_image"] = entry.MediaThumbnail.Url
 	}
 	return data
+}
+
+func (feed *Feed) findEntryByIdSelfOrUrl(id_self_or_link string) (int, *Entry) {
+	defer un(trace(strings.Join([]string{"Feed.findEntryByIdSelfOrUrl('", id_self_or_link, "')"}, "")))
+	if "" != id_self_or_link {
+		if parts := strings.SplitN(id_self_or_link, "/", 4); 4 == len(parts) && "" == parts[3] && uriPub == parts[0] && uriPosts == parts[1] {
+			// looks like an internal id, so treat it as such.
+			id_self_or_link = parts[2]
+		}
+
+		doesMatch := func(entry *Entry) bool {
+			if id_self_or_link == entry.Id {
+				return true
+			}
+			for _, l := range entry.Links {
+				if ("" == l.Rel || "self" == l.Rel) && (id_self_or_link == l.Href /* todo: url equal */) {
+					return true
+				}
+			}
+			return false
+		}
+
+		return feed.findEntry(doesMatch)
+	}
+	return feed.findEntry(nil)
 }

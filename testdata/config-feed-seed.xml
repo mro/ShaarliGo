@@ -1,0 +1,57 @@
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Seed entries for new feeds</title>
+  <entry xmlns="http://www.w3.org/2005/Atom">
+    <title>Hello, #Atom!</title>
+    <id>voo8Uo</id>
+    <published>2012-12-31T02:02:02+01:00</published>
+    <link href="http://www.loremipsum.de/"></link>
+    <category term="🐳"></category>
+    <category term="Atom"></category>
+    <category term="opensource"></category>
+    <category term="ipsum"></category>
+    <content>Lorem #ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+
+Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
+
+Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.</content>
+  </entry>
+  <entry xmlns="http://www.w3.org/2005/Atom">
+    <title>Was noch alles fehlt</title>
+    <id>Naev8k</id>
+    <published>2012-12-31T01:01:01+01:00</published>
+    <category term="🐳"></category>
+    <category term="Cloud"></category>
+    <category term="i18n"></category>
+    <content>- Posten, Löschen, Bookmarklet,
+- &#39;API&#39;-Kompatibilität mit Vanilla Shaarli (=&gt; ShaarliOS, Shaarlier)
+- neue Posts vorbelegen (optional: extern per http GET, rewrite URLs à la heise),
+- Tag #Cloud,
+- Shaarli Import,
+- Tagesansicht,
+- Suche,
+- PuSH,
+- Komplett-Feed (Archiv),
+- clickbare Links im Text (client-seitig),
+- Referer-Anonymisierer,
+- Bilder Cache/Proxy,
+- QR-Code pro Post,
+- Skinning/Themeing (asset dir),
+- #i18n,
+- private Posts,
+- Kommentare,
+- Bilder hochladen,
+- AtomPub, https://tools.ietf.org/html/rfc5023#section-9.2
+- Html/Markdown (client-seitig),
+- Atom Aggregator?</content>
+  </entry>
+  <entry xmlns="http://www.w3.org/2005/Atom">
+    <title>Shaarli — sebsauvage.net</title>
+    <id>kaJ9Rw</id>
+    <published>2011-09-13T15:45:00+02:00</published>
+    <link href="http://sebsauvage.net/wiki/doku.php?id=php:shaarli"></link>
+    <category term="opensource"></category>
+    <category term="Software"></category>
+    <content>Welcome to Shaarli ! This is a bookmark. To edit or delete me, you must first login.</content>
+    <thumbnail xmlns="http://search.yahoo.com/mrss/" url="https://cdn.rawgit.com/mro/ShaarliOS/master/shaarli-petal.svg"></thumbnail>
+  </entry>
+</feed>

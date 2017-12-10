@@ -214,7 +214,7 @@ func TestPostConfig(t *testing.T) {
 
 	cfg, err := ioutil.ReadFile(filepath.Join("app", "config.yaml"))
 	assert.Nil(t, err, "aha")
-	assert.True(t, strings.HasPrefix(string(cfg), "title: A\nauthor_name: B\n"), string(cfg))
+	assert.True(t, strings.HasPrefix(string(cfg), "title: A\nuid: B\n"), string(cfg))
 
 	assert.Equal(t, 1, len(r.Header["Set-Cookie"]), "naja")
 

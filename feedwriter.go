@@ -144,7 +144,7 @@ func (feed *Feed) writeFeeds(entriesPerPage int, fw feedWriter) error {
 	// we need to know the total pages per each feed in order to know the 'last' uri.
 	// So no concurrency here :-(
 	catScheme := xmlBase.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String() + "/"
-	uri2entries := make(map[string][]*Entry)
+	uri2entries := make(map[string][]*Entry, 2*len(feed.Entries))
 	for _, item := range feed.Entries {
 		if err0 := item.Validate(); err0 != nil {
 			return err0

@@ -41,6 +41,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -117,6 +119,36 @@ func (app App) IsLoggedIn(now time.Time) bool {
 	return ok && now.Before(time.Unix(timeout, 0))
 }
 
+func (app App) LoadFeed() (Feed, error) {
+	feed, err := FeedFromFileName(fileFeedStorage)
+	if err != nil {
+		sort.Sort(ByPublishedDesc(feed.Entries))
+
+		// aggregate & count feed entry categories
+		cats := make(map[string]int, 1*len(feed.Entries)) // raw len guess
+		for _, ent := range feed.Entries {
+			for _, cat := range ent.Categories {
+				cats[cat.Term] += 1
+			}
+		}
+		cs := make([]Category, 0, len(cats))
+		for term, count := range cats {
+			if term != "" && count != 0 {
+				cs = append(cs, Category{Term: term, Label: strconv.Itoa(count)})
+			}
+		}
+		sort.Slice(cs, func(i, j int) bool {
+			return strings.Compare(cs[i].Term, cs[j].Term) < 0
+		})
+		feed.Categories = cs
+	}
+	return feed, err
+}
+
+func (app App) SaveFeed(feed Feed) error {
+	return feed.Save(fileFeedStorage)
+}
+
 func handleMux(w http.ResponseWriter, r *http.Request) {
 	defer un(trace(strings.Join([]string{"v", version, "+", GitSHA1, " ", r.RemoteAddr, " ", r.Method, " ", r.URL.String()}, "")))
 	// w.Header().Set("Server", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
@@ -178,7 +210,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			// w.Header().Set("Etag", r.URL.Path)
 			// w.Header().Set("Cache-Control", "max-age=59") // 59 Seconds
-			io.WriteString(w, app.cfg.AuthorName)
+			io.WriteString(w, app.cfg.Uid)
 		} else {
 			// don't squeal to ban.
 			http.NotFound(w, r)
