@@ -1,11 +1,12 @@
 
 # Requires:
-#   mod_cgi.so
-#   mod_rewrite.so
+#   mod_cgi.c
+#   mod_rewrite.c
 
-# mandatory, already before first run of cgi (hopefully a webserver default or place .htaccess manually...):
-AddHandler cgi-script .cgi
-Options FollowSymLinks ExecCGI
+# mandatory, already before first run of cgi (hopefully a webserver default or
+# uncomment and place .htaccess manually...):
+# AddHandler cgi-script .cgi
+# Options FollowSymLinks ExecCGI
 
 # mandatory
 DirectoryIndex index.xml

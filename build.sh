@@ -35,14 +35,14 @@ go fmt && go test --short || { exit $?; }
 say "ok"
 
 say "ithneen"
-go build -ldflags "-X main.GitSHA1=$(git rev-parse --short HEAD)" -o ~/Sites/b/shaarligo.cgi || { echo "Aua" 1>&2 && exit 1; }
+go build -ldflags "-v=2 -s -w -X main.GitSHA1=$(git rev-parse --short HEAD)" -o ~/Sites/b/shaarligo.cgi || { echo "Aua" 1>&2 && exit 1; }
 say "ok"
 # open "http://localhost/~$(whoami)/b/shaarligo.cgi"
 
 say "linux"
 # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
 # env GOOS=linux GOARCH=arm GOARM=6 go build -o "${PROG_NAME}-linux-arm-${VERSION}"
-env GOOS=linux GOARCH=amd64 go build -ldflags "-s" -ldflags "-X main.GitSHA1=$(git rev-parse --short HEAD)" -o "${PROG_NAME}-linux-amd64-${VERSION}" || { echo "Aua" 1>&2 && exit 1; }
+env GOOS=linux GOARCH=amd64 go build -ldflags="-v=2 -s -w -X main.GitSHA1=$(git rev-parse --short HEAD)" -o "${PROG_NAME}-linux-amd64-${VERSION}" || { echo "Aua" 1>&2 && exit 1; }
 # env GOOS=linux GOARCH=386 GO386=387 go build -o "${PROG_NAME}-linux-386-${VERSION}" # https://github.com/golang/go/issues/11631
 # env GOOS=darwin GOARCH=amd64 go build -o "${PROG_NAME}-darwin-amd64-${VERSION}"
 say "ok"
