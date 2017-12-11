@@ -41,16 +41,15 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"sort"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gorilla/sessions"
 )
 
-const myselfNamespace = "http://purl.mro.name/ShaarliGo"
 const toSession = 30 * time.Minute
+
+const myselfNamespace = "http://purl.mro.name/ShaarliGo"
 
 var GitSHA1 = "Please set -ldflags \"-X main.GitSHA1=$(git rev-parse --short HEAD)\"" // https://medium.com/@joshroppo/setting-go-1-5-variables-at-compile-time-for-versioning-5b30a965d33e
 var fileFeedStorage string
@@ -120,32 +119,11 @@ func (app App) IsLoggedIn(now time.Time) bool {
 }
 
 func (app App) LoadFeed() (Feed, error) {
-	feed, err := FeedFromFileName(fileFeedStorage)
-	if err != nil {
-		sort.Sort(ByPublishedDesc(feed.Entries))
-
-		// aggregate & count feed entry categories
-		cats := make(map[string]int, 1*len(feed.Entries)) // raw len guess
-		for _, ent := range feed.Entries {
-			for _, cat := range ent.Categories {
-				cats[cat.Term] += 1
-			}
-		}
-		cs := make([]Category, 0, len(cats))
-		for term, count := range cats {
-			if term != "" && count != 0 {
-				cs = append(cs, Category{Term: term, Label: strconv.Itoa(count)})
-			}
-		}
-		sort.Slice(cs, func(i, j int) bool {
-			return strings.Compare(cs[i].Term, cs[j].Term) < 0
-		})
-		feed.Categories = cs
-	}
-	return feed, err
+	return FeedFromFileName(fileFeedStorage)
 }
 
 func (app App) SaveFeed(feed Feed) error {
+	feed.Categories = nil
 	return feed.Save(fileFeedStorage)
 }
 

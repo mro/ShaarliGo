@@ -377,7 +377,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 					feed.Id = feed.XmlBase
 					app.SaveFeed(feed)
 
-					if err := feed.replaceFeeds(); err != nil {
+					if err := app.replaceFeeds(feed); err != nil {
 						log.Println("couldn't write feeds: ", err.Error())
 						http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
 						return
@@ -395,7 +395,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 				feed.Id = feed.XmlBase
 				app.SaveFeed(feed)
 
-				if err := feed.replaceFeeds(); err != nil {
+				if err := app.replaceFeeds(feed); err != nil {
 					log.Println("couldn't write feeds: ", err.Error())
 					http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
 					return

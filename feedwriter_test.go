@@ -227,7 +227,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
 		"pub/tags/aha/",
 	}, keys4map(sfw.bufs), "soso")
 
-	assert.Equal(t, 1616, len(sfw.bufs["pub/days/1990-12-31/"].b), "aha")
+	assert.Equal(t, 1661, len(sfw.bufs["pub/days/1990-12-31/"].b), "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../assets/default/de/posts.xslt'?>
 <!--
@@ -250,6 +250,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
   <id>http://example.com/</id>
   <updated>1990-12-31T01:02:03+01:00</updated>
   <link href="pub/posts/" rel="self" title="1"></link>
+  <category term="aha" label="1"></category>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
     <title>Hello, Entry!</title>
     <id>http://example.com/pub/posts/e0/</id>
@@ -445,4 +446,35 @@ func TestWriteFeedsPaged(t *testing.T) {
 </entry>
 `,
 		string(sfw.bufs["pub/posts/e0/"].b), "page 2")
+}
+
+func BenchmarkWriteFeedsPaged(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		feed := &Feed{
+			XmlBase: mustParseURL("http://example.com/").String(),
+			XmlLang: "deu",
+			Id:      mustParseURL("http://example.com").String(),
+			Title:   HumanText{Body: "Hello, Atom!"},
+			Entries: []*Entry{
+				&Entry{
+					Id:      "e2",
+					Title:   HumanText{Body: "Hello, Entry 2!"},
+					Updated: iso8601{mustParseRFC3339("1990-12-31T02:02:02+01:00")},
+				},
+				&Entry{
+					Id:      "e1",
+					Title:   HumanText{Body: "Hello, Entry 1!"},
+					Updated: iso8601{mustParseRFC3339("1990-12-31T01:01:01+01:00")},
+				},
+				&Entry{
+					Id:      "e0",
+					Title:   HumanText{Body: "Hello, Entry 0!"},
+					Updated: iso8601{mustParseRFC3339("1990-12-30T00:00:00+01:00")},
+				},
+			},
+		}
+
+		sfw := saveFeedWriter{feeds: make(map[string]Feed), entries: make(map[string]Entry), bufs: make(map[string]buff)}
+		feed.writeFeeds(2, sfw)
+	}
 }

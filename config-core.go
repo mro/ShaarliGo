@@ -53,11 +53,17 @@ type Config struct {
 }
 
 func LoadConfig() (Config, error) {
+	// seed the cookie store secret
+	buf := make([]byte, 32)
+	if _, err := io.ReadFull(rand.Reader, buf); err != nil {
+		return Config{}, err
+	}
 	ret := Config{
-		TimeZone:     "Europe/Paris",
-		LinksPerPage: 100,   // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L18
-		BanAfter:     4,     // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L20
-		BanSeconds:   14400, // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L21
+		CookieStoreSecret: base64.StdEncoding.EncodeToString(buf),
+		TimeZone:          "Europe/Paris",
+		LinksPerPage:      100,   // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L18
+		BanAfter:          4,     // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L20
+		BanSeconds:        14400, // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L21
 		UrlCleaner: []RegexpReplaceAllString{
 			{Regexp: "[\\?&]utm_source=.*$", ReplaceAllString: ""}, // We remove the annoying parameters added by FeedBurner and GoogleFeedProxy (?utm_source=...)
 			{Regexp: "#xtor=RSS-.*$", ReplaceAllString: ""},
@@ -67,12 +73,6 @@ func LoadConfig() (Config, error) {
 			{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?youtube.com/watch\\?v=([^&]+)(?:.*&(t=[^&]+))?(?:.*)$", ReplaceAllString: "https://youtu.be/${1}?${2}"},
 		},
 	}
-	// seed the cookie store secret
-	buf := make([]byte, 32)
-	if _, err := io.ReadFull(rand.Reader, buf); err != nil {
-		return ret, err
-	}
-	ret.CookieStoreSecret = base64.StdEncoding.EncodeToString(buf)
 
 	if read, err := ioutil.ReadFile(configFileName); err == nil {
 		err = yaml.Unmarshal(read, &ret)

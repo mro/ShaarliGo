@@ -315,3 +315,9 @@ func _TestGetPostNew(t *testing.T) {
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
 	assert.Equal(t, "/sub/pub/posts/?#foo", r.Header["Location"], "aha")
 }
+
+func BenchmarkHello(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		fmt.Sprintf("hello")
+	}
+}

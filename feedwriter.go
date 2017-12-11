@@ -28,6 +28,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -76,8 +77,8 @@ type feedWriter interface {
 
 // maybe replace the CONTENT of pub rather than pub itself. So . could remain readonly.
 //
-func (feed *Feed) replaceFeeds() error {
-	defer un(trace("Feed.replaceFeeds"))
+func (app App) replaceFeeds(feed Feed) error {
+	defer un(trace("App.replaceFeeds"))
 	if path.Join("a", "b") != filepath.Join("a", "b") {
 		return errors.New("Go, get an OS.")
 	}
@@ -134,12 +135,34 @@ func (feed *Feed) replaceFeeds() error {
 	return err
 }
 
-func (feed *Feed) writeFeeds(entriesPerPage int, fw feedWriter) error {
+func (feed Feed) writeFeeds(entriesPerPage int, fw feedWriter) error {
 	xmlBase := mustParseURL(feed.XmlBase)
 	if !xmlBase.IsAbs() || !strings.HasSuffix(xmlBase.Path, "/") {
 		log.Printf("xml:base is '%s'\n", xmlBase)
 		return errors.New("feed/@xml:base must be set to an absolute URL with a trailing slash")
 	}
+
+	sort.Sort(ByUpdatedDesc(feed.Entries))
+	{
+		// aggregate & count feed entry categories
+		cats := make(map[string]int, 1*len(feed.Entries)) // raw len guess
+		for _, ent := range feed.Entries {
+			for _, cat := range ent.Categories {
+				cats[cat.Term] += 1
+			}
+		}
+		cs := make([]Category, 0, len(cats))
+		for term, count := range cats {
+			if term != "" && count != 0 {
+				cs = append(cs, Category{Term: term, Label: strconv.Itoa(count)})
+			}
+		}
+		sort.Slice(cs, func(i, j int) bool {
+			return strings.Compare(cs[i].Term, cs[j].Term) < 0
+		})
+		feed.Categories = cs
+	}
+
 	// load template feed, set Id and birthday.
 	// we need to know the total pages per each feed in order to know the 'last' uri.
 	// So no concurrency here :-(

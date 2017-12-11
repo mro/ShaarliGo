@@ -120,9 +120,11 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 			// if process is running: add a hint about the running background task into the response,
 			// e.g. as a refresh timer. <meta http-equiv="refresh" content="5; URL=http://www.yourdomain.com/yoursite.html">
 
-			app.SaveFeed(feed)
-
-			if err := feed.replaceFeeds(); err != nil {
+			if err := app.SaveFeed(feed); err != nil {
+				http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+			if err = app.replaceFeeds(feed); err != nil {
 				http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
 				return
 			}

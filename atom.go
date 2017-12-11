@@ -230,6 +230,12 @@ func (a ByPublishedDesc) Len() int           { return len(a) }
 func (a ByPublishedDesc) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByPublishedDesc) Less(i, j int) bool { return !a[i].Published.Time.Before(a[j].Published.Time) }
 
+type ByUpdatedDesc []*Entry
+
+func (a ByUpdatedDesc) Len() int           { return len(a) }
+func (a ByUpdatedDesc) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByUpdatedDesc) Less(i, j int) bool { return !a[i].Updated.Time.Before(a[j].Updated.Time) }
+
 // custom interface
 
 func (feed *Feed) findEntry(doesMatch func(*Entry) bool) (int, *Entry) {
@@ -265,7 +271,7 @@ func (feed *Feed) deleteEntry(id string) *Entry {
 }
 
 func (feed Feed) Save(dst string) error {
-	defer un(trace("Feed.SortAndSave"))
+	defer un(trace("Feed.Save"))
 	tmp := dst + "~"
 	var err error
 	var w *os.File
