@@ -19,6 +19,7 @@ package main
 
 import (
 	"encoding/xml"
+	"fmt"
 	"net/url"
 	"path"
 	"regexp"
@@ -477,4 +478,9 @@ func BenchmarkWriteFeedsPaged(b *testing.B) {
 		sfw := saveFeedWriter{feeds: make(map[string]Feed), entries: make(map[string]Entry), bufs: make(map[string]buff)}
 		feed.writeFeeds(2, sfw)
 	}
+}
+
+func ExampleFeed_WriteFeeds() {
+	fmt.Println("hello")
+	// Output: hello
 }

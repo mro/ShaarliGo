@@ -168,7 +168,7 @@ div.if_hasdiv_pwd { display:none; }
             <div class="form-group">
               <label for="import_shaarli_url" class="control-label col-sm-2">altes Shaarli</label>
               <div class="col-sm-8">
-                <input tabindex="600" name="import_shaarli_url" type="url" placeholder="example.com/shaarli" pattern="\S+" class="form-control"/>
+                <input tabindex="600" name="import_shaarli_url" type="url" placeholder="https://example.com/mylinks" pattern="\S+" class="form-control"/>
               </div>
             </div>
             <div class="hidden form-group">

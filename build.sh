@@ -43,7 +43,7 @@ say bench
 go test -bench=.
 say ok
 
-say "linux"
+say "linux build"
 # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
 # env GOOS=linux GOARCH=arm GOARM=6 go build -o "${PROG_NAME}-linux-arm-${VERSION}"
 env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)" -o "${PROG_NAME}-linux-amd64-${VERSION}" || { echo "Aua" 1>&2 && exit 1; }
@@ -63,7 +63,8 @@ say "ok"
 # ssh vario rm -vrf mro.name/webroot/b/pub
 
 say "simply"
-scp "${PROG_NAME}-linux-amd64-${VERSION}" simply:/var/www/lighttpd/h4u.r-2.eu/public_html/"shaarligo.cgi"
+gzip --best < "${PROG_NAME}-linux-amd64-${VERSION}" \
+| ssh simply "cd /var/www/lighttpd/h4u.r-2.eu/public_html/ && tee shaarligo_cgi.gz | gunzip > shaarligo.cgi && ls -l shaarligo?cgi*"
 say "ok"
 # scp "ServerInfo.cgi" simply:/var/www/lighttpd/h4u.r-2.eu/public_html/"info.cgi"
 
@@ -71,8 +72,7 @@ say "ok"
 # scp "ServerInfo.cgi" vario:~/mro.name/webroot/b/"info.cgi"
 
 say "vario"
-ssh simply scp /var/www/lighttpd/h4u.r-2.eu/public_html/shaarligo.cgi vario:~/mro.name/webroot/b/
-ssh vario ls -Al mro.name/webroot/b/shaarligo.cgi
+ssh vario "cd mro.name/webroot/b/ && curl https://h4u.r-2.eu/shaarligo_cgi.gz | tee shaarligo_cgi.gz | gunzip > shaarligo.cgi && ls -l shaarligo?cgi*"
 say "ok"
 
 exit 0
