@@ -106,7 +106,7 @@ func (app App) replaceFeeds(feed Feed) error {
 		defer os.Remove(strFileLock)
 		os.RemoveAll(strDirStage)
 		os.RemoveAll(strDirOld)
-		if err = feed.writeFeeds(100, fileFeedWriter{baseDir: strDirStage}); err == nil {
+		if err = feed.writeFeeds(app.cfg.LinksPerPage, fileFeedWriter{baseDir: strDirStage}); err == nil {
 			if _, err = os.Stat(dirPub); os.IsNotExist(err) {
 				err = nil // ignore nonexisting pub dir. That's fine for first launch.
 			} else {

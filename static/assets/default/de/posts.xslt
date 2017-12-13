@@ -278,17 +278,17 @@ div.awesomplete { display: block; }
         <tbody>
           <tr>
             <xsl:if test="a:link[@rel='first']">
-              <td class="text-left"><a href="{a:link[@rel='first']/@href}">1 &lt;&lt;</a></td>
+              <td class="text-left"><a href="{$xml_base_pub}/../{a:link[@rel='first']/@href}">1 &lt;&lt;</a></td>
             </xsl:if>
             <xsl:if test="a:link[@rel='previous']">
-              <td class="text-center"><a href="{a:link[@rel='previous']/@href}"><xsl:value-of select="a:link[@rel='previous']/@title"/> &lt;</a></td>
+              <td class="text-center"><a href="{$xml_base_pub}/../{a:link[@rel='previous']/@href}"><xsl:value-of select="a:link[@rel='previous']/@title"/> &lt;</a></td>
             </xsl:if>
-            <td class="text-center"><a href="{a:link[@rel='self']/@href}">Seite <xsl:value-of select="a:link[@rel='self']/@title"/></a></td>
+            <td class="text-center"><a href="{$xml_base_pub}/../{a:link[@rel='self']/@href}">Seite <xsl:value-of select="a:link[@rel='self']/@title"/></a></td>
             <xsl:if test="a:link[@rel='next']">
-              <td class="text-center"><a href="{a:link[@rel='next']/@href}">&gt; <xsl:value-of select="a:link[@rel='next']/@title"/></a></td>
+              <td class="text-center"><a href="{$xml_base_pub}/../{a:link[@rel='next']/@href}">&gt; <xsl:value-of select="a:link[@rel='next']/@title"/></a></td>
             </xsl:if>
             <xsl:if test="a:link[@rel='last']">
-              <td class="text-right" ><a href="{a:link[@rel='last']/@href}">&gt;&gt; <xsl:value-of select="a:link[@rel='last']/@title"/></a></td>
+              <td class="text-right" ><a href="{$xml_base_pub}/../{a:link[@rel='last']/@href}">&gt;&gt; <xsl:value-of select="a:link[@rel='last']/@title"/></a></td>
             </xsl:if>
           </tr>
         </tbody>

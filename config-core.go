@@ -76,6 +76,9 @@ func LoadConfig() (Config, error) {
 
 	if read, err := ioutil.ReadFile(configFileName); err == nil {
 		err = yaml.Unmarshal(read, &ret)
+		if ret.LinksPerPage < 1 {
+			ret.LinksPerPage = 1
+		}
 		return ret, err
 	} else if os.IsNotExist(err) {
 		return ret, nil
