@@ -61,6 +61,8 @@
       <link  href="{$xml_base_pub}/../assets/default/awesomplete.css" rel="stylesheet" />
       <script src="{$xml_base_pub}/../assets/default/awesomplete.js"><!-- async="true" fails --></script>
 
+      <script src="{$xml_base_pub}/../assets/default/do-post.js"></script>
+
       <style type="text/css">
 .hidden-logged-in { display:initial; }
 .logged-in .hidden-logged-in { display:none; }
@@ -152,6 +154,11 @@ div.awesomplete { display: block; }
       </textarea>
   <!-- div class="input-group">
     <div class="col-sm-12">
+      <input name="lf_tags" type="text" placeholder="Schlagwort NochEinSchlagwort" data-multiple="data-multiple" value="{h:input[@name='lf_tags']/@value}" class="form-control"/>
+    </div>
+  </div -->
+  <!-- div class="input-group">
+    <div class="col-sm-12">
       <input name="lf_private" type="checkbox" value="{h:input[@name='lf_private']/@value}" class="form-control"/>
     </div>
   </div -->
@@ -165,33 +172,6 @@ div.awesomplete { display: block; }
         <input name="delete_edit" type="submit" value="Delete" class="btn btn-danger"/>
       </span>
     </form>
-    <script type="text/javascript">
-//<![CDATA[
-// inspired by http://leaverou.github.io/awesomplete/#extensibility
-
-var tit = new Awesomplete('input[data-multiple]', {
-  minChars: 3,
-  maxItems: 15,
-  filter: function(text, input) { return Awesomplete.FILTER_CONTAINS(text, input.match(/\S*$/)[0]); /* match */ },
-  item: function(text, input) { return Awesomplete.ITEM(text, input.match(/\S*$/)[0]); /* highlight */ },
-  replace: function(text) {
-    var before = this.input.value.match(/^.+\s+|/)[0]; // ends with a whitespace
-    this.input.value = before + text + " ";
-  }
-});
-
-var txt = new Awesomplete('textarea[data-multiple]', {
-  minChars: 3,
-  maxItems: 15,
-  filter: function(text, input) { return Awesomplete.FILTER_CONTAINS(text, input.match(/\S*$/)[0]); /* match */ },
-  item: function(text, input) { return Awesomplete.ITEM(text, input.match(/\S*$/)[0]); /* highlight */ },
-  replace: function(text) {
-    var before = this.input.value.match(/^.+\s+|/)[0]; // ends with a whitespace
-    this.input.value = before + text + " ";
-  }
-});
-//]]>
-    </script>
   </xsl:template>
 
 </xsl:stylesheet>

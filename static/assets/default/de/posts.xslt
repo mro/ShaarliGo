@@ -99,30 +99,10 @@
       Do not set a class="logged-out" initially, but do via early JavaScript.
       If JavaScript is off, we need mixture between logged-in and -out.
     -->
-    <html xmlns="http://www.w3.org/1999/xhtml">
+    <html xmlns="http://www.w3.org/1999/xhtml" data-xml-base-pub="{$xml_base_pub}">
       <xsl:call-template name="head"/>
 
       <body>
-<!--
-   onload="document.getElementById('q').removeAttribute('autofocus');document.getElementById('post').setAttribute('autofocus', 'autofocus');"
-   onload="document.form_post.post.focus();"
--->
-        <script type="text/javascript">
-var xml_base_pub = '<xsl:value-of select="$xml_base_pub"/>';
-// <![CDATA[
-// check if we're logged-in (AJAX or Cookie?).
-var xhr = new XMLHttpRequest();
-xhr.onreadystatechange = function(data0) {
-  if (xhr.readyState == 4) {
-    console.log('xhr.status = ' + xhr.status);
-    document.documentElement.classList.add(xhr.status === 200 ? 'logged-in' : 'logged-out');
-    // store the result locally and use as initial value for later calls?
-  }
-}
-xhr.open('GET', xml_base_pub + '/../shaarligo.cgi/session/');
-xhr.send(null);
-// ]]>
-        </script>
         <xsl:apply-templates select="a:feed|a:entry" mode="root"/>
       </body>
     </html>
@@ -142,6 +122,8 @@ xhr.send(null);
 
       <link  href="{$xml_base_pub}/../assets/default/awesomplete.css" rel="stylesheet" />
       <script src="{$xml_base_pub}/../assets/default/awesomplete.js"><!-- async="true" fails --></script>
+
+      <script src="{$xml_base_pub}/../assets/default/posts.js"></script>
 
       <link href="." rel="alternate" type="application/atom+xml"/>
       <link href="." rel="self" type="application/xhtml+xml"/>
@@ -241,22 +223,6 @@ div.awesomplete { display: block; }
         </div>
       </form>
 
-      <script type="text/javascript">
-//<![CDATA[
-// inspired by http://leaverou.github.io/awesomplete/#extensibility
-new Awesomplete('input[data-multiple]', {
-  minChars: 3,
-  maxItems: 15,
-  filter: function(text, input) { return Awesomplete.FILTER_CONTAINS(text, input.match(/\S*$/)[0]); /* match */ },
-  item: function(text, input) { return Awesomplete.ITEM(text, input.match(/\S*$/)[0]); /* highlight */ },
-  replace: function(text) {
-    var before = this.input.value.match(/^.+\s+|/)[0]; // ends with a whitespace
-    this.input.value = before + text + " ";
-  }
-});
-//]]>
-      </script>
-
       <xsl:call-template name="prev-next"/>
 
       <!-- <h1><xsl:value-of select="a:title"/></h1> -->
@@ -331,8 +297,6 @@ new Awesomplete('input[data-multiple]', {
   </xsl:template>
 
   <xsl:template name="footer">
-    <script src="{$xml_base_pub}/../assets/default/script.js" type="text/javascript"></script>
-
     <hr style="clear:left;"/>
     <p id="footer">
       <a title="Validate my Atom 1.0 feed" href="https://validator.w3.org/feed/check.cgi?url={$xml_base_pub}/../{a:link[@rel='self']/@href}">
