@@ -76,6 +76,14 @@ func TestQueryParse(t *testing.T) {
 	}
 }
 
+// non-Ascii paths and Cookies...
+func TestUrlParseµ(t *testing.T) {
+	t.Parallel()
+	u := mustParseURL("http://example.com/µ/")
+	assert.Equal(t, "/µ/", u.Path, "omg")
+	assert.Equal(t, "/%C2%B5/", u.EscapedPath(), "omg")
+}
+
 func doHttp(method, path_info string) (*http.Response, error) {
 	cgi := "shaarligo.cgi"
 	os.Setenv("SCRIPT_NAME", "/sub/"+cgi)

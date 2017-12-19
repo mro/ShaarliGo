@@ -163,7 +163,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			// what if the cookie has changed? Ignore cookie errors, especially on new/changed keys.
 			app.ses, _ = sessions.NewCookieStore(buf).Get(r, "ShaarliGo")
 			app.ses.Options = &sessions.Options{
-				Path:     urlBase.Path, // to match all requests
+				Path:     urlBase.EscapedPath(), // to match all requests
 				MaxAge:   int(toSession / time.Second),
 				HttpOnly: true,
 			}

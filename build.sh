@@ -64,7 +64,7 @@ say "ok"
 
 say "simply"
 gzip --best < "${PROG_NAME}-linux-amd64-${VERSION}" \
-| ssh simply "cd /var/www/lighttpd/h4u.r-2.eu/public_html/ && tee shaarligo_cgi.gz | gunzip > shaarligo.cgi && ls -l shaarligo?cgi*"
+| ssh simply "cd /var/www/lighttpd/b.r-2.eu/public_html/u/ && tee shaarligo_cgi.gz | gunzip > shaarligo.cgi && ls -l shaarligo?cgi*"
 say "ok"
 # scp "ServerInfo.cgi" simply:/var/www/lighttpd/h4u.r-2.eu/public_html/"info.cgi"
 
@@ -72,7 +72,7 @@ say "ok"
 # scp "ServerInfo.cgi" vario:~/mro.name/webroot/b/"info.cgi"
 
 say "vario"
-ssh vario "cd mro.name/webroot/b/ && curl https://h4u.r-2.eu/shaarligo_cgi.gz | tee shaarligo_cgi.gz | gunzip > shaarligo.cgi && ls -l shaarligo?cgi*"
+ssh vario "cd mro.name/webroot/b/ && curl https://b.r-2.eu/u/shaarligo_cgi.gz | tee shaarligo_cgi.gz | gunzip > shaarligo.cgi && chmod a+x shaarligo.cgi && ls -l shaarligo?cgi*"
 say "ok"
 
 exit 0
