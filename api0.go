@@ -34,6 +34,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -518,6 +519,12 @@ func (entry Entry) api0LinkFormMap() map[string]interface{} {
 	}
 	if nil != entry.MediaThumbnail && len(entry.MediaThumbnail.Url) > 0 {
 		data["lf_image"] = entry.MediaThumbnail.Url
+	}
+
+	for key, value := range data {
+		if s, ok := value.(string); ok && !utf8.ValidString(s) {
+			data[key] = "Invalid UTF8"
+		}
 	}
 	return data
 }
