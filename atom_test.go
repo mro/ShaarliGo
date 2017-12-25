@@ -104,7 +104,7 @@ Ach was, wen gibt's denn dann da noch so?`, cleanLegacyContent(txt), "soso")
 	assert.Equal(t, 3618, len(feed.Entries), "soso")
 }
 
-func TestFeedFromFileName_AtomLarge(t *testing.T) {
+func _TestFeedFromFileName_AtomLarge(t *testing.T) {
 	if testing.Short() {
 		t.Skip("long running")
 	}
@@ -136,7 +136,7 @@ func TestFeedFromFileName_PhotosAtom(t *testing.T) {
 	assert.Equal(t, float32(10.871933), feed.Entries[0].GeoRssPoint.Lon, "soso")
 }
 
-func TestFeedLargeToGob(t *testing.T) {
+func _TestFeedLargeToGob(t *testing.T) {
 	if testing.Short() {
 		t.Skip("long running")
 	}
@@ -152,7 +152,7 @@ func TestFeedLargeToGob(t *testing.T) {
 	assert.Nil(t, err, "soso")
 }
 
-func TestFeedLargeToAtomClean(t *testing.T) {
+func _TestFeedLargeToAtomClean(t *testing.T) {
 	if testing.Short() {
 		t.Skip("long running")
 	}
@@ -173,7 +173,7 @@ func TestFeedLargeToAtomClean(t *testing.T) {
 	assert.Nil(t, err, "soso")
 }
 
-func TestFeedFromFileName_GobLarge(t *testing.T) {
+func _TestFeedFromFileName_GobLarge(t *testing.T) {
 	t.Parallel()
 
 	file, err := os.Open("testdata/sebsauvage.gob")
@@ -186,7 +186,7 @@ func TestFeedFromFileName_GobLarge(t *testing.T) {
 	assert.Equal(t, 21900, len(feed.Entries), "soso")
 }
 
-func TestFeedFromFileName_Gob(t *testing.T) {
+func _TestFeedFromFileName_Gob(t *testing.T) {
 	t.Parallel()
 
 	file, err := os.Open("testdata/links.gob")

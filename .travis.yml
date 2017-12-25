@@ -1,0 +1,35 @@
+---
+# http://docs.travis-ci.com/user/languages/go/#Default-Test-Script
+language: go
+go: # https://github.com/atotto/travisci-golang-example
+- 1.1
+- 1.7
+- 1.8
+- 1.9
+- tip
+env:
+  matrix:
+  - GOOS=linux
+  - GOOS=darwin
+  - GOOS=freebsd
+  - GOOS=windows
+matrix:
+  allow_failures:
+  - go: 1.1
+  - go: 1.7
+  - go: tip
+branches:
+  only: [master, develop]
+install:
+- go get github.com/jteeuwen/go-bindata/...
+- go get golang.org/x/crypto/bcrypt
+- go get gopkg.in/yaml.v2
+- go get github.com/gorilla/sessions
+- go get golang.org/x/net/html
+- go get golang.org/x/net/html/atom
+  # for testing only:
+- go get github.com/stretchr/testify
+- go get golang.org/x/tools/blog/atom
+- go get github.com/yhat/scrape
+script:
+- go-bindata -ignore=.DS_Store -prefix static static/... && go test -v

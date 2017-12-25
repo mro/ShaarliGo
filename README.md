@@ -1,6 +1,8 @@
 
 🌩 [Lightning Talk at the 34c3](https://events.ccc.de/congress/2017/wiki/Lightning:ShaarliGo:_self-hosted_microblogging) 🚀
 
+[![Build Status](https://travis-ci.org/mro/ShaarliGo.svg?branch=master)](https://travis-ci.org/mro/ShaarliGo)
+
 # ShaarliGo
 
 self-hosted microblogging inspired by

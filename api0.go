@@ -239,12 +239,13 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 				ent.Title = HumanText{Body: post}
 			}
 			ent.Updated = iso8601{now}
-			if ent.Published.IsZero() {
+			const SetPublishedToNowInitially = true
+			if SetPublishedToNowInitially || ent.Published.IsZero() {
 				ent.Published = ent.Updated
 			}
 			// do not append to feed yet, keep dangling
 		} else {
-			log.Printf("storing Id in cookie: ", ent.Id)
+			log.Printf("storing Id in cookie: %v", ent.Id)
 			app.ses.Values["identifier"] = ent.Id
 		}
 		app.KeepAlive(w, r, now)
@@ -310,7 +311,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		if ok {
 			delete(app.ses.Values, "identifier")
 		}
-		log.Printf("pulled Id from cookie: ", app.ses.Values["identifier"], identifier)
+		log.Printf("pulled Id from cookie: %v %v", app.ses.Values["identifier"], identifier)
 		app.KeepAlive(w, r, now)
 		location := path.Join(uriPub, uriPosts) + "/"
 
