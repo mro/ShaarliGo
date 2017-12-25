@@ -354,18 +354,18 @@ func TestWriteFeedsPaged(t *testing.T) {
 <feed xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/" xml:lang="deu">
   <title>Hello, Atom!</title>
   <id>http://example.com</id>
-  <updated>1990-12-31T02:02:02+01:00</updated>
+  <updated>1990-12-30T00:00:00+01:00</updated>
   <link href="pub/posts/" rel="self" title="1"></link>
   <link href="pub/posts/" rel="first" title="1"></link>
   <link href="pub/posts-1/" rel="next" title="2"></link>
   <link href="pub/posts-1/" rel="last" title="2"></link>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
-    <title>Hello, Entry 2!</title>
-    <id>http://example.com/pub/posts/e2/</id>
-    <updated>1990-12-31T02:02:02+01:00</updated>
+    <title>Hello, Entry 0!</title>
+    <id>http://example.com/pub/posts/e0/</id>
+    <updated>1990-12-30T00:00:00+01:00</updated>
     <published>0001-01-01T00:00:00Z</published>
-    <link href="pub/posts/e2/" rel="self"></link>
-    <link href="shaarligo.cgi?post=pub/posts/e2/" rel="edit"></link>
+    <link href="pub/posts/e0/" rel="self"></link>
+    <link href="shaarligo.cgi?post=pub/posts/e0/" rel="edit"></link>
     <link href="../" rel="up" title="Hello, Atom!"></link>
   </entry>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
@@ -401,18 +401,18 @@ func TestWriteFeedsPaged(t *testing.T) {
 <feed xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/" xml:lang="deu">
   <title>Hello, Atom!</title>
   <id>http://example.com</id>
-  <updated>1990-12-31T02:02:02+01:00</updated>
+  <updated>1990-12-30T00:00:00+01:00</updated>
   <link href="pub/posts-1/" rel="self" title="2"></link>
   <link href="pub/posts/" rel="first" title="1"></link>
   <link href="pub/posts/" rel="previous" title="1"></link>
   <link href="pub/posts-1/" rel="last" title="2"></link>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
-    <title>Hello, Entry 0!</title>
-    <id>http://example.com/pub/posts/e0/</id>
-    <updated>1990-12-30T00:00:00+01:00</updated>
+    <title>Hello, Entry 2!</title>
+    <id>http://example.com/pub/posts/e2/</id>
+    <updated>1990-12-31T02:02:02+01:00</updated>
     <published>0001-01-01T00:00:00Z</published>
-    <link href="pub/posts/e0/" rel="self"></link>
-    <link href="shaarligo.cgi?post=pub/posts/e0/" rel="edit"></link>
+    <link href="pub/posts/e2/" rel="self"></link>
+    <link href="shaarligo.cgi?post=pub/posts/e2/" rel="edit"></link>
     <link href="../" rel="up" title="Hello, Atom!"></link>
   </entry>
 </feed>

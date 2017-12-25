@@ -142,7 +142,7 @@ func (feed Feed) writeFeeds(entriesPerPage int, fw feedWriter) error {
 		return errors.New("feed/@xml:base must be set to an absolute URL with a trailing slash")
 	}
 
-	sort.Sort(ByUpdatedDesc(feed.Entries))
+	sort.Sort(ByPublishedDesc(feed.Entries))
 	{
 		// aggregate & count feed entry categories
 		cats := make(map[string]int, 1*len(feed.Entries)) // raw len guess
