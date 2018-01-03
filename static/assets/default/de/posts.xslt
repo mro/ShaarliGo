@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ShaarliGo, microblogging detox
-  Copyright (C) 2017-2017  Marcus Rohrmoser, http://purl.mro.name/ShaarliGo
+  Copyright (C) 2017-2018  Marcus Rohrmoser, http://purl.mro.name/ShaarliGo
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -205,7 +205,7 @@ div.awesomplete { display: block; }
       </ul>
 
       <xsl:comment> https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ </xsl:comment>
-      <form id="form_search" name="form_search" class="form-horizontal form-search" action="{$xml_base_pub}/../shaarligo.cgi/search">
+      <form id="form_search" name="form_search" class="form-horizontal form-search" action="{$xml_base_pub}/../shaarligo.cgi/search/">
         <div class="input-group">
           <input tabindex="100" name="q" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="awesomplete form-control search-query" data-multiple="true" data-list="#taglist"/>
           <span class="input-group-btn">

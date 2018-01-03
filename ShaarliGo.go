@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017-2017 Marcus Rohrmoser, http://purl.mro.name/ShaarliGo
+// Copyright (C) 2017-2018 Marcus Rohrmoser, http://purl.mro.name/ShaarliGo
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -217,7 +217,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case "/search/":
-		// app.KeepAlive(w, r, now)
+		app.handleSearch(w, r)
 		return
 	case "/tools/":
 		app.handleTools(w, r)
