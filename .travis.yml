@@ -21,17 +21,17 @@ matrix:
 branches:
   only: [master, develop]
 install:
+- go get github.com/gorilla/sessions
 - go get github.com/jteeuwen/go-bindata/...
 - go get golang.org/x/crypto/bcrypt
-- go get gopkg.in/yaml.v2
-- go get github.com/gorilla/sessions
 - go get golang.org/x/net/html
 - go get golang.org/x/net/html/atom
 - go get golang.org/x/text/language
 - go get golang.org/x/text/search
+- go get gopkg.in/yaml.v2
   # for testing only:
 - go get github.com/stretchr/testify
-- go get golang.org/x/tools/blog/atom
 - go get github.com/yhat/scrape
+- go get golang.org/x/tools/blog/atom
 script:
 - go-bindata -ignore=.DS_Store -prefix static static/... && go test -v

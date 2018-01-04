@@ -8,20 +8,21 @@ cd "$(dirname "${0}")"
 # Linux x86_64
 # Linux armv6l
 
-say="echo"
+say="say"
 false && {
   "${say}" "go get"
-  go get -u golang.org/x/tools/blog/atom
-  go get -u golang.org/x/crypto/bcrypt
-  go get -u gopkg.in/yaml.v2
-  go get -u github.com/jteeuwen/go-bindata/...
   go get -u github.com/gorilla/sessions
-  go get -u golang.org/x/text/language
-  go get -u golang.org/x/text/search
-  # for testing only:
-  go get -u github.com/yhat/scrape
+  go get -u github.com/jteeuwen/go-bindata/...
+  go get -u golang.org/x/crypto/bcrypt
   go get -u golang.org/x/net/html
   go get -u golang.org/x/net/html/atom
+  go get -u golang.org/x/text/language
+  go get -u golang.org/x/text/search
+  go get -u gopkg.in/yaml.v2
+  # for testing only:
+  go get -u github.com/stretchr/testify
+  go get -u github.com/yhat/scrape
+  go get -u golang.org/x/tools/blog/atom
   "${say}" "ok"
 }
 
