@@ -63,6 +63,7 @@ func FeedFromFileName(file string) (Feed, error) {
 }
 
 func FeedFromReader(file io.Reader) (Feed, error) {
+	un(trace("FeedFromReader"))
 	ret := Feed{}
 	err := xml.NewDecoder(file).Decode(&ret)
 	return ret, err

@@ -22,8 +22,20 @@ import (
 	"testing"
 )
 
+func entry(title, content string) *Entry {
+	return &Entry{
+		Title:   HumanText{Body: title},
+		Content: &HumanText{Body: content},
+	}
+}
+
 func TestRankEntryTerms(t *testing.T) {
 	t.Parallel()
-	assert.Nil(t, nil, "soso")
-	// assert.Equal(t, 0, rankEntryTerms(Entry{}, []string{}), "soso")
+	assert.Equal(t, 0, rankEntryTerms(nil, nil), "soso")
+	assert.Equal(t, 0, rankEntryTerms(&Entry{}, nil), "soso")
+	assert.Equal(t, 2, rankEntryTerms(&Entry{Title: HumanText{Body: "my foo bar"}}, []string{"foo"}), "soso")
+
+	assert.Equal(t, 2, rankEntryTerms(entry("my foo bar", ""), []string{"foo"}), "soso")
 }
+
+//

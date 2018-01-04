@@ -20,16 +20,24 @@ package main
 import (
 	"encoding/xml"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
 
 func rankEntryTerms(entry *Entry, terms []string) int {
 	// defer un(trace("ranker"))
-	var parts = [2]string{entry.Content.Body, entry.Title.Body}
+	parts := [2]string{"", ""}
+	if entry != nil && entry.Content != nil {
+		parts[0] = entry.Content.Body
+	}
+	if entry != nil {
+		parts[1] = entry.Title.Body
+	}
 	rank := 0
 	for _, term := range terms {
 		for weight, txt := range parts {
@@ -56,16 +64,36 @@ func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) {
 		app.KeepAlive(w, r, now)
 		// pull out parameters q, offset, limit
 		query := r.URL.Query()
-		if rq := query["q"]; rq != nil && 0 < len(rq) {
-			terms := regexp.MustCompile("\\s+").Split(rq[0], -1)
-			limit := 50
+		if q := query["q"]; q != nil && 0 < len(q) {
+			terms := regexp.MustCompile("\\s+").Split(strings.Join(q, " "), -1)
+			limit := max(1, app.cfg.LinksPerPage)
 			offset := 0
+			if o := query["offset"]; o != nil {
+				offset, _ = strconv.Atoi(o[0]) // just ignore conversion errors. 0 is a fine fallback
+			}
 
 			feed, _ := app.LoadFeed()
 			feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
 			feed.Id = feed.XmlBase // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
 
-			ret := feed.Search(func(entry *Entry) int { return rankEntryTerms(entry, terms) }, offset, limit)
+			ret := feed.Search(func(entry *Entry) int { return rankEntryTerms(entry, terms) })
+			clamp := func(x int) int { return min(len(ret.Entries), x) }
+			offset = clamp(max(0, offset))
+			// paging / RFC5005
+			qu := cgiName + "/search/" + "?" + "q" + "=" + url.QueryEscape(strings.Join(terms, " "))
+			count := len(ret.Entries)
+			ret.Links = append(ret.Links, Link{Rel: relSelf, Href: qu + "&" + "offset" + "=" + strconv.Itoa(offset), Title: strconv.Itoa(1 + offset/limit)})
+			if count > limit {
+				ret.Links = append(ret.Links, Link{Rel: relFirst, Href: qu, Title: strconv.Itoa(1 + 0)})
+				ret.Links = append(ret.Links, Link{Rel: relLast, Href: qu + "&" + "offset" + "=" + strconv.Itoa(count-(count%limit)), Title: strconv.Itoa(1 + count/limit)})
+				if intPrev := offset - limit; intPrev >= 0 {
+					ret.Links = append(ret.Links, Link{Rel: relPrevious, Href: qu + "&" + "offset" + "=" + strconv.Itoa(intPrev), Title: strconv.Itoa(1 + intPrev/limit)})
+				}
+				if intNext := offset + limit; intNext < count {
+					ret.Links = append(ret.Links, Link{Rel: relNext, Href: qu + "&" + "offset" + "=" + strconv.Itoa(intNext), Title: strconv.Itoa(1 + intNext/limit)})
+				}
+				ret.Entries = ret.Entries[offset:clamp(offset+limit)]
+			}
 
 			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 			enc := xml.NewEncoder(w)
@@ -79,10 +107,22 @@ func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (feed Feed) Search(ranker func(*Entry) int, offset, limit int) Feed {
+func min(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
+}
+func max(x, y int) int {
+	if x > y {
+		return x
+	}
+	return y
+}
+
+func (feed Feed) Search(ranker func(*Entry) int) Feed {
 	defer un(trace("Feed.Search"))
 	feed.Entries = searchEntries(feed.Entries, ranker)
-	// paging: adjust links
 	return feed
 }
 

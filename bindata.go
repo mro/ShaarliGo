@@ -429,7 +429,7 @@ func assetsDefaultDePostsXslt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/de/posts.xslt", size: 16534, mode: os.FileMode(436), modTime: time.Unix(1514991564, 0)}
+	info := bindataFileInfo{name: "assets/default/de/posts.xslt", size: 16534, mode: os.FileMode(436), modTime: time.Unix(1514993663, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
