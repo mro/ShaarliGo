@@ -22,27 +22,37 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/text/language"
+	"golang.org/x/text/search"
 )
 
-func rankEntryTerms(entry *Entry, terms []string) int {
+// better: https://stackoverflow.com/questions/24836044/case-insensitive-string-search-in-golang
+func rankEntryTerms(entry *Entry, terms []string, matcher *search.Matcher) int {
 	// defer un(trace("ranker"))
 	parts := [2]string{"", ""}
-	if entry != nil && entry.Content != nil {
-		parts[0] = entry.Content.Body
-	}
-	if entry != nil {
+	if nil != entry {
+		if nil != entry.Content {
+			parts[0] = entry.Content.Body
+		}
 		parts[1] = entry.Title.Body
 	}
 	rank := 0
 	for _, term := range terms {
+		if strings.HasPrefix(term, "#") {
+			t := term[1:]
+			for _, cat := range entry.Categories {
+				if idx, _ := matcher.IndexString(t, cat.Term); idx >= 0 {
+					rank += 5
+				}
+			}
+		}
 		for weight, txt := range parts {
-			// better: https://stackoverflow.com/questions/24836044/case-insensitive-string-search-in-golang
-			if strings.Contains(txt, term) {
+			if idx, _ := matcher.IndexString(txt, term); idx >= 0 {
 				rank += 1 + weight
 			}
 		}
@@ -65,7 +75,7 @@ func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) {
 		// pull out parameters q, offset, limit
 		query := r.URL.Query()
 		if q := query["q"]; q != nil && 0 < len(q) {
-			terms := regexp.MustCompile("\\s+").Split(strings.Join(q, " "), -1)
+			terms := strings.Fields(strings.Join(q, " "))
 			limit := max(1, app.cfg.LinksPerPage)
 			offset := 0
 			if o := query["offset"]; o != nil {
@@ -76,7 +86,9 @@ func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) {
 			feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
 			feed.Id = feed.XmlBase // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
 
-			ret := feed.Search(func(entry *Entry) int { return rankEntryTerms(entry, terms) })
+			lang := language.Make("de") // should come from the entry, feed, settings, default (in that order)
+			matcher := search.New(lang, search.IgnoreDiacritics, search.IgnoreCase)
+			ret := feed.Search(func(entry *Entry) int { return rankEntryTerms(entry, terms, matcher) })
 			clamp := func(x int) int { return min(len(ret.Entries), x) }
 			offset = clamp(max(0, offset))
 			// paging / RFC5005

@@ -16,6 +16,8 @@ false && {
   go get -u gopkg.in/yaml.v2
   go get -u github.com/jteeuwen/go-bindata/...
   go get -u github.com/gorilla/sessions
+  go get -u golang.org/x/text/language
+  go get -u golang.org/x/text/search
   # for testing only:
   go get -u github.com/yhat/scrape
   go get -u golang.org/x/net/html

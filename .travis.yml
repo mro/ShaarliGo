@@ -27,6 +27,8 @@ install:
 - go get github.com/gorilla/sessions
 - go get golang.org/x/net/html
 - go get golang.org/x/net/html/atom
+- go get golang.org/x/text/language
+- go get golang.org/x/text/search
   # for testing only:
 - go get github.com/stretchr/testify
 - go get golang.org/x/tools/blog/atom

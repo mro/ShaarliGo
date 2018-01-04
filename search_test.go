@@ -18,6 +18,9 @@
 package main
 
 import (
+	"golang.org/x/text/language"
+	"golang.org/x/text/search"
+
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -31,11 +34,16 @@ func entry(title, content string) *Entry {
 
 func TestRankEntryTerms(t *testing.T) {
 	t.Parallel()
-	assert.Equal(t, 0, rankEntryTerms(nil, nil), "soso")
-	assert.Equal(t, 0, rankEntryTerms(&Entry{}, nil), "soso")
-	assert.Equal(t, 2, rankEntryTerms(&Entry{Title: HumanText{Body: "my foo bar"}}, []string{"foo"}), "soso")
+	lang := language.Make("DE-LU")
+	assert.Equal(t, "de-LU", lang.String(), "aha")
 
-	assert.Equal(t, 2, rankEntryTerms(entry("my foo bar", ""), []string{"foo"}), "soso")
+	matcher := search.New(language.German, search.IgnoreDiacritics, search.IgnoreCase)
+
+	assert.Equal(t, 0, rankEntryTerms(nil, nil, nil), "soso")
+	assert.Equal(t, 0, rankEntryTerms(&Entry{}, nil, nil), "soso")
+	assert.Equal(t, 2, rankEntryTerms(&Entry{Title: HumanText{Body: "my foo bar"}}, []string{"foo"}, matcher), "soso")
+
+	assert.Equal(t, 2, rankEntryTerms(entry("my foo bar", ""), []string{"fòO"}, matcher), "soso")
 }
 
 //
