@@ -21,10 +21,12 @@
 <xsl:stylesheet
   xmlns="http://www.w3.org/1999/xhtml"
   xmlns:a="http://www.w3.org/2005/Atom"
+  xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/"
   xmlns:media="http://search.yahoo.com/mrss/"
   xmlns:georss="http://www.georss.org/georss"
+  xmlns:sg="http://purl.mro.name/ShaarliGo/2018/"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-  exclude-result-prefixes="a media georss"
+  exclude-result-prefixes="a opensearch media georss sg"
   version="1.0">
 
   <!-- replace linefeeds with <br> tags -->
@@ -149,6 +151,10 @@
   width: 100%;
   max-width: 100%;
 }
+table.prev-next td {
+  width: 10%;
+  padding: 2ex 0;
+}
 li {
   background-color: #F8F8F8;
   margin: 1em 0;
@@ -207,7 +213,7 @@ div.awesomplete { display: block; }
       <xsl:comment> https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ </xsl:comment>
       <form id="form_search" name="form_search" class="form-horizontal form-search" action="{$xml_base_pub}/../shaarligo.cgi/search/">
         <div class="input-group">
-          <input tabindex="100" name="q" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="awesomplete form-control search-query" data-multiple="true" data-list="#taglist"/>
+          <input tabindex="100" name="q" value="{@sg:searchTerms}" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="awesomplete form-control search-query" data-multiple="true" data-list="#taglist"/>
           <span class="input-group-btn">
             <button tabindex="200" type="submit" class="btn btn-primary">Suche</button>
           </span>
@@ -264,9 +270,13 @@ div.awesomplete { display: block; }
           <td tabindex="20" class="text-right"><a href="{$xml_base_pub}/tags/">⛅ <span class="hidden-xs"># Tags</span></a></td>
           <td tabindex="30" class="text-right"><a href="{$xml_base_pub}/days/">📅 <span class="hidden-xs">Tage</span></a></td>
           <td tabindex="40" class="text-right"><a href="{$xml_base_pub}/imgs/">🎨 <span class="hidden-xs">Bilder</span></a></td>
-          <td tabindex="45" class="text-right hidden-logged-out"><a href="{$xml_base_pub}/../shaarligo.cgi/tools/">🔨 <span class="hidden-xs">Tools</span></a></td>
-          <td tabindex="50" class="text-right hidden-logged-out"><a id="link_logout" href="{$xml_base_pub}/../shaarligo.cgi?do=logout"><span class="hidden-xs">Abmelden</span> 🐾 </a></td>
-          <td tabindex="51" class="text-right visible-logged-out"><a id="link_login" href="{$xml_base_pub}/../shaarligo.cgi?do=login"><span class="hidden-xs">Anmelden</span> 🌺 </a></td>
+          <td class="text-right"><!-- I'd peefer a class="text-right hidden-logged-out" but just don't get it right -->
+            <a href="{$xml_base_pub}/../shaarligo.cgi/tools/">🔨 <span class="hidden-xs">Tools</span></a>
+          </td>
+          <td class="text-right">
+            <a tabindex="50" id="link_login" href="{$xml_base_pub}/../shaarligo.cgi?do=login" class="visible-logged-out"><span class="hidden-xs">Anmelden</span> 🌺 </a>
+            <a tabindex="51" id="link_logout" href="{$xml_base_pub}/../shaarligo.cgi?do=logout" class="hidden-logged-out"><span class="hidden-xs">Abmelden</span> 🐾 </a>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -280,13 +290,17 @@ div.awesomplete { display: block; }
             <xsl:if test="a:link[@rel='first']">
               <td class="text-left"><a href="{$xml_base_pub}/../{a:link[@rel='first']/@href}">1 &lt;&lt;</a></td>
             </xsl:if>
-            <xsl:if test="a:link[@rel='previous']">
-              <td class="text-center"><a href="{$xml_base_pub}/../{a:link[@rel='previous']/@href}"><xsl:value-of select="a:link[@rel='previous']/@title"/> &lt;</a></td>
-            </xsl:if>
-            <td class="text-center"><a href="{$xml_base_pub}/../{a:link[@rel='self']/@href}">Seite <xsl:value-of select="a:link[@rel='self']/@title"/></a></td>
-            <xsl:if test="a:link[@rel='next']">
-              <td class="text-center"><a href="{$xml_base_pub}/../{a:link[@rel='next']/@href}">&gt; <xsl:value-of select="a:link[@rel='next']/@title"/></a></td>
-            </xsl:if>
+            <td class="text-center">
+              <xsl:if test="a:link[@rel='previous']">
+                <a href="{$xml_base_pub}/../{a:link[@rel='previous']/@href}"><xsl:value-of select="a:link[@rel='previous']/@title"/> &lt;</a>
+              </xsl:if>
+            </td>
+            <td class="text-center">Seite <xsl:value-of select="a:link[@rel='self']/@title"/></td>
+            <td class="text-center">
+              <xsl:if test="a:link[@rel='next']">
+                <a href="{$xml_base_pub}/../{a:link[@rel='next']/@href}">&gt; <xsl:value-of select="a:link[@rel='next']/@title"/></a>
+              </xsl:if>
+            </td>
             <xsl:if test="a:link[@rel='last']">
               <td class="text-right" ><a href="{$xml_base_pub}/../{a:link[@rel='last']/@href}">&gt;&gt; <xsl:value-of select="a:link[@rel='last']/@title"/></a></td>
             </xsl:if>
@@ -333,7 +347,10 @@ div.awesomplete { display: block; }
 
   <xsl:template match="a:entry">
     <xsl:variable name="link" select="a:link[not(@rel)]/@href"/>
-    <li id="{substring-after(a:link[@rel='self']/@href, '/posts/')}" class="clearfix">
+    <xsl:variable name="self" select="a:link[@rel='self']/@href"/>
+    <xsl:variable name="id_slash" select="substring-after($self, '/posts/')"/>
+    <xsl:variable name="id" select="substring-before($id_slash, '/')"/>
+    <li id="{$id}" class="clearfix">
       <p class="small text-right">
         <xsl:if test="media:thumbnail/@url">
           <a href="{$link}">

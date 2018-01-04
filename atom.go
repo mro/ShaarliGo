@@ -73,22 +73,26 @@ func FeedFromReader(file io.Reader) (Feed, error) {
 //
 // see also https://godoc.org/golang.org/x/tools/blog/atom#Feed
 type Feed struct {
-	XMLName      xml.Name   `xml:"http://www.w3.org/2005/Atom feed"`
-	XmlBase      string     `xml:"xml:base,attr,omitempty"`
-	XmlLang      string     `xml:"xml:lang,attr,omitempty"`
-	Title        HumanText  `xml:"title"`
-	Subtitle     *HumanText `xml:"subtitle,omitempty"`
-	Id           string     `xml:"id"`
-	Updated      iso8601    `xml:"updated"`
-	Generator    *Generator `xml:"generator,omitempty"`
-	Icon         string     `xml:"icon,omitempty"`
-	Logo         string     `xml:"logo,omitempty"`
-	Links        []Link     `xml:"link"`
-	Categories   []Category `xml:"category"`
-	Authors      []Person   `xml:"author"`
-	Contributors []Person   `xml:"contributor"`
-	Rights       *HumanText `xml:"rights,omitempty"`
-	Entries      []*Entry   `xml:"entry"`
+	XMLName         xml.Name   `xml:"http://www.w3.org/2005/Atom feed"`
+	XmlBase         string     `xml:"xml:base,attr,omitempty"`
+	XmlLang         string     `xml:"xml:lang,attr,omitempty"`
+	XmlNSShaarliGo  string     `xml:"xmlns:sg,attr,omitempty"`         // https://github.com/golang/go/issues/9519#issuecomment-252196382
+	SearchTerms     string     `xml:"sg:searchTerms,attr,omitempty"`   // rather use http://www.opensearch.org/Specifications/OpenSearch/1.1#Example_of_OpenSearch_response_elements_in_Atom_1.0
+	XmlNSOpenSearch string     `xml:"xmlns:opensearch,attr,omitempty"` // https://github.com/golang/go/issues/9519#issuecomment-252196382
+	Query           string     `xml:"opensearch:Query,omitempty"`      // http://www.opensearch.org/Specifications/OpenSearch/1.1#Example_of_OpenSearch_response_elements_in_Atom_1.0
+	Title           HumanText  `xml:"title"`
+	Subtitle        *HumanText `xml:"subtitle,omitempty"`
+	Id              string     `xml:"id"`
+	Updated         iso8601    `xml:"updated"`
+	Generator       *Generator `xml:"generator,omitempty"`
+	Icon            string     `xml:"icon,omitempty"`
+	Logo            string     `xml:"logo,omitempty"`
+	Links           []Link     `xml:"link"`
+	Categories      []Category `xml:"category"`
+	Authors         []Person   `xml:"author"`
+	Contributors    []Person   `xml:"contributor"`
+	Rights          *HumanText `xml:"rights,omitempty"`
+	Entries         []*Entry   `xml:"entry"`
 }
 
 type Generator struct {

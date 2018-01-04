@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"sort"
 	"strconv"
 	"strings"
@@ -75,24 +76,36 @@ func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) {
 		// pull out parameters q, offset, limit
 		query := r.URL.Query()
 		if q := query["q"]; q != nil && 0 < len(q) {
-			terms := strings.Fields(strings.Join(q, " "))
+			terms := strings.Fields(strings.TrimSpace(strings.Join(q, " ")))
+			if 0 == len(terms) {
+				http.Redirect(w, r, path.Join("..", "..", uriPub, uriPosts)+"/", http.StatusFound)
+				return
+			}
 			limit := max(1, app.cfg.LinksPerPage)
 			offset := 0
 			if o := query["offset"]; o != nil {
 				offset, _ = strconv.Atoi(o[0]) // just ignore conversion errors. 0 is a fine fallback
 			}
+			qu := cgiName + "/search/" + "?" + "q" + "=" + url.QueryEscape(strings.Join(terms, " "))
+
+			xmlBase := xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
+			catScheme := xmlBase.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String() + "/"
 
 			feed, _ := app.LoadFeed()
-			feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
-			feed.Id = feed.XmlBase // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
+			feed.XmlBase = xmlBase.String()
+			feed.Id = xmlBase.ResolveReference(mustParseURL(qu)).String()
+
+			feed.XmlNSShaarliGo = "http://purl.mro.name/ShaarliGo/2018/"
+			feed.SearchTerms = strings.Join(q, " ") // rather use http://www.opensearch.org/Specifications/OpenSearch/1.1#Example_of_OpenSearch_response_elements_in_Atom_1.0
+			feed.XmlNSOpenSearch = "http://a9.com/-/spec/opensearch/1.1/"
 
 			lang := language.Make("de") // should come from the entry, feed, settings, default (in that order)
 			matcher := search.New(lang, search.IgnoreDiacritics, search.IgnoreCase)
 			ret := feed.Search(func(entry *Entry) int { return rankEntryTerms(entry, terms, matcher) })
+
+			// paging / RFC5005
 			clamp := func(x int) int { return min(len(ret.Entries), x) }
 			offset = clamp(max(0, offset))
-			// paging / RFC5005
-			qu := cgiName + "/search/" + "?" + "q" + "=" + url.QueryEscape(strings.Join(terms, " "))
 			count := len(ret.Entries)
 			ret.Links = append(ret.Links, Link{Rel: relSelf, Href: qu + "&" + "offset" + "=" + strconv.Itoa(offset), Title: strconv.Itoa(1 + offset/limit)})
 			if count > limit {
@@ -105,6 +118,29 @@ func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) {
 					ret.Links = append(ret.Links, Link{Rel: relNext, Href: qu + "&" + "offset" + "=" + strconv.Itoa(intNext), Title: strconv.Itoa(1 + intNext/limit)})
 				}
 				ret.Entries = ret.Entries[offset:clamp(offset+limit)]
+			}
+			// prepare entries for Atom publication
+			for _, item := range ret.Entries {
+				// change entries for output but don't save the change:
+				selfURL := mustParseURL(path.Join(uriPub, uriPosts, item.Id) + "/")
+				editURL := strings.Join([]string{cgiName, "?post=", selfURL.String()}, "")
+				item.Id = xmlBase.ResolveReference(selfURL).String() // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
+				item.Links = append(item.Links,
+					Link{Rel: relSelf, Href: selfURL.String()},
+					Link{Rel: relEdit, Href: editURL},
+				)
+				for i, _ := range item.Categories {
+					item.Categories[i].Scheme = catScheme
+				}
+				if item.Updated.IsZero() {
+					item.Updated = item.Published
+				}
+				if item.Updated.After(ret.Updated.Time) {
+					ret.Updated = item.Updated
+				}
+			}
+			if ret.Updated.IsZero() {
+				ret.Updated = iso8601{now}
 			}
 
 			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
@@ -156,7 +192,6 @@ func (r search_results) Swap(i, j int) {
 }
 
 func searchEntries(entries []*Entry, ranker func(*Entry) int) []*Entry {
-	defer un(trace("searchEntries"))
 	r := search_results{
 		Ranks:   make([]int, len(entries)),
 		Entries: entries,
