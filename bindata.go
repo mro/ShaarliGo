@@ -2,6 +2,7 @@
 // sources:
 // static/.htaccess
 // static/app/.htaccess
+// static/app/deleteme_to_restore
 // static/app/i-must-be-403.svg
 // static/app/lighttpd.conf
 // static/app/var/feed.xml
@@ -130,6 +131,26 @@ func appHtaccess() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "app/.htaccess", size: 30, mode: os.FileMode(420), modTime: time.Unix(1499974795, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _appDeleteme_to_restore = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xe2\x72\x49\xcd\x49\x2d\x49\x55\x28\xc9\xc8\x2c\x56\x48\xcb\xcc\x49\x55\x28\xc9\x57\x28\x4a\x2d\x2e\xc9\x2f\x02\x09\xa6\x2a\xe4\xe5\xe7\xe9\xa6\x56\x64\x16\x97\x64\xe6\xa5\x2b\x24\x16\x17\xa7\x96\x14\xeb\x71\x71\x69\x78\xe6\x25\xe7\x94\xa6\x80\xc4\xe0\x3a\x35\xb9\x00\x01\x00\x00\xff\xff\x93\xb4\x9b\x96\x4d\x00\x00\x00")
+
+func appDeleteme_to_restoreBytes() ([]byte, error) {
+	return bindataRead(
+		_appDeleteme_to_restore,
+		"app/deleteme_to_restore",
+	)
+}
+
+func appDeleteme_to_restore() (*asset, error) {
+	bytes, err := appDeleteme_to_restoreBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "app/deleteme_to_restore", size: 77, mode: os.FileMode(420), modTime: time.Unix(1515169284, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -688,6 +709,7 @@ func AssetNames() []string {
 var _bindata = map[string]func() (*asset, error){
 	".htaccess":                               Htaccess,
 	"app/.htaccess":                           appHtaccess,
+	"app/deleteme_to_restore":                 appDeleteme_to_restore,
 	"app/i-must-be-403.svg":                   appIMustBe403Svg,
 	"app/lighttpd.conf":                       appLighttpdConf,
 	"app/var/feed.xml":                        appVarFeedXml,
@@ -758,9 +780,10 @@ type bintree struct {
 var _bintree = &bintree{nil, map[string]*bintree{
 	".htaccess": &bintree{Htaccess, map[string]*bintree{}},
 	"app": &bintree{nil, map[string]*bintree{
-		".htaccess":         &bintree{appHtaccess, map[string]*bintree{}},
-		"i-must-be-403.svg": &bintree{appIMustBe403Svg, map[string]*bintree{}},
-		"lighttpd.conf":     &bintree{appLighttpdConf, map[string]*bintree{}},
+		".htaccess":           &bintree{appHtaccess, map[string]*bintree{}},
+		"deleteme_to_restore": &bintree{appDeleteme_to_restore, map[string]*bintree{}},
+		"i-must-be-403.svg":   &bintree{appIMustBe403Svg, map[string]*bintree{}},
+		"lighttpd.conf":       &bintree{appLighttpdConf, map[string]*bintree{}},
 		"var": &bintree{nil, map[string]*bintree{
 			"feed.xml": &bintree{appVarFeedXml, map[string]*bintree{}},
 		}},

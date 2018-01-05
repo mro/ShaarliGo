@@ -20,7 +20,6 @@ package main
 import (
 	"html/template"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -57,21 +56,6 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "double check failed.", http.StatusInternalServerError)
 		return
 	}
-
-	// unpack (nonexisting) static files
-	for _, filename := range AssetNames() {
-		if _, err := os.Stat(filename); os.IsNotExist(err) {
-			if err := RestoreAsset(".", filename); err != nil {
-				http.Error(w, "failed "+filename+": "+err.Error(), http.StatusInternalServerError)
-				return
-			} else {
-				log.Println(strings.Join([]string{"create ", filename}, ""))
-			}
-		} else {
-			log.Println(strings.Join([]string{"keep   ", filename}, ""))
-		}
-	}
-	// os.Chmod("app", os.FileMode(0750)) // not sure if this is a good idea.
 
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "couldn't parse form: "+err.Error(), http.StatusInternalServerError)

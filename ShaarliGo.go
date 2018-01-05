@@ -147,6 +147,27 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 	//	script_name :=
 	urlBase := xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
 
+	// unpack (nonexisting) static files
+	func() {
+		if _, err := os.Stat(filepath.Join(dirApp, "deleteme_to_restore")); !os.IsNotExist(err) {
+			return
+		}
+		defer un(trace("RestoreAssets"))
+		for _, filename := range AssetNames() {
+			if _, err := os.Stat(filename); os.IsNotExist(err) {
+				if err := RestoreAsset(".", filename); err != nil {
+					http.Error(w, "failed "+filename+": "+err.Error(), http.StatusInternalServerError)
+					return
+				} else {
+					log.Printf("create %s\n", filename)
+				}
+			} else {
+				log.Printf("keep   %s\n", filename)
+			}
+		}
+		// os.Chmod("app", os.FileMode(0750)) // not sure if this is a good idea.
+	}()
+
 	// get config and session
 	app := App{}
 	{
