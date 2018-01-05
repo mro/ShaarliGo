@@ -48,7 +48,7 @@ func (app *App) handleTools(w http.ResponseWriter, r *http.Request) {
 <body>
   <ol>
     <li class="config"><a href="../config/">Config</a></li>
-    
+
     <li class="bookmarklet">
       <a
         onclick="alert('Drag this link to your bookmarks toolbar, or right-click it and choose Bookmark This Link...');return false;"
@@ -56,6 +56,20 @@ func (app *App) handleTools(w http.ResponseWriter, r *http.Request) {
       >✚ShaarliGo</a>
       <span>⇐ Drag this link to your bookmarks toolbar (or right-click it and choose Bookmark This Link…).
       Then click "✚ShaarliGo" button in any page you want to share.</span>
+    </li>
+
+    <li class="update">
+      Update: Just replace shaarligo.cgi. To update the assets, delete them and
+      app/deleteme_to_restore, then clear your browser cache and visit the CGI, e.g.
+      the search.
+      <br/>
+      <code>$ ssh <kbd>myserver.example.com</kbd> "cd <kbd>filesystem/path/to/</kbd> &amp;&amp; curl -L <a href="http://purl.mro.name/shaarligo_cgi.gz">http://purl.mro.name/shaarligo_cgi.gz</a>  | tee shaarligo_cgi.gz | gunzip &gt; shaarligo.cgi &amp;&amp; chmod a+x shaarligo.cgi &amp;&amp; ls -l shaarligo?cgi*"</code>
+    </li>
+
+    <li class="disclosure">
+      Responsible Disclosure: In case you are reluctant to <a
+      href="http://purl.mro.name/ShaarliGo">file a public issue</a>, feel free to
+      email <a href="mailto:ShaarliGo@mro.name?subject=">ShaarliGo@mro.name</a>.
     </li>
   </ol>
 </body>
