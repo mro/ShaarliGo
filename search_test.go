@@ -20,15 +20,25 @@ package main
 import (
 	"golang.org/x/text/language"
 	"golang.org/x/text/search"
+	"strings"
 
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func entry(title, content string) *Entry {
+func entry(title, content, tags string) *Entry {
+	cs := strings.Fields(tags)
+	cat := make([]Category, len(cs))
+	for idx, txt := range cs {
+		if strings.HasPrefix(txt, "#") {
+			txt = txt[1:]
+		}
+		cat[idx].Term = txt
+	}
 	return &Entry{
-		Title:   HumanText{Body: title},
-		Content: &HumanText{Body: content},
+		Title:      HumanText{Body: title},
+		Content:    &HumanText{Body: content},
+		Categories: cat,
 	}
 }
 
@@ -43,7 +53,8 @@ func TestRankEntryTerms(t *testing.T) {
 	assert.Equal(t, 0, rankEntryTerms(&Entry{}, nil, nil), "soso")
 	assert.Equal(t, 2, rankEntryTerms(&Entry{Title: HumanText{Body: "my foo bar"}}, []string{"foo"}, matcher), "soso")
 
-	assert.Equal(t, 2, rankEntryTerms(entry("my foo bar", ""), []string{"fòO"}, matcher), "soso")
+	assert.Equal(t, 2, rankEntryTerms(entry("my foo bar", "", ""), []string{"fòO"}, matcher), "ignores Diacritics")
+	assert.Equal(t, 5, rankEntryTerms(entry("my foo bar", "", "#barfoobaz"), []string{"#fòO"}, matcher), "matches tag substrings")
 }
 
 //

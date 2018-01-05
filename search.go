@@ -47,7 +47,7 @@ func rankEntryTerms(entry *Entry, terms []string, matcher *search.Matcher) int {
 		if strings.HasPrefix(term, "#") {
 			t := term[1:]
 			for _, cat := range entry.Categories {
-				if idx, _ := matcher.IndexString(t, cat.Term); idx >= 0 {
+				if idx, _ := matcher.IndexString(cat.Term, t); idx >= 0 {
 					rank += 5
 				}
 			}
