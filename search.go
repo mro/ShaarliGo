@@ -92,16 +92,16 @@ func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) {
 			catScheme := xmlBase.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String() + "/"
 
 			feed, _ := app.LoadFeed()
-			feed.XmlBase = xmlBase.String()
-			feed.Id = xmlBase.ResolveReference(mustParseURL(qu)).String()
-
-			feed.XmlNSShaarliGo = "http://purl.mro.name/ShaarliGo/2018/"
-			feed.SearchTerms = strings.Join(q, " ") // rather use http://www.opensearch.org/Specifications/OpenSearch/1.1#Example_of_OpenSearch_response_elements_in_Atom_1.0
-			feed.XmlNSOpenSearch = "http://a9.com/-/spec/opensearch/1.1/"
 
 			lang := language.Make("de") // should come from the entry, feed, settings, default (in that order)
 			matcher := search.New(lang, search.IgnoreDiacritics, search.IgnoreCase)
 			ret := feed.Search(func(entry *Entry) int { return rankEntryTerms(entry, terms, matcher) })
+
+			ret.XmlBase = xmlBase.String()
+			ret.Id = xmlBase.ResolveReference(mustParseURL(qu)).String()
+			ret.XmlNSShaarliGo = "http://purl.mro.name/ShaarliGo/2018/"
+			ret.SearchTerms = strings.Join(q, " ") // rather use http://www.opensearch.org/Specifications/OpenSearch/1.1#Example_of_OpenSearch_response_elements_in_Atom_1.0
+			ret.XmlNSOpenSearch = "http://a9.com/-/spec/opensearch/1.1/"
 
 			// paging / RFC5005
 			clamp := func(x int) int { return min(len(ret.Entries), x) }
@@ -139,6 +139,7 @@ func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) {
 					ret.Updated = item.Updated
 				}
 			}
+			ret.Categories = AggregateCategories(ret.Entries)
 			if ret.Updated.IsZero() {
 				ret.Updated = iso8601{now}
 			}

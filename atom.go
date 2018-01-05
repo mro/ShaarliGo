@@ -332,6 +332,26 @@ func (entry Entry) CategoriesMerged() []Category {
 	return uniqCategory(ret)
 }
 
+func AggregateCategories(entries []*Entry) []Category {
+	// aggregate & count feed entry categories
+	cats := make(map[string]int, 1*len(entries)) // raw len guess
+	for _, ent := range entries {
+		for _, cat := range ent.Categories {
+			cats[cat.Term] += 1
+		}
+	}
+	cs := make([]Category, 0, len(cats))
+	for term, count := range cats {
+		if term != "" && count != 0 {
+			cs = append(cs, Category{Term: term, Label: strconv.Itoa(count)})
+		}
+	}
+	sort.Slice(cs, func(i, j int) bool {
+		return strings.Compare(cs[i].Term, cs[j].Term) < 0
+	})
+	return cs
+}
+
 func uniqCategory(data []Category) []Category {
 	ret := make([]Category, 0, len(data))
 	for i, e := range data {

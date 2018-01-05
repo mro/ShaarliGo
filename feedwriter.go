@@ -143,25 +143,7 @@ func (feed Feed) writeFeeds(entriesPerPage int, fw feedWriter) error {
 	}
 
 	sort.Sort(ByPublishedDesc(feed.Entries))
-	{
-		// aggregate & count feed entry categories
-		cats := make(map[string]int, 1*len(feed.Entries)) // raw len guess
-		for _, ent := range feed.Entries {
-			for _, cat := range ent.Categories {
-				cats[cat.Term] += 1
-			}
-		}
-		cs := make([]Category, 0, len(cats))
-		for term, count := range cats {
-			if term != "" && count != 0 {
-				cs = append(cs, Category{Term: term, Label: strconv.Itoa(count)})
-			}
-		}
-		sort.Slice(cs, func(i, j int) bool {
-			return strings.Compare(cs[i].Term, cs[j].Term) < 0
-		})
-		feed.Categories = cs
-	}
+	feed.Categories = AggregateCategories(feed.Entries)
 
 	// load template feed, set Id and birthday.
 	// we need to know the total pages per each feed in order to know the 'last' uri.
