@@ -111,7 +111,7 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
 `); err == nil {
 			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 			io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='./assets/default/de/do-login.xslt'?>
+<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-login.xslt'?>
 <!--
   must be compatible with https://github.com/mro/Shaarli-API-test/blob/master/tests/test-login-ok.sh
   https://github.com/mro/ShaarliOS/blob/master/ios/ShaarliOS/API/ShaarliCmd.m#L386
@@ -282,7 +282,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 `); err == nil {
 			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 			io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='./assets/default/de/do-post.xslt'?>
+<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-post.xslt'?>
 <!--
   must be compatible with https://github.com/mro/Shaarli-API-test/blob/master/tests/test-post.sh
   https://github.com/mro/ShaarliOS/blob/master/ios/ShaarliOS/API/ShaarliCmd.m#L386
@@ -455,7 +455,7 @@ func (app *App) handleDoCheckLoginAfterTheFact(w http.ResponseWriter, r *http.Re
 `); err == nil {
 			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 			io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='./assets/default/de/do-changepassword.xslt'?>
+<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-changepassword.xslt'?>
 <!--
   must be compatible with https://github.com/mro/Shaarli-API-test/blob/master/tests/test-post.sh
   https://github.com/mro/ShaarliOS/blob/master/ios/ShaarliOS/API/ShaarliCmd.m#L386

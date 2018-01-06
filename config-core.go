@@ -46,6 +46,7 @@ type Config struct {
 	PwdBcrypt         string                   `yaml:"pwd_bcrypt"`
 	CookieStoreSecret string                   `yaml:"cookie_secret"`
 	TimeZone          string                   `yaml:"timezone"`
+	Skin              string                   `yaml:"skin"`
 	LinksPerPage      int                      `yaml:"links_per_page"` // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L18
 	BanAfter          int                      `yaml:"ban_after"`      // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L20
 	BanSeconds        int                      `yaml:"ban_seconds"`    // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L21
@@ -62,6 +63,7 @@ func LoadConfig() (Config, error) {
 	ret := Config{
 		CookieStoreSecret: base64.StdEncoding.EncodeToString(buf),
 		TimeZone:          "Europe/Paris",
+		Skin:              "default/de",
 		LinksPerPage:      100,   // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L18
 		BanAfter:          4,     // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L20
 		BanSeconds:        14400, // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L21

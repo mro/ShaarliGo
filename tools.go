@@ -77,7 +77,7 @@ func (app *App) handleTools(w http.ResponseWriter, r *http.Request) {
 `); err == nil {
 			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 			io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='../../assets/default/de/tools.xslt'?>
+<?xml-stylesheet type='text/xsl' href='../../assets/`+app.cfg.Skin+`/tools.xslt'?>
 `)
 			data := map[string]string{
 				"title":    app.cfg.Title,

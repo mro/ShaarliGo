@@ -46,9 +46,6 @@ const fileName = "index.xml" // could be 'index.atom' but xml may have a proper 
 const dirAssets = "assets"
 const dirApp = "app"
 
-const themeDefault = "default"
-const langDefault = "de"
-
 const uriPub = "pub"
 const uriPosts = "posts"
 const uriDays = "days"
@@ -107,7 +104,7 @@ func (app App) replaceFeeds(feed Feed) error {
 		os.RemoveAll(strDirStage)
 		os.RemoveAll(strDirOld)
 		// feed.XmlNSShaarliGo = myselfNamespace
-		if err = feed.writeFeeds(app.cfg.LinksPerPage, fileFeedWriter{baseDir: strDirStage}); err == nil {
+		if err = feed.writeFeeds(app.cfg.LinksPerPage, fileFeedWriter{baseDir: strDirStage, skinPath: app.cfg.Skin}); err == nil {
 			if _, err = os.Stat(dirPub); os.IsNotExist(err) {
 				err = nil // ignore nonexisting pub dir. That's fine for first launch.
 			} else {
@@ -292,13 +289,14 @@ func (feed Feed) writePage(uri string, page, lastPage int, fw feedWriter) error 
 }
 
 type fileFeedWriter struct {
-	baseDir string
+	baseDir  string
+	skinPath string
 }
 
 func (ffw fileFeedWriter) Write(feedOrEntry interface{}, self *url.URL, xsltFileName string) error {
 	uri := self.Path
 	pathPrefix := rexPath.ReplaceAllString(uri, "..")
-	xslt := path.Join(pathPrefix, dirAssets, themeDefault, langDefault, xsltFileName)
+	xslt := path.Join(pathPrefix, dirAssets, ffw.skinPath, xsltFileName)
 	dstDirName := filepath.Join(ffw.baseDir, filepath.FromSlash(uri))
 	dstFileName := filepath.Join(dstDirName, fileName)
 	var err error

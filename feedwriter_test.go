@@ -135,7 +135,7 @@ func (sfw saveFeedWriter) Write(feedOrEntry interface{}, self *url.URL, xsltFile
 	w := new(buff)
 
 	pathPrefix := rexPath.ReplaceAllString(uri, "..")
-	xslt := path.Join(pathPrefix, dirAssets, themeDefault, langDefault, xsltFileName)
+	xslt := path.Join(pathPrefix, dirAssets, "default/de", xsltFileName)
 
 	enc := xml.NewEncoder(w)
 	enc.Indent("", "  ")
