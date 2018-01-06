@@ -63,6 +63,6 @@ gzip --best < "${PROG_NAME}-linux-amd64-${VERSION}" \
 
 "${say}" "vario"
 # scp "ServerInfo.cgi" vario:~/mro.name/webroot/b/"info.cgi"
-ssh vario "cd mro.name/webroot/b/ && curl https://b.mro.name/u/shaarligo_cgi.gz | tee shaarligo_cgi.gz | gunzip > shaarligo.cgi && chmod a+x shaarligo.cgi && ls -l shaarligo?cgi*"
+ssh vario "cd mro.name/webroot/b/ && curl -L http://purl.mro.name/shaarligo_cgi.gz | tee shaarligo_cgi.gz | gunzip > shaarligo.cgi && chmod a+x shaarligo.cgi && ls -l shaarligo?cgi*"
 "${say}" "ok"
 
