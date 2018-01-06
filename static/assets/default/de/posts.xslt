@@ -24,10 +24,13 @@
   xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/"
   xmlns:media="http://search.yahoo.com/mrss/"
   xmlns:georss="http://www.georss.org/georss"
-  xmlns:sg="http://purl.mro.name/ShaarliGo/2018/"
+  xmlns:sg="http://purl.mro.name/ShaarliGo/"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   exclude-result-prefixes="a opensearch media georss sg"
   version="1.0">
+
+  <xsl:variable name="redirector">https://anonym.to/?</xsl:variable> <!-- mask the HTTP_REFERER -->
+  <xsl:variable name="archive">https://web.archive.org/web/</xsl:variable>
 
   <!-- replace linefeeds with <br> tags -->
   <xsl:template name="linefeed2br">
@@ -367,13 +370,13 @@ div.awesomplete { display: block; }
         <a class="time" title="Einzelansicht" href="{$xml_base_pub}/../{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_updated_human"/> ¶</a>
         <xsl:if test="$link">
           <xsl:text> ~ </xsl:text>
-          <a title="Archiv" href="https://web.archive.org/web/{$link}">@archive.org</a>
+          <a title="Archiv" href="{$archive}{$link}">@archive.org</a>
         </xsl:if>
       </p>
       <h4>
         <xsl:choose>
           <xsl:when test="$link">
-            <a href="{$link}" title="Original"><xsl:value-of select="a:title"/> 🚀</a>
+            <a href="{$redirector}{$link}" title="Original"><xsl:value-of select="a:title"/> 🚀</a>
           </xsl:when>
           <xsl:otherwise>
             <xsl:value-of select="a:title"/>

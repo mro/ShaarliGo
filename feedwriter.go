@@ -106,6 +106,7 @@ func (app App) replaceFeeds(feed Feed) error {
 		defer os.Remove(strFileLock)
 		os.RemoveAll(strDirStage)
 		os.RemoveAll(strDirOld)
+		// feed.XmlNSShaarliGo = myselfNamespace
 		if err = feed.writeFeeds(app.cfg.LinksPerPage, fileFeedWriter{baseDir: strDirStage}); err == nil {
 			if _, err = os.Stat(dirPub); os.IsNotExist(err) {
 				err = nil // ignore nonexisting pub dir. That's fine for first launch.

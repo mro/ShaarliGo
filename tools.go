@@ -68,7 +68,7 @@ func (app *App) handleTools(w http.ResponseWriter, r *http.Request) {
 
     <li class="disclosure">
       Responsible Disclosure: In case you are reluctant to <a
-      href="http://purl.mro.name/ShaarliGo">file a public issue</a>, feel free to
+      href="http://purl.mro.name/ShaarliGo/">file a public issue</a>, feel free to
       email <a href="mailto:ShaarliGo@mro.name?subject=">ShaarliGo@mro.name</a>.
     </li>
   </ol>

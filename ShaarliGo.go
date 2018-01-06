@@ -49,7 +49,7 @@ import (
 
 const toSession = 30 * time.Minute
 
-const myselfNamespace = "http://purl.mro.name/ShaarliGo"
+const myselfNamespace = "http://purl.mro.name/ShaarliGo/"
 
 var GitSHA1 = "Please set -ldflags \"-X main.GitSHA1=$(git rev-parse --short HEAD)\"" // https://medium.com/@joshroppo/setting-go-1-5-variables-at-compile-time-for-versioning-5b30a965d33e
 var fileFeedStorage string

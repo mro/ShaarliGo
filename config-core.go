@@ -50,6 +50,7 @@ type Config struct {
 	BanAfter          int                      `yaml:"ban_after"`      // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L20
 	BanSeconds        int                      `yaml:"ban_seconds"`    // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L21
 	UrlCleaner        []RegexpReplaceAllString `yaml:"url_cleaner"`
+	// Redirector     string                   `yaml:"redirector"` // actually a prefix to href - Hardcoded in xslt
 }
 
 func LoadConfig() (Config, error) {
@@ -72,6 +73,7 @@ func LoadConfig() (Config, error) {
 			{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?sueddeutsche\\.de/.*?-(\\d+\\.\\d+)(?:\\.html.*)?$", ReplaceAllString: "https://sz.de/${1}"},
 			{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?youtube.com/watch\\?v=([^&]+)(?:.*&(t=[^&]+))?(?:.*)$", ReplaceAllString: "https://youtu.be/${1}?${2}"},
 		},
+		// Redirector: "http://anonym.to/?",
 	}
 
 	if read, err := ioutil.ReadFile(configFileName); err == nil {
