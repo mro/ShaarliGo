@@ -27,6 +27,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/yhat/scrape"
 	"golang.org/x/net/html"
@@ -326,6 +327,61 @@ func _TestGetPostNew(t *testing.T) {
 
 func BenchmarkHello(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		fmt.Sprintf("hello")
+		s := fmt.Sprintf("hello")
+		assert.NotNil(b, s, "aha")
 	}
+}
+
+func fileIOPayload(idx int) {
+	strFile := filepath.Join("testdata", strconv.Itoa(idx))
+	if f, err := os.Create(strFile); err == nil {
+		f.WriteString(strFile)
+		f.Close()
+		os.Remove(strFile)
+	} else {
+		panic(err)
+	}
+}
+
+func BenchmarkFileCreateDeleteSequential(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		fileIOPayload(i)
+	}
+}
+
+func _BenchmarkFileCreateDeleteParallel(b *testing.B) {
+	var wg sync.WaitGroup
+	for i := 0; i < b.N; i++ {
+		go func() {
+			wg.Add(1)
+			defer wg.Done()
+			fileIOPayload(i)
+		}()
+	}
+	wg.Wait()
+}
+
+func BenchmarkFileCreateDeleteParallelChannel(b *testing.B) {
+	var wg sync.WaitGroup
+
+	worker := func(id int, jobs <-chan int) {
+		for j := range jobs {
+			func() {
+				wg.Add(1)
+				defer wg.Done()
+				fileIOPayload(j)
+			}()
+		}
+	}
+
+	jobs := make(chan int, 10)
+	for w := 0; w < 5; w++ {
+		go worker(w, jobs)
+	}
+	for j := 0; j < b.N; j++ {
+		jobs <- j
+	}
+	close(jobs)
+
+	wg.Wait()
 }
