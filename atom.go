@@ -200,9 +200,9 @@ func (c *GeoRssPoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error
 func xmlEncodeWithXslt(e interface{}, hrefXslt string, enc *xml.Encoder) error {
 	var err error
 	// preamble
-	if err = enc.EncodeToken(xml.ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)}); err == nil {
+	if err = enc.EncodeToken(xml.ProcInst{Target: "xml", Inst: []byte(`version="1.0" encoding="UTF-8"`)}); err == nil {
 		if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
-			if err = enc.EncodeToken(xml.ProcInst{"xml-stylesheet", []byte("type='text/xsl' href='" + hrefXslt + "'")}); err == nil {
+			if err = enc.EncodeToken(xml.ProcInst{Target: "xml-stylesheet", Inst: []byte("type='text/xsl' href='" + hrefXslt + "'")}); err == nil {
 				if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
 					if err = enc.EncodeToken(xml.Comment(lengthyAtomPreambleComment)); err == nil {
 						if err = enc.EncodeToken(xml.CharData("\n")); err == nil {

@@ -35,7 +35,7 @@ rm "${PROG_NAME}"-*-"${VERSION}" 2>/dev/null
 
 "${say}" "test"
 umask 0022
-go fmt && go test --short || { exit $?; }
+go fmt && go vet && go test --short || { exit $?; }
 "${say}" "ok"
 
 "${say}" "build localhost"
