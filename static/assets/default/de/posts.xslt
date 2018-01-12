@@ -27,6 +27,8 @@
   xmlns:sg="http://purl.mro.name/ShaarliGo/"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   exclude-result-prefixes="a opensearch media georss sg"
+  xmlns:math="http://exslt.org/math"
+  extension-element-prefixes="math"
   version="1.0">
 
   <xsl:variable name="redirector">https://anonym.to/?</xsl:variable> <!-- mask the HTTP_REFERER -->
@@ -176,6 +178,7 @@ p.categories {
 }
 .categories a {
   padding: 0.5ex;
+  margin: 0.5ex;
   background: linear-gradient(#F2F2F2, #ffffff);
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
   border-radius: 3px;
@@ -239,6 +242,19 @@ div.awesomplete { display: block; }
       <xsl:if test="a:subtitle">
         <h2><xsl:value-of select="a:subtitle"/></h2>
       </xsl:if>
+
+      <p id="tags" class="categories">
+        <xsl:variable name="labelsDesc">
+          <xsl:for-each select="a:category">
+            <xsl:sort select="@label" order="descending"/>
+            <xsl:value-of select="@label"/>
+          </xsl:for-each>
+        </xsl:variable>
+        <xsl:for-each select="a:category">
+          <xsl:sort select="@term" order="ascending"/>
+          <a href="{@term}/" class="tag" style="font-size:{7.2 + @label * 0.8}pt"><span class="label"><xsl:value-of select="@term"/></span>&#160;(<span class="count"><xsl:value-of select="@label"/></span>)</a>
+        </xsl:for-each>
+      </p>
 
       <ol id="entries" class="list-unstyled">
         <xsl:apply-templates select="a:entry"/>
