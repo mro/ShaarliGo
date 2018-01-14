@@ -27,4 +27,4 @@ RewriteRule ^/?$ %{ENV:BASE}pub/posts/ [redirect=301,last]
 Header add Content-Security-Policy "default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-hGqewLn4csF93PEX/0TCk2jdnAytXBZFxFBzKt7wcgo='; connect-src 'self'; font-src 'self'; img-src * 'self' data:; media-src *;"
 
 # nice
-Header add X-Powered-By "http://purl.mro.name/ShaarliGo#v0.0.2"
+Header add X-Powered-By "http://purl.mro.name/ShaarliGo#v0.0.3"
