@@ -217,6 +217,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		}
 
 		feed, _ := app.LoadFeed()
+		feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
 		post := sanitiseURLString(params["post"][0], app.cfg.UrlCleaner)
 
 		_, ent := feed.findEntryByIdSelfOrUrl(post)
@@ -260,7 +261,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			// data["lf_source"] = params["source"][0]
 		}
 
-		if tmpl, err := template.New("linkform").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
+		if tmpl, err := template.New("linkform").Parse(`<html xmlns="http://www.w3.org/1999/xhtml" xml:base="{{.xml_base}}">
 <head><title>{{.title}}</title></head>
 <body>
   <ul id="taglist" style="display:none">{{ range $idx, $cat := .categories }}<li>#{{ $cat.Term }}</li>{{ end }}</ul>
@@ -295,6 +296,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			io.ReadFull(rand.Reader, bTok)
 			data["token"] = hex.EncodeToString(bTok)
 			data["returnurl"] = ""
+			data["xml_base"] = feed.XmlBase
 
 			if err := tmpl.Execute(w, data); err != nil {
 				http.Error(w, "Coudln't send linkform: "+err.Error(), http.StatusInternalServerError)
@@ -332,6 +334,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 					log.Println("todo: use returnurl ", returnurl)
 
 					feed, _ := app.LoadFeed()
+					feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
 
 					lf_url := r.FormValue("lf_url")
 					_, ent := feed.findEntryById(identifier)

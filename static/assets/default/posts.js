@@ -5,13 +5,14 @@
   // check if we're logged-in (AJAX or Cookie?).
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function(data0) {
-    if (xhr.readyState == 4) {
+    if (xhr.readyState > 3) {
       // console.log('xhr.status = ' + xhr.status);
       document.documentElement.classList.add(xhr.status === 200 ? 'logged-in' : 'logged-out');
       // store the result locally and use as initial value for later calls?
     }
   }
   xhr.open('GET', xml_base_pub + '/../shaarligo.cgi/session/');
+  xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
   xhr.send(null);
 }
 
@@ -19,7 +20,7 @@
 // onload="document.form_post.post.focus();"
 
 document.addEventListener('DOMContentLoaded', function(event) {
-  console.log(event.type);
+  // console.log(event.type);
   // inspired by http://leaverou.github.io/awesomplete/#extensibility
   var addlink = new Awesomplete('input[data-multiple]', {
     minChars: 3,
@@ -31,4 +32,13 @@ document.addEventListener('DOMContentLoaded', function(event) {
       this.input.value = before + text + " ";
     }
   });
+
+  var xhr = new XMLHttpRequest()
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState > 3 && xhr.status == 200)
+      addlink.list = JSON.parse(xhr.response);
+  };
+  xhr.open('GET', xml_base_pub + '/tags/index.json');
+  xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+  xhr.send();
 });

@@ -33,14 +33,14 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:variable name="xml_base_pub">pub</xsl:variable>
+  <xsl:variable name="xml_base_pub" select="concat(/*/@xml:base,'pub')"/>
 
   <xsl:template match="/">
     <xsl:apply-templates select="h:html"/>
   </xsl:template>
 
   <xsl:template match="h:html">
-    <html xmlns="http://www.w3.org/1999/xhtml" class="logged-out">
+    <html xmlns="http://www.w3.org/1999/xhtml" class="logged-out" data-xml-base-pub="{$xml_base_pub}">
       <xsl:apply-templates select="h:head"/>
       <xsl:apply-templates select="h:body"/>
     </html>
@@ -145,8 +145,8 @@ div.awesomplete { display: block; }
     <form method="{@method}" name="{@name}" class="form-horizontal">
       <xsl:copy-of select=".//h:input[@type='hidden']"/>
       <input name="lf_url" type="text" placeholder="https://..." value="{h:input[@name='lf_url']/@value}" class="form-control"/>
-      <input autofocus="autofocus" name="lf_title" type="text" placeholder="Ein Titel, gerne mit #Schlagwort" value="{h:input[@name='lf_title']/@value}" class="awesomplete form-control" data-multiple="true" data-list="#taglist"/>
-      <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="14" cols="25" class="form-control" data-multiple="true" data-list="#taglist">
+      <input autofocus="autofocus" name="lf_title" type="text" placeholder="Ein Titel, gerne mit #Schlagwort" value="{h:input[@name='lf_title']/@value}" class="awesomplete form-control" data-multiple="true"/>
+      <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="14" cols="25" class="form-control" data-multiple="true">
         <xsl:value-of select="h:textarea[@name='lf_description']"/>
         <xsl:call-template name="tags_with_hash">
           <xsl:with-param name="string" select="h:input[@name='lf_tags']/@value"/>

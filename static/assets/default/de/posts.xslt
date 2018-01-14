@@ -212,14 +212,10 @@ div.awesomplete { display: block; }
 
       <xsl:call-template name="links_commands"/>
 
-      <ul id="taglist" style="display:none">
-        <xsl:for-each select="a:category"><li>#<xsl:value-of select="@term"/></li></xsl:for-each>
-      </ul>
-
       <xsl:comment> https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ </xsl:comment>
       <form id="form_search" name="form_search" class="form-horizontal form-search" action="{$xml_base_pub}/../shaarligo.cgi/search/">
         <div class="input-group">
-          <input tabindex="100" name="q" value="{@sg:searchTerms}" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="awesomplete form-control search-query" data-multiple="true" data-list="#taglist"/>
+          <input tabindex="100" name="q" value="{@sg:searchTerms}" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="awesomplete form-control search-query" data-multiple="true"/>
           <span class="input-group-btn">
             <button tabindex="200" type="submit" class="btn btn-primary">Suche</button>
           </span>
@@ -228,7 +224,7 @@ div.awesomplete { display: block; }
 
       <form id="form_post" name="form_post" class="form-horizontal" action="{$xml_base_pub}/../shaarligo.cgi">
         <div class="input-group">
-          <input tabindex="300" name="post" type="text" placeholder="Was gibt's #Neues? (Notiz oder URL)" class="awesomplete form-control" data-multiple="true" data-list="#taglist"/>
+          <input tabindex="300" name="post" type="text" placeholder="Was gibt's #Neues? (Notiz oder URL)" class="awesomplete form-control" data-multiple="true"/>
           <span class="input-group-btn">
             <button tabindex="400" type="submit" class="btn btn-primary">Shaaaare!</button>
           </span>
