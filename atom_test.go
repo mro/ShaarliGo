@@ -169,7 +169,7 @@ func _TestFeedLargeToAtomClean(t *testing.T) {
 		}
 	}
 
-	err = feed.Save("testdata/sebsauvage.atom~")
+	err = feed.SaveToFile("testdata/sebsauvage.atom~")
 	assert.Nil(t, err, "soso")
 }
 

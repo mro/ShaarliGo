@@ -20,6 +20,7 @@ package main
 import (
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -108,7 +109,9 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
-			if err = app.replaceFeeds(feed); err != nil {
+			feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
+			if err := app.PublishFeedsForModifiedEntries(feed, feed.Entries); err != nil {
+				log.Println("couldn't write feeds: ", err.Error())
 				http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
 				return
 			}

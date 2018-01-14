@@ -346,6 +346,10 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 							return
 						}
 					}
+					ent0 := *ent
+
+					location = strings.Join([]string{location, ent.Id}, "?#")
+
 					ent.Updated = iso8601{now}
 					ent.Title = HumanText{Body: strings.TrimSpace(r.FormValue("lf_title")), Type: "text"}
 					url := mustParseURL(lf_url)
@@ -374,12 +378,13 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 						http.Error(w, "couldn't add entry: "+err.Error(), http.StatusInternalServerError)
 						return
 					}
-					location = strings.Join([]string{location, ent.Id}, "?#")
-					feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
-					feed.Id = feed.XmlBase
-					app.SaveFeed(feed)
 
-					if err := app.replaceFeeds(feed); err != nil {
+					if err := app.SaveFeed(feed); err != nil {
+						http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
+						return
+					}
+					feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
+					if err := app.PublishFeedsForModifiedEntries(feed, []*Entry{ent, &ent0}); err != nil {
 						log.Println("couldn't write feeds: ", err.Error())
 						http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
 						return
@@ -392,12 +397,13 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			token := r.FormValue("token")
 			log.Println("todo: check token ", token)
 			feed, _ := app.LoadFeed()
-			if entry := feed.deleteEntry(identifier); nil != entry {
+			if ent := feed.deleteEntry(identifier); nil != ent {
+				if err := app.SaveFeed(feed); err != nil {
+					http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
+					return
+				}
 				feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
-				feed.Id = feed.XmlBase
-				app.SaveFeed(feed)
-
-				if err := app.replaceFeeds(feed); err != nil {
+				if err := app.PublishFeedsForModifiedEntries(feed, []*Entry{ent}); err != nil {
 					log.Println("couldn't write feeds: ", err.Error())
 					http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
 					return

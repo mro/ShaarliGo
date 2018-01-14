@@ -18,9 +18,8 @@
 package main
 
 import (
-	"encoding/xml"
-	"fmt"
-	"net/url"
+	//	"encoding/xml"
+	//"net/url"
 	"path"
 	"regexp"
 	"sort"
@@ -71,19 +70,28 @@ func TestComputeLastPage(t *testing.T) {
 	assert.Equal(t, 1, computeLastPage(101, 100), "Oha")
 }
 
-func TestFeedUrlsForEntry(t *testing.T) {
+func TestEntryFeedFilters(t *testing.T) {
 	itm := &Entry{
 		Id:         "id_0",
 		Published:  iso8601{mustParseRFC3339("2010-12-31T00:11:22Z")},
 		Categories: []Category{Category{Term: "🐳"}},
 	}
 
-	uris := feedUrlsForEntry(itm)
-
-	assert.Equal(t, 2+1, len(uris), "Oha")
-	assert.Equal(t, "pub/posts/", uris[0], "Oha")
-	assert.Equal(t, "pub/days/2010-12-31/", uris[1], "Oha")
-	assert.Equal(t, "pub/tags/🐳/", uris[2], "Oha")
+	uris := itm.FeedFilters(nil)
+	keys := make([]string, len(uris))
+	{
+		i := 0
+		for k := range uris {
+			keys[i] = k
+			i++
+		}
+		sort.Strings(keys)
+	}
+	assert.Equal(t, []string{
+		"pub/days/2010-12-31/",
+		"pub/posts/", "pub/posts/id_0/",
+		"pub/tags/", "pub/tags/🐳/",
+	}, keys, "Oha")
 }
 
 func TestPathJoin(t *testing.T) {
@@ -97,68 +105,178 @@ func TestAppendPageNumber(t *testing.T) {
 	assert.Equal(t, "pub/posts-1/", appendPageNumber("pub/posts/", 1), "Oha")
 }
 
-type buff struct {
-	b []byte
-}
-
-func (buff *buff) Write(p []byte) (n int, err error) {
-	buff.b = append(buff.b, p...)
-	return len(p), nil
-}
-
-func (buff *buff) Close() error {
-	return nil
-}
-
 func TestWriteFeedsEmpty0(t *testing.T) {
-	assert.Equal(t, "feed/@xml:base must be set to an absolute URL with a trailing slash", new(Feed).writeFeeds(2, nil).Error(), "aha")
+	assert.Equal(t, "feed/@xml:base must be set to an absolute URL with a trailing slash", App{}.PublishFeedsForModifiedEntries(Feed{}, nil).Error(), "aha")
 }
 
-type saveFeedWriter struct {
-	feeds   map[string]Feed
-	entries map[string]Entry
-	bufs    map[string]buff
+func TestWriteFeedsAddOneAndOneAndRemoveFirst(t *testing.T) {
+	feed := &Feed{XmlBase: mustParseURL("http://example.com/").String()}
+	{
+		entry := &Entry{
+			Id:         "id_0",
+			Published:  iso8601{mustParseRFC3339("2010-12-31T00:11:22Z")},
+			Categories: []Category{Category{Term: "🐳"}},
+		}
+
+		feed.Append(entry)
+
+		complete := feed.CompleteFeedsForModifiedEntries([]*Entry{entry})
+		sort.Slice(complete, func(i, j int) bool { return complete[i].Id < complete[j].Id })
+
+		assert.Equal(t, 5, len(complete), "ja")
+
+		assert.Equal(t, "pub/days/2010-12-31/", complete[0].Id, "ja")
+		assert.Equal(t, 1, len(complete[0].Entries), "ja")
+
+		assert.Equal(t, "pub/posts/", complete[1].Id, "ja")
+		assert.Equal(t, 1, len(complete[1].Entries), "ja")
+
+		assert.Equal(t, "pub/posts/id_0/", complete[2].Id, "ja")
+		assert.Equal(t, 1, len(complete[2].Entries), "ja")
+
+		assert.Equal(t, "pub/tags/", complete[3].Id, "ja")
+		assert.Equal(t, 0, len(complete[3].Entries), "ja")
+
+		assert.Equal(t, "pub/tags/🐳/", complete[4].Id, "ja")
+		assert.Equal(t, 1, len(complete[4].Entries), "ja")
+	}
+	{
+		entry := &Entry{
+			Id:         "id_1",
+			Published:  iso8601{mustParseRFC3339("2010-12-30T00:11:22Z")},
+			Categories: []Category{Category{Term: "foo"}},
+		}
+
+		feed.Append(entry)
+
+		complete := feed.CompleteFeedsForModifiedEntries([]*Entry{entry})
+		sort.Slice(complete, func(i, j int) bool { return complete[i].Id < complete[j].Id })
+
+		assert.Equal(t, 5, len(complete), "ja")
+
+		assert.Equal(t, "pub/days/2010-12-30/", complete[0].Id, "ja")
+		assert.Equal(t, 1, len(complete[0].Entries), "ja")
+
+		assert.Equal(t, "pub/posts/", complete[1].Id, "ja")
+		assert.Equal(t, 2, len(complete[1].Entries), "ja")
+
+		assert.Equal(t, "pub/posts/id_1/", complete[2].Id, "ja")
+		assert.Equal(t, 1, len(complete[2].Entries), "ja")
+
+		assert.Equal(t, "pub/tags/", complete[3].Id, "ja")
+		assert.Equal(t, 0, len(complete[3].Entries), "ja")
+
+		assert.Equal(t, "pub/tags/foo/", complete[4].Id, "ja")
+		assert.Equal(t, 1, len(complete[4].Entries), "ja")
+	}
+	{
+		e0 := *feed.Entries[0]
+		feed.deleteEntry("id_0")
+
+		complete := feed.CompleteFeedsForModifiedEntries([]*Entry{&e0})
+		sort.Slice(complete, func(i, j int) bool { return complete[i].Id < complete[j].Id })
+
+		assert.Equal(t, 5, len(complete), "ja")
+
+		assert.Equal(t, "pub/days/2010-12-31/", complete[0].Id, "ja")
+		assert.Equal(t, 0, len(complete[0].Entries), "ja")
+
+		assert.Equal(t, "pub/posts/", complete[1].Id, "ja")
+		assert.Equal(t, 1, len(complete[1].Entries), "ja")
+
+		assert.Equal(t, "pub/posts/id_0/", complete[2].Id, "ja")
+		assert.Equal(t, 0, len(complete[2].Entries), "ja")
+
+		assert.Equal(t, "pub/tags/", complete[3].Id, "ja")
+		assert.Equal(t, 0, len(complete[3].Entries), "ja")
+
+		assert.Equal(t, "pub/tags/🐳/", complete[4].Id, "ja")
+		assert.Equal(t, 0, len(complete[4].Entries), "ja")
+	}
 }
 
-func (sfw saveFeedWriter) Write(feedOrEntry interface{}, self *url.URL, xsltFileName string) error {
-	uri := self.String()
-
-	fep, ok := feedOrEntry.(*Feed)
-	if ok {
-		sfw.feeds[uri] = *fep
+func TestWriteFeedsPaged(t *testing.T) {
+	feed := &Feed{
+		XmlBase: mustParseURL("http://example.com/").String(),
+		XmlLang: "deu",
+		Id:      mustParseURL("http://example.com").String(),
+		Title:   HumanText{Body: "Hello, Atom!"},
+		Entries: []*Entry{
+			&Entry{
+				Id:        "e2",
+				Title:     HumanText{Body: "Hello, Entry 2!"},
+				Published: iso8601{mustParseRFC3339("1990-12-31T02:02:02+01:00")},
+			},
+			&Entry{
+				Id:        "e1",
+				Title:     HumanText{Body: "Hello, Entry 1!"},
+				Published: iso8601{mustParseRFC3339("1990-12-31T01:01:01+01:00")},
+			},
+			&Entry{
+				Id:        "e0",
+				Title:     HumanText{Body: "Hello, Entry 0!"},
+				Published: iso8601{mustParseRFC3339("1990-12-30T00:00:00+01:00")},
+			},
+		},
 	}
-	enp, ok := feedOrEntry.(*Entry)
-	if ok {
-		sfw.entries[uri] = *enp
-	}
 
-	w := new(buff)
+	sort.Sort(ByPublishedDesc(feed.Entries))
 
-	pathPrefix := rexPath.ReplaceAllString(uri, "..")
-	xslt := path.Join(pathPrefix, dirAssets, "default/de", xsltFileName)
+	complete := feed.CompleteFeedsForModifiedEntries(feed.Entries)
+	assert.Equal(t, 7, len(complete), "uhu")
 
-	enc := xml.NewEncoder(w)
-	enc.Indent("", "  ")
-	if err := xmlEncodeWithXslt(feedOrEntry, xslt, enc); err == nil {
-		enc.Flush()
-		w.Close()
-		sfw.bufs[uri] = *w
-	}
+	pages, err := feed.PagedFeeds(complete, 1)
+	assert.Nil(t, err, "uhu")
+	assert.Equal(t, 10, len(pages), "uhu")
 
-	return nil
-}
+	sort.Slice(complete, func(i, j int) bool { return complete[i].Id < complete[j].Id })
+	sort.Slice(pages, func(i, j int) bool { return LinkRelSelf(pages[i].Links).Href < LinkRelSelf(pages[j].Links).Href })
 
-func keys4map(mymap map[string]buff) []string {
-	keys := make([]string, len(mymap))
 	i := 0
-	for k := range mymap {
-		keys[i] = k
-		i++
-	}
-	sort.Strings(keys)
-	return keys
+	assert.Equal(t, "pub/days/1990-12-30/", pages[i].Id, "ja")
+	assert.Equal(t, "pub/days/1990-12-30/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, 1, len(pages[i].Entries), "ja")
+	i++
+	assert.Equal(t, "pub/days/1990-12-31/", pages[i].Id, "ja")
+	assert.Equal(t, "pub/days/1990-12-31-1/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, 1, len(pages[i].Entries), "ja")
+	i++
+	assert.Equal(t, "pub/days/1990-12-31/", pages[i].Id, "ja")
+	assert.Equal(t, "pub/days/1990-12-31/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, 1, len(pages[i].Entries), "ja")
+	i++
+	assert.Equal(t, "pub/posts/", pages[i].Id, "ja")
+	assert.Equal(t, "pub/posts-1/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, 1, len(pages[i].Entries), "ja")
+	i++
+	assert.Equal(t, "pub/posts/", pages[i].Id, "ja")
+	assert.Equal(t, "pub/posts-2/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, 1, len(pages[i].Entries), "ja")
+	i++
+	assert.Equal(t, "pub/posts/", pages[i].Id, "ja")
+	assert.Equal(t, "pub/posts/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, 1, len(pages[i].Entries), "ja")
+	i++
+	assert.Equal(t, "pub/posts/e0/", pages[i].Id, "ja")
+	assert.Equal(t, "pub/posts/e0/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, 1, len(pages[i].Entries), "ja")
+	i++
+	assert.Equal(t, "pub/posts/e1/", pages[i].Id, "ja")
+	assert.Equal(t, "pub/posts/e1/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, 1, len(pages[i].Entries), "ja")
+	i++
+	assert.Equal(t, "pub/posts/e2/", pages[i].Id, "ja")
+	assert.Equal(t, "pub/posts/e2/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, 1, len(pages[i].Entries), "ja")
+	i++
+	assert.Equal(t, "pub/tags/", pages[i].Id, "ja")
+	assert.Equal(t, "pub/tags/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, 0, len(pages[i].Entries), "ja")
+	i++
+	assert.Equal(t, len(pages), i, "ja")
 }
 
+/*
 func TestWriteFeedsEmpty1(t *testing.T) {
 	feed := &Feed{
 		XmlBase: mustParseURL("http://example.com/").String(),
@@ -479,8 +597,4 @@ func BenchmarkWriteFeedsPaged(b *testing.B) {
 		feed.writeFeeds(2, sfw)
 	}
 }
-
-func ExampleFeed_WriteFeeds() {
-	fmt.Println("hello")
-	// Output: hello
-}
+*/

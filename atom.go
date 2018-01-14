@@ -104,6 +104,11 @@ type Generator struct {
 // http://stackoverflow.com/a/25015260
 type iso8601 struct{ time.Time }
 
+func (v iso8601) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	e.EncodeElement(v.Format(time.RFC3339), start)
+	return nil
+}
+
 func (c *iso8601) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var v string
 	d.DecodeElement(&v, &start)
@@ -270,13 +275,21 @@ func (feed *Feed) deleteEntry(id string) *Entry {
 		copy(a[i:], a[i+1:])
 		a[len(a)-1] = nil // or the zero value of T
 		feed.Entries = a[:len(a)-1]
+
+		// don' try to be smart. When removing days feeds, we rely on correct Published date.
+		// entry.Published = iso8601{time.Time{}}
+		// entry.Updated = entry.Published
+
 		return entry
 	}
 	return nil
 }
 
-func (feed Feed) Save(dst string) error {
-	defer un(trace("Feed.Save"))
+func (feed Feed) SaveToFile(dst string) error {
+	defer un(trace("Feed.SaveToFile"))
+	sort.Sort(ByPublishedDesc(feed.Entries))
+	// remove deleted entries? Maybe Published date zero.
+
 	tmp := dst + "~"
 	var err error
 	var w *os.File

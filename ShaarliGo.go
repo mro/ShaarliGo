@@ -122,9 +122,13 @@ func (app App) LoadFeed() (Feed, error) {
 	return FeedFromFileName(fileFeedStorage)
 }
 
+// Internal storage, not publishing.
 func (app App) SaveFeed(feed Feed) error {
 	feed.Categories = nil
-	return feed.Save(fileFeedStorage)
+	feed.Id = ""
+	feed.XmlBase = ""
+	feed.Updated = iso8601{}
+	return feed.SaveToFile(fileFeedStorage)
 }
 
 func handleMux(w http.ResponseWriter, r *http.Request) {
