@@ -93,7 +93,7 @@ func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) {
 
 			feed, _ := app.LoadFeed()
 
-			lang := language.Make("de") // should come from the entry, feed, settings, default (in that order)
+			lang := language.Make("de") // todo: should come from the entry, feed, settings, default (in that order)
 			matcher := search.New(lang, search.IgnoreDiacritics, search.IgnoreCase)
 			ret := feed.Search(func(entry *Entry) int { return rankEntryTerms(entry, terms, matcher) })
 

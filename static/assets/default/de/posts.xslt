@@ -201,6 +201,9 @@ img.img-thumbnail {
 /* I'm surprised, that I need to fiddle: */
 .awesomplete > ul { top: 5ex; z-index: 3; }
 div.awesomplete { display: block; }
+
+h4 a::after { content: " 🔗"; }
+a.time::after { content: " ¶"; }
       </style>
       <title><xsl:value-of select="a:*/a:title"/></title>
     </head>
@@ -379,7 +382,7 @@ div.awesomplete { display: block; }
         <span class="hidden-logged-out" title="Bearbeiten">
           <a href="{$xml_base_pub}/../{a:link[@rel='edit']/@href}">🔨</a><xsl:text> </xsl:text>
         </span>
-        <a class="time" title="Einzelansicht" href="{$xml_base_pub}/../{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_updated_human"/> ¶</a>
+        <a class="time" title="Einzelansicht" href="{$xml_base_pub}/../{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_updated_human"/></a>
         <xsl:if test="$link">
           <xsl:text> ~ </xsl:text>
           <a title="Archiv" href="{$archive}{$link}">@archive.org</a>
@@ -388,7 +391,7 @@ div.awesomplete { display: block; }
       <h4>
         <xsl:choose>
           <xsl:when test="$link">
-            <a href="{$redirector}{$link}" title="Original"><xsl:value-of select="a:title"/> 🚀</a>
+            <a href="{$redirector}{$link}" title="Original"><xsl:value-of select="a:title"/></a>
           </xsl:when>
           <xsl:otherwise>
             <xsl:value-of select="a:title"/>
@@ -409,6 +412,8 @@ div.awesomplete { display: block; }
         <!-- Überbleibsel vom Shaarli Atom Feed raus: -->
         <!-- xsl:value-of select="substring-before(a:content[not(@src)], '&lt;br&gt;(&lt;a href=&quot;https://links.mro.name/?')" disable-output-escaping="yes" / -->
         <xsl:apply-templates select="a:content"/>
+
+        <p class="small"><a href="{$link}"><xsl:value-of select="$link"/></a></p>
 
         <p class="categories" title="Schlagworte">
           <xsl:for-each select="a:category">

@@ -71,41 +71,35 @@ var rexPath = regexp.MustCompile("[^/]+")
 
 const uriPubPosts = uriPub + "/" + uriPosts + "/"
 const uriPubTags = uriPub + "/" + uriTags + "/"
+const uriPubDays = uriPub + "/" + uriDays + "/"
 
-func addEntryFilter(m map[string][]func(*Entry) bool, k string, f func(*Entry) bool) map[string][]func(*Entry) bool {
-	m[k] = append(m[k], f)
-	return m
-}
-
-func (entry Entry) FeedFilters(uri2filter map[string][]func(*Entry) bool) map[string][]func(*Entry) bool {
-	defer un(trace("Entry.FeedFilters " + entry.Id))
+func (entry Entry) FeedFilters(uri2filter map[string]func(*Entry) bool) map[string]func(*Entry) bool {
+	// defer un(trace("Entry.FeedFilters " + entry.Id))
 	if nil == uri2filter {
-		uri2filter = make(map[string][]func(*Entry) bool, 10)
-	}
-	a := func(k string, f func(*Entry) bool) {
-		addEntryFilter(uri2filter, k, f)
+		uri2filter = make(map[string]func(*Entry) bool, 10)
 	}
 
-	a(uriPubPosts, func(*Entry) bool { return true })
-	a(uriPubPosts+entry.Id+"/", func(iEntry *Entry) bool { return entry.Id == iEntry.Id })
+	uri2filter[uriPubPosts] = func(*Entry) bool { return true }
+	uri2filter[uriPubPosts+entry.Id+"/"] = func(iEntry *Entry) bool { return entry.Id == iEntry.Id }
 
-	a(uriPubTags, func(*Entry) bool { return false }) // dummy to get an (empty) feed
+	uri2filter[uriPubTags] = func(*Entry) bool { return false } // dummy to get an (empty) feed
 	for _, cat := range entry.Categories {
-		a(uriPubTags+cat.Term+"/", func(iEntry *Entry) bool {
+		trm := cat.Term
+		uri2filter[uriPubTags+trm+"/"] = func(iEntry *Entry) bool {
 			for _, iCat := range iEntry.Categories {
-				if cat.Term == iCat.Term && cat.Scheme == iCat.Scheme {
+				if trm == iCat.Term { // && cat.Scheme == iCat.Scheme {
 					return true
 				}
 			}
 			return false
-		})
+		}
 	}
 
-	// a("pub/days/", func(*Entry) bool { return false })
+	// uri2filter["pub/days/", func(*Entry) bool { return false })
 	dayStr := entry.Published.Format(time.RFC3339[:10])
-	a("pub/days/"+dayStr+"/", func(iEntry *Entry) bool {
+	uri2filter[uriPubDays+dayStr+"/"] = func(iEntry *Entry) bool {
 		return dayStr == iEntry.Published.Format(time.RFC3339[:10])
-	})
+	}
 
 	return uri2filter
 }
@@ -120,23 +114,17 @@ func LinkRelSelf(links []Link) Link {
 }
 
 // collect all entries into all (unpaged, complete) feeds to publish
-func (seed Feed) CompleteFeeds(uri2filter map[string][]func(*Entry) bool) []Feed {
+func (seed Feed) CompleteFeeds(uri2filter map[string]func(*Entry) bool) []Feed {
 	defer un(trace("Feed.CompleteFeeds"))
 	ret := make([]Feed, 0, len(uri2filter))
-	for uri, entryFilters := range uri2filter {
+	for uri, entryFilter := range uri2filter {
 		feed := seed // clone
 		feed.Id = uri
 		feed.Entries = nil // save reallocs?
 		for _, entry := range seed.Entries {
-			for _, entryFilter := range entryFilters {
-				if entryFilter(entry) {
-					feed.Entries = append(feed.Entries, entry)
-					break
-				}
+			if entryFilter(entry) {
+				feed.Entries = append(feed.Entries, entry)
 			}
-		}
-		if 0 < len(feed.Entries) {
-			feed.Updated = feed.Entries[0].Updated // that's just a guess.
 		}
 		if uriPubTags == uri {
 			feed.Categories = AggregateCategories(seed.Entries) // rather the ones from pub/posts
@@ -164,7 +152,7 @@ func computeLastPage(count int, entriesPerPage int) int {
 }
 
 func (seed Feed) Pages(entriesPerPage int) []Feed {
-	defer un(trace("Feed.Pages " + seed.Id))
+	// defer un(trace("Feed.Pages " + seed.Id))
 	entriesPerPage = max(1, entriesPerPage)
 	totalEntries := len(seed.Entries)
 	lastPage := computeLastPage(totalEntries, entriesPerPage)
@@ -182,17 +170,17 @@ func (seed Feed) Pages(entriesPerPage int) []Feed {
 			feed.Entries = seed.Entries[lower:upper]
 		}
 		pagedUri := appendPageNumber(uri, page)
-		feed.Links = append(feed.Links, Link{Rel: relSelf, Href: pagedUri, Title: fmt.Sprintf("%d", page+1)})
+		feed.Links = append(feed.Links, Link{Rel: relSelf, Href: pagedUri, Title: strconv.Itoa(page + 1)})
 		// https://tools.ietf.org/html/rfc5005#section-3
 		if lastPage > 0 {
-			feed.Links = append(feed.Links, Link{Rel: relFirst, Href: appendPageNumber(uri, 0), Title: fmt.Sprintf("%d", 0+1)})
+			feed.Links = append(feed.Links, Link{Rel: relFirst, Href: appendPageNumber(uri, 0), Title: strconv.Itoa(0 + 1)})
 			if page > 0 {
-				feed.Links = append(feed.Links, Link{Rel: relPrevious, Href: appendPageNumber(uri, page-1), Title: fmt.Sprintf("%d", page-1+1)})
+				feed.Links = append(feed.Links, Link{Rel: relPrevious, Href: appendPageNumber(uri, page-1), Title: strconv.Itoa(page - 1 + 1)})
 			}
 			if page < lastPage {
-				feed.Links = append(feed.Links, Link{Rel: relNext, Href: appendPageNumber(uri, page+1), Title: fmt.Sprintf("%d", page+1+1)})
+				feed.Links = append(feed.Links, Link{Rel: relNext, Href: appendPageNumber(uri, page+1), Title: strconv.Itoa(page + 1 + 1)})
 			}
-			feed.Links = append(feed.Links, Link{Rel: relLast, Href: appendPageNumber(uri, lastPage), Title: fmt.Sprintf("%d", lastPage+1)})
+			feed.Links = append(feed.Links, Link{Rel: relLast, Href: appendPageNumber(uri, lastPage), Title: strconv.Itoa(lastPage + 1)})
 		} else {
 			// TODO https://tools.ietf.org/html/rfc5005#section-2
 			// xmlns:fh="http://purl.org/syndication/history/1.0" <fh:complete/>
@@ -203,10 +191,25 @@ func (seed Feed) Pages(entriesPerPage int) []Feed {
 }
 
 func (feed Feed) CompleteFeedsForModifiedEntries(entries []*Entry) []Feed {
-	defer un(trace("Feed.CompleteFeedsForModifiedEntries"))
-	var uri2filter map[string][]func(*Entry) bool
+	// defer un(trace("Feed.CompleteFeedsForModifiedEntries"))
+	var uri2filter map[string]func(*Entry) bool
 	for _, entry := range entries {
 		uri2filter = entry.FeedFilters(uri2filter)
+	}
+
+	if feed.Updated.IsZero() {
+		feed.Updated = func() iso8601 {
+			if len(feed.Entries) > 0 {
+				ent := feed.Entries[0]
+				if !ent.Updated.IsZero() {
+					return ent.Updated
+				}
+				if !ent.Published.IsZero() {
+					return ent.Published
+				}
+			}
+			return iso8601{time.Now()}
+		}()
 	}
 
 	return feed.CompleteFeeds(uri2filter)
@@ -323,9 +326,9 @@ func (app App) PublishFeeds(feeds []Feed) error {
 func (app App) PublishFeed(feed Feed) error {
 	const feedFileName = "index.xml"
 	const xsltFileName = "posts.xslt"
-	defer un(trace(strings.Join([]string{"App.PublishFeed", feed.Id}, " ")))
-
 	uri := LinkRelSelf(feed.Links).Href
+	defer un(trace(strings.Join([]string{"App.PublishFeed", uri}, " ")))
+
 	pathPrefix := rexPath.ReplaceAllString(uri, "..")
 	dstDirName := filepath.FromSlash(uri)
 	dstFileName := filepath.Join(dstDirName, feedFileName)
@@ -342,22 +345,26 @@ func (app App) PublishFeed(feed Feed) error {
 
 	if feed.Updated.IsZero() {
 		log.Println("repairing Feed.Updated time")
-		if 0 < len(feed.Entries) {
-			feed.Updated = feed.Entries[0].Updated
-		} else {
-			feed.Updated = iso8601{time.Now()}
-		}
+		feed.Updated = func() iso8601 {
+			if 0 < len(feed.Entries) {
+				return feed.Entries[0].Updated
+			} else {
+				return iso8601{time.Now()}
+			}
+		}()
 	}
 
 	var feedOrEntry interface{} = feed
 	if "../../../" == pathPrefix && strings.HasPrefix(uri, uriPubPosts) {
-		if 1 != len(feed.Entries) {
-			return errors.New("Invalid feed")
+		if 0 == len(feed.Entries) {
+			return fmt.Errorf("Invalid feed, self: %v len(entries): %d", uri, len(feed.Entries))
+		}
+		if 1 < len(feed.Entries) {
+			log.Printf("%d entries with Id: %v, keeping just one.", len(feed.Entries), uri)
 		}
 		feedOrEntry = feed.Entries[0]
 	}
 
-	log.Printf("write %s", dstFileName)
 	tmpFileName := dstFileName + "~"
 	xslt := path.Join(pathPrefix, dirAssets, app.cfg.Skin, xsltFileName)
 

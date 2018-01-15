@@ -18,11 +18,15 @@
 package main
 
 import (
+	"net/url"
+
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestFooTool(t *testing.T) {
+func TestLoadParseUrl(t *testing.T) {
 	t.Parallel()
-	assert.Nil(t, nil, "soso")
+
+	_, err := url.Parse("http://„Epic Zen Garden“")
+	assert.NotNil(t, err, "my bookmarks  OY0RWg")
 }

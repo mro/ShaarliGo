@@ -20,11 +20,15 @@ package main
 import (
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 )
+
+const timeoutShaarliImportFetch = time.Minute
 
 func (app *App) handleTools(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
@@ -39,6 +43,8 @@ func (app *App) handleTools(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	xmlBase := xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
+
 	switch r.Method {
 	case http.MethodGet:
 		app.KeepAlive(w, r, now)
@@ -47,7 +53,55 @@ func (app *App) handleTools(w http.ResponseWriter, r *http.Request) {
 <head><title>{{.title}}</title></head>
 <body>
   <ol>
+    <li class="disclosure">
+      Responsible Disclosure: In case you are reluctant to <a
+      href="http://purl.mro.name/ShaarliGo/">file a public issue</a>, feel free to
+      email <a href="mailto:ShaarliGo@mro.name?subject=">ShaarliGo@mro.name</a>.
+    </li>
+
+    <li class="update">
+      Update: Just replace shaarligo.cgi. To update the assets, delete them and
+      app/deleteme_to_restore, then clear your browser cache and visit the CGI, e.g.
+      the search.
+      <br/>
+      <code>$ ssh <kbd>myserver.example.com</kbd><br/>
+$ cd <kbd>filesystem/path/to/</kbd><br/>
+<br/>
+$ curl -L <a href="http://purl.mro.name/shaarligo_cgi.gz">http://purl.mro.name/shaarligo_cgi.gz</a> | tee shaarligo_cgi.gz | gunzip &gt; shaarligo.cgi<br/>
+$ chmod a+x shaarligo.cgi<br/>
+$ ls -l shaarligo?cgi*"<br/>
+$ rm -rf .htaccess assets app/deleteme_to_restore</code>
+    </li>
+
     <li class="config"><a href="../config/">Config</a></li>
+
+    <li>
+      <form class="form-inline" name="tag_rename">
+        <div class="form-group">
+          <label for="tag_rename_old">Rename Tag:</label>
+          <input type="text" class="form-control" id="tag_rename_old" placeholder="#before" value="{{ .tag_rename_old }}"/>
+        </div>
+        <div class="form-group">
+          <label for="tag_rename_new" class="sr-only">To:</label>
+          <input type="text" class="form-control" id="tag_rename_new" placeholder="#after" value="{{ .tag_rename_new }}"/>
+        </div>
+        <button type="submit" class="btn btn-primary">Rename</button>
+      </form>    
+    </li>
+
+    <li>
+      <form class="form-inline" name="shaarli_import" method="post">
+        <div class="form-group">
+          <label for="shaarli_import_url">Import Other Shaarli:</label>
+          <input type="url" class="form-control" name="shaarli_import_url" placeholder="https://demo.shaarli.org/?" value="{{ .other_shaarli_url }}"/>
+        </div>
+        <div class="form-group">
+          <label for="shaarli_import_tag" class="sr-only">#MarkerForThisImport</label>
+          <input type="text" class="form-control" name="shaarli_import_tag" placeholder="#MarkerTagForThisImport" value="#{{ .other_shaarli_tag }}"/>
+        </div>
+        <button name="shaarli_import_submit" type="submit" value="shaarli_import_submit" class="btn btn-primary">Import</button>
+      </form>    
+    </li>
 
     <li class="bookmarklet">
       <a
@@ -56,20 +110,6 @@ func (app *App) handleTools(w http.ResponseWriter, r *http.Request) {
       >✚ShaarliGo</a>
       <span>⇐ Drag this link to your bookmarks toolbar (or right-click it and choose Bookmark This Link…).
       Then click "✚ShaarliGo" button in any page you want to share.</span>
-    </li>
-
-    <li class="update">
-      Update: Just replace shaarligo.cgi. To update the assets, delete them and
-      app/deleteme_to_restore, then clear your browser cache and visit the CGI, e.g.
-      the search.
-      <br/>
-      <code>$ ssh <kbd>myserver.example.com</kbd> "cd <kbd>filesystem/path/to/</kbd> &amp;&amp; curl -L <a href="http://purl.mro.name/shaarligo_cgi.gz">http://purl.mro.name/shaarligo_cgi.gz</a>  | tee shaarligo_cgi.gz | gunzip &gt; shaarligo.cgi &amp;&amp; chmod a+x shaarligo.cgi &amp;&amp; ls -l shaarligo?cgi*"</code>
-    </li>
-
-    <li class="disclosure">
-      Responsible Disclosure: In case you are reluctant to <a
-      href="http://purl.mro.name/ShaarliGo/">file a public issue</a>, feel free to
-      email <a href="mailto:ShaarliGo@mro.name?subject=">ShaarliGo@mro.name</a>.
     </li>
   </ol>
 </body>
@@ -80,13 +120,82 @@ func (app *App) handleTools(w http.ResponseWriter, r *http.Request) {
 <?xml-stylesheet type='text/xsl' href='../../assets/`+app.cfg.Skin+`/tools.xslt'?>
 `)
 			data := map[string]string{
-				"title":    app.cfg.Title,
-				"xml_base": xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String() + cgiName,
+				"title":             app.cfg.Title,
+				"xml_base":          xmlBase.String() + cgiName,
+				"tag_rename_old":    "",
+				"tag_rename_new":    "",
+				"other_shaarli_url": "",
+				"other_shaarli_tag": time.Now().Format(time.RFC3339[:16]),
 			}
 
 			if err := tmpl.Execute(w, data); err != nil {
-				http.Error(w, "Coudln't send linkform: "+err.Error(), http.StatusInternalServerError)
+				http.Error(w, "Coudln't render tools: "+err.Error(), http.StatusInternalServerError)
 			}
 		}
+	case http.MethodPost:
+		app.KeepAlive(w, r, now)
+		if "" != r.FormValue("shaarli_import_submit") {
+			if url, err := url.Parse(strings.TrimSpace(r.FormValue("shaarli_import_url")) + "?do=atom&nb=all"); err != nil {
+				http.Error(w, "Coudln't parse shaarli_import_url "+err.Error(), http.StatusBadRequest)
+			} else {
+				if rq, err := HttpGetBody(url, timeoutShaarliImportFetch); err != nil {
+					http.Error(w, "Coudln't fetch shaarli_import_url "+err.Error(), http.StatusBadRequest)
+				} else {
+					if importedFeed, err := FeedFromReader(rq); err != nil {
+						http.Error(w, "Coudln't parse feed from shaarli_import_url "+err.Error(), http.StatusBadRequest)
+					} else {
+						log.Printf("Import %d entries from %v\n", len(importedFeed.Entries), url)
+						cat := Category{Term: strings.TrimSpace(strings.TrimPrefix(r.FormValue("shaarli_import_tag"), "#"))}
+						feed, _ := app.LoadFeed()
+						feed.XmlBase = xmlBase.String()
+						// feed.Id = feed.XmlBase
+						impEnt := make([]*Entry, 0, len(importedFeed.Entries))
+						for _, entry := range importedFeed.Entries {
+							if et, err := entry.NormaliseAfterImport(); err != nil {
+								log.Printf("Error with %v: %v\n", entry.Id, err.Error())
+							} else {
+								// log.Printf("done entry: %s\n", et.Id)
+								if "" != cat.Term {
+									et.Categories = append(et.Categories, cat)
+								}
+								if _, err := feed.Append(&et); err == nil {
+									impEnt = append(impEnt, &et)
+								} else {
+									log.Printf("couldn't add entry: %s\n", err.Error())
+								}
+							}
+						}
+						if err := app.SaveFeed(feed); err != nil {
+							http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
+							return
+						}
+						feed.XmlBase = xmlBase.String()
+						if err := app.PublishFeedsForModifiedEntries(feed, feed.Entries); err != nil {
+							log.Println("couldn't write feeds: ", err.Error())
+							http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
+							return
+						}
+					}
+				}
+			}
+		}
+		http.Redirect(w, r, xmlBase.String(), http.StatusFound)
 	}
+}
+
+func (entry Entry) NormaliseAfterImport() (Entry, error) {
+	// log.Printf("process entry: %s\n", entry.Id)
+	// normalise Id
+	if idx := strings.Index(entry.Id, "?"); idx >= 0 {
+		entry.Id = entry.Id[idx+1:]
+	}
+	if entry.Published.IsZero() {
+		entry.Published = entry.Updated
+	}
+	// normalise Links
+	if nil != entry.Content {
+		entry.Content = &HumanText{Body: cleanLegacyContent(entry.Content.Body)}
+	}
+	err := entry.Validate()
+	return entry, err
 }

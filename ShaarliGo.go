@@ -119,11 +119,13 @@ func (app App) IsLoggedIn(now time.Time) bool {
 }
 
 func (app App) LoadFeed() (Feed, error) {
+	defer un(trace("App.LoadFeed"))
 	return FeedFromFileName(fileFeedStorage)
 }
 
 // Internal storage, not publishing.
 func (app App) SaveFeed(feed Feed) error {
+	defer un(trace("App.SaveFeed"))
 	feed.Categories = nil
 	feed.Id = ""
 	feed.XmlBase = ""
