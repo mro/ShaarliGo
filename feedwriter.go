@@ -228,8 +228,8 @@ func (feed Feed) PagedFeeds(complete []Feed, linksPerPage int) ([]Feed, error) {
 	}
 
 	pages := make([]Feed, 0, 2*len(complete))
-	for _, complete := range complete {
-		pages = append(pages, complete.Pages(linksPerPage)...)
+	for _, comp := range complete {
+		pages = append(pages, comp.Pages(linksPerPage)...)
 	}
 
 	// do before writing but after all matching is done:
