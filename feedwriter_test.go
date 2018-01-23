@@ -276,6 +276,50 @@ func TestWriteFeedsPaged(t *testing.T) {
 	assert.Equal(t, len(pages), i, "ja")
 }
 
+func TestPagedFeeds(t *testing.T) {
+	feed, err := FeedFromFileName("testdata/feedwriter.TestPagedFeeds.feed.xml")
+	assert.Nil(t, err, "ja")
+	assert.Equal(t, 5, len(feed.Entries), "ja")
+	feed.XmlBase = "http://foo.eu/s/"
+
+	feeds := feed.CompleteFeedsForModifiedEntries([]*Entry{feed.Entries[0]})
+	assert.Equal(t, 4, len(feeds), "ja")
+	sort.Slice(feeds, func(i, j int) bool { return feeds[i].Id < feeds[j].Id })
+	assert.Equal(t, "pub/days/2018-01-22/", feeds[0].Id, "ja")
+	assert.Equal(t, "pub/posts/", feeds[1].Id, "ja")
+	assert.Equal(t, "pub/posts/XsuMcA/", feeds[2].Id, "ja")
+	assert.Equal(t, "pub/tags/", feeds[3].Id, "ja")
+
+	// test low level
+	assert.Equal(t, "pub/posts/", LinkRelSelf(feeds[1].Pages(100)[0].Links).Href, "ja")
+
+	pages := make([]Feed, 0, 2*len(feeds))
+	for _, comp := range feeds {
+		pages = append(pages, comp.Pages(100)...)
+	}
+	assert.Equal(t, 4, len(pages), "ja")
+	assert.Equal(t, "pub/posts/", pages[1].Id, "ja")
+	assert.Equal(t, "pub/posts/", LinkRelSelf(pages[1].Links).Href, "ja")
+
+	// high level
+	pages, err = feed.PagedFeeds(feeds, 100)
+	assert.Nil(t, err, "ja")
+	assert.Equal(t, 4, len(pages), "ja")
+	assert.Equal(t, "pub/days/2018-01-22/", pages[0].Id, "ja")
+	assert.Equal(t, "pub/posts/", pages[1].Id, "ja")
+	assert.Equal(t, "pub/posts/XsuMcA/", pages[2].Id, "ja")
+	assert.Equal(t, "pub/tags/", pages[3].Id, "ja")
+
+	assert.Equal(t, "pub/days/2018-01-22/", LinkRelSelf(pages[0].Links).Href, "ja")
+	assert.Equal(t, "pub/posts/", LinkRelSelf(pages[1].Links).Href, "ja")
+	assert.Equal(t, "pub/posts/XsuMcA/", LinkRelSelf(pages[2].Links).Href, "ja")
+	assert.Equal(t, "pub/tags/", LinkRelSelf(pages[3].Links).Href, "ja")
+
+	pages = feeds[1].Pages(100)
+	assert.Equal(t, "pub/posts/", pages[0].Id, "ja")
+	assert.Equal(t, "pub/posts/", LinkRelSelf(pages[0].Links).Href, "ja")
+}
+
 /*
 func TestWriteFeedsEmpty1(t *testing.T) {
 	feed := &Feed{

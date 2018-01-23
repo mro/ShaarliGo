@@ -175,22 +175,23 @@ func (seed Feed) Pages(entriesPerPage int) []Feed {
 			}
 			feed.Entries = seed.Entries[lower:upper]
 		}
-		pagedUri := appendPageNumber(uri, page)
-		feed.Links = append(feed.Links, Link{Rel: relSelf, Href: pagedUri, Title: strconv.Itoa(page + 1)})
+		ls := append(make([]Link, 0, len(feed.Links)+5), feed.Links...)
+		ls = append(ls, Link{Rel: relSelf, Href: appendPageNumber(uri, page), Title: strconv.Itoa(page + 1)})
 		// https://tools.ietf.org/html/rfc5005#section-3
 		if lastPage > 0 {
-			feed.Links = append(feed.Links, Link{Rel: relFirst, Href: appendPageNumber(uri, 0), Title: strconv.Itoa(0 + 1)})
+			ls = append(ls, Link{Rel: relFirst, Href: appendPageNumber(uri, 0), Title: strconv.Itoa(0 + 1)})
 			if page > 0 {
-				feed.Links = append(feed.Links, Link{Rel: relPrevious, Href: appendPageNumber(uri, page-1), Title: strconv.Itoa(page - 1 + 1)})
+				ls = append(ls, Link{Rel: relPrevious, Href: appendPageNumber(uri, page-1), Title: strconv.Itoa(page - 1 + 1)})
 			}
 			if page < lastPage {
-				feed.Links = append(feed.Links, Link{Rel: relNext, Href: appendPageNumber(uri, page+1), Title: strconv.Itoa(page + 1 + 1)})
+				ls = append(ls, Link{Rel: relNext, Href: appendPageNumber(uri, page+1), Title: strconv.Itoa(page + 1 + 1)})
 			}
-			feed.Links = append(feed.Links, Link{Rel: relLast, Href: appendPageNumber(uri, lastPage), Title: strconv.Itoa(lastPage + 1)})
+			ls = append(ls, Link{Rel: relLast, Href: appendPageNumber(uri, lastPage), Title: strconv.Itoa(lastPage + 1)})
 		} else {
 			// TODO https://tools.ietf.org/html/rfc5005#section-2
 			// xmlns:fh="http://purl.org/syndication/history/1.0" <fh:complete/>
 		}
+		feed.Links = ls
 		ret = append(ret, feed)
 	}
 	return ret
