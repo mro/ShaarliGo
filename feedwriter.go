@@ -104,13 +104,19 @@ func (entry Entry) FeedFilters(uri2filter map[string]func(*Entry) bool) map[stri
 	return uri2filter
 }
 
-func LinkRelSelf(links []Link) Link {
+func LinkRel(rel string, links []Link) Link {
 	for _, l := range links {
-		if relSelf == l.Rel {
-			return l
+		for _, r := range strings.Fields(l.Rel) { // may be worth caching
+			if rel == r {
+				return l
+			}
 		}
 	}
 	return Link{}
+}
+
+func LinkRelSelf(links []Link) Link {
+	return LinkRel(relSelf, links)
 }
 
 // collect all entries into all (unpaged, complete) feeds to publish
