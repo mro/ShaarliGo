@@ -169,10 +169,7 @@ func (seed Feed) Pages(entriesPerPage int) []Feed {
 		feed := seed
 		{
 			lower := page * entriesPerPage
-			upper := lower + entriesPerPage
-			if upper > totalEntries {
-				upper = totalEntries
-			}
+			upper := min(totalEntries, lower+entriesPerPage)
 			feed.Entries = seed.Entries[lower:upper]
 		}
 		ls := append(make([]Link, 0, len(feed.Links)+5), feed.Links...)
