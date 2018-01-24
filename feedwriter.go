@@ -358,6 +358,7 @@ func (app App) PublishFeed(feed Feed) error {
 		}()
 	}
 
+	feed.Id = feed.XmlBase + feed.Id
 	var feedOrEntry interface{} = feed
 	if "../../../" == pathPrefix && strings.HasPrefix(uri, uriPubPosts) {
 		if 0 == len(feed.Entries) {
