@@ -251,7 +251,7 @@ a.time::after { content: " ¶"; }
         </xsl:variable>
         <xsl:for-each select="a:category">
           <xsl:sort select="@term" order="ascending"/>
-          <a href="{@term}/" class="tag" style="font-size:{7.2 + @label * 0.8}pt"><span class="label"><xsl:value-of select="@term"/></span>&#160;(<span class="count"><xsl:value-of select="@label"/></span>)</a>
+          <a href="{$xml_base_pub}/../shaarligo.cgi/search/?q=%23{@term}" class="tag"><span class="label"><xsl:value-of select="@term"/></span>&#160;(<span class="count"><xsl:value-of select="@label"/></span>)</a><xsl:text> </xsl:text>
         </xsl:for-each>
       </p>
 
@@ -378,11 +378,13 @@ a.time::after { content: " ¶"; }
 
         <xsl:variable name="entry_updated" select="a:updated"/>
         <xsl:variable name="entry_updated_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_updated"/></xsl:call-template></xsl:variable>
+        <xsl:variable name="entry_published" select="a:published"/>
+        <xsl:variable name="entry_published_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_published"/></xsl:call-template></xsl:variable>
 
         <span class="hidden-logged-out" title="Bearbeiten">
           <a href="{$xml_base_pub}/../{a:link[@rel='edit']/@href}">🔨</a><xsl:text> </xsl:text>
         </span>
-        <a class="time" title="Einzelansicht" href="{$xml_base_pub}/../{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_updated_human"/></a>
+        <a class="time" title="zuletzt: {$entry_updated_human}" href="{$xml_base_pub}/../{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_published_human"/></a>
         <xsl:if test="$link">
           <xsl:text> ~ </xsl:text>
           <a title="Archiv" href="{$archive}{$link}">@archive.org</a>
@@ -406,14 +408,14 @@ a.time::after { content: " ¶"; }
         </h5>
       </xsl:if>
       <div class="content">
+        <p class="small"><a><xsl:value-of select="$link"/></a></p>
+
         <!-- html content won't work that easy (out-of-the-firebox): https://bugzilla.mozilla.org/show_bug.cgi?id=98168#c140 -->
         <!-- workaround via jquery: http://stackoverflow.com/a/9714567 -->
 
         <!-- Überbleibsel vom Shaarli Atom Feed raus: -->
         <!-- xsl:value-of select="substring-before(a:content[not(@src)], '&lt;br&gt;(&lt;a href=&quot;https://links.mro.name/?')" disable-output-escaping="yes" / -->
         <xsl:apply-templates select="a:content"/>
-
-        <p class="small"><a href="{$link}"><xsl:value-of select="$link"/></a></p>
 
         <p class="categories" title="Schlagworte">
           <xsl:for-each select="a:category">
