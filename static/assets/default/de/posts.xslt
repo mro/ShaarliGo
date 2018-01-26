@@ -99,7 +99,8 @@
   <!-- http://stackoverflow.com/a/16328207 -->
   <xsl:key name="CategorY" match="a:entry/a:category" use="@term" />
 
-  <xsl:variable name="xml_base_pub" select="concat(/*/@xml:base,'pub')"/>
+  <xsl:variable name="xml_base" select="/*/@xml:base"/>
+  <xsl:variable name="xml_base_pub" select="concat($xml_base,'pub')"/>
 
   <xsl:template match="/">
     <!--
@@ -331,7 +332,7 @@ a.time::after { content: " ¶"; }
   <xsl:template name="footer">
     <hr style="clear:left;"/>
     <p id="footer">
-      <a title="Validate my Atom 1.0 feed" href="https://validator.w3.org/feed/check.cgi?url={$xml_base_pub}/../{a:link[@rel='self']/@href}">
+      <a title="Validate my Atom 1.0 feed" href="https://validator.w3.org/feed/check.cgi?url={$xml_base}{a:link[@rel='self']/@href}">
         <img alt="Valid Atom 1.0" src="{$xml_base_pub}/../assets/default/valid-atom.svg" style="border:0;width:88px;height:31px"/>
       </a>
       <!-- <xsl:text> </xsl:text>
@@ -344,7 +345,7 @@ a.time::after { content: " ¶"; }
       -->
     </p>
     <p>
-      <img src="{$xml_base_pub}/../assets/default/qrcode.png" alt="QR Code"/>
+      <a href="http://purl.mro.name/ShaarliGo"><img src="{$xml_base_pub}/../assets/default/qrcode.png" alt="QR Code"/></a>
     </p>
   </xsl:template>
 

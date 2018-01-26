@@ -277,7 +277,7 @@ func TestWriteFeedsPaged(t *testing.T) {
 }
 
 func TestPagedFeeds(t *testing.T) {
-	feed, err := FeedFromFileName("testdata/feedwriter.TestPagedFeeds.feed.xml")
+	feed, err := FeedFromFileName("testdata/feedwriter.TestPagedFeeds.pub.atom")
 	assert.Nil(t, err, "ja")
 	assert.Equal(t, 5, len(feed.Entries), "ja")
 	feed.XmlBase = "http://foo.eu/s/"

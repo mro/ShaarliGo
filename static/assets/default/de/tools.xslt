@@ -87,6 +87,8 @@ margin: 1.0ex 0;
 #links_commands td {
 min-width: 40px;
 }
+
+br.br { display:none; }
       </style>
       <title>Tools</title>
     </head>
@@ -150,7 +152,7 @@ xhr.send(null);
     </body>
   </xsl:template>
 
-  <xsl:template match="h:li[@class='bookmarklet']">
+  <xsl:template match="h:li[@id='bookmarklet']">
     <li>
       <a class="btn btn-default btn-lg active" onclick="{h:a/@onclick}" href="{h:a/@href}">
         <xsl:value-of select="h:a"/>

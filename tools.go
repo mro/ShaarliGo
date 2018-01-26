@@ -53,27 +53,27 @@ func (app *App) handleTools(w http.ResponseWriter, r *http.Request) {
 <head><title>{{.title}}</title></head>
 <body>
   <ol>
-    <li class="disclosure">
-      Responsible Disclosure: In case you are reluctant to <a
+    <li id="disclosure">
+      <b>Responsible Disclosure:</b> In case you are reluctant to <a
       href="http://purl.mro.name/ShaarliGo/">file a public issue</a>, feel free to
       email <a href="mailto:ShaarliGo@mro.name?subject=">ShaarliGo@mro.name</a>.
     </li>
 
-    <li class="update">
-      Update: Just replace shaarligo.cgi. To update the assets, delete them and
+    <li id="update">
+      <b>Update:</b> Just replace shaarligo.cgi. To update the assets, delete them and
       app/deleteme_to_restore, then clear your browser cache and visit the CGI, e.g.
-      the search.
-      <br/>
-      <code>$ ssh <kbd>myserver.example.com</kbd><br/>
-$ cd <kbd>filesystem/path/to/</kbd><br/>
-<br/>
-$ curl -L <a href="http://purl.mro.name/shaarligo_cgi.gz">http://purl.mro.name/shaarligo_cgi.gz</a> | tee shaarligo_cgi.gz | gunzip &gt; shaarligo.cgi<br/>
-$ chmod a+x shaarligo.cgi<br/>
-$ ls -l shaarligo?cgi*"<br/>
+      the <a href="../search/?q=foo">search</a>.
+      <br class="br"/>
+      <code>$ ssh <kbd>myserver.example.com</kbd><br class="br"/>
+$ cd <kbd>filesystem/path/to/</kbd><br class="br"/>
+<br class="br"/>
+$ curl -R -L -o shaarligo_cgi.gz <a href="http://purl.mro.name/shaarligo_cgi.gz">http://purl.mro.name/shaarligo_cgi.gz</a> &amp;&amp; gunzip shaarligo_cgi.gz<br class="br"/>
+$ chmod a+x shaarligo.cgi<br class="br"/>
+$ ls -l shaarligo?cgi*"<br class="br"/>
 $ rm -rf .htaccess assets app/deleteme_to_restore</code>
     </li>
 
-    <li class="config"><a href="../config/">Config</a></li>
+    <li id="config"><a href="../config/">Config</a></li>
 
     <li>
       <form class="form-inline" name="tag_rename">
@@ -103,13 +103,17 @@ $ rm -rf .htaccess assets app/deleteme_to_restore</code>
       </form>    
     </li>
 
-    <li class="bookmarklet">
-      <a
+    <li id="bookmarklet">
+      <b>Bookmarklet:</b> <a
         onclick="alert('Drag this link to your bookmarks toolbar, or right-click it and choose Bookmark This Link...');return false;"
         href="javascript:javascript:(function(){var%20url%20=%20location.href;var%20title%20=%20document.title%20||%20url;window.open('{{.xml_base}}?post='%20+%20encodeURIComponent(url)+'&amp;title='%20+%20encodeURIComponent(title)+'&amp;description='%20+%20encodeURIComponent(document.getSelection())+'&amp;source=bookmarklet','_blank','menubar=no,height=450,width=600,toolbar=no,scrollbars=no,status=no,dialog=1');})();"
       >✚ShaarliGo</a>
       <span>⇐ Drag this link to your bookmarks toolbar (or right-click it and choose Bookmark This Link…).
       Then click "✚ShaarliGo" button in any page you want to share.</span>
+    </li>
+
+    <li id="version">
+    	<b>Version:</b> <span id="number">v{{.version}}</span>+<span id="gitsha1">{{.gitsha1}}</span>
     </li>
   </ol>
 </body>
@@ -126,6 +130,8 @@ $ rm -rf .htaccess assets app/deleteme_to_restore</code>
 				"tag_rename_new":    "",
 				"other_shaarli_url": "",
 				"other_shaarli_tag": time.Now().Format(time.RFC3339[:16]),
+				"version":           version,
+				"gitsha1":           GitSHA1,
 			}
 
 			if err := tmpl.Execute(w, data); err != nil {

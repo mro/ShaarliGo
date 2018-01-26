@@ -55,7 +55,7 @@ var GitSHA1 = "Please set -ldflags \"-X main.GitSHA1=$(git rev-parse --short HEA
 var fileFeedStorage string
 
 func init() {
-	fileFeedStorage = filepath.Join(dirApp, "var", "feed.xml")
+	fileFeedStorage = filepath.Join(dirApp, "var", "pub.atom")
 }
 
 // even cooler: https://stackoverflow.com/a/8363629

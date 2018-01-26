@@ -47,10 +47,6 @@ func mustParseRFC3339(str string) time.Time {
 	}
 }
 
-func feedFromLegacyShaarli(urlbase string, uid string, pwd string) (feed Feed, err error) {
-	return
-}
-
 func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	if app.cfg.IsConfigured() && !app.IsLoggedIn(now) {
@@ -97,13 +93,6 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 			feed.Links = []Link{
 				Link{Rel: relEdit, Href: path.Join(cgiName, uriPub, uriPosts), Title: "PostURI, maybe better a app:collection https://tools.ietf.org/html/rfc5023#section-8.3.3"},
 			}
-
-			// fork that one?
-			//_, err := feedFromLegacyShaarli(r.FormValue("import_shaarli_url"), r.FormValue("import_shaarli_uid"), r.FormValue("import_shaarli_pwd"))
-			// log.Println(err.Error())
-
-			// if process is running: add a hint about the running background task into the response,
-			// e.g. as a refresh timer. <meta http-equiv="refresh" content="5; URL=http://www.yourdomain.com/yoursite.html">
 
 			if err := app.SaveFeed(feed); err != nil {
 				http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)

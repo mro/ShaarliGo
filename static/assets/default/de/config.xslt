@@ -163,27 +163,6 @@ div.if_hasdiv_pwd { display:none; }
             </div>
             <!-- evtl. Zeitzone, continent / city? -->
 
-            <p class="col-sm-10 col-sm-offset-2">Soll ich Posts aus einem alten Shaarli übernehmen?</p>
-
-            <div class="form-group">
-              <label for="import_shaarli_url" class="control-label col-sm-2">altes Shaarli</label>
-              <div class="col-sm-8">
-                <input tabindex="600" name="import_shaarli_url" type="url" placeholder="https://example.com/mylinks" pattern="\S+" class="form-control"/>
-              </div>
-            </div>
-            <div class="hidden form-group">
-              <label for="import_shaarli_setlogin" class="control-label col-sm-2">Benutzer</label>
-              <div class="col-sm-8">
-                <input tabindex="700" name="import_shaarli_setlogin" type="text" placeholder="Benutzername des alten Shaarli" class="form-control"/>
-              </div>
-            </div>
-            <div class="hidden form-group">
-              <label for="import_shaarli_setpassword" class="control-label col-sm-2">Pwd</label>
-              <div class="col-sm-8">
-                <input tabindex="800" name="import_shaarli_password" type="password" placeholder="Passwort des alten Shaarli" class="form-control"/>
-              </div>
-            </div>
-
             <div class="form-group">
               <div class="col-sm-8 col-sm-offset-2">
                 <button tabindex="900" type="submit" class="btn btn-primary">Loooooos!</button>

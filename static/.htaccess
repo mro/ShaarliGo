@@ -9,7 +9,7 @@
 # Options FollowSymLinks ExecCGI
 
 # mandatory
-DirectoryIndex index.xml
+DirectoryIndex index.xml.gz index.xml
 
 # recommended
 AddOutputFilter DEFLATE xml xslt css js json svg
@@ -19,8 +19,12 @@ RewriteEngine On
 RewriteCond %{REQUEST_URI}::$1 ^(.*?/)(.*)::\2$
 RewriteRule ^(.*)$ - [E=BASE:%1]
 
-# TODO: check subdir and legacy post URLs
-RewriteRule ^/?(\?([0-9a-zA-Z_-]{6}))?$ %{ENV:BASE}pub/posts/$2/ [redirect=301,last]
+# legacy URLs https://perishablepress.com/redirect-query-string-htaccess/
+RewriteCond %{QUERY_STRING} ([0-9a-zA-Z_-]{6})
+RewriteRule ^/?$  %{ENV:BASE}pub/posts/%1/    [redirect=301,last,qsdiscard]
+
+# webroot to pub/posts/
+RewriteRule ^/?$  %{ENV:BASE}pub/posts/       [redirect=301,last,qsdiscard]
 
 # recommended
 # http://www.golem.de/news/content-security-policy-schutz-vor-cross-site-scripting-1306-99795.html
