@@ -233,7 +233,8 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		case 1 == len(params["post"]):
 			app.handleDoPost(w, r)
 			return
-		case 1 == len(params["do"]) && "login" == params["do"][0]:
+		case (1 == len(params["do"]) && "login" == params["do"][0]) ||
+			(http.MethodPost == r.Method && "" != r.FormValue("login")): // really. https://github.com/sebsauvage/Shaarli/blob/master/index.php#L402
 			app.handleDoLogin(w, r)
 			return
 		case 1 == len(params["do"]) && "logout" == params["do"][0]:
