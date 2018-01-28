@@ -205,6 +205,13 @@ div.awesomplete { display: block; }
 
 h4 a::after { content: " 🔗"; }
 a.time::after { content: " ¶"; }
+
+table.prev-next a {
+  padding: 0.75ex;
+  background-color: #FAFAFA;
+  border: 1px solid #F0F0F0;
+  border-radius: 4px;
+}
       </style>
       <title><xsl:value-of select="a:*/a:title"/></title>
     </head>

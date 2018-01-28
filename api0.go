@@ -122,7 +122,7 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
 				"token":     "ff13e7eaf9541ca2ba30fd44e864c3ff014d2bc9",
 				"returnurl": returnurl,
 			}); err != nil {
-				http.Error(w, "Coudln't send login form: "+err.Error(), http.StatusInternalServerError)
+				http.Error(w, "Couldn't send login form: "+err.Error(), http.StatusInternalServerError)
 			}
 		}
 	case http.MethodPost:

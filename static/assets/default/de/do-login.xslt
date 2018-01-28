@@ -105,7 +105,7 @@ min-width: 40px;
       <div class="container">
         <noscript><p>JavaScript ist aus, es geht zwar (fast) alles auch ohne, aber mit ist's <em>schöner</em>.</p></noscript>
 
-        <xsl:call-template name="links_commands"/>
+        <!-- xsl:call-template name="links_commands"/ -->
 
         <xsl:apply-templates select="h:form"/>
       </div>

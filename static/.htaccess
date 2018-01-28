@@ -12,6 +12,12 @@
 DirectoryIndex index.xml.gz index.xml
 
 # recommended
+AddDefaultCharset UTF-8
+AddType application/javascript    js jsonp
+AddType application/json          json
+AddType image/svg+xml             svg
+AddType text/css                  css
+AddType text/xml                  xml xslt
 AddOutputFilter DEFLATE xml xslt css js json svg
 
 # https://stackoverflow.com/questions/21062290/set-rewritebase-to-the-current-folder-path-dynamically/21063276#21063276
@@ -33,3 +39,8 @@ Header add Content-Security-Policy "default-src 'none'; style-src 'self' 'unsafe
 
 # nice
 Header add X-Powered-By "http://purl.mro.name/ShaarliGo#v0.0.3"
+
+# cache assets only (see assets/.htaccess)
+Header set Cache-Control "no-cache"
+
+Header set Connection Keep-Alive
