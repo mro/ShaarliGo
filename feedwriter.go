@@ -73,6 +73,16 @@ const uriPubPosts = uriPub + "/" + uriPosts + "/"
 const uriPubTags = uriPub + "/" + uriTags + "/"
 const uriPubDays = uriPub + "/" + uriDays + "/"
 
+func uri2subtitle(subtitle *HumanText, uri string) *HumanText {
+	if strings.HasPrefix(uri, uriPubTags) {
+		return &HumanText{Body: "#" + strings.TrimRight(uri[len(uriPubTags):], "/")}
+	}
+	if strings.HasPrefix(uri, uriPubDays) {
+		return &HumanText{Body: "📅 " + strings.TrimRight(uri[len(uriPubDays):], "/")}
+	}
+	return subtitle
+}
+
 func (entry Entry) FeedFilters(uri2filter map[string]func(*Entry) bool) map[string]func(*Entry) bool {
 	// defer un(trace("Entry.FeedFilters " + entry.Id))
 	if nil == uri2filter {
@@ -126,6 +136,7 @@ func (seed Feed) CompleteFeeds(uri2filter map[string]func(*Entry) bool) []Feed {
 	for uri, entryFilter := range uri2filter {
 		feed := seed // clone
 		feed.Id = uri
+		feed.Subtitle = uri2subtitle(feed.Subtitle, uri)
 		feed.Entries = nil // save reallocs?
 		for _, entry := range seed.Entries {
 			if entryFilter(entry) {
