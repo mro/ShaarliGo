@@ -101,8 +101,8 @@ func TestPathJoin(t *testing.T) {
 func TestAppendPageNumber(t *testing.T) {
 	s := "abc/"
 	assert.Equal(t, "/", s[len(s)-1:], "Oha")
-	assert.Equal(t, "pub/posts/", appendPageNumber("pub/posts/", 0), "Oha")
-	assert.Equal(t, "pub/posts-1/", appendPageNumber("pub/posts/", 1), "Oha")
+	assert.Equal(t, "pub/posts-0/", appendPageNumber("pub/posts/", 0, 1), "Oha")
+	assert.Equal(t, "pub/posts/", appendPageNumber("pub/posts/", 1, 1), "Oha")
 }
 
 func TestWriteFeedsEmpty0(t *testing.T) {
@@ -238,7 +238,7 @@ func TestWriteFeedsPaged(t *testing.T) {
 	assert.Equal(t, 1, len(pages[i].Entries), "ja")
 	i++
 	assert.Equal(t, "pub/days/1990-12-31/", pages[i].Id, "ja")
-	assert.Equal(t, "pub/days/1990-12-31-1/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, "pub/days/1990-12-31-0/", LinkRelSelf(pages[i].Links).Href, "ja")
 	assert.Equal(t, 1, len(pages[i].Entries), "ja")
 	i++
 	assert.Equal(t, "pub/days/1990-12-31/", pages[i].Id, "ja")
@@ -246,11 +246,11 @@ func TestWriteFeedsPaged(t *testing.T) {
 	assert.Equal(t, 1, len(pages[i].Entries), "ja")
 	i++
 	assert.Equal(t, "pub/posts/", pages[i].Id, "ja")
-	assert.Equal(t, "pub/posts-1/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, "pub/posts-0/", LinkRelSelf(pages[i].Links).Href, "ja")
 	assert.Equal(t, 1, len(pages[i].Entries), "ja")
 	i++
 	assert.Equal(t, "pub/posts/", pages[i].Id, "ja")
-	assert.Equal(t, "pub/posts-2/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, "pub/posts-1/", LinkRelSelf(pages[i].Links).Href, "ja")
 	assert.Equal(t, 1, len(pages[i].Entries), "ja")
 	i++
 	assert.Equal(t, "pub/posts/", pages[i].Id, "ja")

@@ -151,11 +151,11 @@ func (seed Feed) CompleteFeeds(uri2filter map[string]func(*Entry) bool) []Feed {
 	return ret
 }
 
-func appendPageNumber(prefix string, page int) string {
+func appendPageNumber(prefix string, page, mostRecentPage int) string {
 	if !strings.HasSuffix(prefix, "/") {
 		panic("invalid input: appendPageNumber('" + prefix + "', " + string(page) + ") needs a trailing slash")
 	}
-	if page == 0 {
+	if page == mostRecentPage {
 		return prefix
 	}
 	return fmt.Sprintf("%s-%d/", prefix[:len(prefix)-1], page)
@@ -172,29 +172,33 @@ func (seed Feed) Pages(entriesPerPage int) []Feed {
 	// defer un(trace("Feed.Pages " + seed.Id))
 	entriesPerPage = max(1, entriesPerPage)
 	totalEntries := len(seed.Entries)
-	lastPage := computeLastPage(totalEntries, entriesPerPage)
-	ret := make([]Feed, 0, 1+lastPage)
+	mostRecentPage := computeLastPage(totalEntries, entriesPerPage)
+	ret := make([]Feed, 0, 1+mostRecentPage)
 	uri := seed.Id
 
-	for page := 0; page <= lastPage; page++ {
+	for page := 0; page <= mostRecentPage; page++ {
 		feed := seed
 		{
-			lower := page * entriesPerPage
+			lower := (mostRecentPage - page) * entriesPerPage
 			upper := min(totalEntries, lower+entriesPerPage)
 			feed.Entries = seed.Entries[lower:upper]
 		}
 		ls := append(make([]Link, 0, len(feed.Links)+5), feed.Links...)
-		ls = append(ls, Link{Rel: relSelf, Href: appendPageNumber(uri, page), Title: strconv.Itoa(page + 1)})
+		ls = append(ls, Link{Rel: relSelf, Href: appendPageNumber(uri, page, mostRecentPage), Title: strconv.Itoa(page + 1)})
 		// https://tools.ietf.org/html/rfc5005#section-3
-		if lastPage > 0 {
-			ls = append(ls, Link{Rel: relFirst, Href: appendPageNumber(uri, 0), Title: strconv.Itoa(0 + 1)})
+		if mostRecentPage > 0 {
+			// oldest, i.e. lowest page number
+			ls = append(ls, Link{Rel: relLast, Href: appendPageNumber(uri, 0, mostRecentPage), Title: strconv.Itoa(0 + 1)})
 			if page > 0 {
-				ls = append(ls, Link{Rel: relPrevious, Href: appendPageNumber(uri, page-1), Title: strconv.Itoa(page - 1 + 1)})
+				// older, i.e. smaller page number
+				ls = append(ls, Link{Rel: relNext, Href: appendPageNumber(uri, page-1, mostRecentPage), Title: strconv.Itoa(page - 1 + 1)})
 			}
-			if page < lastPage {
-				ls = append(ls, Link{Rel: relNext, Href: appendPageNumber(uri, page+1), Title: strconv.Itoa(page + 1 + 1)})
+			if page < mostRecentPage {
+				// newer, i.e. higher page number
+				ls = append(ls, Link{Rel: relPrevious, Href: appendPageNumber(uri, page+1, mostRecentPage), Title: strconv.Itoa(page + 1 + 1)})
 			}
-			ls = append(ls, Link{Rel: relLast, Href: appendPageNumber(uri, lastPage), Title: strconv.Itoa(lastPage + 1)})
+			// newest, i.e. largest page number
+			ls = append(ls, Link{Rel: relFirst, Href: appendPageNumber(uri, mostRecentPage, mostRecentPage), Title: strconv.Itoa(mostRecentPage + 1)})
 		} else {
 			// TODO https://tools.ietf.org/html/rfc5005#section-2
 			// xmlns:fh="http://purl.org/syndication/history/1.0" <fh:complete/>

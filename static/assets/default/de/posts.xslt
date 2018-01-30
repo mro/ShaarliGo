@@ -314,21 +314,21 @@ table.prev-next a {
         <tbody>
           <tr>
             <xsl:if test="a:link[@rel='first']">
-              <td class="text-left"><a href="{$xml_base_pub}/../{a:link[@rel='first']/@href}">1 &lt;&lt;</a></td>
+              <td class="text-left"><a href="{$xml_base_pub}/../{a:link[@rel='first']/@href}"><xsl:value-of select="a:link[@rel='first']/@title"/>&#160;&lt;&lt;</a></td>
             </xsl:if>
             <td class="text-center">
               <xsl:if test="a:link[@rel='previous']">
-                <a href="{$xml_base_pub}/../{a:link[@rel='previous']/@href}"><xsl:value-of select="a:link[@rel='previous']/@title"/> &lt;</a>
+                <a href="{$xml_base_pub}/../{a:link[@rel='previous']/@href}"><xsl:value-of select="a:link[@rel='previous']/@title"/>&#160;&lt;</a>
               </xsl:if>
             </td>
-            <td class="text-center">Seite <xsl:value-of select="a:link[@rel='self']/@title"/></td>
+            <td class="text-center">Seite&#160;<xsl:value-of select="a:link[@rel='self']/@title"/></td>
             <td class="text-center">
               <xsl:if test="a:link[@rel='next']">
-                <a href="{$xml_base_pub}/../{a:link[@rel='next']/@href}">&gt; <xsl:value-of select="a:link[@rel='next']/@title"/></a>
+                <a href="{$xml_base_pub}/../{a:link[@rel='next']/@href}">&gt;&#160;<xsl:value-of select="a:link[@rel='next']/@title"/></a>
               </xsl:if>
             </td>
             <xsl:if test="a:link[@rel='last']">
-              <td class="text-right" ><a href="{$xml_base_pub}/../{a:link[@rel='last']/@href}">&gt;&gt; <xsl:value-of select="a:link[@rel='last']/@title"/></a></td>
+              <td class="text-right" ><a href="{$xml_base_pub}/../{a:link[@rel='last']/@href}">&gt;&gt;&#160;<xsl:value-of select="a:link[@rel='last']/@title"/></a></td>
             </xsl:if>
           </tr>
         </tbody>
