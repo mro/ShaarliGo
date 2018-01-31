@@ -179,9 +179,9 @@ func (seed Feed) Pages(entriesPerPage int) []Feed {
 	for page := 0; page <= mostRecentPage; page++ {
 		feed := seed
 		{
-			lower := (mostRecentPage - page) * entriesPerPage
-			upper := min(totalEntries, lower+entriesPerPage)
-			feed.Entries = seed.Entries[lower:upper]
+			upper := totalEntries - page*entriesPerPage
+			lower := upper - entriesPerPage
+			feed.Entries = seed.Entries[max(0, lower):upper]
 		}
 		ls := append(make([]Link, 0, len(feed.Links)+5), feed.Links...)
 		ls = append(ls, Link{Rel: relSelf, Href: appendPageNumber(uri, page, mostRecentPage), Title: strconv.Itoa(page + 1)})
