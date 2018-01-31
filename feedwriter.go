@@ -176,6 +176,10 @@ func (seed Feed) Pages(entriesPerPage int) []Feed {
 	ret := make([]Feed, 0, 1+mostRecentPage)
 	uri := seed.Id
 
+	link := func(rel string, page int) Link {
+		return Link{Rel: rel, Href: appendPageNumber(uri, page, mostRecentPage), Title: strconv.Itoa(page + 1)}
+	}
+
 	for page := 0; page <= mostRecentPage; page++ {
 		feed := seed
 		{
@@ -184,21 +188,17 @@ func (seed Feed) Pages(entriesPerPage int) []Feed {
 			feed.Entries = seed.Entries[max(0, lower):upper]
 		}
 		ls := append(make([]Link, 0, len(feed.Links)+5), feed.Links...)
-		ls = append(ls, Link{Rel: relSelf, Href: appendPageNumber(uri, page, mostRecentPage), Title: strconv.Itoa(page + 1)})
+		ls = append(ls, link(relSelf, page))
 		// https://tools.ietf.org/html/rfc5005#section-3
 		if mostRecentPage > 0 {
-			// oldest, i.e. lowest page number
-			ls = append(ls, Link{Rel: relLast, Href: appendPageNumber(uri, 0, mostRecentPage), Title: strconv.Itoa(0 + 1)})
+			ls = append(ls, link(relLast, 0)) // oldest, i.e. lowest page number
 			if page > 0 {
-				// older, i.e. smaller page number
-				ls = append(ls, Link{Rel: relNext, Href: appendPageNumber(uri, page-1, mostRecentPage), Title: strconv.Itoa(page - 1 + 1)})
+				ls = append(ls, link(relNext, page-1)) // older, i.e. smaller page number
 			}
 			if page < mostRecentPage {
-				// newer, i.e. higher page number
-				ls = append(ls, Link{Rel: relPrevious, Href: appendPageNumber(uri, page+1, mostRecentPage), Title: strconv.Itoa(page + 1 + 1)})
+				ls = append(ls, link(relPrevious, page+1)) // newer, i.e. higher page number
 			}
-			// newest, i.e. largest page number
-			ls = append(ls, Link{Rel: relFirst, Href: appendPageNumber(uri, mostRecentPage, mostRecentPage), Title: strconv.Itoa(mostRecentPage + 1)})
+			ls = append(ls, link(relFirst, mostRecentPage)) // newest, i.e. largest page number
 		} else {
 			// TODO https://tools.ietf.org/html/rfc5005#section-2
 			// xmlns:fh="http://purl.org/syndication/history/1.0" <fh:complete/>
