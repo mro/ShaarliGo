@@ -1,9 +1,9 @@
 
+const xml_base_pub = document.documentElement.getAttribute("data-xml-base-pub");
 {
-  var xml_base_pub = document.documentElement.getAttribute("data-xml-base-pub");
   // <![CDATA[
   // check if we're logged-in (AJAX or Cookie?).
-  var xhr = new XMLHttpRequest();
+  const xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function(data0) {
     if (xhr.readyState > 3) {
       // console.log('xhr.status = ' + xhr.status);
@@ -19,21 +19,22 @@
 // onload="document.getElementById('q').removeAttribute('autofocus');document.getElementById('post').setAttribute('autofocus', 'autofocus');"
 // onload="document.form_post.post.focus();"
 
-document.addEventListener('DOMContentLoaded', function(event) {
-  // console.log(event.type);
+// Firefox 56+ doesn't fire that one in xslt situation: document.addEventListener("DOMContentLoaded", function(event) { console.log("DOM fully loaded and parsed"); });
+let addlink;
+document.onreadystatechange = function () {
+  if(addlink !== undefined)
+    return; 
+  // console.log('setup awesomeplete');
   // inspired by http://leaverou.github.io/awesomplete/#extensibility
-  var addlink = new Awesomplete('input[data-multiple]', {
+  addlink = new Awesomplete('input[data-multiple]', {
     minChars: 3,
     maxItems: 15,
-    filter: function(text, input) { return Awesomplete.FILTER_CONTAINS(text, input.match(/\S*$/)[0]); /* match */ },
-    item: function(text, input) { return Awesomplete.ITEM(text, input.match(/\S*$/)[0]); /* highlight */ },
-    replace: function(text) {
-      var before = this.input.value.match(/^.+\s+|/)[0]; // ends with a whitespace
-      this.input.value = before + text + " ";
-    }
+    filter:  function(text, input) { const m = input.match(/#(\S*)$/); return m !== null && Awesomplete.FILTER_CONTAINS(text, m[1]); /* match */ },
+    item:    function(text, input) { const m = input.match(/#(\S*)$/); return m !== null && Awesomplete.ITEM(text, m[1]); /* highlight */ },
+    replace: function(text) { const inp = this.input; inp.value = inp.value.replace(/#[^#]+$/, text) + " "; },
   });
 
-  var xhr = new XMLHttpRequest()
+  const xhr = new XMLHttpRequest()
   xhr.onreadystatechange = function() {
     if (xhr.readyState > 3 && xhr.status == 200)
       addlink.list = JSON.parse(xhr.response);
@@ -41,4 +42,5 @@ document.addEventListener('DOMContentLoaded', function(event) {
   xhr.open('GET', xml_base_pub + '/tags/index.json');
   xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
   xhr.send();
-});
+};
+
