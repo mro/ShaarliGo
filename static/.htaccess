@@ -41,6 +41,6 @@ Header add Content-Security-Policy "default-src 'none'; style-src 'self' 'unsafe
 Header add X-Powered-By "http://purl.mro.name/ShaarliGo#v0.0.3"
 
 # cache assets only (see assets/.htaccess)
-Header set Cache-Control "max-age=0, public, must-revalidate"
+Header set Cache-Control "no-cache"
 
 Header set Connection Keep-Alive
