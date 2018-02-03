@@ -107,9 +107,9 @@ $ rm -rf .htaccess assets app/deleteme_to_restore</code>
       <b>Bookmarklet:</b> <a
         onclick="alert('Drag this link to your bookmarks toolbar, or right-click it and choose Bookmark This Link...');return false;"
         href="javascript:javascript:(function(){var%20url%20=%20location.href;var%20title%20=%20document.title%20||%20url;window.open('{{.xml_base}}?post='%20+%20encodeURIComponent(url)+'&amp;title='%20+%20encodeURIComponent(title)+'&amp;description='%20+%20encodeURIComponent(document.getSelection())+'&amp;source=bookmarklet','_blank','menubar=no,height=450,width=600,toolbar=no,scrollbars=no,status=no,dialog=1');})();"
-      >✚ShaarliGo</a>
+      >✚ShaarliGo 🌺</a>
       <span>⇐ Drag this link to your bookmarks toolbar (or right-click it and choose Bookmark This Link…).
-      Then click "✚ShaarliGo" button in any page you want to share.</span>
+      Then click "✚ShaarliGo 🌺" button in any page you want to share.</span>
     </li>
 
     <li id="version">
