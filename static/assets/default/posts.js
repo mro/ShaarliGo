@@ -1,7 +1,6 @@
 
 const xml_base_pub = document.documentElement.getAttribute("data-xml-base-pub");
 {
-  // <![CDATA[
   // check if we're logged-in (AJAX or Cookie?).
   const xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function(data0) {
@@ -23,7 +22,7 @@ const xml_base_pub = document.documentElement.getAttribute("data-xml-base-pub");
 let addlink;
 document.onreadystatechange = function () {
   if(addlink !== undefined)
-    return; 
+    return;
   // console.log('setup awesomeplete');
   // inspired by http://leaverou.github.io/awesomplete/#extensibility
   addlink = new Awesomplete('input[data-multiple]', {
@@ -42,5 +41,22 @@ document.onreadystatechange = function () {
   xhr.open('GET', xml_base_pub + '/tags/index.json');
   xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
   xhr.send();
-};
 
+  // list tags with font-size in relation to frequency
+  // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1254
+  let fontMin = 8;
+  let fontMax = 48;
+  const tags = document.getElementById('tags').getElementsByClassName('tag');
+  const counts = new Array(tags.length);
+  for (let i = tags.length - 1; i >= 0; i--) {
+    const elm = tags[i].getElementsByClassName('count')[0];
+    counts[i] = 1 * elm.innerText;
+  }
+  const countMaxLog = Math.log(Math.max.apply(Math, counts)); // https://johnresig.com/blog/fast-javascript-maxmin/
+  const factor = 1.0 / countMaxLog * (fontMax - fontMin);
+  for (let i = tags.length - 1; i >= 0; i--) {
+    // https://stackoverflow.com/a/3717340
+    const size = Math.log(counts[i]) * factor + fontMin;
+    tags[i].style.fontSize = size + 'pt';
+  }
+};

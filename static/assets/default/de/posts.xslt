@@ -251,6 +251,15 @@ table.prev-next a {
       </xsl:if>
 
       <p id="tags" class="categories">
+
+        <xsl:variable name="countMax">
+          <!-- https://stackoverflow.com/a/17966412 -->
+          <xsl:for-each select="a:category">
+            <xsl:sort select="@label" data-type="number" order="descending"/>
+            <xsl:if test="position() = 1"><xsl:value-of select="@label"/></xsl:if>
+          </xsl:for-each>
+        </xsl:variable>
+
         <xsl:variable name="labelsDesc">
           <xsl:for-each select="a:category">
             <xsl:sort select="@label" order="descending"/>
@@ -259,7 +268,9 @@ table.prev-next a {
         </xsl:variable>
         <xsl:for-each select="a:category">
           <xsl:sort select="@term" order="ascending"/>
-          <a href="{$xml_base_pub}/../shaarligo.cgi/search/?q=%23{@term}" class="tag"><span class="label"><xsl:value-of select="@term"/></span>&#160;(<span class="count"><xsl:value-of select="@label"/></span>)</a><xsl:text> </xsl:text>
+          <!-- not log, just linear, similar to https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1254 -->
+          <xsl:variable name="size" select="8 + 40 * @label div $countMax"/>
+          <a style="font-size:{$size}pt" href="{$xml_base_pub}/../shaarligo.cgi/search/?q=%23{@term}+" class="tag"><span class="label"><xsl:value-of select="@term"/></span><span style="font-size:8pt">&#160;(<span class="count"><xsl:value-of select="@label"/></span>)</span></a><xsl:text> </xsl:text>
         </xsl:for-each>
       </p>
 
