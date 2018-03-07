@@ -352,11 +352,11 @@ func BenchmarkFileCreateDeleteSequential(b *testing.B) {
 func _BenchmarkFileCreateDeleteParallel(b *testing.B) {
 	var wg sync.WaitGroup
 	for i := 0; i < b.N; i++ {
-		go func() {
+		go func(ii int) {
 			wg.Add(1)
 			defer wg.Done()
-			fileIOPayload(i)
-		}()
+			fileIOPayload(ii)
+		}(i)
 	}
 	wg.Wait()
 }

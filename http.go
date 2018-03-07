@@ -41,6 +41,7 @@ func HttpGetBody(url *url.URL, timeout time.Duration) (io.Reader, error) {
 	client := &http.Client{Timeout: timeout}
 	req, _ := http.NewRequest("GET", url.String(), nil)
 	req.Header.Set("Accept-Encoding", "gzip, deflate")
+	req.Header.Set("User-Agent", strings.Join([]string{myselfNamespace, version}, ""))
 	if resp, err := client.Do(req); nil == resp && nil != err {
 		return nil, err
 	} else {
