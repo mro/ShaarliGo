@@ -31,6 +31,7 @@ import (
 var serverLocation *time.Location
 
 func init() {
+	// TODO rather use app settings?
 	serverLocation, _ = time.LoadLocation("Europe/Berlin")
 }
 

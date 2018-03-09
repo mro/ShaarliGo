@@ -66,18 +66,18 @@ func un(name string, start time.Time)       { log.Printf("%s took %s", name, tim
 
 // evtl. as a server, too: http://www.dav-muz.net/blog/2013/09/how-to-use-go-and-fastcgi/
 func main() {
-	{ // log to custom logfile rather than stderr (which may not be accessible on shared hosting)
+	{ // log to custom logfile rather than stderr (which may not be reachable for analysis on shared hosting)
 		dst := filepath.Join("app", "var", "log", "error.log")
 		if err := os.MkdirAll(filepath.Dir(dst), 0770); err != nil {
 			log.Fatal("Couldn't create app/var/log dir: " + err.Error())
 			return
 		}
-		if w, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0660); err != nil {
+		if fileLog, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0660); err != nil {
 			log.Fatal("Couldn't create open logfile: " + err.Error())
 			return
 		} else {
-			defer w.Close()
-			log.SetOutput(w)
+			defer fileLog.Close()
+			log.SetOutput(fileLog)
 		}
 	}
 

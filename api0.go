@@ -223,7 +223,12 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		_, ent := feed.findEntryByIdSelfOrUrl(post)
 		if nil == ent {
 			// nothing found, so we need a new (dangling, unsaved) entry:
-			if url := urlFromPostParam(post); url != nil {
+			if url := urlFromPostParam(post); url == nil {
+				// post parameter doesn't look like an url, so we treat it as a note.
+				ent = &Entry{}
+				ent.Title = HumanText{Body: post}
+			} else {
+				// post parameter looks like an url, so we try to GET it
 				{
 					ee, err := entryFromURL(url, time.Second*3/2)
 					if nil != err {
@@ -235,9 +240,6 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 					ent.Content = ent.Summary
 				}
 				ent.Links = []Link{Link{Href: url.String()}}
-			} else {
-				ent = &Entry{}
-				ent.Title = HumanText{Body: post}
 			}
 			ent.Updated = iso8601{now}
 			const SetPublishedToNowInitially = true

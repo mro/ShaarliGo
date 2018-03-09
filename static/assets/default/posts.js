@@ -45,7 +45,7 @@ document.onreadystatechange = function () {
   // list tags with font-size in relation to frequency
   // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1254
   let fontMin = 8;
-  let fontMax = 48;
+  let fontMax = 32;
   const tags = document.getElementById('tags').getElementsByClassName('tag');
   const counts = new Array(tags.length);
   for (let i = tags.length - 1; i >= 0; i--) {
