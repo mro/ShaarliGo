@@ -32,6 +32,12 @@ func TestSuffix(t *testing.T) {
 func TestIsRemoteAddrBanned(t *testing.T) {
 	now := mustParseRFC3339("2017-11-01T00:00:00+01:00")
 
+	{
+		data, err := yaml.Marshal(now)
+		assert.Nil(t, err, "soso")
+		assert.Equal(t, "2017-11-01T00:00:00+01:00\n", string(data), "Oh je")
+	}
+
 	bp := BanPenalties{
 		Penalties: map[string]Penalty{
 			"92.194.87.209": {Badness: -100, End: mustParseRFC3339("2017-01-01T01:02:03+02:00")},
