@@ -19,6 +19,8 @@ false && {
   go get -u golang.org/x/text/language
   go get -u golang.org/x/text/search
   go get -u gopkg.in/yaml.v2
+  # https://github.com/go-yaml/yaml/issues/341#issuecomment-372379701
+  cd "$(go env GOPATH)/src/gopkg.in/yaml.v2" && git checkout 0e4404da71227dcc02fb1deee803d93e86d08f72 && cd -
   # for testing only:
   go get -u github.com/stretchr/testify
   go get -u github.com/yhat/scrape
