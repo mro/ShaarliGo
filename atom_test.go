@@ -212,7 +212,7 @@ func _TestFeedFromFileName_Gob(t *testing.T) {
 	assert.Equal(t, 3618, len(feed.Entries), "soso")
 }
 
-func TestFeedFromFileName_GobGz(t *testing.T) {
+func _TestFeedFromFileName_GobGz(t *testing.T) {
 	t.Parallel()
 	file, err := os.Open("testdata/links.gob.gz")
 	assert.Nil(t, err, "soso")

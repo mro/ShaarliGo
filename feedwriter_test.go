@@ -73,7 +73,7 @@ func TestComputeLastPage(t *testing.T) {
 func TestEntryFeedFilters(t *testing.T) {
 	itm := &Entry{
 		Id:         "id_0",
-		Published:  iso8601{mustParseRFC3339("2010-12-31T00:11:22Z")},
+		Published:  iso8601(mustParseRFC3339("2010-12-31T00:11:22Z")),
 		Categories: []Category{Category{Term: "🐳"}},
 	}
 
@@ -114,7 +114,7 @@ func TestWriteFeedsAddOneAndOneAndRemoveFirst(t *testing.T) {
 	{
 		entry := &Entry{
 			Id:         "id_0",
-			Published:  iso8601{mustParseRFC3339("2010-12-31T00:11:22Z")},
+			Published:  iso8601(mustParseRFC3339("2010-12-31T00:11:22Z")),
 			Categories: []Category{Category{Term: "🐳"}},
 		}
 
@@ -143,7 +143,7 @@ func TestWriteFeedsAddOneAndOneAndRemoveFirst(t *testing.T) {
 	{
 		entry := &Entry{
 			Id:         "id_1",
-			Published:  iso8601{mustParseRFC3339("2010-12-30T00:11:22Z")},
+			Published:  iso8601(mustParseRFC3339("2010-12-30T00:11:22Z")),
 			Categories: []Category{Category{Term: "foo"}},
 		}
 
@@ -205,17 +205,17 @@ func TestWriteFeedsPaged(t *testing.T) {
 			&Entry{
 				Id:        "e2",
 				Title:     HumanText{Body: "Hello, Entry 2!"},
-				Published: iso8601{mustParseRFC3339("1990-12-31T02:02:02+01:00")},
+				Published: iso8601(mustParseRFC3339("1990-12-31T02:02:02+01:00")),
 			},
 			&Entry{
 				Id:        "e1",
 				Title:     HumanText{Body: "Hello, Entry 1!"},
-				Published: iso8601{mustParseRFC3339("1990-12-31T01:01:01+01:00")},
+				Published: iso8601(mustParseRFC3339("1990-12-31T01:01:01+01:00")),
 			},
 			&Entry{
 				Id:        "e0",
 				Title:     HumanText{Body: "Hello, Entry 0!"},
-				Published: iso8601{mustParseRFC3339("1990-12-30T00:00:00+01:00")},
+				Published: iso8601(mustParseRFC3339("1990-12-30T00:00:00+01:00")),
 			},
 		},
 	}

@@ -241,7 +241,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 				}
 				ent.Links = []Link{Link{Href: url.String()}}
 			}
-			ent.Updated = iso8601{now}
+			ent.Updated = iso8601(now)
 			const SetPublishedToNowInitially = true
 			if SetPublishedToNowInitially || ent.Published.IsZero() {
 				ent.Published = ent.Updated
@@ -343,7 +343,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 					if nil == ent {
 						ent = &Entry{
 							Authors:   feed.Authors,
-							Published: iso8601{lf_linkdate},
+							Published: iso8601(lf_linkdate),
 							Id:        smallHashRandom(),
 						}
 						if _, err := feed.Append(ent); err != nil {
@@ -355,7 +355,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 
 					location = strings.Join([]string{location, ent.Id}, "?#")
 
-					ent.Updated = iso8601{now}
+					ent.Updated = iso8601(now)
 					ent.Title = HumanText{Body: strings.TrimSpace(r.FormValue("lf_title")), Type: "text"}
 					url := mustParseURL(lf_url)
 					if url.IsAbs() && "" != url.Host {

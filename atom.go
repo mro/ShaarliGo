@@ -101,7 +101,12 @@ type Generator struct {
 }
 
 // http://stackoverflow.com/a/25015260
-type iso8601 struct{ time.Time }
+type iso8601 time.Time
+
+func (v iso8601) IsZero() bool             { return time.Time(v).IsZero() }
+func (a iso8601) After(b iso8601) bool     { return time.Time(a).After(time.Time(b)) }
+func (a iso8601) Before(b iso8601) bool    { return time.Time(a).Before(time.Time(b)) }
+func (a iso8601) Format(fmt string) string { return time.Time(a).Format(fmt) }
 
 func (v iso8601) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	e.EncodeElement(v.Format(time.RFC3339), start)
@@ -114,7 +119,7 @@ func (c *iso8601) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	if parse, err := time.Parse(time.RFC3339, v); err != nil {
 		return err
 	} else {
-		*c = iso8601{parse}
+		*c = iso8601(parse)
 		return nil
 	}
 }
@@ -237,13 +242,13 @@ type ByPublishedDesc []*Entry
 
 func (a ByPublishedDesc) Len() int           { return len(a) }
 func (a ByPublishedDesc) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a ByPublishedDesc) Less(i, j int) bool { return !a[i].Published.Time.Before(a[j].Published.Time) }
+func (a ByPublishedDesc) Less(i, j int) bool { return !a[i].Published.Before(a[j].Published) }
 
 type ByUpdatedDesc []*Entry
 
 func (a ByUpdatedDesc) Len() int           { return len(a) }
 func (a ByUpdatedDesc) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a ByUpdatedDesc) Less(i, j int) bool { return !a[i].Updated.Time.Before(a[j].Updated.Time) }
+func (a ByUpdatedDesc) Less(i, j int) bool { return !a[i].Updated.Before(a[j].Updated) }
 
 // custom interface
 

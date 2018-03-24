@@ -227,7 +227,7 @@ func (feed Feed) CompleteFeedsForModifiedEntries(entries []*Entry) []Feed {
 					return ent.Published
 				}
 			}
-			return iso8601{time.Now()}
+			return iso8601(time.Now())
 		}()
 	}
 
@@ -368,7 +368,7 @@ func (app App) PublishFeed(feed Feed) error {
 			if 0 < len(feed.Entries) {
 				return feed.Entries[0].Updated
 			} else {
-				return iso8601{time.Now()}
+				return iso8601(time.Now())
 			}
 		}()
 	}
@@ -398,7 +398,7 @@ func (app App) PublishFeed(feed Feed) error {
 			if err = xmlEncodeWithXslt(feedOrEntry, xslt, enc); err == nil {
 				if err = enc.Flush(); err == nil {
 					if err = w.Close(); err == nil {
-						mTime := feed.Updated.Time
+						mTime := time.Time(feed.Updated)
 						os.Chtimes(tmpFileName, mTime, mTime)
 						return os.Rename(tmpFileName, dstFileName)
 					}

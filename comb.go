@@ -85,7 +85,7 @@ func entryFromNode(root *html.Node, ur *url.URL) (Entry, error) {
 				}
 			}
 			if err == nil {
-				ret.Published = iso8601{Time: t}
+				ret.Published = iso8601(t)
 			}
 
 		case "keywords" == strName:

@@ -135,13 +135,13 @@ func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) {
 				if item.Updated.IsZero() {
 					item.Updated = item.Published
 				}
-				if item.Updated.After(ret.Updated.Time) {
+				if item.Updated.After(ret.Updated) {
 					ret.Updated = item.Updated
 				}
 			}
 			ret.Categories = AggregateCategories(ret.Entries)
 			if ret.Updated.IsZero() {
-				ret.Updated = iso8601{now}
+				ret.Updated = iso8601(now)
 			}
 
 			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
