@@ -18,8 +18,6 @@
 package main
 
 import (
-	//	"encoding/xml"
-	//"net/url"
 	"path"
 	"regexp"
 	"sort"
@@ -29,6 +27,7 @@ import (
 )
 
 func TestSliceIndices(t *testing.T) {
+	t.Parallel()
 	s := []string{"a", "b", "c"}
 	p := s[0:2]
 	assert.Equal(t, 2, len(p), "Oha")
@@ -41,6 +40,7 @@ func TestSliceIndices(t *testing.T) {
 }
 
 func TestUriBasics(t *testing.T) {
+	t.Parallel()
 	u1 := mustParseURL("b")
 	assert.Equal(t, "a/b", path.Join("a", u1.Path), "Oha")
 	assert.Equal(t, "/b", mustParseURL("a").ResolveReference(u1).String(), "Oha")
@@ -64,6 +64,7 @@ func TestUriBasics(t *testing.T) {
 }
 
 func TestComputeLastPage(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, 0, computeLastPage(0, 100), "Oha")
 	assert.Equal(t, 0, computeLastPage(1, 100), "Oha")
 	assert.Equal(t, 0, computeLastPage(100, 100), "Oha")
@@ -71,6 +72,7 @@ func TestComputeLastPage(t *testing.T) {
 }
 
 func TestEntryFeedFilters(t *testing.T) {
+	t.Parallel()
 	itm := &Entry{
 		Id:         "id_0",
 		Published:  iso8601(mustParseRFC3339("2010-12-31T00:11:22Z")),
@@ -95,10 +97,12 @@ func TestEntryFeedFilters(t *testing.T) {
 }
 
 func TestPathJoin(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, "a/b", path.Join("a", "b", ""), "Oha")
 }
 
 func TestAppendPageNumber(t *testing.T) {
+	t.Parallel()
 	s := "abc/"
 	assert.Equal(t, "/", s[len(s)-1:], "Oha")
 	assert.Equal(t, "pub/posts-0/", appendPageNumber("pub/posts/", 0, 1), "Oha")
@@ -110,6 +114,7 @@ func TestWriteFeedsEmpty0(t *testing.T) {
 }
 
 func TestWriteFeedsAddOneAndOneAndRemoveFirst(t *testing.T) {
+	t.Parallel()
 	feed := &Feed{XmlBase: mustParseURL("http://example.com/").String()}
 	{
 		entry := &Entry{
@@ -196,6 +201,7 @@ func TestWriteFeedsAddOneAndOneAndRemoveFirst(t *testing.T) {
 }
 
 func TestWriteFeedsPaged(t *testing.T) {
+	t.Parallel()
 	feed := &Feed{
 		XmlBase: mustParseURL("http://example.com/").String(),
 		XmlLang: "deu",
@@ -277,6 +283,7 @@ func TestWriteFeedsPaged(t *testing.T) {
 }
 
 func TestPagedFeeds(t *testing.T) {
+	t.Parallel()
 	feed, err := FeedFromFileName("testdata/feedwriter.TestPagedFeeds.pub.atom")
 	assert.Nil(t, err, "ja")
 	assert.Equal(t, 5, len(feed.Entries), "ja")
