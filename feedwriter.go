@@ -180,12 +180,12 @@ func (seed Feed) Pages(entriesPerPage int) []Feed {
 		return Link{Rel: rel, Href: appendPageNumber(uri, page, mostRecentPage), Title: strconv.Itoa(page + 1)}
 	}
 
-	lower, upper := totalEntries, -17
 	for page := 0; page <= mostRecentPage; page++ {
+	lower := totalEntries // start past the oldest entry
 		feed := seed
 
 		{
-			upper = lower
+			upper := lower
 			step := entriesPerPage
 			if page == mostRecentPage-1 {
 				// the page BEFORE the last one has the variable length (if needed)
