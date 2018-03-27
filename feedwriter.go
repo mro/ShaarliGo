@@ -151,44 +151,45 @@ func (seed Feed) CompleteFeeds(uri2filter map[string]func(*Entry) bool) []Feed {
 	return ret
 }
 
-func appendPageNumber(prefix string, page, mostRecentPage int) string {
+func appendPageNumber(prefix string, page, pageCount int) string {
 	if !strings.HasSuffix(prefix, "/") {
 		panic("invalid input: appendPageNumber('" + prefix + "', " + string(page) + ") needs a trailing slash")
 	}
-	if page == mostRecentPage {
+	if page == pageCount-1 {
 		return prefix
 	}
 	return fmt.Sprintf("%s-%d/", prefix[:len(prefix)-1], page)
 }
 
-func computeLastPage(count int, entriesPerPage int) int {
+func computePageCount(count int, entriesPerPage int) int {
 	if count == 0 {
-		return 0
+		// even 0 entries need one (empty) page
+		return 1
 	}
-	return (count - 1) / entriesPerPage
+	return 1 + (count-1)/entriesPerPage
 }
 
 func (seed Feed) Pages(entriesPerPage int) []Feed {
 	// defer un(trace("Feed.Pages " + seed.Id))
 	entriesPerPage = max(1, entriesPerPage)
 	totalEntries := len(seed.Entries)
-	mostRecentPage := computeLastPage(totalEntries, entriesPerPage)
-	ret := make([]Feed, 0, 1+mostRecentPage)
+	pageCount := computePageCount(totalEntries, entriesPerPage)
+	ret := make([]Feed, 0, pageCount)
 	uri := seed.Id
 
 	link := func(rel string, page int) Link {
-		return Link{Rel: rel, Href: appendPageNumber(uri, page, mostRecentPage), Title: strconv.Itoa(page + 1)}
+		return Link{Rel: rel, Href: appendPageNumber(uri, page, pageCount), Title: strconv.Itoa(page + 1)}
 	}
 
-	for page := 0; page <= mostRecentPage; page++ {
 	lower := totalEntries // start past the oldest entry
+	for page := 0; page < pageCount; page++ {
 		feed := seed
 
 		{
 			upper := lower
 			step := entriesPerPage
-			if page == mostRecentPage-1 {
-				// the page BEFORE the last one has the variable length (if needed)
+			if page == pageCount-2 {
+				// only the page BEFORE the last one has variable length (if needed)
 				step = totalEntries % entriesPerPage
 				if 0 == step {
 					step = entriesPerPage
@@ -200,15 +201,15 @@ func (seed Feed) Pages(entriesPerPage int) []Feed {
 		ls := append(make([]Link, 0, len(feed.Links)+5), feed.Links...)
 		ls = append(ls, link(relSelf, page))
 		// https://tools.ietf.org/html/rfc5005#section-3
-		if mostRecentPage > 0 {
+		if pageCount > 1 {
 			ls = append(ls, link(relLast, 0)) // oldest, i.e. lowest page number
 			if page > 0 {
 				ls = append(ls, link(relNext, page-1)) // older, i.e. smaller page number
 			}
-			if page < mostRecentPage {
+			if page < pageCount-1 {
 				ls = append(ls, link(relPrevious, page+1)) // newer, i.e. higher page number
 			}
-			ls = append(ls, link(relFirst, mostRecentPage)) // newest, i.e. largest page number
+			ls = append(ls, link(relFirst, pageCount-1)) // newest, i.e. largest page number
 		} else {
 			// TODO https://tools.ietf.org/html/rfc5005#section-2
 			// xmlns:fh="http://purl.org/syndication/history/1.0" <fh:complete/>

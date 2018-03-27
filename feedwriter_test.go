@@ -65,10 +65,10 @@ func TestUriBasics(t *testing.T) {
 
 func TestComputeLastPage(t *testing.T) {
 	t.Parallel()
-	assert.Equal(t, 0, computeLastPage(0, 100), "Oha")
-	assert.Equal(t, 0, computeLastPage(1, 100), "Oha")
-	assert.Equal(t, 0, computeLastPage(100, 100), "Oha")
-	assert.Equal(t, 1, computeLastPage(101, 100), "Oha")
+	assert.Equal(t, 1, computePageCount(0, 100), "Oha")
+	assert.Equal(t, 1, computePageCount(1, 100), "Oha")
+	assert.Equal(t, 1, computePageCount(100, 100), "Oha")
+	assert.Equal(t, 2, computePageCount(101, 100), "Oha")
 }
 
 func TestEntryFeedFilters(t *testing.T) {
@@ -105,8 +105,8 @@ func TestAppendPageNumber(t *testing.T) {
 	t.Parallel()
 	s := "abc/"
 	assert.Equal(t, "/", s[len(s)-1:], "Oha")
-	assert.Equal(t, "pub/posts-0/", appendPageNumber("pub/posts/", 0, 1), "Oha")
-	assert.Equal(t, "pub/posts/", appendPageNumber("pub/posts/", 1, 1), "Oha")
+	assert.Equal(t, "pub/posts-0/", appendPageNumber("pub/posts/", 0, 1+1), "Oha")
+	assert.Equal(t, "pub/posts/", appendPageNumber("pub/posts/", 1, 1+1), "Oha")
 }
 
 func TestWriteFeedsEmpty0(t *testing.T) {
