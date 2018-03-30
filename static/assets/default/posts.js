@@ -19,7 +19,7 @@ const xml_base_pub = document.documentElement.getAttribute("data-xml-base-pub");
 // onload="document.form_post.post.focus();"
 
 // Firefox 56+ doesn't fire that one in xslt situation: document.addEventListener("DOMContentLoaded", function(event) { console.log("DOM fully loaded and parsed"); });
-let addlink;
+var addlink;
 document.onreadystatechange = function () {
   if(addlink !== undefined)
     return;
@@ -44,17 +44,17 @@ document.onreadystatechange = function () {
 
   // list tags with font-size in relation to frequency
   // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1254
-  let fontMin = 8;
-  let fontMax = 32;
+  var fontMin = 8;
+  var fontMax = 32;
   const tags = document.getElementById('tags').getElementsByClassName('tag');
   const counts = new Array(tags.length);
-  for (let i = tags.length - 1; i >= 0; i--) {
+  for (var i = tags.length - 1; i >= 0; i--) {
     const elm = tags[i].getElementsByClassName('count')[0];
     counts[i] = 1 * elm.innerText;
   }
   const countMaxLog = Math.log(Math.max.apply(Math, counts)); // https://johnresig.com/blog/fast-javascript-maxmin/
   const factor = 1.0 / countMaxLog * (fontMax - fontMin);
-  for (let i = tags.length - 1; i >= 0; i--) {
+  for (var i = tags.length - 1; i >= 0; i--) {
     // https://stackoverflow.com/a/3717340
     const size = Math.log(counts[i]) * factor + fontMin;
     tags[i].style.fontSize = size + 'pt';
