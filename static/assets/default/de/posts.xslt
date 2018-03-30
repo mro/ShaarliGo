@@ -305,11 +305,11 @@ table.prev-next a {
           <td tabindex="30" class="text-right"><a href="{$xml_base_pub}/days/">📅 <span class="hidden-xs">Tage</span></a></td>
           <td tabindex="40" class="text-right"><a href="{$xml_base_pub}/imgs/">🎨 <span class="hidden-xs">Bilder</span></a></td>
           <td class="text-right"><!-- I'd prefer a class="text-right hidden-logged-out" but just don't get it right -->
-            <a class="hidden-logged-out" href="{$xml_base_pub}/../shaarligo.cgi/tools/">🔨 <span class="hidden-xs">Tools</span></a>
+            <a class="hidden-logged-out" href="{$xml_base_pub}/../shaarligo.cgi/tools/" rel="nofollow">🔨 <span class="hidden-xs">Tools</span></a>
           </td>
           <td class="text-right">
-            <a tabindex="50" id="link_login" href="{$xml_base_pub}/../shaarligo.cgi?do=login" class="visible-logged-out"><span class="hidden-xs">Anmelden</span> 🌺 </a>
-            <a tabindex="51" id="link_logout" href="{$xml_base_pub}/../shaarligo.cgi?do=logout" class="hidden-logged-out"><span class="hidden-xs">Abmelden</span> 🐾 </a>
+            <a tabindex="50" id="link_login" href="{$xml_base_pub}/../shaarligo.cgi?do=login" class="visible-logged-out" rel="nofollow"><span class="hidden-xs">Anmelden</span> 🌺 </a>
+            <a tabindex="51" id="link_logout" href="{$xml_base_pub}/../shaarligo.cgi?do=logout" class="hidden-logged-out" rel="nofollow"><span class="hidden-xs">Abmelden</span> 🐾 </a>
           </td>
         </tr>
       </tbody>
@@ -398,7 +398,7 @@ table.prev-next a {
         <xsl:variable name="entry_published_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_published"/></xsl:call-template></xsl:variable>
 
         <span class="hidden-logged-out" title="Bearbeiten">
-          <a href="{$xml_base_pub}/../{a:link[@rel='edit']/@href}">🔨</a><xsl:text> </xsl:text>
+          <a href="{$xml_base_pub}/../{a:link[@rel='edit']/@href}" rel="nofollow">🔨</a><xsl:text> </xsl:text>
         </span>
         <a class="time" title="zuletzt: {$entry_updated_human}" href="{$xml_base_pub}/../{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_published_human"/></a>
         <xsl:if test="$link">
