@@ -162,7 +162,7 @@ table.prev-next td {
   padding: 2ex 0;
 }
 li {
-  background-color: hsl(35, 84%, 50%, 0.2);
+  background-color: hsl(35, 84%, 50%, 0.1);
   margin: 1em 0;
 }
 form {
@@ -390,7 +390,8 @@ table.prev-next a {
       <p class="small text-right">
         <xsl:if test="media:thumbnail/@url">
           <a href="{$link}">
-            <img alt="Vorschaubild" class="img-thumbnail pull-right" src="{media:thumbnail/@url}"/>
+            <!-- https://varvy.com/pagespeed/defer-images.html -->
+            <img alt="Vorschaubild" class="img-thumbnail pull-right" data-src="{media:thumbnail/@url}" src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" />
           </a>
         </xsl:if>
 
