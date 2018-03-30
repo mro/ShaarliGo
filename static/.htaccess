@@ -25,8 +25,12 @@ RewriteEngine On
 RewriteCond %{REQUEST_URI}::$1 ^(.*?/)(.*)::\2$
 RewriteRule ^(.*)$ - [E=BASE:%1]
 
+# redirect legacy shaarli posting
+RewriteCond %{QUERY_STRING} ^((.+)?&)?post=(.+)?)$
+RewriteRule ^/?$  %{ENV:BASE}shaarligo.cgi?%1    [redirect=301,last,qsdiscard]
+
 # legacy URLs https://perishablepress.com/redirect-query-string-htaccess/
-RewriteCond %{QUERY_STRING} ([0-9a-zA-Z_-]{6})
+RewriteCond %{QUERY_STRING} ^([0-9a-zA-Z_-]{6})$
 RewriteRule ^/?$  %{ENV:BASE}pub/posts/%1/    [redirect=301,last,qsdiscard]
 
 # webroot to pub/posts/
