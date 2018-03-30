@@ -16,7 +16,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  http://www.w3.org/TR/xslt-10/
+  https://www.w3.org/TR/xslt-10/
 -->
 <xsl:stylesheet
   xmlns="http://www.w3.org/1999/xhtml"
@@ -321,23 +321,25 @@ table.prev-next a {
       <table class="table prev-next">
         <tbody>
           <tr>
-            <xsl:if test="a:link[@rel='first']">
-              <td class="text-left"><a href="{$xml_base_pub}/../{a:link[@rel='first']/@href}" class="btn btn-primary"><xsl:value-of select="a:link[@rel='first']/@title"/>&#160;&lt;&lt;</a></td>
-            </xsl:if>
-            <td class="text-center">
-              <xsl:if test="a:link[@rel='previous']">
-                <a href="{$xml_base_pub}/../{a:link[@rel='previous']/@href}" class="btn btn-primary"><xsl:value-of select="a:link[@rel='previous']/@title"/>&#160;&lt;</a>
-              </xsl:if>
+            <td class="text-left">
+              <xsl:variable name="disabled"><xsl:if test="a:link[@rel='first']/@href = a:link[@rel='self']/@href">disabled</xsl:if></xsl:variable>
+              <a href="{$xml_base_pub}/../{a:link[@rel='first']/@href}" class="{$disabled} btn btn-primary btn-sm"><xsl:value-of select="a:link[@rel='first']/@title"/>&#160;&lt;&lt;</a>
             </td>
-            <td class="text-center">Seite&#160;<xsl:value-of select="a:link[@rel='self']/@title"/></td>
             <td class="text-center">
-              <xsl:if test="a:link[@rel='next']">
-                <a href="{$xml_base_pub}/../{a:link[@rel='next']/@href}" class="btn btn-primary">&gt;&#160;<xsl:value-of select="a:link[@rel='next']/@title"/></a>
-              </xsl:if>
+              <xsl:variable name="disabled"><xsl:if test="not(a:link[@rel='previous'])">disabled</xsl:if></xsl:variable>
+              <a href="{$xml_base_pub}/../{a:link[@rel='previous']/@href}" class="{$disabled} btn btn-primary btn-sm"><xsl:value-of select="a:link[@rel='previous']/@title"/>&#160;&lt;</a>
             </td>
-            <xsl:if test="a:link[@rel='last']">
-              <td class="text-right" ><a href="{$xml_base_pub}/../{a:link[@rel='last']/@href}" class="btn btn-primary">&gt;&gt;&#160;<xsl:value-of select="a:link[@rel='last']/@title"/></a></td>
-            </xsl:if>
+            <td class="text-center">
+              <span class="hidden-xs">Seite&#160;</span><xsl:value-of select="a:link[@rel='self']/@title"/>
+            </td>
+            <td class="text-center">
+              <xsl:variable name="disabled"><xsl:if test="not(a:link[@rel='next'])">disabled</xsl:if></xsl:variable>
+              <a href="{$xml_base_pub}/../{a:link[@rel='next']/@href}" class="{$disabled} btn btn-primary btn-sm">&gt;&#160;<xsl:value-of select="a:link[@rel='next']/@title"/></a>
+            </td>
+            <td class="text-right">
+              <xsl:variable name="disabled"><xsl:if test="a:link[@rel='last']/@href = a:link[@rel='self']/@href">disabled</xsl:if></xsl:variable>
+              <a href="{$xml_base_pub}/../{a:link[@rel='last']/@href}" class="{$disabled} btn btn-primary btn-sm">&gt;&gt;&#160;<xsl:value-of select="a:link[@rel='last']/@title"/></a>
+            </td>
           </tr>
         </tbody>
       </table>
