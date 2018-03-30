@@ -162,7 +162,7 @@ table.prev-next td {
   padding: 2ex 0;
 }
 li {
-  background-color: #F8F8F8;
+  background-color: hsl(35, 84%, 50%, 0.2);
   margin: 1em 0;
 }
 form {
@@ -180,7 +180,7 @@ p.categories {
 .categories a {
   padding: 0.5ex;
   margin: 0.5ex;
-  background: linear-gradient(#F2F2F2, #ffffff);
+  background: linear-gradient(hsl(35, 84%, 50%, 0.3), hsl(35, 84%, 50%, 0.1));
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
   border-radius: 3px;
 }
@@ -208,9 +208,6 @@ a.time::after { content: " ¶"; }
 
 table.prev-next a {
   padding: 0.75ex;
-  background-color: #FAFAFA;
-  border: 1px solid #F0F0F0;
-  border-radius: 4px;
 }
       </style>
       <title><xsl:value-of select="a:*/a:title"/></title>
@@ -325,21 +322,21 @@ table.prev-next a {
         <tbody>
           <tr>
             <xsl:if test="a:link[@rel='first']">
-              <td class="text-left"><a href="{$xml_base_pub}/../{a:link[@rel='first']/@href}"><xsl:value-of select="a:link[@rel='first']/@title"/>&#160;&lt;&lt;</a></td>
+              <td class="text-left"><a href="{$xml_base_pub}/../{a:link[@rel='first']/@href}" class="btn btn-primary"><xsl:value-of select="a:link[@rel='first']/@title"/>&#160;&lt;&lt;</a></td>
             </xsl:if>
             <td class="text-center">
               <xsl:if test="a:link[@rel='previous']">
-                <a href="{$xml_base_pub}/../{a:link[@rel='previous']/@href}"><xsl:value-of select="a:link[@rel='previous']/@title"/>&#160;&lt;</a>
+                <a href="{$xml_base_pub}/../{a:link[@rel='previous']/@href}" class="btn btn-primary"><xsl:value-of select="a:link[@rel='previous']/@title"/>&#160;&lt;</a>
               </xsl:if>
             </td>
             <td class="text-center">Seite&#160;<xsl:value-of select="a:link[@rel='self']/@title"/></td>
             <td class="text-center">
               <xsl:if test="a:link[@rel='next']">
-                <a href="{$xml_base_pub}/../{a:link[@rel='next']/@href}">&gt;&#160;<xsl:value-of select="a:link[@rel='next']/@title"/></a>
+                <a href="{$xml_base_pub}/../{a:link[@rel='next']/@href}" class="btn btn-primary">&gt;&#160;<xsl:value-of select="a:link[@rel='next']/@title"/></a>
               </xsl:if>
             </td>
             <xsl:if test="a:link[@rel='last']">
-              <td class="text-right" ><a href="{$xml_base_pub}/../{a:link[@rel='last']/@href}">&gt;&gt;&#160;<xsl:value-of select="a:link[@rel='last']/@title"/></a></td>
+              <td class="text-right" ><a href="{$xml_base_pub}/../{a:link[@rel='last']/@href}" class="btn btn-primary">&gt;&gt;&#160;<xsl:value-of select="a:link[@rel='last']/@title"/></a></td>
             </xsl:if>
           </tr>
         </tbody>
