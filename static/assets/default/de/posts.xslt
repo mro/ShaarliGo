@@ -162,7 +162,7 @@ table.prev-next td {
   padding: 2ex 0;
 }
 li {
-  background-color: hsl(35, 84%, 50%, 0.1);
+  background-color: hsla(35, 84%, 50%, 0.15);
   margin: 1em 0;
 }
 form {
@@ -174,16 +174,6 @@ form button { min-width: 14ex; }
   min-width: 40px;
 }
 
-p.categories {
-  margin: 1ex 0;
-}
-.categories a {
-  padding: 0.5ex;
-  margin: 0.5ex;
-  background: linear-gradient(hsl(35, 84%, 50%, 0.3), hsl(35, 84%, 50%, 0.1));
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-  border-radius: 3px;
-}
 img.img-thumbnail {
   max-width: 120px;
   max-height: 120px;
@@ -267,7 +257,7 @@ table.prev-next a {
           <xsl:sort select="@term" order="ascending"/>
           <!-- not log, just linear, similar to https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1254 -->
           <xsl:variable name="size" select="8 + 40 * @label div $countMax"/>
-          <a style="font-size:{$size}pt" href="{$xml_base_pub}/../shaarligo.cgi/search/?q=%23{@term}+" class="tag"><span class="label"><xsl:value-of select="@term"/></span><span style="font-size:8pt">&#160;(<span class="count"><xsl:value-of select="@label"/></span>)</span></a><xsl:text> </xsl:text>
+          <a style="font-size:{$size}pt" href="{$xml_base_pub}/../shaarligo.cgi/search/?q=%23{@term}+" class="tag"><span class="label"><xsl:value-of select="@term"/></span><span style="font-size:8pt">&#160;(<span class="count"><xsl:value-of select="@label"/></span>)</span></a><xsl:text>, </xsl:text>
         </xsl:for-each>
       </p>
 
@@ -427,7 +417,7 @@ table.prev-next a {
         </h5>
       </xsl:if>
       <div class="content">
-        <p class="small"><a><xsl:value-of select="$link"/></a></p>
+        <p class="small text-right"><a><xsl:value-of select="$link"/></a></p>
 
         <!-- html content won't work that easy (out-of-the-firebox): https://bugzilla.mozilla.org/show_bug.cgi?id=98168#c140 -->
         <!-- workaround via jquery: http://stackoverflow.com/a/9714567 -->
@@ -439,7 +429,7 @@ table.prev-next a {
         <p class="categories" title="Schlagworte">
           <xsl:for-each select="a:category">
             <xsl:sort select="@term"/>
-            <a href="{@scheme}{@term}/">#<xsl:value-of select="@term"/></a><xsl:text> </xsl:text>
+            <a href="{@scheme}{@term}/">#<xsl:value-of select="@term"/></a><xsl:text>, </xsl:text>
           </xsl:for-each>
         </p>
       </div>
