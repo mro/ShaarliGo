@@ -8,7 +8,7 @@
 self-hosted microblogging inspired by
 http://sebsauvage.net/wiki/doku.php?id=php:shaarli. Destilled down to the bare
 minimum, with easy hosting and security in mind. No PHP, no DB, no server-side
-templating.
+templating, JS optional.
 
 ## Design Goals
 
@@ -29,11 +29,11 @@ templating.
 | Quality         | very good | good | normal | irrelevant |
 |-----------------|:---------:|:----:|:------:|:----------:|
 | Functionality   |           |      |    ×   |            |
-| Reliability     |     ×     |      |        |            |
-| Usability       |           |  ×   |        |            |
-| Efficiency      |     ×     |      |        |            |
+| Reliability     |           |  ×   |        |            |
+| Usability       |     ×     |      |        |            |
+| Efficiency      |           |      |    ×   |            |
 | Changeability   |           |  ×   |        |            |
-| Portability     |           |      |        |     ×      |
+| Portability     |     ×     |      |        |            |
 
 ## Install / Update
 
