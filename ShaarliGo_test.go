@@ -215,7 +215,7 @@ func TestPostConfig(t *testing.T) {
 
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
-	assert.Equal(t, "/sub/pub/posts/", r.Header["Location"][0], "aha")
+	assert.Equal(t, "/sub/"+uriPubPosts, r.Header["Location"][0], "aha")
 
 	body, err := ioutil.ReadAll(r.Body)
 	assert.Nil(t, err, "aha")
@@ -227,7 +227,7 @@ func TestPostConfig(t *testing.T) {
 
 	assert.Equal(t, 1, len(r.Header["Set-Cookie"]), "naja")
 
-	stat, _ := os.Stat("pub")
+	stat, _ := os.Stat(uriPub)
 	assert.Equal(t, 0755, int(stat.Mode()&os.ModePerm), "ach, wieso?")
 }
 
@@ -238,7 +238,7 @@ func TestGetLoginWithoutRedir(t *testing.T) {
 	r, err := doPost("/config/", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
-	assert.Equal(t, "/sub/pub/posts/", r.Header["Location"][0], "aha")
+	assert.Equal(t, "/sub/"+uriPubPosts, r.Header["Location"][0], "aha")
 
 	os.Setenv("QUERY_STRING", "do=login")
 	r, err = doGet("")
@@ -252,7 +252,7 @@ func TestGetLoginWithoutRedir(t *testing.T) {
 
 	r, err = doPost("", []byte(`login=B&password=123456789012&token=foo`))
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
-	assert.Equal(t, "/sub/pub/posts/", r.Header["Location"][0], "aha")
+	assert.Equal(t, "/sub/"+uriPubPosts, r.Header["Location"][0], "aha")
 	cook := r.Header["Set-Cookie"][0]
 	assert.True(t, strings.HasPrefix(cook, "ShaarliGo=MTU"), cook)
 }
@@ -265,9 +265,9 @@ func TestGetLoginWithRedir(t *testing.T) {
 	r, err := doPost("/config/", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
-	assert.Equal(t, "/sub/pub/posts/", r.Header["Location"][0], "aha")
+	assert.Equal(t, "/sub/"+uriPubPosts, r.Header["Location"][0], "aha")
 
-	returnurl := "/sub/pub/posts/anyid/?foo=bar#baz"
+	returnurl := "/sub/" + uriPubPosts + "anyid/?foo=bar#baz"
 	os.Setenv("QUERY_STRING", "do=login&returnurl="+url.QueryEscape(returnurl))
 	r, err = doGet("")
 	assert.Nil(t, err, "aha")
@@ -278,7 +278,7 @@ func TestGetLoginWithRedir(t *testing.T) {
 	inputs := scrape.FindAll(root, func(n *html.Node) bool { return atom.Input == n.DataAtom })
 	assert.Equal(t, 6, len(inputs), "aha")
 
-	r, err = doPost("", []byte(`login=B&password=123456789012&token=foo&returnurl=/sub/pub/posts/anyid/?foo=bar#baz`))
+	r, err = doPost("", []byte(`login=B&password=123456789012&token=foo&returnurl=/sub/`+uriPubPosts+`anyid/?foo=bar#baz`))
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
 	assert.Equal(t, returnurl, r.Header["Location"][0], "aha")
 	cook := r.Header["Set-Cookie"][0]
@@ -292,7 +292,7 @@ func _TestGetPostNew(t *testing.T) {
 	r, err := doPost("/config", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
-	assert.Equal(t, "/sub/pub/posts/", r.Header["Location"][0], "aha")
+	assert.Equal(t, "/sub/"+uriPubPosts, r.Header["Location"][0], "aha")
 
 	purl := fmt.Sprintf("?post=%s&title=%s&source=%s", url.QueryEscape("http://example.com/foo?bar=baz#grr"), url.QueryEscape("A first post"), url.QueryEscape("me"))
 	os.Setenv("QUERY_STRING", purl)
@@ -322,7 +322,7 @@ func _TestGetPostNew(t *testing.T) {
 
 	r, err = doPost(purl, nil)
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
-	assert.Equal(t, "/sub/pub/posts/?#foo", r.Header["Location"], "aha")
+	assert.Equal(t, "/sub/"+uriPubPosts+"?#foo", r.Header["Location"], "aha")
 }
 
 func BenchmarkHello(b *testing.B) {

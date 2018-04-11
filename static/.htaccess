@@ -31,10 +31,10 @@ RewriteRule ^/?$  %{ENV:BASE}shaarligo.cgi?%1    [redirect=301,last,qsdiscard]
 
 # legacy URLs https://perishablepress.com/redirect-query-string-htaccess/
 RewriteCond %{QUERY_STRING} ^([0-9a-zA-Z_-]{6})$
-RewriteRule ^/?$  %{ENV:BASE}pub/posts/%1/    [redirect=301,last,qsdiscard]
+RewriteRule ^/?$  %{ENV:BASE}=/p/%1/    [redirect=301,last,qsdiscard]
 
-# webroot to pub/posts/
-RewriteRule ^/?$  %{ENV:BASE}pub/posts/       [redirect=301,last,qsdiscard]
+# webroot to =/p/
+RewriteRule ^/?$  %{ENV:BASE}=/p/       [redirect=301,last,qsdiscard]
 
 # recommended
 # http://www.golem.de/news/content-security-policy-schutz-vor-cross-site-scripting-1306-99795.html

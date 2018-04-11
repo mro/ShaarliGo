@@ -38,7 +38,7 @@ document.onreadystatechange = function () {
     if (xhr.readyState > 3 && xhr.status == 200)
       addlink.list = JSON.parse(xhr.response);
   };
-  xhr.open('GET', xml_base_pub + '/tags/index.json');
+  xhr.open('GET', xml_base_pub + '/t/index.json');
   xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
   xhr.send();
 

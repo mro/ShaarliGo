@@ -13,3 +13,4 @@ go-bindata -ignore=\\.DS_Store -prefix static static/... \
 
 "${say}" "pack mas"
 ls -Al ~/Sites/b/shaarligo.cgi
+echo "http://$(hostname)/~$(whoami)/b/"

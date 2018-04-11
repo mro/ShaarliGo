@@ -101,7 +101,7 @@
   <xsl:key name="CategorY" match="a:entry/a:category" use="@term" />
 
   <xsl:variable name="xml_base" select="/*/@xml:base"/>
-  <xsl:variable name="xml_base_pub" select="concat($xml_base,'pub')"/>
+  <xsl:variable name="xml_base_pub" select="concat($xml_base,'=')"/>
 
   <xsl:template match="/">
     <!--
@@ -263,7 +263,7 @@ table.prev-next a {
       <tbody>
         <tr>
           <td class="text-left">
-            <a tabindex="10" href="{$xml_base_pub}/posts/">
+            <a tabindex="10" href="{$xml_base_pub}/p/">
               <xsl:choose>
                 <xsl:when test="a:link[@rel = 'up']/@title">
                   <xsl:value-of select="a:link[@rel = 'up']/@title"/>
@@ -274,9 +274,9 @@ table.prev-next a {
               </xsl:choose>
             </a>
           </td>
-          <td tabindex="20" class="text-right"><a href="{$xml_base_pub}/tags/">⛅ <span class="hidden-xs"># Tags</span></a></td>
-          <td tabindex="30" class="text-right"><a href="{$xml_base_pub}/days/">📅 <span class="hidden-xs">Tage</span></a></td>
-          <td tabindex="40" class="text-right"><a href="{$xml_base_pub}/imgs/">🎨 <span class="hidden-xs">Bilder</span></a></td>
+          <td tabindex="20" class="text-right"><a href="{$xml_base_pub}/t/">⛅ <span class="hidden-xs"># Tags</span></a></td>
+          <td tabindex="30" class="text-right"><a href="{$xml_base_pub}/d/">📅 <span class="hidden-xs">Tage</span></a></td>
+          <td tabindex="40" class="text-right"><a href="{$xml_base_pub}/i/">🎨 <span class="hidden-xs">Bilder</span></a></td>
           <td class="text-right"><!-- I'd prefer a class="text-right hidden-logged-out" but just don't get it right -->
             <a class="hidden-logged-out" href="{$xml_base_pub}/../shaarligo.cgi/tools/" rel="nofollow">🛠 <span class="hidden-xs">Tools</span></a>
           </td>
@@ -376,7 +376,7 @@ table.prev-next a {
   <xsl:template match="a:entry">
     <xsl:variable name="link" select="a:link[not(@rel)]/@href"/>
     <xsl:variable name="self" select="a:link[@rel='self']/@href"/>
-    <xsl:variable name="id_slash" select="substring-after($self, '/posts/')"/>
+    <xsl:variable name="id_slash" select="substring-after($self, '/p/')"/>
     <xsl:variable name="id" select="substring-before($id_slash, '/')"/>
     <li id="{$id}" class="clearfix">
       <p class="small text-right">

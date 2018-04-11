@@ -47,10 +47,10 @@ const cgiName = "shaarligo.cgi"
 const dirAssets = "assets"
 const dirApp = "app"
 
-const uriPub = "pub"
-const uriPosts = "posts"
-const uriDays = "days"
-const uriTags = "tags"
+const uriPub = "="
+const uriPosts = "p"
+const uriDays = "d"
+const uriTags = "t"
 
 const relSelf = "self"            // https://www.iana.org/assignments/link-relations/link-relations.xhtml
 const relAlternate = "alternate"  // https://www.iana.org/assignments/link-relations/link-relations.xhtml

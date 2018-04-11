@@ -61,10 +61,10 @@ env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.GitSHA1=$(git rev-p
 # scp "ServerInfo.cgi" simply:/var/www/lighttpd/h4u.r-2.eu/public_html/"info.cgi"
 gzip --force --best "${PROG_NAME}-linux-amd64-${VERSION}" \
 && rsync -vp --bwlimit=1234 "${PROG_NAME}-linux-amd64-${VERSION}.gz" "simply:/tmp/shaarligo_cgi.gz" \
-&& ssh simply "cd /var/www/lighttpd/links.mro.name/public_html/ && cp /tmp/shaarligo_cgi.gz . && gunzip < shaarligo_cgi.gz > shaarligo.cgi && ls -l shaarligo?cgi*" \
-&& ssh simply "cd /var/www/lighttpd/b.r-2.eu/public_html/u/ && cp /var/www/lighttpd/links.mro.name/public_html/shaarligo?cgi* ."
+&& ssh simply "cd /var/www/lighttpd/l.mro.name/public_html/ && cp /tmp/shaarligo_cgi.gz . && gunzip < shaarligo_cgi.gz > shaarligo.cgi && ls -l shaarligo?cgi*" \
+&& ssh simply "cd /var/www/lighttpd/b.r-2.eu/public_html/u/ && cp /var/www/lighttpd/l.mro.name/public_html/shaarligo?cgi* ."
 
-ssh simply "cd /var/www/lighttpd/b.mro.name/public_html/u/ && cp /var/www/lighttpd/links.mro.name/public_html/shaarligo?cgi* . && ls -l shaarligo?cgi*"
+ssh simply "cd /var/www/lighttpd/b.mro.name/public_html/u/ && cp /var/www/lighttpd/l.mro.name/public_html/shaarligo?cgi* . && ls -l shaarligo?cgi*"
 "${say}" "ok"
 
 "${say}" "vario"
