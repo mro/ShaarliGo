@@ -26,7 +26,7 @@ RewriteCond %{REQUEST_URI}::$1 ^(.*?/)(.*)::\2$
 RewriteRule ^(.*)$ - [E=BASE:%1]
 
 # redirect legacy shaarli posting
-RewriteCond %{QUERY_STRING} ^((.+)?&)?post=(.+)?)$
+RewriteCond %{QUERY_STRING} ^((.*&)?post=.*)$
 RewriteRule ^/?$  %{ENV:BASE}shaarligo.cgi?%1    [redirect=301,last,qsdiscard]
 
 # legacy URLs https://perishablepress.com/redirect-query-string-htaccess/
