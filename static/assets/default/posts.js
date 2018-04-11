@@ -56,7 +56,7 @@ document.onreadystatechange = function () {
   const factor = 1.0 / countMaxLog * (fontMax - fontMin);
   for (var i = tags.length - 1; i >= 0; i--) {
     // https://stackoverflow.com/a/3717340
-    const size = Math.log(counts[i]) * factor + fontMin;
+    const size = Math.ceil(Math.log(counts[i]) * factor) + fontMin;
     tags[i].style.fontSize = size + 'pt';
   }
 

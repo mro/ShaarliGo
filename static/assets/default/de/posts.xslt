@@ -31,7 +31,8 @@
   extension-element-prefixes="math"
   version="1.0">
 
-  <xsl:variable name="redirector">https://anonym.to/?</xsl:variable> <!-- mask the HTTP_REFERER -->
+  <!-- xsl:variable name="redirector">https://anonym.to/?</xsl:variable --> <!-- mask the HTTP_REFERER -->
+  <xsl:variable name="redirector"></xsl:variable>
   <xsl:variable name="archive">https://web.archive.org/web/</xsl:variable>
 
   <!-- replace linefeeds with <br> tags -->
@@ -107,7 +108,7 @@
       Do not set a class="logged-out" initially, but do via early JavaScript.
       If JavaScript is off, we need mixture between logged-in and -out.
     -->
-    <html xmlns="http://www.w3.org/1999/xhtml" data-xml-base-pub="{$xml_base_pub}">
+    <html xmlns="http://www.w3.org/1999/xhtml" data-xml-base-pub="{$xml_base_pub}" style="background-color:blue">
       <xsl:call-template name="head"/>
 
       <body>
@@ -163,7 +164,8 @@ table.prev-next td {
 }
 li {
   background-color: hsla(35, 84%, 50%, 0.15);
-  margin: 1em 0;
+  margin: 2ex -1ex;
+  padding: 1ex;
 }
 form {
   margin: 1.0ex 0;
@@ -209,25 +211,6 @@ table.prev-next a {
       <noscript><p>JavaScript ist aus, es geht zwar (fast) alles auch ohne, aber mit ist's <em>schöner</em>.</p></noscript>
 
       <xsl:call-template name="links_commands"/>
-
-      <xsl:comment> https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ </xsl:comment>
-      <form id="form_search" name="form_search" class="form-horizontal form-search" action="{$xml_base_pub}/../shaarligo.cgi/search/">
-        <div class="input-group">
-          <input tabindex="100" name="q" value="{@sg:searchTerms}" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="awesomplete form-control search-query" data-multiple="true"/>
-          <span class="input-group-btn">
-            <button tabindex="200" type="submit" class="btn btn-primary">Suche</button>
-          </span>
-        </div>
-      </form>
-
-      <form id="form_post" name="form_post" class="form-horizontal" action="{$xml_base_pub}/../shaarligo.cgi">
-        <div class="input-group">
-          <input tabindex="300" name="post" type="text" placeholder="Was gibt's #Neues? (Notiz oder URL)" class="awesomplete form-control" data-multiple="true"/>
-          <span class="input-group-btn">
-            <button tabindex="400" type="submit" class="btn btn-primary">Shaaaare!</button>
-          </span>
-        </div>
-      </form>
 
       <xsl:call-template name="prev-next"/>
 
@@ -295,7 +278,7 @@ table.prev-next a {
           <td tabindex="30" class="text-right"><a href="{$xml_base_pub}/days/">📅 <span class="hidden-xs">Tage</span></a></td>
           <td tabindex="40" class="text-right"><a href="{$xml_base_pub}/imgs/">🎨 <span class="hidden-xs">Bilder</span></a></td>
           <td class="text-right"><!-- I'd prefer a class="text-right hidden-logged-out" but just don't get it right -->
-            <a class="hidden-logged-out" href="{$xml_base_pub}/../shaarligo.cgi/tools/" rel="nofollow">🔨 <span class="hidden-xs">Tools</span></a>
+            <a class="hidden-logged-out" href="{$xml_base_pub}/../shaarligo.cgi/tools/" rel="nofollow">🛠 <span class="hidden-xs">Tools</span></a>
           </td>
           <td class="text-right">
             <a tabindex="50" id="link_login" href="{$xml_base_pub}/../shaarligo.cgi?do=login" class="visible-logged-out" rel="nofollow"><span class="hidden-xs">Anmelden</span> 🌺 </a>
@@ -304,6 +287,25 @@ table.prev-next a {
         </tr>
       </tbody>
     </table>
+
+    <xsl:comment> https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ </xsl:comment>
+    <form id="form_search" name="form_search" class="form-horizontal form-search" action="{$xml_base_pub}/../shaarligo.cgi/search/">
+      <div class="input-group">
+        <input tabindex="100" name="q" value="{@sg:searchTerms}" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="awesomplete form-control search-query" data-multiple="true"/>
+        <span class="input-group-btn">
+          <button tabindex="200" type="submit" class="btn btn-primary">Suche</button>
+        </span>
+      </div>
+    </form>
+
+    <form id="form_post" name="form_post" class="form-horizontal" action="{$xml_base_pub}/../shaarligo.cgi">
+      <div class="input-group">
+        <input tabindex="300" name="post" type="text" placeholder="Was gibt's #Neues? (Notiz oder URL)" class="awesomplete form-control" data-multiple="true"/>
+        <span class="input-group-btn">
+          <button tabindex="400" type="submit" class="btn btn-primary">Shaaaare!</button>
+        </span>
+      </div>
+    </form>
   </xsl:template>
 
   <xsl:template name="prev-next">
@@ -379,30 +381,16 @@ table.prev-next a {
     <li id="{$id}" class="clearfix">
       <p class="small text-right">
         <xsl:if test="media:thumbnail/@url">
-          <a href="{$link}">
+          <a href="{$redirector}{$link}" rel="noopener noreferrer" referrerpolicy="no-referrer">
             <!-- https://varvy.com/pagespeed/defer-images.html -->
             <img alt="Vorschaubild" class="img-thumbnail pull-right" data-src="{media:thumbnail/@url}" src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" />
           </a>
-        </xsl:if>
-
-        <xsl:variable name="entry_updated" select="a:updated"/>
-        <xsl:variable name="entry_updated_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_updated"/></xsl:call-template></xsl:variable>
-        <xsl:variable name="entry_published" select="a:published"/>
-        <xsl:variable name="entry_published_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_published"/></xsl:call-template></xsl:variable>
-
-        <span class="hidden-logged-out" title="Bearbeiten">
-          <a href="{$xml_base_pub}/../{a:link[@rel='edit']/@href}" rel="nofollow">🔨</a><xsl:text> </xsl:text>
-        </span>
-        <a class="time" title="zuletzt: {$entry_updated_human}" href="{$xml_base_pub}/../{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_published_human"/></a>
-        <xsl:if test="$link">
-          <xsl:text> ~ </xsl:text>
-          <a title="Archiv" href="{$archive}{$link}">@archive.org</a>
         </xsl:if>
       </p>
       <h4>
         <xsl:choose>
           <xsl:when test="$link">
-            <a href="{$redirector}{$link}" title="Original"><xsl:value-of select="a:title"/></a>
+            <a href="{$redirector}{$link}" title="Original" rel="noopener noreferrer" referrerpolicy="no-referrer"><xsl:value-of select="a:title"/></a>
           </xsl:when>
           <xsl:otherwise>
             <xsl:value-of select="a:title"/>
@@ -417,7 +405,7 @@ table.prev-next a {
         </h5>
       </xsl:if>
       <div class="content">
-        <p class="small text-right"><a><xsl:value-of select="$link"/></a></p>
+        <!-- p class="small text-right"><a><xsl:value-of select="$link"/></a></p -->
 
         <!-- html content won't work that easy (out-of-the-firebox): https://bugzilla.mozilla.org/show_bug.cgi?id=98168#c140 -->
         <!-- workaround via jquery: http://stackoverflow.com/a/9714567 -->
@@ -433,6 +421,22 @@ table.prev-next a {
           </xsl:for-each>
         </p>
       </div>
+      <p>
+        <xsl:variable name="entry_updated" select="a:updated"/>
+        <xsl:variable name="entry_updated_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_updated"/></xsl:call-template></xsl:variable>
+        <xsl:variable name="entry_published" select="a:published"/>
+        <xsl:variable name="entry_published_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_published"/></xsl:call-template></xsl:variable>
+
+        <a class="time" title="zuletzt: {$entry_updated_human}" href="{$xml_base_pub}/../{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_published_human"/></a>
+        <xsl:if test="$link">
+          <xsl:text> ~ </xsl:text>
+          <a title="Archiv" href="{$archive}{$link}" rel="noopener noreferrer" referrerpolicy="no-referrer">@archive.org</a>
+        </xsl:if>
+        <span class="hidden-logged-out" title="Bearbeiten">
+          <xsl:text> ~ </xsl:text>
+          <a href="{$xml_base_pub}/../{a:link[@rel='edit']/@href}" rel="nofollow">🛠 </a><xsl:text> </xsl:text>
+        </span>
+      </p>
     </li>
   </xsl:template>
 
