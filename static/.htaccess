@@ -42,9 +42,15 @@ RewriteRule ^/?$  %{ENV:BASE}=/p/       [redirect=301,last,qsdiscard]
 Header add Content-Security-Policy "default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-hGqewLn4csF93PEX/0TCk2jdnAytXBZFxFBzKt7wcgo='; connect-src 'self'; font-src 'self'; img-src * 'self' data:; media-src *;"
 
 # nice
-Header add X-Powered-By "http://purl.mro.name/ShaarliGo#v0.0.3"
+Header add X-Powered-By "http://purl.mro.name/ShaarliGo#v0.0.4"
 
 # cache assets only (see assets/.htaccess)
 Header set Cache-Control "no-cache"
 
 Header set Connection Keep-Alive
+
+# if we actually serve .xml.gz DirectoryIndex
+# RewriteRule (/|\.xml\.gz)$ - [ENV=IS_GZIP_MARKER:true]
+RewriteRule (\.xml\.gz)$ - [ENV=IS_GZIP_MARKER:true]
+Header always add "Content-Encoding" "gzip" env=IS_GZIP_MARKER
+Header always set "Content-Type" "text/xml; charset=utf8" env=IS_GZIP_MARKER

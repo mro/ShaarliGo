@@ -108,7 +108,7 @@
       Do not set a class="logged-out" initially, but do via early JavaScript.
       If JavaScript is off, we need mixture between logged-in and -out.
     -->
-    <html xmlns="http://www.w3.org/1999/xhtml" data-xml-base-pub="{$xml_base_pub}" style="background-color:blue">
+    <html xmlns="http://www.w3.org/1999/xhtml" data-xml-base-pub="{$xml_base_pub}" style="background-color:#3d2400">
       <xsl:call-template name="head"/>
 
       <body>
@@ -148,7 +148,11 @@
 .visible-logged-out { display:none; }
 .logged-out .visible-logged-out { display:initial; }
 
+body {
+  background: none;
+}
 .container {
+  background-color: black;
 }
 
 #links_commands {
@@ -163,9 +167,12 @@ table.prev-next td {
   padding: 2ex 0;
 }
 li {
-  background-color: hsla(35, 84%, 50%, 0.15);
   margin: 2ex -1ex;
   padding: 1ex;
+}
+p {
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 form {
   margin: 1.0ex 0;
