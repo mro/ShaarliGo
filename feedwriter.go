@@ -18,6 +18,7 @@
 package main
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
@@ -354,7 +355,7 @@ func (app App) PublishFeeds(feeds []Feed) error {
 }
 
 func (app App) PublishFeed(feed Feed) error {
-	const feedFileName = "index.xml"
+	const feedFileName = "index.xml.gz"
 	const xsltFileName = "posts.xslt"
 	uri := LinkRelSelf(feed.Links).Href
 	defer un(trace(strings.Join([]string{"App.PublishFeed", uri}, " ")))
@@ -401,17 +402,21 @@ func (app App) PublishFeed(feed Feed) error {
 
 	var err error
 	if err = os.MkdirAll(dstDirName, newDirPerms); err == nil {
-		var w *os.File
-		if w, err = os.Create(tmpFileName); err == nil {
-			defer w.Close() // just to be sure
-			enc := xml.NewEncoder(w)
-			enc.Indent("", "  ")
-			if err = xmlEncodeWithXslt(feedOrEntry, xslt, enc); err == nil {
-				if err = enc.Flush(); err == nil {
-					if err = w.Close(); err == nil {
-						mTime := time.Time(feed.Updated)
-						os.Chtimes(tmpFileName, mTime, mTime)
-						return os.Rename(tmpFileName, dstFileName)
+		var gz *os.File
+		if gz, err = os.Create(tmpFileName); err == nil {
+			defer gz.Close() // just to be sure
+			var w *gzip.Writer
+			if w, err = gzip.NewWriterLevel(gz, gzip.BestCompression); err == nil {
+				defer w.Close() // just to be sure
+				enc := xml.NewEncoder(w)
+				enc.Indent("", "  ")
+				if err = xmlEncodeWithXslt(feedOrEntry, xslt, enc); err == nil {
+					if err = enc.Flush(); err == nil {
+						if err = w.Close(); err == nil {
+							mTime := time.Time(feed.Updated)
+							os.Chtimes(tmpFileName, mTime, mTime)
+							return os.Rename(tmpFileName, dstFileName)
+						}
 					}
 				}
 			}
