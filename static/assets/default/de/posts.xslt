@@ -171,8 +171,9 @@ li {
   padding: 1ex;
 }
 p {
-  hyphens: auto;
   overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
 }
 form {
   margin: 1.0ex 0;
