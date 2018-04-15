@@ -203,9 +203,6 @@ img.img-thumbnail {
 .awesomplete > ul { top: 5ex; z-index: 3; }
 div.awesomplete { display: block; }
 
-h4 a::after { content: " 🔗"; }
-a.time::after { content: " ¶"; }
-
 table.prev-next a {
   padding: 0.75ex;
 }
