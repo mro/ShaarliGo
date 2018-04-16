@@ -61,7 +61,7 @@ func (app *App) handleTools(w http.ResponseWriter, r *http.Request) {
 
     <li id="update">
       <b>Update:</b> Just replace the file <code>shaarligo.cgi</code>. To update the assets, delete them and
-      <code>app/deleteme_to_restore</code>, then clear your browser cache and visit the CGI, e.g.
+      <code>app/delete_me_to_restore</code>, then clear your browser cache and visit the CGI, e.g.
       the <a href="../search/?q=foo">search</a>.
       <br class="br"/>
       <code>$ ssh <kbd>myserver.example.com</kbd><br class="br"/>
@@ -69,7 +69,7 @@ $ cd <kbd>filesystem/path/to/</kbd><br class="br"/>
 $ curl -R -L -o shaarligo.cgi.gz <a href="http://purl.mro.name/shaarligo_cgi.gz">http://purl.mro.name/shaarligo_cgi.gz</a> &amp;&amp; gunzip shaarligo.cgi.gz<br class="br"/>
 $ chmod a+x shaarligo.cgi<br class="br"/>
 $ ls -l shaarligo?cgi*<br class="br"/>
-$ rm -rf .htaccess assets app/deleteme_to_restore</code>
+$ rm -rf .htaccess assets app/delete_me_to_restore</code>
     </li>
 
     <li id="config"><a href="../config/">Config</a></li>

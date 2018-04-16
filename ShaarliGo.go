@@ -155,7 +155,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 	// unpack (nonexisting) static files
 	func() {
-		if _, err := os.Stat(filepath.Join(dirApp, "deleteme_to_restore")); !os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(dirApp, "delete_me_to_restore")); !os.IsNotExist(err) {
 			return
 		}
 		defer un(trace("RestoreAssets"))
