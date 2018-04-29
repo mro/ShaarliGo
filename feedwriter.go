@@ -130,11 +130,27 @@ func LinkRelSelf(links []Link) Link {
 	return LinkRel(relSelf, links)
 }
 
-// collect all entries into all (unpaged, complete) feeds to publish
+func uriSliceSorted(uri2filter map[string]func(*Entry) bool) []string {
+	keys := make([]string, len(uri2filter))
+	{
+		i := 0
+		for k := range uri2filter {
+			keys[i] = k
+			i++
+		}
+	}
+	sort.Strings(keys) // I don't care too much how they're sorted, I just want them to be stable.
+	return keys
+}
+
+// collect all entries into all (unpaged, complete) feeds to publish.
+//
+// return sorted by Id
 func (seed Feed) CompleteFeeds(uri2filter map[string]func(*Entry) bool) []Feed {
 	defer un(trace("Feed.CompleteFeeds"))
 	ret := make([]Feed, 0, len(uri2filter))
-	for uri, entryFilter := range uri2filter {
+	for _, uri := range uriSliceSorted(uri2filter) {
+		entryFilter := uri2filter[uri]
 		feed := seed // clone
 		feed.Id = uri
 		feed.Subtitle = uri2subtitle(feed.Subtitle, uri)

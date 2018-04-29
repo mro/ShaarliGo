@@ -79,20 +79,13 @@ func TestEntryFeedFilters(t *testing.T) {
 		Categories: []Category{Category{Term: "🐳"}},
 	}
 
-	uris := itm.FeedFilters(nil)
-	keys := make([]string, len(uris))
-	{
-		i := 0
-		for k := range uris {
-			keys[i] = k
-			i++
-		}
-		sort.Strings(keys)
-	}
+	keys := uriSliceSorted(itm.FeedFilters(nil))
 	assert.Equal(t, []string{
 		uriPubDays + "2010-12-31" + "/",
-		uriPubPosts, uriPubPosts + "id_0" + "/",
-		uriPubTags, uriPubTags + "🐳" + "/",
+		uriPubPosts,
+		uriPubPosts + "id_0" + "/",
+		uriPubTags,
+		uriPubTags + "🐳" + "/",
 	}, keys, "Oha")
 }
 
@@ -126,7 +119,6 @@ func TestWriteFeedsAddOneAndOneAndRemoveFirst(t *testing.T) {
 		feed.Append(entry)
 
 		complete := feed.CompleteFeedsForModifiedEntries([]*Entry{entry})
-		sort.Slice(complete, func(i, j int) bool { return complete[i].Id < complete[j].Id })
 
 		assert.Equal(t, 5, len(complete), "ja")
 
@@ -155,7 +147,6 @@ func TestWriteFeedsAddOneAndOneAndRemoveFirst(t *testing.T) {
 		feed.Append(entry)
 
 		complete := feed.CompleteFeedsForModifiedEntries([]*Entry{entry})
-		sort.Slice(complete, func(i, j int) bool { return complete[i].Id < complete[j].Id })
 
 		assert.Equal(t, 5, len(complete), "ja")
 
@@ -179,7 +170,6 @@ func TestWriteFeedsAddOneAndOneAndRemoveFirst(t *testing.T) {
 		feed.deleteEntry("id_0")
 
 		complete := feed.CompleteFeedsForModifiedEntries([]*Entry{&e0})
-		sort.Slice(complete, func(i, j int) bool { return complete[i].Id < complete[j].Id })
 
 		assert.Equal(t, 5, len(complete), "ja")
 
@@ -235,9 +225,6 @@ func TestWriteFeedsPaged(t *testing.T) {
 	assert.Nil(t, err, "uhu")
 	assert.Equal(t, 10, len(pages), "uhu")
 
-	sort.Slice(complete, func(i, j int) bool { return complete[i].Id < complete[j].Id })
-	sort.Slice(pages, func(i, j int) bool { return LinkRelSelf(pages[i].Links).Href < LinkRelSelf(pages[j].Links).Href })
-
 	i := 0
 	assert.Equal(t, uriPubDays+"1990-12-30/", pages[i].Id, "ja")
 	assert.Equal(t, uriPubDays+"1990-12-30/", LinkRelSelf(pages[i].Links).Href, "ja")
@@ -291,7 +278,6 @@ func TestPagedFeeds(t *testing.T) {
 
 	feeds := feed.CompleteFeedsForModifiedEntries([]*Entry{feed.Entries[0]})
 	assert.Equal(t, 4, len(feeds), "ja")
-	sort.Slice(feeds, func(i, j int) bool { return feeds[i].Id < feeds[j].Id })
 	assert.Equal(t, uriPubDays+"2018-01-22/", feeds[0].Id, "ja")
 	assert.Equal(t, uriPubPosts, feeds[1].Id, "ja")
 	assert.Equal(t, uriPubPosts+"XsuMcA/", feeds[2].Id, "ja")
