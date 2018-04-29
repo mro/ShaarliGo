@@ -90,9 +90,9 @@ func TestEntryFeedFilters(t *testing.T) {
 		sort.Strings(keys)
 	}
 	assert.Equal(t, []string{
-		uriPubDays + "2010-12-31/",
-		uriPubPosts, uriPubPosts + "id_0/",
-		uriPubTags, uriPubTags + "🐳/",
+		uriPubDays + "2010-12-31" + "/",
+		uriPubPosts, uriPubPosts + "id_0" + "/",
+		uriPubTags, uriPubTags + "🐳" + "/",
 	}, keys, "Oha")
 }
 
@@ -105,8 +105,8 @@ func TestAppendPageNumber(t *testing.T) {
 	t.Parallel()
 	s := "abc/"
 	assert.Equal(t, "/", s[len(s)-1:], "Oha")
-	assert.Equal(t, uriPub+"/"+uriPosts+"-0/", appendPageNumber(uriPubPosts+"", 0, 1+1), "Oha")
-	assert.Equal(t, uriPubPosts+"", appendPageNumber(uriPubPosts+"", 1, 1+1), "Oha")
+	assert.Equal(t, uriPub+"/"+uriPosts+"-"+"0"+"/", appendPageNumber(uriPubPosts, 0, 1+1), "Oha")
+	assert.Equal(t, uriPubPosts, appendPageNumber(uriPubPosts, 1, 1+1), "Oha")
 }
 
 func TestWriteFeedsEmpty0(t *testing.T) {
@@ -130,16 +130,16 @@ func TestWriteFeedsAddOneAndOneAndRemoveFirst(t *testing.T) {
 
 		assert.Equal(t, 5, len(complete), "ja")
 
-		assert.Equal(t, uriPubDays+"2010-12-31/", complete[0].Id, "ja")
+		assert.Equal(t, uriPubDays+"2010-12-31"+"/", complete[0].Id, "ja")
 		assert.Equal(t, 1, len(complete[0].Entries), "ja")
 
-		assert.Equal(t, uriPubPosts+"", complete[1].Id, "ja")
+		assert.Equal(t, uriPubPosts, complete[1].Id, "ja")
 		assert.Equal(t, 1, len(complete[1].Entries), "ja")
 
 		assert.Equal(t, uriPubPosts+"id_0/", complete[2].Id, "ja")
 		assert.Equal(t, 1, len(complete[2].Entries), "ja")
 
-		assert.Equal(t, uriPubTags+"", complete[3].Id, "ja")
+		assert.Equal(t, uriPubTags, complete[3].Id, "ja")
 		assert.Equal(t, 0, len(complete[3].Entries), "ja")
 
 		assert.Equal(t, uriPubTags+"🐳/", complete[4].Id, "ja")
@@ -159,19 +159,19 @@ func TestWriteFeedsAddOneAndOneAndRemoveFirst(t *testing.T) {
 
 		assert.Equal(t, 5, len(complete), "ja")
 
-		assert.Equal(t, uriPubDays+"2010-12-30/", complete[0].Id, "ja")
+		assert.Equal(t, uriPubDays+"2010-12-30"+"/", complete[0].Id, "ja")
 		assert.Equal(t, 1, len(complete[0].Entries), "ja")
 
-		assert.Equal(t, uriPubPosts+"", complete[1].Id, "ja")
+		assert.Equal(t, uriPubPosts, complete[1].Id, "ja")
 		assert.Equal(t, 2, len(complete[1].Entries), "ja")
 
-		assert.Equal(t, uriPubPosts+"id_1/", complete[2].Id, "ja")
+		assert.Equal(t, uriPubPosts+"id_1"+"/", complete[2].Id, "ja")
 		assert.Equal(t, 1, len(complete[2].Entries), "ja")
 
-		assert.Equal(t, uriPubTags+"", complete[3].Id, "ja")
+		assert.Equal(t, uriPubTags, complete[3].Id, "ja")
 		assert.Equal(t, 0, len(complete[3].Entries), "ja")
 
-		assert.Equal(t, uriPubTags+"foo/", complete[4].Id, "ja")
+		assert.Equal(t, uriPubTags+"foo"+"/", complete[4].Id, "ja")
 		assert.Equal(t, 1, len(complete[4].Entries), "ja")
 	}
 	{
@@ -183,19 +183,19 @@ func TestWriteFeedsAddOneAndOneAndRemoveFirst(t *testing.T) {
 
 		assert.Equal(t, 5, len(complete), "ja")
 
-		assert.Equal(t, uriPubDays+"2010-12-31/", complete[0].Id, "ja")
+		assert.Equal(t, uriPubDays+"2010-12-31"+"/", complete[0].Id, "ja")
 		assert.Equal(t, 0, len(complete[0].Entries), "ja")
 
-		assert.Equal(t, uriPubPosts+"", complete[1].Id, "ja")
+		assert.Equal(t, uriPubPosts, complete[1].Id, "ja")
 		assert.Equal(t, 1, len(complete[1].Entries), "ja")
 
-		assert.Equal(t, uriPubPosts+"id_0/", complete[2].Id, "ja")
+		assert.Equal(t, uriPubPosts+"id_0"+"/", complete[2].Id, "ja")
 		assert.Equal(t, 0, len(complete[2].Entries), "ja")
 
-		assert.Equal(t, uriPubTags+"", complete[3].Id, "ja")
+		assert.Equal(t, uriPubTags, complete[3].Id, "ja")
 		assert.Equal(t, 0, len(complete[3].Entries), "ja")
 
-		assert.Equal(t, uriPubTags+"🐳/", complete[4].Id, "ja")
+		assert.Equal(t, uriPubTags+"🐳"+"/", complete[4].Id, "ja")
 		assert.Equal(t, 0, len(complete[4].Entries), "ja")
 	}
 }
@@ -244,23 +244,23 @@ func TestWriteFeedsPaged(t *testing.T) {
 	assert.Equal(t, 1, len(pages[i].Entries), "ja")
 	i++
 	assert.Equal(t, uriPubDays+"1990-12-31/", pages[i].Id, "ja")
-	assert.Equal(t, uriPubDays+"1990-12-31-0/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, uriPubDays+"1990-12-31"+"-"+"0"+"/", LinkRelSelf(pages[i].Links).Href, "ja")
 	assert.Equal(t, 1, len(pages[i].Entries), "ja")
 	i++
 	assert.Equal(t, uriPubDays+"1990-12-31/", pages[i].Id, "ja")
 	assert.Equal(t, uriPubDays+"1990-12-31/", LinkRelSelf(pages[i].Links).Href, "ja")
 	assert.Equal(t, 1, len(pages[i].Entries), "ja")
 	i++
-	assert.Equal(t, uriPubPosts+"", pages[i].Id, "ja")
-	assert.Equal(t, uriPub+"/"+uriPosts+"-0/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, uriPubPosts, pages[i].Id, "ja")
+	assert.Equal(t, uriPub+"/"+uriPosts+"-"+"0"+"/", LinkRelSelf(pages[i].Links).Href, "ja")
 	assert.Equal(t, 1, len(pages[i].Entries), "ja")
 	i++
-	assert.Equal(t, uriPubPosts+"", pages[i].Id, "ja")
-	assert.Equal(t, uriPub+"/"+uriPosts+"-1/", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, uriPubPosts, pages[i].Id, "ja")
+	assert.Equal(t, uriPub+"/"+uriPosts+"-"+"1"+"/", LinkRelSelf(pages[i].Links).Href, "ja")
 	assert.Equal(t, 1, len(pages[i].Entries), "ja")
 	i++
-	assert.Equal(t, uriPubPosts+"", pages[i].Id, "ja")
-	assert.Equal(t, uriPubPosts+"", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, uriPubPosts, pages[i].Id, "ja")
+	assert.Equal(t, uriPubPosts, LinkRelSelf(pages[i].Links).Href, "ja")
 	assert.Equal(t, 1, len(pages[i].Entries), "ja")
 	i++
 	assert.Equal(t, uriPubPosts+"e0/", pages[i].Id, "ja")
@@ -275,8 +275,8 @@ func TestWriteFeedsPaged(t *testing.T) {
 	assert.Equal(t, uriPubPosts+"e2/", LinkRelSelf(pages[i].Links).Href, "ja")
 	assert.Equal(t, 1, len(pages[i].Entries), "ja")
 	i++
-	assert.Equal(t, uriPubTags+"", pages[i].Id, "ja")
-	assert.Equal(t, uriPubTags+"", LinkRelSelf(pages[i].Links).Href, "ja")
+	assert.Equal(t, uriPubTags, pages[i].Id, "ja")
+	assert.Equal(t, uriPubTags, LinkRelSelf(pages[i].Links).Href, "ja")
 	assert.Equal(t, 0, len(pages[i].Entries), "ja")
 	i++
 	assert.Equal(t, len(pages), i, "ja")
@@ -293,38 +293,38 @@ func TestPagedFeeds(t *testing.T) {
 	assert.Equal(t, 4, len(feeds), "ja")
 	sort.Slice(feeds, func(i, j int) bool { return feeds[i].Id < feeds[j].Id })
 	assert.Equal(t, uriPubDays+"2018-01-22/", feeds[0].Id, "ja")
-	assert.Equal(t, uriPubPosts+"", feeds[1].Id, "ja")
+	assert.Equal(t, uriPubPosts, feeds[1].Id, "ja")
 	assert.Equal(t, uriPubPosts+"XsuMcA/", feeds[2].Id, "ja")
-	assert.Equal(t, uriPubTags+"", feeds[3].Id, "ja")
+	assert.Equal(t, uriPubTags, feeds[3].Id, "ja")
 
 	// test low level
-	assert.Equal(t, uriPubPosts+"", LinkRelSelf(feeds[1].Pages(100)[0].Links).Href, "ja")
+	assert.Equal(t, uriPubPosts, LinkRelSelf(feeds[1].Pages(100)[0].Links).Href, "ja")
 
 	pages := make([]Feed, 0, 2*len(feeds))
 	for _, comp := range feeds {
 		pages = append(pages, comp.Pages(100)...)
 	}
 	assert.Equal(t, 4, len(pages), "ja")
-	assert.Equal(t, uriPubPosts+"", pages[1].Id, "ja")
-	assert.Equal(t, uriPubPosts+"", LinkRelSelf(pages[1].Links).Href, "ja")
+	assert.Equal(t, uriPubPosts, pages[1].Id, "ja")
+	assert.Equal(t, uriPubPosts, LinkRelSelf(pages[1].Links).Href, "ja")
 
 	// high level
 	pages, err = feed.PagedFeeds(feeds, 100)
 	assert.Nil(t, err, "ja")
 	assert.Equal(t, 4, len(pages), "ja")
 	assert.Equal(t, uriPubDays+"2018-01-22/", pages[0].Id, "ja")
-	assert.Equal(t, uriPubPosts+"", pages[1].Id, "ja")
+	assert.Equal(t, uriPubPosts, pages[1].Id, "ja")
 	assert.Equal(t, uriPubPosts+"XsuMcA/", pages[2].Id, "ja")
-	assert.Equal(t, uriPubTags+"", pages[3].Id, "ja")
+	assert.Equal(t, uriPubTags, pages[3].Id, "ja")
 
 	assert.Equal(t, uriPubDays+"2018-01-22/", LinkRelSelf(pages[0].Links).Href, "ja")
-	assert.Equal(t, uriPubPosts+"", LinkRelSelf(pages[1].Links).Href, "ja")
+	assert.Equal(t, uriPubPosts, LinkRelSelf(pages[1].Links).Href, "ja")
 	assert.Equal(t, uriPubPosts+"XsuMcA/", LinkRelSelf(pages[2].Links).Href, "ja")
-	assert.Equal(t, uriPubTags+"", LinkRelSelf(pages[3].Links).Href, "ja")
+	assert.Equal(t, uriPubTags, LinkRelSelf(pages[3].Links).Href, "ja")
 
 	pages = feeds[1].Pages(100)
-	assert.Equal(t, uriPubPosts+"", pages[0].Id, "ja")
-	assert.Equal(t, uriPubPosts+"", LinkRelSelf(pages[0].Links).Href, "ja")
+	assert.Equal(t, uriPubPosts, pages[0].Id, "ja")
+	assert.Equal(t, uriPubPosts, LinkRelSelf(pages[0].Links).Href, "ja")
 }
 
 /*
@@ -337,7 +337,7 @@ func TestWriteFeedsEmpty1(t *testing.T) {
 	sfw := saveFeedWriter{feeds: make(map[string]Feed), entries: make(map[string]Entry), bufs: make(map[string]buff)}
 	err := feed.writeFeeds(2, sfw)
 	assert.Nil(t, err, "soso")
-	assert.Equal(t, []string{uriPubDays+"0001-01-01/", uriPubPosts+"", uriPubPosts+"abcd/"}, keys4map(sfw.bufs), "soso")
+	assert.Equal(t, []string{uriPubDays+"0001-01-01/", uriPubPosts, uriPubPosts+"abcd/"}, keys4map(sfw.bufs), "soso")
 
 	assert.Equal(t, 1472, len(sfw.bufs[uriPubDays+"0001-01-01/"].b), "aha")
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
@@ -361,7 +361,7 @@ func TestWriteFeedsEmpty1(t *testing.T) {
   <title></title>
   <id></id>
   <updated>0001-01-01T00:00:00Z</updated>
-  <link href=uriPubPosts+"" rel="self" title="1"></link>
+  <link href=uriPubPosts rel="self" title="1"></link>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
     <title></title>
     <id>http://example.com/"+uriPubPosts+"abcd/</id>
@@ -372,7 +372,7 @@ func TestWriteFeedsEmpty1(t *testing.T) {
     <link href="../" rel="up"></link>
   </entry>
 </feed>
-`, string(sfw.bufs[uriPubPosts+""].b), "soso")
+`, string(sfw.bufs[uriPubPosts].b), "soso")
 }
 
 func TestWriteFeedsUnpaged(t *testing.T) {
@@ -392,7 +392,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
 	assert.Nil(t, err, "soso")
 	assert.Equal(t, []string{
 		uriPubDays+"1990-12-31/",
-		uriPubPosts+"",
+		uriPubPosts,
 		uriPubPosts+"e0/",
 		uriPubTags+"aha/",
 	}, keys4map(sfw.bufs), "soso")
@@ -419,7 +419,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
   <title>Hello, Atom!</title>
   <id>http://example.com/</id>
   <updated>1990-12-31T01:02:03+01:00</updated>
-  <link href=uriPubPosts+"" rel="self" title="1"></link>
+  <link href=uriPubPosts rel="self" title="1"></link>
   <category term="aha" label="1"></category>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
     <title>Hello, Entry!</title>
@@ -429,10 +429,10 @@ func TestWriteFeedsUnpaged(t *testing.T) {
     <link href=uriPubPosts+"e0/" rel="self"></link>
     <link href="shaarligo.cgi?post="+uriPubPosts+"e0/" rel="edit"></link>
     <link href="../" rel="up" title="Hello, Atom!"></link>
-    <category term="aha" scheme="http://example.com/"+uriPubTags+""></category>
+    <category term="aha" scheme="http://example.com/"+uriPubTags></category>
   </entry>
 </feed>
-`, string(sfw.bufs[uriPubPosts+""].b), "soso")
+`, string(sfw.bufs[uriPubPosts].b), "soso")
 
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../../assets/default/de/posts.xslt'?>
@@ -459,7 +459,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
   <link href=uriPubPosts+"e0/" rel="self"></link>
   <link href="shaarligo.cgi?post="+uriPubPosts+"e0/" rel="edit"></link>
   <link href="../" rel="up" title="Hello, Atom!"></link>
-  <category term="aha" scheme="http://example.com/"+uriPubTags+""></category>
+  <category term="aha" scheme="http://example.com/"+uriPubTags></category>
 </entry>
 `, string(sfw.bufs[uriPubPosts+"e0/"].b), "soso")
 
@@ -497,7 +497,7 @@ func TestWriteFeedsPaged(t *testing.T) {
 		uriPubDays+"1990-12-30/",
 		uriPubDays+"1990-12-31/",
 		"pub/posts-1/",
-		uriPubPosts+"",
+		uriPubPosts,
 		uriPubPosts+"e0/",
 		uriPubPosts+"e1/",
 		uriPubPosts+"e2/",
@@ -524,8 +524,8 @@ func TestWriteFeedsPaged(t *testing.T) {
   <title>Hello, Atom!</title>
   <id>http://example.com</id>
   <updated>1990-12-30T00:00:00+01:00</updated>
-  <link href=uriPubPosts+"" rel="self" title="1"></link>
-  <link href=uriPubPosts+"" rel="first" title="1"></link>
+  <link href=uriPubPosts rel="self" title="1"></link>
+  <link href=uriPubPosts rel="first" title="1"></link>
   <link href="pub/posts-1/" rel="next" title="2"></link>
   <link href="pub/posts-1/" rel="last" title="2"></link>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
@@ -548,7 +548,7 @@ func TestWriteFeedsPaged(t *testing.T) {
   </entry>
 </feed>
 `,
-		string(sfw.bufs[uriPubPosts+""].b), "page 1")
+		string(sfw.bufs[uriPubPosts].b), "page 1")
 
 	assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='../../assets/default/de/posts.xslt'?>
@@ -572,8 +572,8 @@ func TestWriteFeedsPaged(t *testing.T) {
   <id>http://example.com</id>
   <updated>1990-12-30T00:00:00+01:00</updated>
   <link href="pub/posts-1/" rel="self" title="2"></link>
-  <link href=uriPubPosts+"" rel="first" title="1"></link>
-  <link href=uriPubPosts+"" rel="previous" title="1"></link>
+  <link href=uriPubPosts rel="first" title="1"></link>
+  <link href=uriPubPosts rel="previous" title="1"></link>
   <link href="pub/posts-1/" rel="last" title="2"></link>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
     <title>Hello, Entry 2!</title>

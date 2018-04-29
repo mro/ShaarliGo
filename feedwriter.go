@@ -159,7 +159,7 @@ func appendPageNumber(prefix string, page, pageCount int) string {
 	if page == pageCount-1 {
 		return prefix
 	}
-	return fmt.Sprintf("%s-%d/", prefix[:len(prefix)-1], page)
+	return fmt.Sprintf("%s"+"-"+"%d"+"/", prefix[:len(prefix)-1], page)
 }
 
 func computePageCount(count int, entriesPerPage int) int {

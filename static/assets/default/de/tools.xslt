@@ -34,7 +34,7 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:variable name="xml_base_pub">../../pub</xsl:variable>
+  <xsl:variable name="xml_base_pub">../../=</xsl:variable>
 
   <xsl:template match="/">
     <xsl:apply-templates select="h:html"/>
