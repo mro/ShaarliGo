@@ -12,19 +12,19 @@ templating, JS optional.
 
 ## Design Goals
 
-* standards compliant ([Atom](https://tools.ietf.org/html/rfc4287), 
-  [Atompub](https://tools.ietf.org/html/rfc5023), 
+- [ ] standards compliant ([Atom](https://tools.ietf.org/html/rfc4287),
+  [Atompub](https://tools.ietf.org/html/rfc5023),
   [WebSub](https://www.w3.org/TR/websub/)),
-* keep server lean, especially for readers,
-* easy migration from existing shaarlis,
-* backwards compatible posting (https://github.com/mro/Shaarli-API-test/)
-* trivial installation and minimal hosting requirements (run on simple hosted webspace),
-* run ok without javascript,
-* visitor reading operates on static flat files only (no server code),
-* secure against brute force login attacks,
-* easy translation & skinning,
-* leverage existing, widely deployed web tec ([XSLT](https://www.w3.org/TR/xslt-10/), HTML, CSS),
-* easy fail2ban integration / DOS mitigation,
+- [x] keep server lean, especially for readers,
+- [ ] easy migration from existing shaarlis,
+- [x] backwards compatible posting (https://github.com/mro/Shaarli-API-test/)
+- [x] trivial installation and minimal hosting requirements (run on simple hosted webspace),
+- [x] run ok without javascript,
+- [x] visitor reading operates on static flat files only (no server code),
+- [ ] secure against brute force login attacks,
+- [x] easy translation & skinning,
+- [x] leverage existing, widely deployed web tec ([XSLT](https://www.w3.org/TR/xslt-10/), HTML, CSS),
+- [ ] easy fail2ban integration / DOS mitigation,
 
 | Quality         | very good | good | normal | irrelevant |
 |-----------------|:---------:|:----:|:------:|:----------:|
@@ -46,13 +46,14 @@ done!
 
 Or build from source at http://purl.mro.name/ShaarliGo
 
+See `.htaccess` or `app/lighttpd.conf` how to set up webserver integration.
+
 ## Todos
 
-6. search,
 1. private posts,
 2. [PuSH/PubSubhubbub](https://github.com/pubsubhubbub/pubsubhubbub) / [WebSub](https://www.w3.org/TR/websub/),
 3. import shaarlis (login?),
-4. pwd reset,
+4. pwd reset (maybe deleting from config.yaml is acceptable),
 5. images/enclosures,
 7. comments,
 8. trackback/pingback
