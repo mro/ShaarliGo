@@ -137,9 +137,9 @@ func (cfg Config) renderSettingsPage(w http.ResponseWriter, code int) {
 		io.WriteString(w, `<!--
   The html you see here is for compatibilty with vanilla shaarli.
 
-  The main reason is backward compatibility for e.g. https://github.com/mro/ShaarliOS and
+  The main reason is backward compatibility for e.g. http://app.mro.name/ShaarliOS and
   https://github.com/dimtion/Shaarlier as tested via
-  https://github.com/mro/Shaarli-API-test
+  https://git.mro.name/mro/Shaarli-API-test
 -->
 `)
 		err = tmpl.Execute(w, map[string]string{

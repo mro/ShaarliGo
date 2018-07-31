@@ -165,9 +165,9 @@ func TestGetConfigRaw(t *testing.T) {
 <!--
   The html you see here is for compatibilty with vanilla shaarli.
 
-  The main reason is backward compatibility for e.g. https://github.com/mro/ShaarliOS and
+  The main reason is backward compatibility for e.g. http://app.mro.name/ShaarliOS and
   https://github.com/dimtion/Shaarlier as tested via
-  https://github.com/mro/Shaarli-API-test
+  https://git.mro.name/mro/Shaarli-API-test
 -->
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head/>
