@@ -70,4 +70,12 @@ document.onreadystatechange = function () {
       imgDefer[i].setAttribute('src', imgDefer[i].getAttribute('data-src'));
     }
   }
+
+  // console.log('make geo URIs (RFC 5870) clickable + microformat');
+  const elmRendered = document.getElementById('entries').getElementsByClassName('rendered');
+  for (var i = 0; i < elmRendered.length; i++) {
+    const elm = elmRendered[i];
+    const txt = elm.innerHTML;
+    elm.innerHTML = txt.replace(/geo:(-?\d+.\d+),(-?\d+.\d+)/g, '<a class="geo" href="https://opentopomap.org/#marker=12/$1/$2">geo:<span class="latitude">$1</span>,<span class="longitude">$2</span></a>');
+  }
 };
