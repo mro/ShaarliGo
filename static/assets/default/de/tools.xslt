@@ -41,7 +41,7 @@
   </xsl:template>
 
   <xsl:template match="h:html">
-    <html xmlns="http://www.w3.org/1999/xhtml">
+    <html xmlns="http://www.w3.org/1999/xhtml" style="background-color:#3d2400">
       <xsl:apply-templates select="h:head"/>
       <xsl:apply-templates select="h:body"/>
     </html>
@@ -70,22 +70,27 @@
 .visible-logged-out { display:none; }
 .logged-out .visible-logged-out { display:initial; }
 
+body {
+  background: none;
+}
 .container {
+  background-color: black;
+  padding-bottom: 1ex;
 }
 
 #links_commands {
-margin: 2ex 0;
+  margin: 2ex 0;
 }
 .table {
-width: 100%;
-max-width: 100%;
+  max-width: 100%;
+  width: 100%;
 }
 form {
-margin: 1.0ex 0;
+  margin: 1.0ex 0;
 }
 
 #links_commands td {
-min-width: 40px;
+  min-width: 40px;
 }
 
 br.br { display:none; }
@@ -148,6 +153,11 @@ xhr.send(null);
         <ol>
           <xsl:apply-templates select="h:ol/h:li"/>
         </ol>
+
+        <hr style="clear:left;"/>
+
+        <p><a href="http://purl.mro.name/ShaarliGo"><img style="background-color:#10b210" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABsAAAAbAQMAAAC3GmYWAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4gQQFCIou+kEAAAAAAZQTFRF////AAAAVcLTfgAAAAF0Uk5TAEDm2GYAAAABYktHRACIBR1IAAAAgUlEQVQIHWNgAIF6jvgDDI4BExwYYi3DgUS6OJBgArIcA4Fi9aFAWQZWBwaG2v9aDQw5GRoNDIFPbx1giNno4cDArmd7gCHnl1cDgyv7ogMMYbZCDgyuC/8CTa10B5ocFA40WdWNgSG2/H8DQ2yU7AGG2ARPoMkh74Aml/MDTQYCAKs2JcgwrX6XAAAAAElFTkSuQmCC" alt="QR Code"/></a></p>
+
       </div>
     </body>
   </xsl:template>

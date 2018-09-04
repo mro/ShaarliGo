@@ -19,7 +19,7 @@
   </xsl:template>
 
   <xsl:template match="h:html">
-    <html xmlns="http://www.w3.org/1999/xhtml" class="logged-out">
+    <html xmlns="http://www.w3.org/1999/xhtml" class="logged-out" style="background-color:#3d2400">
       <xsl:apply-templates select="h:head"/>
       <xsl:apply-templates select="h:body"/>
     </html>
@@ -48,7 +48,12 @@
 .visible-logged-out { display:none; }
 .logged-out .visible-logged-out { display:initial; }
 
+body {
+  background: none;
+}
 .container {
+  background-color: black;
+  padding-bottom: 2em;
 }
 
 #links_commands {

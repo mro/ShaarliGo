@@ -126,13 +126,9 @@
       <!-- http://www.quirksmode.org/blog/archives/2013/10/initialscale1_m.html -->
       <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
       <!-- meta name="viewport" content="width=400"/ -->
-      <link href="{$xml_base_pub}/../assets/default/bootstrap.css" rel="stylesheet" type="text/css"/>
-      <link href="{$xml_base_pub}/../assets/default/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
-
-      <link  href="{$xml_base_pub}/../assets/default/awesomplete.css" rel="stylesheet" />
+      <link href="{$xml_base_pub}/../assets/default/combined.css" rel="stylesheet" type="text/css"/>
       <script src="{$xml_base_pub}/../assets/default/awesomplete.js"><!-- async="true" fails --></script>
-
-      <script src="{$xml_base_pub}/../assets/default/posts.js"></script>
+      <script src="{$xml_base_pub}/../assets/default/posts.js"><!-- async="true" fails --></script>
 
       <link href="." rel="alternate" type="application/atom+xml"/>
       <link href="." rel="self" type="application/xhtml+xml"/>
@@ -283,7 +279,7 @@ table.prev-next a {
           <td tabindex="30" class="text-right"><a href="{$xml_base_pub}/d/">📅 <span class="hidden-xs">Tage</span></a></td>
           <td tabindex="40" class="text-right"><a href="{$xml_base_pub}/i/">🎨 <span class="hidden-xs">Bilder</span></a></td>
           <td class="text-right"><!-- I'd prefer a class="text-right hidden-logged-out" but just don't get it right -->
-            <a class="hidden-logged-out" href="{$xml_base_pub}/../shaarligo.cgi/tools/" rel="nofollow">🛠 <span class="hidden-xs">Tools</span></a>
+            <a class="hidden-logged-out" href="{$xml_base_pub}/../shaarligo.cgi/tools/" rel="nofollow">🔨 <span class="hidden-xs">Tools</span></a>
           </td>
           <td class="text-right">
             <a tabindex="50" id="link_login" href="{$xml_base_pub}/../shaarligo.cgi?do=login" class="visible-logged-out" rel="nofollow"><span class="hidden-xs">Anmelden</span> 🌺 </a>
@@ -359,7 +355,7 @@ table.prev-next a {
       -->
     </p>
     <p>
-      <a href="http://purl.mro.name/ShaarliGo"><img style="background-color:#eba014" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABsAAAAbAQMAAAC3GmYWAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4gQQFCIou+kEAAAAAAZQTFRF////AAAAVcLTfgAAAAF0Uk5TAEDm2GYAAAABYktHRACIBR1IAAAAgUlEQVQIHWNgAIF6jvgDDI4BExwYYi3DgUS6OJBgArIcA4Fi9aFAWQZWBwaG2v9aDQw5GRoNDIFPbx1giNno4cDArmd7gCHnl1cDgyv7ogMMYbZCDgyuC/8CTa10B5ocFA40WdWNgSG2/H8DQ2yU7AGG2ARPoMkh74Aml/MDTQYCAKs2JcgwrX6XAAAAAElFTkSuQmCC" alt="QR Code"/></a>
+      <a href="http://purl.mro.name/ShaarliGo"><img style="background-color:#10b210" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABsAAAAbAQMAAAC3GmYWAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4gQQFCIou+kEAAAAAAZQTFRF////AAAAVcLTfgAAAAF0Uk5TAEDm2GYAAAABYktHRACIBR1IAAAAgUlEQVQIHWNgAIF6jvgDDI4BExwYYi3DgUS6OJBgArIcA4Fi9aFAWQZWBwaG2v9aDQw5GRoNDIFPbx1giNno4cDArmd7gCHnl1cDgyv7ogMMYbZCDgyuC/8CTa10B5ocFA40WdWNgSG2/H8DQ2yU7AGG2ARPoMkh74Aml/MDTQYCAKs2JcgwrX6XAAAAAElFTkSuQmCC" alt="QR Code"/></a>
     </p>
   </xsl:template>
 
@@ -439,7 +435,7 @@ table.prev-next a {
         </xsl:if>
         <span class="hidden-logged-out" title="Bearbeiten">
           <xsl:text> ~ </xsl:text>
-          <a href="{$xml_base_pub}/../{a:link[@rel='edit']/@href}" rel="nofollow">🛠 </a><xsl:text> </xsl:text>
+          <a href="{$xml_base_pub}/../{a:link[@rel='edit']/@href}" rel="nofollow"><span class="hidden-xs">🔧</span>🔨</a><xsl:text> </xsl:text>
         </span>
       </p>
     </li>

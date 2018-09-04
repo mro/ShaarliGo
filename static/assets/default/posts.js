@@ -46,18 +46,21 @@ document.onreadystatechange = function () {
   // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1254
   var fontMin = 8;
   var fontMax = 32;
-  const tags = document.getElementById('tags').getElementsByClassName('tag');
-  const counts = new Array(tags.length);
-  for (var i = tags.length - 1; i >= 0; i--) {
-    const elm = tags[i].getElementsByClassName('count')[0];
-    counts[i] = 1 * elm.innerText;
-  }
-  const countMaxLog = Math.log(Math.max.apply(Math, counts)); // https://johnresig.com/blog/fast-javascript-maxmin/
-  const factor = 1.0 / countMaxLog * (fontMax - fontMin);
-  for (var i = tags.length - 1; i >= 0; i--) {
-    // https://stackoverflow.com/a/3717340
-    const size = Math.ceil(Math.log(counts[i]) * factor) + fontMin;
-    tags[i].style.fontSize = size + 'pt';
+  const tag0 = document.getElementById('tags');
+  if (tag0) {
+    const tags = tag0.getElementsByClassName('tag');
+    const counts = new Array(tags.length);
+    for (var i = tags.length - 1; i >= 0; i--) {
+      const elm = tags[i].getElementsByClassName('count')[0];
+      counts[i] = 1 * elm.innerText;
+    }
+    const countMaxLog = Math.log(Math.max.apply(Math, counts)); // https://johnresig.com/blog/fast-javascript-maxmin/
+    const factor = 1.0 / countMaxLog * (fontMax - fontMin);
+    for (var i = tags.length - 1; i >= 0; i--) {
+      // https://stackoverflow.com/a/3717340
+      const size = Math.ceil(Math.log(counts[i]) * factor) + fontMin;
+      tags[i].style.fontSize = size + 'pt';
+    }
   }
 
   // https://varvy.com/pagespeed/defer-images.html
