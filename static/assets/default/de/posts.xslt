@@ -102,6 +102,8 @@
 
   <xsl:variable name="xml_base" select="/*/@xml:base"/>
   <xsl:variable name="xml_base_pub" select="concat($xml_base,'=')"/>
+  <xsl:variable name="skin_base" select="concat($xml_base,'assets/default')"/>
+  <xsl:variable name="cgi_base" select="concat($xml_base,'shaarligo.cgi')"/>
 
   <xsl:template match="/">
     <!--
@@ -126,9 +128,9 @@
       <!-- http://www.quirksmode.org/blog/archives/2013/10/initialscale1_m.html -->
       <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
       <!-- meta name="viewport" content="width=400"/ -->
-      <link href="{$xml_base_pub}/../assets/default/combined.css" rel="stylesheet" type="text/css"/>
-      <script src="{$xml_base_pub}/../assets/default/awesomplete.js"><!-- async="true" fails --></script>
-      <script src="{$xml_base_pub}/../assets/default/posts.js"><!-- async="true" fails --></script>
+      <link href="{$skin_base}/combined.css" rel="stylesheet" type="text/css"/>
+      <script src="{$skin_base}/awesomplete.js"><!-- async="true" fails --></script>
+      <script src="{$skin_base}/posts.js"><!-- async="true" fails --></script>
 
       <link href="." rel="alternate" type="application/atom+xml"/>
       <link href="." rel="self" type="application/xhtml+xml"/>
@@ -241,7 +243,7 @@ table.prev-next a {
           <xsl:sort select="@term" order="ascending"/>
           <!-- not log, just linear, similar to https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1254 -->
           <xsl:variable name="size" select="8 + 40 * @label div $countMax"/>
-          <a style="font-size:{$size}pt" href="{$xml_base_pub}/../shaarligo.cgi/search/?q=%23{@term}+" class="tag"><span class="label"><xsl:value-of select="@term"/></span><span style="font-size:8pt">&#160;(<span class="count"><xsl:value-of select="@label"/></span>)</span></a><xsl:text>, </xsl:text>
+          <a style="font-size:{$size}pt" href="{$cgi_base}/search/?q=%23{@term}+" class="tag"><span class="label"><xsl:value-of select="@term"/></span><span style="font-size:8pt">&#160;(<span class="count"><xsl:value-of select="@label"/></span>)</span></a><xsl:text>, </xsl:text>
         </xsl:for-each>
       </p>
 
@@ -279,18 +281,18 @@ table.prev-next a {
           <td tabindex="30" class="text-right"><a href="{$xml_base_pub}/d/">📅 <span class="hidden-xs">Tage</span></a></td>
           <td tabindex="40" class="text-right"><a href="{$xml_base_pub}/i/">🎨 <span class="hidden-xs">Bilder</span></a></td>
           <td class="text-right"><!-- I'd prefer a class="text-right hidden-logged-out" but just don't get it right -->
-            <a class="hidden-logged-out" href="{$xml_base_pub}/../shaarligo.cgi/tools/" rel="nofollow">🔨 <span class="hidden-xs">Tools</span></a>
+            <a class="hidden-logged-out" href="{$cgi_base}/tools/" rel="nofollow">🔨 <span class="hidden-xs">Tools</span></a>
           </td>
           <td class="text-right">
-            <a tabindex="50" id="link_login" href="{$xml_base_pub}/../shaarligo.cgi?do=login" class="visible-logged-out" rel="nofollow"><span class="hidden-xs">Anmelden</span> 🌺 </a>
-            <a tabindex="51" id="link_logout" href="{$xml_base_pub}/../shaarligo.cgi?do=logout" class="hidden-logged-out" rel="nofollow"><span class="hidden-xs">Abmelden</span> 🐾 </a>
+            <a tabindex="50" id="link_login" href="{$cgi_base}?do=login" class="visible-logged-out" rel="nofollow"><span class="hidden-xs">Anmelden</span> 🌺 </a>
+            <a tabindex="51" id="link_logout" href="{$cgi_base}?do=logout" class="hidden-logged-out" rel="nofollow"><span class="hidden-xs">Abmelden</span> 🐾 </a>
           </td>
         </tr>
       </tbody>
     </table>
 
     <xsl:comment> https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ </xsl:comment>
-    <form id="form_search" name="form_search" class="form-horizontal form-search" action="{$xml_base_pub}/../shaarligo.cgi/search/">
+    <form id="form_search" name="form_search" class="form-horizontal form-search" action="{$cgi_base}/search/">
       <div class="input-group">
         <input tabindex="100" name="q" value="{@sg:searchTerms}" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="awesomplete form-control search-query" data-multiple="true"/>
         <span class="input-group-btn">
@@ -299,7 +301,7 @@ table.prev-next a {
       </div>
     </form>
 
-    <form id="form_post" name="form_post" class="form-horizontal" action="{$xml_base_pub}/../shaarligo.cgi">
+    <form id="form_post" name="form_post" class="form-horizontal" action="{$cgi_base}">
       <div class="input-group">
         <input tabindex="300" name="post" type="text" placeholder="Was gibt's #Neues? (Notiz oder URL)" class="awesomplete form-control" data-multiple="true"/>
         <span class="input-group-btn">
@@ -316,22 +318,22 @@ table.prev-next a {
           <tr>
             <td class="text-left">
               <xsl:variable name="disabled"><xsl:if test="a:link[@rel='first']/@href = a:link[@rel='self']/@href">disabled</xsl:if></xsl:variable>
-              <a href="{$xml_base_pub}/../{a:link[@rel='first']/@href}" class="{$disabled} btn btn-primary btn-sm"><xsl:value-of select="a:link[@rel='first']/@title"/>&#160;&lt;&lt;</a>
+              <a href="{$xml_base}{a:link[@rel='first']/@href}" class="{$disabled} btn btn-primary btn-sm"><xsl:value-of select="a:link[@rel='first']/@title"/>&#160;&lt;&lt;</a>
             </td>
             <td class="text-center">
               <xsl:variable name="disabled"><xsl:if test="not(a:link[@rel='previous'])">disabled</xsl:if></xsl:variable>
-              <a href="{$xml_base_pub}/../{a:link[@rel='previous']/@href}" class="{$disabled} btn btn-primary btn-sm"><xsl:value-of select="a:link[@rel='previous']/@title"/>&#160;&lt;</a>
+              <a href="{$xml_base}{a:link[@rel='previous']/@href}" class="{$disabled} btn btn-primary btn-sm"><xsl:value-of select="a:link[@rel='previous']/@title"/>&#160;&lt;</a>
             </td>
             <td class="text-center">
               <span class="hidden-xs">Seite&#160;</span><xsl:value-of select="a:link[@rel='self']/@title"/>
             </td>
             <td class="text-center">
               <xsl:variable name="disabled"><xsl:if test="not(a:link[@rel='next'])">disabled</xsl:if></xsl:variable>
-              <a href="{$xml_base_pub}/../{a:link[@rel='next']/@href}" class="{$disabled} btn btn-primary btn-sm">&gt;&#160;<xsl:value-of select="a:link[@rel='next']/@title"/></a>
+              <a href="{$xml_base}{a:link[@rel='next']/@href}" class="{$disabled} btn btn-primary btn-sm">&gt;&#160;<xsl:value-of select="a:link[@rel='next']/@title"/></a>
             </td>
             <td class="text-right">
               <xsl:variable name="disabled"><xsl:if test="a:link[@rel='last']/@href = a:link[@rel='self']/@href">disabled</xsl:if></xsl:variable>
-              <a href="{$xml_base_pub}/../{a:link[@rel='last']/@href}" class="{$disabled} btn btn-primary btn-sm">&gt;&gt;&#160;<xsl:value-of select="a:link[@rel='last']/@title"/></a>
+              <a href="{$xml_base}{a:link[@rel='last']/@href}" class="{$disabled} btn btn-primary btn-sm">&gt;&gt;&#160;<xsl:value-of select="a:link[@rel='last']/@title"/></a>
             </td>
           </tr>
         </tbody>
@@ -347,10 +349,10 @@ table.prev-next a {
       </a>
       <!-- <xsl:text> </xsl:text>
       <a href="https://validator.w3.org/check?uri=referer">
-        <img alt="Valid XHTML 1.0 Strict" src="{$xml_base_pub}/../assets/default/valid-xhtml10-blue-v.svg" style="border:0;width:88px;height:31px"/>
+        <img alt="Valid XHTML 1.0 Strict" src="{$skin_base}/valid-xhtml10-blue-v.svg" style="border:0;width:88px;height:31px"/>
       </a>
       <a href="https://jigsaw.w3.org/css-validator/check/referer?profile=css3&amp;usermedium=screen&amp;warning=2&amp;vextwarning=false&amp;lang=de">
-        <img alt="CSS ist valide!" src="{$xml_base_pub}/../assets/default/valid-css-blue-v.svg" style="border:0;width:88px;height:31px"/>
+        <img alt="CSS ist valide!" src="{$skin_base}/valid-css-blue-v.svg" style="border:0;width:88px;height:31px"/>
       </a>
       -->
     </p>
@@ -428,14 +430,14 @@ table.prev-next a {
         <xsl:variable name="entry_published" select="a:published"/>
         <xsl:variable name="entry_published_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_published"/></xsl:call-template></xsl:variable>
 
-        <a class="time" title="zuletzt: {$entry_updated_human}" href="{$xml_base_pub}/../{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_published_human"/></a>
+        <a class="time" title="zuletzt: {$entry_updated_human}" href="{$xml_base}{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_published_human"/></a>
         <xsl:if test="$link">
           <xsl:text> ~ </xsl:text>
           <a title="Archiv" href="{$archive}{$link}" rel="noopener noreferrer" referrerpolicy="no-referrer">@archive.org</a>
         </xsl:if>
         <span class="hidden-logged-out" title="Bearbeiten">
           <xsl:text> ~ </xsl:text>
-          <a href="{$xml_base_pub}/../{a:link[@rel='edit']/@href}" rel="nofollow"><span class="hidden-xs">🔧</span>🔨</a><xsl:text> </xsl:text>
+          <a href="{$xml_base}{a:link[@rel='edit']/@href}" rel="nofollow"><span class="hidden-xs">🔧</span>🔨</a><xsl:text> </xsl:text>
         </span>
       </p>
     </li>
