@@ -41,7 +41,7 @@
     <xsl:param name="pattern" select="'&#10;'"/>
     <xsl:choose>
       <xsl:when test="contains($string, $pattern)">
-        <xsl:value-of select="substring-before($string, $pattern)"/><br class="br"/><xsl:comment>Why do we see 2 br on Safari and output/@method=html here? http://purl.mro.name/safari-xslt-br-bug</xsl:comment>
+        <xsl:value-of select="substring-before($string, $pattern)"/><br class="br"/><xsl:comment> Why do we see 2 br on Safari and output/@method=html here? http://purl.mro.name/safari-xslt-br-bug </xsl:comment>
         <xsl:call-template name="linefeed2br">
           <xsl:with-param name="string" select="substring-after($string, $pattern)"/>
           <xsl:with-param name="pattern" select="$pattern"/>

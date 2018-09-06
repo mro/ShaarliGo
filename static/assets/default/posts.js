@@ -71,11 +71,13 @@ document.onreadystatechange = function () {
     }
   }
 
-  // console.log('make geo URIs (RFC 5870) clickable + microformat');
-  const elmRendered = document.getElementById('entries').getElementsByClassName('rendered');
-  for (var i = 0; i < elmRendered.length; i++) {
-    const elm = elmRendered[i];
-    const txt = elm.innerHTML;
-    elm.innerHTML = txt.replace(/geo:(-?\d+.\d+),(-?\d+.\d+)/g, '<a class="geo" href="https://opentopomap.org/#marker=12/$1/$2">geo:<span class="latitude">$1</span>,<span class="longitude">$2</span></a>');
+  // console.log('make http and geo URIs (RFC 5870) clickable + microformat');
+  const elmsRendered = document.getElementById('entries').getElementsByClassName('rendered');
+  for (var i = 0; i < elmsRendered.length; i++) {
+    const elm = elmsRendered[i];
+    elm.innerHTML = elm.innerHTML.replace(/(https?:\/\/\S+[^ \t\r\n.,;()])/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
+    // https://alanstorm.com/url_regex_explained/ \b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))
+    // elm.innerHTML = elm.innerHTML.replace(/\b(([\w-]+:\/\/?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
+    elm.innerHTML = elm.innerHTML.replace(/geo:(-?\d+.\d+),(-?\d+.\d+)/gi, '<a class="geo" href="https://opentopomap.org/#marker=12/$1/$2">geo:<span class="latitude">$1</span>,<span class="longitude">$2</span></a>');
   }
 };
