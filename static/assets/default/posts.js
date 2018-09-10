@@ -82,4 +82,21 @@ document.onreadystatechange = function () {
     // elm.innerHTML = elm.innerHTML.replace(/\b(([\w-]+:\/\/?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
     elm.innerHTML = elm.innerHTML.replace(/geo:(-?\d+.\d+),(-?\d+.\d+)/gi, '<a class="geo" href="https://opentopomap.org/#marker=12/$1/$2">geo:<span class="latitude">$1</span>,<span class="longitude">$2</span></a>');
   }
+
+  // https://koddsson.com/posts/emoji-favicon/
+  const favicon = document.querySelector("link[rel=icon]");
+  if (favicon) {
+    const emoji = favicon.getAttribute("data-emoji");
+    if (emoji) {
+      const canvas = document.createElement("canvas");
+      canvas.height = 64;
+      canvas.width = 64;
+
+      const ctx = canvas.getContext("2d");
+      ctx.font = "64px serif";
+      ctx.fillText(emoji, 0, 56);
+
+      favicon.href = canvas.toDataURL();
+    }
+  }
 };

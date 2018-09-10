@@ -58,6 +58,7 @@
       <!-- http://www.quirksmode.org/blog/archives/2013/10/initialscale1_m.html -->
       <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
       <!-- meta name="viewport" content="width=400"/ -->
+      <link rel="icon" data-emoji="🌺" type="image/png"/>
       <link href="{$skin_base}/bootstrap.css" rel="stylesheet" type="text/css"/>
       <link href="{$skin_base}/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
 
@@ -148,6 +149,23 @@ xhr.onreadystatechange = function(data0) {
 xhr.timeout = 1000;
 xhr.open('GET', cgi_base + '/session/');
 xhr.send(null);
+
+// https://koddsson.com/posts/emoji-favicon/
+const favicon = document.querySelector("link[rel=icon]");
+if (favicon) {
+  const emoji = favicon.getAttribute("data-emoji");
+  if (emoji) {
+    const canvas = document.createElement("canvas");
+    canvas.height = 64;
+    canvas.width = 64;
+
+    const ctx = canvas.getContext("2d");
+    ctx.font = "64px serif";
+    ctx.fillText(emoji, 0, 56);
+
+    favicon.href = canvas.toDataURL();
+  }
+}
 // ]]>
       </script>
       <div class="container">

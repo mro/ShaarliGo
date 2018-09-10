@@ -128,6 +128,7 @@
       <!-- http://www.quirksmode.org/blog/archives/2013/10/initialscale1_m.html -->
       <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
       <!-- meta name="viewport" content="width=400"/ -->
+      <link rel="icon" data-emoji="🌺" type="image/png"/>
       <link href="{$skin_base}/combined.css" rel="stylesheet" type="text/css"/>
       <script src="{$skin_base}/awesomplete.js"><!-- async="true" fails --></script>
       <script src="{$skin_base}/posts.js"><!-- async="true" fails --></script>
