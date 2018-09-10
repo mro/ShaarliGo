@@ -10,6 +10,7 @@ const xml_base_pub = document.documentElement.getAttribute("data-xml-base-pub");
       // store the result locally and use as initial value for later calls?
     }
   }
+  xhr.timeout = 1000;
   xhr.open('GET', xml_base_pub + '/../shaarligo.cgi/session/');
   xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
   xhr.send(null);
@@ -38,6 +39,7 @@ document.onreadystatechange = function () {
     if (xhr.readyState > 3 && xhr.status == 200)
       addlink.list = JSON.parse(xhr.response);
   };
+  xhr.timeout = 1000;
   xhr.open('GET', xml_base_pub + '/t/index.json');
   xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
   xhr.send();

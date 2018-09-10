@@ -35,6 +35,8 @@
   </xsl:template>
 
   <xsl:variable name="xml_base_pub">../../=</xsl:variable>
+  <xsl:variable name="skin_base" select="concat($xml_base_pub,'/../assets/default')"/>
+  <xsl:variable name="cgi_base" select="concat($xml_base_pub,'/../shaarligo.cgi')"/>
 
   <xsl:template match="/">
     <xsl:apply-templates select="h:html"/>
@@ -56,8 +58,8 @@
       <!-- http://www.quirksmode.org/blog/archives/2013/10/initialscale1_m.html -->
       <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
       <!-- meta name="viewport" content="width=400"/ -->
-      <link href="{$xml_base_pub}/../assets/default/bootstrap.css" rel="stylesheet" type="text/css"/>
-      <link href="{$xml_base_pub}/../assets/default/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
+      <link href="{$skin_base}/bootstrap.css" rel="stylesheet" type="text/css"/>
+      <link href="{$skin_base}/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
 
       <style type="text/css">
 .hidden-logged-in { display:initial; }
@@ -112,11 +114,11 @@ br.br { display:none; }
           <td tabindex="30" class="text-right"><a href="{$xml_base_pub}/d/">📅 <span class="hidden-xs">Tage</span></a></td>
           <td tabindex="40" class="text-right"><a href="{$xml_base_pub}/i/">🎨 <span class="hidden-xs">Bilder</span></a></td>
           <td class="text-right"><!-- I'd prefer a class="text-right hidden-logged-out" but just don't get it right -->
-            <a class="hidden-logged-out" href="{$xml_base_pub}/../shaarligo.cgi/tools/">🔨 <span class="hidden-xs">Tools</span></a>
+            <a class="hidden-logged-out" href="{$cgi_base}/tools/">🔨 <span class="hidden-xs">Tools</span></a>
           </td>
           <td class="text-right">
-            <a tabindex="50" id="link_login" href="{$xml_base_pub}/../shaarligo.cgi?do=login" class="visible-logged-out"><span class="hidden-xs">Anmelden</span> 🌺 </a>
-            <a tabindex="51" id="link_logout" href="{$xml_base_pub}/../shaarligo.cgi?do=logout" class="hidden-logged-out"><span class="hidden-xs">Abmelden</span> 🐾 </a>
+            <a tabindex="50" id="link_login" href="{$cgi_base}?do=login" class="visible-logged-out"><span class="hidden-xs">Anmelden</span> 🌺 </a>
+            <a tabindex="51" id="link_logout" href="{$cgi_base}?do=logout" class="hidden-logged-out"><span class="hidden-xs">Abmelden</span> 🐾 </a>
           </td>
         </tr>
       </tbody>
@@ -130,10 +132,12 @@ br.br { display:none; }
    onload="document.form_post.post.focus();"
 -->
       <script>
-var xml_base_pub = '<xsl:value-of select="$xml_base_pub"/>';
+const xml_base_pub = '<xsl:value-of select="$xml_base_pub"/>';
+const skin_base    = '<xsl:value-of select="$skin_base"/>';
+const cgi_base     = '<xsl:value-of select="$cgi_base"/>';
 // <![CDATA[
 // check if we're logged-in (AJAX or Cookie?).
-var xhr = new XMLHttpRequest();
+const xhr = new XMLHttpRequest();
 xhr.onreadystatechange = function(data0) {
   if (xhr.readyState == 4) {
     console.log('xhr.status = ' + xhr.status);
@@ -141,7 +145,8 @@ xhr.onreadystatechange = function(data0) {
     // store the result locally and use as initial value for later calls.
   }
 }
-xhr.open('GET', xml_base_pub + '/../shaarligo.cgi/session/');
+xhr.timeout = 1000;
+xhr.open('GET', cgi_base + '/session/');
 xhr.send(null);
 // ]]>
       </script>
@@ -156,7 +161,7 @@ xhr.send(null);
 
         <hr style="clear:left;"/>
 
-        <p><a href="http://purl.mro.name/ShaarliGo"><img style="background-color:#10b210" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABsAAAAbAQMAAAC3GmYWAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4gQQFCIou+kEAAAAAAZQTFRF////AAAAVcLTfgAAAAF0Uk5TAEDm2GYAAAABYktHRACIBR1IAAAAgUlEQVQIHWNgAIF6jvgDDI4BExwYYi3DgUS6OJBgArIcA4Fi9aFAWQZWBwaG2v9aDQw5GRoNDIFPbx1giNno4cDArmd7gCHnl1cDgyv7ogMMYbZCDgyuC/8CTa10B5ocFA40WdWNgSG2/H8DQ2yU7AGG2ARPoMkh74Aml/MDTQYCAKs2JcgwrX6XAAAAAElFTkSuQmCC" alt="QR Code"/></a></p>
+        <p><a href="http://purl.mro.name/ShaarliGo"><img style="background-color:#10b210" src="{$skin_base}/qrcode.png" alt="QR Code"/></a></p>
 
       </div>
     </body>
