@@ -99,6 +99,7 @@ func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) {
 
 			ret.XmlBase = xmlBase.String()
 			ret.Id = xmlBase.ResolveReference(mustParseURL(qu)).String()
+			ret.Generator = &Generator{Uri: myselfNamespace, Version: version + "+" + GitSHA1, Body: "ShaarliGo"}
 			ret.XmlNSShaarliGo = myselfNamespace
 			ret.SearchTerms = strings.Join(q, " ") // rather use http://www.opensearch.org/Specifications/OpenSearch/1.1#Example_of_OpenSearch_response_elements_in_Atom_1.0
 			ret.XmlNSOpenSearch = "http://a9.com/-/spec/opensearch/1.1/"

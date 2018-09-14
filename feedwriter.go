@@ -304,6 +304,7 @@ func (feed Feed) PagedFeeds(complete []Feed, linksPerPage int) ([]Feed, error) {
 func (app App) PublishFeedsForModifiedEntries(feed Feed, entries []*Entry) error {
 	defer un(trace("App.PublishFeedsForModifiedEntries"))
 
+	feed.Generator = &Generator{Uri: myselfNamespace, Version: version + "+" + GitSHA1, Body: "ShaarliGo"}
 	sort.Sort(ByPublishedDesc(feed.Entries))
 
 	complete := feed.CompleteFeedsForModifiedEntries(entries)

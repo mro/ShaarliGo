@@ -89,7 +89,6 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 			feed.Id = feed.XmlBase // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
 			feed.Title = HumanText{Body: title}
 			feed.Authors = []Person{Person{Name: uid}}
-			feed.Generator = &Generator{Uri: myselfNamespace, Version: version + "+" + GitSHA1, Body: "ShaarliGo"}
 			feed.Links = []Link{
 				Link{Rel: relEdit, Href: path.Join(cgiName, uriPub, uriPosts), Title: "PostURI, maybe better a app:collection https://tools.ietf.org/html/rfc5023#section-8.3.3"},
 			}

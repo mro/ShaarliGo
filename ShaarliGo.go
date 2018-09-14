@@ -126,10 +126,11 @@ func (app App) LoadFeed() (Feed, error) {
 // Internal storage, not publishing.
 func (app App) SaveFeed(feed Feed) error {
 	defer un(trace("App.SaveFeed"))
-	feed.Categories = nil
 	feed.Id = ""
 	feed.XmlBase = ""
+	feed.Generator = nil
 	feed.Updated = iso8601{}
+	feed.Categories = nil
 	return feed.SaveToFile(fileFeedStorage)
 }
 
