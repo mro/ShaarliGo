@@ -12,7 +12,7 @@
     doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
     doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN"/>
 
-  <xsl:variable name="xml_base_pub">pub</xsl:variable>
+  <xsl:variable name="xml_base_pub" select="concat(/*/@xml:base,'o')"/>
 
   <xsl:template match="/">
     <xsl:apply-templates select="h:html"/>

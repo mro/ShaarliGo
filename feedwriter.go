@@ -48,7 +48,7 @@ const cgiName = "shaarligo.cgi"
 const dirAssets = "assets"
 const dirApp = "app"
 
-const uriPub = "="
+const uriPub = "o"
 const uriPosts = "p"
 const uriDays = "d"
 const uriTags = "t"

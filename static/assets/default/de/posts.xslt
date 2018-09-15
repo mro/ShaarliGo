@@ -101,7 +101,7 @@
   <xsl:key name="CategorY" match="a:entry/a:category" use="@term" />
 
   <xsl:variable name="xml_base" select="/*/@xml:base"/>
-  <xsl:variable name="xml_base_pub" select="concat($xml_base,'=')"/>
+  <xsl:variable name="xml_base_pub" select="concat($xml_base,'o')"/>
   <xsl:variable name="skin_base" select="concat($xml_base,'assets/default')"/>
   <xsl:variable name="cgi_base" select="concat($xml_base,'shaarligo.cgi')"/>
 

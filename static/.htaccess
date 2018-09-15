@@ -31,11 +31,11 @@ RewriteRule ^/?$  %{ENV:BASE}shaarligo.cgi?%1    [redirect=301,last,qsdiscard]
 
 # legacy URLs https://perishablepress.com/redirect-query-string-htaccess/
 RewriteCond %{QUERY_STRING} ^([0-9a-zA-Z_-]{6})$
-# RewriteRule ^/?$  %{ENV:BASE}=/p/%1/    [redirect=301,last,qsdiscard]
+# RewriteRule ^/?$  %{ENV:BASE}o/p/%1/    [redirect=301,last,qsdiscard]
 RewriteRule ^/?$  %{ENV:BASE}shaarligo.cgi?%1    [redirect=301,last,qsdiscard]
 
-# webroot to =/p/
-RewriteRule ^/?$  %{ENV:BASE}=/p/       [redirect=301,last,qsdiscard]
+# webroot to o/p/
+RewriteRule ^/?$  %{ENV:BASE}o/p/       [redirect=301,last,qsdiscard]
 
 # recommended
 # http://www.golem.de/news/content-security-policy-schutz-vor-cross-site-scripting-1306-99795.html
@@ -53,6 +53,6 @@ Header set Connection Keep-Alive
 # when NOT serving .xml.gz by default:
 # RewriteRule (/index\.xml\.gz)$ - [ENV=IS_GZIP_MARKER:true]
 # when NOT serving .xml.gz by default:
-RewriteRule (^/=/.+/|/index\.xml\.gz)$ - [ENV=IS_GZIP_MARKER:true]
+RewriteRule (^/o/.+/|/index\.xml\.gz)$ - [ENV=IS_GZIP_MARKER:true]
 Header always add "Content-Encoding" "gzip" env=IS_GZIP_MARKER
 Header always set "Content-Type" "text/xml; charset=utf8" env=IS_GZIP_MARKER

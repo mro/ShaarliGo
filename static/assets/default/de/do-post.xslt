@@ -33,7 +33,7 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:variable name="xml_base_pub" select="concat(/*/@xml:base,'=')"/>
+  <xsl:variable name="xml_base_pub" select="concat(/*/@xml:base,'o')"/>
 
   <xsl:template match="/">
     <xsl:apply-templates select="h:html"/>
