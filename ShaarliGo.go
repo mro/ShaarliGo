@@ -66,14 +66,14 @@ func un(name string, start time.Time)       { log.Printf("%s took %s", name, tim
 
 // evtl. as a server, too: http://www.dav-muz.net/blog/2013/09/how-to-use-go-and-fastcgi/
 func main() {
-	{ // log to custom logfile rather than stderr (which may not be reachable for analysis on shared hosting)
+	{ // log to custom logfile rather than stderr (may not be reachable on shared hosting)
 		dst := filepath.Join(dirApp, "var", "log", "error.log")
 		if err := os.MkdirAll(filepath.Dir(dst), 0770); err != nil {
 			log.Fatal("Couldn't create app/var/log dir: " + err.Error())
 			return
 		}
 		if fileLog, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0660); err != nil {
-			log.Fatal("Couldn't create open logfile: " + err.Error())
+			log.Fatal("Couldn't open logfile: " + err.Error())
 			return
 		} else {
 			defer fileLog.Close()
@@ -126,8 +126,10 @@ func (app App) LoadFeed() (Feed, error) {
 		for _, ent := range feed.Entries {
 			if 6 == len(ent.Id) {
 				if id, err := base64ToBase24x7(ent.Id); err != nil {
+					log.Printf("Error converting id \"%s\": %s\n", ent.Id, err)
 				} else {
-					log.Printf("shaarli_go_path_0 + \"?("+uriPubPosts+"|\\?)%s/?$\" => \""+uriPubPosts+"%s/\",\n", ent.Id, id)
+					log.Printf("shaarli_go_path_0 + \"?(%[1]s|\\?)%[2]s/?$\" => \"%[1]s%[3]s/\",\n", uriPubPosts, ent.Id, id)
+					ent.Id = id
 				}
 			}
 		}
@@ -263,8 +265,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 					if id, err := base64ToBase24x7(k); err != nil {
 						http.Error(w, "Invalid Id '"+k+"': "+err.Error(), http.StatusNotAcceptable)
 					} else {
-						log.Printf("Redirect \"\\?%s$\" => \"%s/%s/%s/\",    # legacy shaarli Id", k, uriPub, uriPosts, id)
-						id = k
+						log.Printf("shaarli_go_path_0 + \"?(%[1]s|\\?)%[2]s/?$\" => \"%[1]s%[3]s/\",\n", uriPubPosts, k, id)
 						http.Redirect(w, r, path.Join(r.URL.Path, "..", uriPub, uriPosts, id)+"/", http.StatusMovedPermanently)
 					}
 					return

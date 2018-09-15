@@ -161,7 +161,7 @@ func (seed Feed) CompleteFeeds(uri2filter map[string]func(*Entry) bool) []Feed {
 			}
 		}
 		if uriPubTags == uri {
-			feed.Categories = AggregateCategories(seed.Entries) // rather the ones from pub/posts
+			feed.Categories = AggregateCategories(seed.Entries) // rather the ones from o/p
 		}
 		ret = append(ret, feed)
 	}
@@ -306,7 +306,7 @@ func (app App) PublishFeedsForModifiedEntries(feed Feed, entries []*Entry) error
 
 	feed.Generator = &Generator{Uri: myselfNamespace, Version: version + "+" + GitSHA1, Body: "ShaarliGo"}
 	sort.Sort(ByPublishedDesc(feed.Entries))
-
+	// entries = feed.Entries // force write all entries. Every single one.
 	complete := feed.CompleteFeedsForModifiedEntries(entries)
 	if pages, err := feed.PagedFeeds(complete, app.cfg.LinksPerPage); err == nil {
 		return app.PublishFeeds(pages)
