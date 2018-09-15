@@ -19,6 +19,8 @@ package main
 
 import (
 	"bufio"
+	"encoding/base64"
+	"encoding/binary"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -245,6 +247,58 @@ func (a ByUpdatedDesc) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByUpdatedDesc) Less(i, j int) bool { return !a[i].Updated.Before(a[j].Updated) }
 
 // custom interface
+
+// sufficient for 32 bit.
+func base64ToBase24x7(b64 string) (string, error) {
+	if data, err := base64.RawURLEncoding.DecodeString(b64); err != nil {
+		return "", err
+	} else {
+		// check len(data) ?
+		ui32 := binary.LittleEndian.Uint32(data)
+		base24 := fmt.Sprintf("%07s", strconv.FormatUint(uint64(ui32), 24))
+		return strings.Map(mapBase24ToSuperCareful, base24), nil
+	}
+}
+
+// Being "super-careful" https://git.mro.name/mro/ProgrammableWebSwartz2013/src/master/content/pages/2-building-for-users.md
+//
+// 0123456789abcdefghijklmn ->
+// 23456789abcdefghkrstuxyz
+func mapBase24ToSuperCareful(r rune) rune {
+	digits := []rune("23456789abcdefghkrstuxyz")
+	switch {
+	case '0' <= r && r <= '9':
+		return digits[:10][r-'0']
+	case r >= 'a' && r <= 'n':
+		return digits[10:][r-'a']
+	}
+	panic("ouch")
+}
+
+func newRandomId(t time.Time) string {
+	ui32 := uint32(t.Unix() & 0xFFFFFFFF) // unix time in seconds as uint32
+	base24 := fmt.Sprintf("%07s", strconv.FormatUint(uint64(ui32), 24))
+	return strings.Map(mapBase24ToSuperCareful, base24)
+}
+
+func (feed Feed) newUniqueId(t time.Time) string {
+	id := newRandomId(t)
+	for _, entry := range feed.Entries {
+		if entry.Id == id {
+			panic("id not unique")
+		}
+	}
+	return id
+}
+
+func (feed Feed) newEntry(t time.Time) *Entry {
+	defer un(trace("Feed.newEntry(t)"))
+	return &Entry{
+		Authors:   feed.Authors,
+		Published: iso8601(t),
+		Id:        feed.newUniqueId(t),
+	}
+}
 
 func (feed *Feed) findEntry(doesMatch func(*Entry) bool) (int, *Entry) {
 	defer un(trace(strings.Join([]string{"Feed.findEntry(f(*Entry))"}, "")))

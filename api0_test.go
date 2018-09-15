@@ -19,9 +19,11 @@ package main
 
 import (
 	"crypto/rand"
+	"encoding/base64"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	// "hash/crc32"
+	"hash/crc32"
 	"io"
 	"net/url"
 	"strings"
@@ -116,6 +118,40 @@ func TestToken(t *testing.T) {
 	assert.Nil(t, err, "aua")
 	assert.NotNil(t, hex.EncodeToString(src), "aua")
 }
+
+/* Returns the small hash of a string, using RFC 4648 base64url format
+   eg. smallHash('20111006_131924') --> yZH23w
+   Small hashes:
+     - are unique (well, as unique as crc32, at last)
+     - are always 6 characters long.
+     - only use the following characters: a-z A-Z 0-9 - _ @
+     - are NOT cryptographically secure (they CAN be forged)
+   In Shaarli, they are used as a tinyurl-like link to individual entries.
+
+   https://github.com/sebsauvage/Shaarli/blob/master/index.php#L228
+*/
+func smallHash(text string) string {
+	// ret:= rtrim(base64_encode(hash('crc32',$text,true)),'=');
+	crc := crc32.ChecksumIEEE([]byte(text))
+	bs := make([]byte, 4) // https://stackoverflow.com/a/16889357
+	binary.LittleEndian.PutUint32(bs, crc)
+	return base64.RawURLEncoding.EncodeToString(bs)
+}
+
+func smallDateHash(tt time.Time) string {
+	bs := make([]byte, 4) // https://stackoverflow.com/a/16889357
+	// unix time in seconds as uint32
+	binary.LittleEndian.PutUint32(bs, uint32(tt.Unix()&0xFFFFFFFF))
+	return base64.RawURLEncoding.EncodeToString(bs)
+}
+
+/*
+func smallHashRandom() string {
+	bs := make([]byte, 4)
+	io.ReadFull(rand.Reader, bs)
+	return base64.RawURLEncoding.EncodeToString(bs)
+}
+*/
 
 func TestSmallHash(t *testing.T) {
 	t.Parallel()

@@ -81,6 +81,33 @@ func TestEntryCategoriesMerged(t *testing.T) {
 	assert.Equal(t, []Category{Category{Term: "da"}, Category{Term: "ha"}, Category{Term: "so"}}, e.CategoriesMerged(), "genau")
 }
 
+var b64Tob24Tests = []struct {
+	n        string
+	expected string
+}{
+	{"FxW3Ow", "77tk489"},
+	{"Zt3wHA", "4ezde68"},
+	{"oHordQ", "c8x2syk"}, // http://sebsauvage.net/links/?oHordQ
+	{"McLIuQ", "k9cr7c3"}, // http://sebsauvage.net/links/?McLIuQ
+}
+
+func TestFeedIdLowerFromIdMixed(t *testing.T) {
+	// https://dave.cheney.net/2013/06/09/writing-table-driven-tests-in-go
+	for _, tt := range b64Tob24Tests {
+		actual, _ := base64ToBase24x7(tt.n)
+		if actual != tt.expected {
+			t.Errorf("base64ToBase24x7(%s): expected %s, actual %s", tt.n, tt.expected, actual)
+		}
+	}
+}
+
+func TestFeedNewEntry(t *testing.T) {
+	f := Feed{}
+	ent := f.newEntry(time.Time{})
+	assert.True(t, ent.Published.IsZero(), "oha")
+	assert.Equal(t, "dzcz8k2", ent.Id, "soso")
+}
+
 func TestFeedFromFileName_Atom(t *testing.T) {
 	t.Parallel()
 	feed, err := FeedFromFileName("testdata/links.atom")

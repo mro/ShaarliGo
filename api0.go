@@ -19,10 +19,7 @@ package main
 
 import (
 	"crypto/rand"
-	"encoding/base64"
-	"encoding/binary"
 	"encoding/hex"
-	"hash/crc32"
 	"html/template"
 	"io"
 	"log"
@@ -52,38 +49,6 @@ func parseLinkUrl(raw string) *url.URL {
 	} else {
 		return nil
 	}
-}
-
-/* Returns the small hash of a string, using RFC 4648 base64url format
-   eg. smallHash('20111006_131924') --> yZH23w
-   Small hashes:
-     - are unique (well, as unique as crc32, at last)
-     - are always 6 characters long.
-     - only use the following characters: a-z A-Z 0-9 - _ @
-     - are NOT cryptographically secure (they CAN be forged)
-   In Shaarli, they are used as a tinyurl-like link to individual entries.
-
-   https://github.com/sebsauvage/Shaarli/blob/master/index.php#L228
-*/
-func smallHash(text string) string {
-	// ret:= rtrim(base64_encode(hash('crc32',$text,true)),'=');
-	crc := crc32.ChecksumIEEE([]byte(text))
-	bs := make([]byte, 4) // https://stackoverflow.com/a/16889357
-	binary.LittleEndian.PutUint32(bs, crc)
-	return base64.RawURLEncoding.EncodeToString(bs)
-}
-
-func smallDateHash(tt time.Time) string {
-	bs := make([]byte, 4) // https://stackoverflow.com/a/16889357
-	// unix time in seconds as uint32
-	binary.LittleEndian.PutUint32(bs, uint32(tt.Unix()&0xFFFFFFFF))
-	return base64.RawURLEncoding.EncodeToString(bs)
-}
-
-func smallHashRandom() string {
-	bs := make([]byte, 4)
-	io.ReadFull(rand.Reader, bs)
-	return base64.RawURLEncoding.EncodeToString(bs)
 }
 
 func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
@@ -315,7 +280,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		if ok {
 			delete(app.ses.Values, "identifier")
 		}
-		log.Printf("pulled Id from cookie: %v %v", app.ses.Values["identifier"], identifier)
+		log.Printf("pulled Id from cookie: %v", identifier)
 		app.KeepAlive(w, r, now)
 		location := path.Join(uriPub, uriPosts) + "/"
 
@@ -341,11 +306,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 					lf_url := r.FormValue("lf_url")
 					_, ent := feed.findEntryById(identifier)
 					if nil == ent {
-						ent = &Entry{
-							Authors:   feed.Authors,
-							Published: iso8601(lf_linkdate),
-							Id:        smallHashRandom(),
-						}
+						ent = feed.newEntry(lf_linkdate)
 						if _, err := feed.Append(ent); err != nil {
 							http.Error(w, "couldn't add entry: "+err.Error(), http.StatusInternalServerError)
 							return

@@ -120,7 +120,19 @@ func (app App) IsLoggedIn(now time.Time) bool {
 
 func (app App) LoadFeed() (Feed, error) {
 	defer un(trace("App.LoadFeed"))
-	return FeedFromFileName(fileFeedStorage)
+	if feed, err := FeedFromFileName(fileFeedStorage); err != nil {
+		return feed, err
+	} else {
+		for _, ent := range feed.Entries {
+			if 6 == len(ent.Id) {
+				if id, err := base64ToBase24x7(ent.Id); err != nil {
+				} else {
+					log.Printf("shaarli_go_path_0 + \"?("+uriPubPosts+"|\\?)%s/?$\" => \""+uriPubPosts+"%s/\",\n", ent.Id, id)
+				}
+			}
+		}
+		return feed, nil
+	}
 }
 
 // Internal storage, not publishing.
@@ -172,7 +184,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 				log.Printf("keep   %s\n", filename)
 			}
 		}
-		// os.Chmod("app", os.FileMode(0750)) // not sure if this is a good idea.
+		// os.Chmod(dirApp, os.FileMode(0750)) // not sure if this is a good idea.
 	}()
 
 	// get config and session
@@ -244,6 +256,20 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		case 1 == len(params["do"]) && "changepasswd" == params["do"][0]:
 			app.handleDoCheckLoginAfterTheFact(w, r)
 			return
+		case 1 == len(params):
+			// redirect legacy Ids [A-Za-z0-9_-]{6} in case
+			for k, v := range params {
+				if 1 == len(v) && "" == v[0] && len(k) == 6 {
+					if id, err := base64ToBase24x7(k); err != nil {
+						http.Error(w, "Invalid Id '"+k+"': "+err.Error(), http.StatusNotAcceptable)
+					} else {
+						log.Printf("Redirect \"\\?%s$\" => \"%s/%s/%s/\",    # legacy shaarli Id", k, uriPub, uriPosts, id)
+						id = k
+						http.Redirect(w, r, path.Join(r.URL.Path, "..", uriPub, uriPosts, id)+"/", http.StatusMovedPermanently)
+					}
+					return
+				}
+			}
 		}
 	case "/search/":
 		app.handleSearch(w, r)
