@@ -221,7 +221,7 @@ func TestPostConfig(t *testing.T) {
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, 0, len(body), "soso")
 
-	cfg, err := ioutil.ReadFile(filepath.Join("app", "config.yaml"))
+	cfg, err := ioutil.ReadFile(filepath.Join(dirApp, "config.yaml"))
 	assert.Nil(t, err, "aha")
 	assert.True(t, strings.HasPrefix(string(cfg), "title: A\nuid: B\n"), string(cfg))
 

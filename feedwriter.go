@@ -318,7 +318,7 @@ func (app App) PublishFeedsForModifiedEntries(feed Feed, entries []*Entry) error
 // create a lock file to avoid races and then call PublishFeed in loop
 func (app App) PublishFeeds(feeds []Feed) error {
 	defer un(trace("App.PublishFeeds"))
-	strFileLock := filepath.Join("app", "var", "lock")
+	strFileLock := filepath.Join(dirApp, "var", "lock")
 
 	// check race: if .lock exists kill pid?
 	if byPid, err := ioutil.ReadFile(strFileLock); err == nil {

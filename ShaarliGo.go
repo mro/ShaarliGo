@@ -55,7 +55,7 @@ var GitSHA1 = "Please set -ldflags \"-X main.GitSHA1=$(git rev-parse --short HEA
 var fileFeedStorage string
 
 func init() {
-	fileFeedStorage = filepath.Join(dirApp, "var", "pub.atom")
+	fileFeedStorage = filepath.Join(dirApp, "var", uriPub+".atom")
 }
 
 // even cooler: https://stackoverflow.com/a/8363629
@@ -67,7 +67,7 @@ func un(name string, start time.Time)       { log.Printf("%s took %s", name, tim
 // evtl. as a server, too: http://www.dav-muz.net/blog/2013/09/how-to-use-go-and-fastcgi/
 func main() {
 	{ // log to custom logfile rather than stderr (which may not be reachable for analysis on shared hosting)
-		dst := filepath.Join("app", "var", "log", "error.log")
+		dst := filepath.Join(dirApp, "var", "log", "error.log")
 		if err := os.MkdirAll(filepath.Dir(dst), 0770); err != nil {
 			log.Fatal("Couldn't create app/var/log dir: " + err.Error())
 			return
