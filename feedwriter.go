@@ -214,6 +214,12 @@ func (seed Feed) Pages(entriesPerPage int) []Feed {
 			}
 			lower = max(0, upper-step)
 			feed.Entries = seed.Entries[lower:upper]
+			feed.Updated = iso8601(time.Time{}) // start with zero
+			for _, ent := range feed.Entries {  // max of entries
+				if feed.Updated.Before(ent.Updated) {
+					feed.Updated = ent.Updated
+				}
+			}
 		}
 		ls := append(make([]Link, 0, len(feed.Links)+5), feed.Links...)
 		ls = append(ls, link(relSelf, page))
@@ -309,14 +315,24 @@ func (app App) PublishFeedsForModifiedEntries(feed Feed, entries []*Entry) error
 	// entries = feed.Entries // force write all entries. Every single one.
 	complete := feed.CompleteFeedsForModifiedEntries(entries)
 	if pages, err := feed.PagedFeeds(complete, app.cfg.LinksPerPage); err == nil {
-		return app.PublishFeeds(pages)
+		if err = app.PublishFeeds(pages, true); err != nil {
+			return err
+		} else {
+			// just assure ALL entries index.xml.gz exist and are up to date
+			for _, ent := range feed.Entries {
+				if err = app.PublishEntry(ent, false); err != nil { // only if newer
+					return err
+				}
+			}
+			return nil
+		}
 	} else {
 		return err
 	}
 }
 
 // create a lock file to avoid races and then call PublishFeed in loop
-func (app App) PublishFeeds(feeds []Feed) error {
+func (app App) PublishFeeds(feeds []Feed, force bool) error {
 	defer un(trace("App.PublishFeeds"))
 	strFileLock := filepath.Join(dirApp, "var", "lock")
 
@@ -339,7 +355,7 @@ func (app App) PublishFeeds(feeds []Feed) error {
 	if err := ioutil.WriteFile(strFileLock, []byte(string(os.Getpid())), os.ModeExclusive); err == nil {
 		defer os.Remove(strFileLock)
 		for _, feed := range feeds {
-			if err := app.PublishFeed(feed); err != nil {
+			if err := app.PublishFeed(feed, force); err != nil {
 				return err
 			}
 			if uriPubTags == LinkRelSelf(feed.Links).Href {
@@ -371,11 +387,11 @@ func (app App) PublishFeeds(feeds []Feed) error {
 	return nil
 }
 
-func (app App) PublishFeed(feed Feed) error {
+func (app App) PublishFeed(feed Feed, force bool) error {
 	const feedFileName = "index.xml.gz"
 	const xsltFileName = "posts.xslt"
 	uri := LinkRelSelf(feed.Links).Href
-	defer un(trace(strings.Join([]string{"App.PublishFeed", uri}, " ")))
+	ti, to := trace(strings.Join([]string{"App.PublishFeed", uri}, " "))
 
 	pathPrefix := rexPath.ReplaceAllString(uri, "..")
 	dstDirName := filepath.FromSlash(uri)
@@ -388,21 +404,12 @@ func (app App) PublishFeed(feed Feed) error {
 		log.Printf("remove %s", dstFileName)
 		err := os.Remove(dstFileName)
 		os.Remove(dstDirName)
+		defer un(ti, to)
 		return err
 	}
 
-	if feed.Updated.IsZero() {
-		log.Println("repairing Feed.Updated time")
-		feed.Updated = func() iso8601 {
-			if 0 < len(feed.Entries) {
-				return feed.Entries[0].Updated
-			} else {
-				return iso8601(time.Now())
-			}
-		}()
-	}
-
 	feed.Id = feed.XmlBase + feed.Id
+	mTime := time.Time(feed.Updated)
 	var feedOrEntry interface{} = feed
 	if "../../../" == pathPrefix && strings.HasPrefix(uri, uriPubPosts) {
 		if 0 == len(feed.Entries) {
@@ -411,9 +418,17 @@ func (app App) PublishFeed(feed Feed) error {
 		if 1 < len(feed.Entries) {
 			log.Printf("%d entries with Id: %v, keeping just one.", len(feed.Entries), uri)
 		}
-		feedOrEntry = feed.Entries[0]
+		ent := feed.Entries[0]
+		feedOrEntry = ent
+		mTime = time.Time(ent.Updated)
 	}
 
+	if fi, err := os.Stat(dstFileName); !force && (fi != nil && !fi.ModTime().Before(mTime)) && !os.IsNotExist(err) {
+		// log.Printf("skip %s, still up to date.", dstFileName)
+		return err
+	}
+
+	defer un(ti, to)
 	tmpFileName := dstFileName + "~"
 	xslt := path.Join(pathPrefix, dirAssets, app.cfg.Skin, xsltFileName)
 
@@ -430,7 +445,53 @@ func (app App) PublishFeed(feed Feed) error {
 				if err = xmlEncodeWithXslt(feedOrEntry, xslt, enc); err == nil {
 					if err = enc.Flush(); err == nil {
 						if err = w.Close(); err == nil {
-							mTime := time.Time(feed.Updated)
+							os.Chtimes(tmpFileName, mTime, mTime)
+							return os.Rename(tmpFileName, dstFileName)
+						}
+					}
+				}
+			}
+		}
+	}
+	return err
+}
+
+func (app App) PublishEntry(ent *Entry, force bool) error {
+	const feedFileName = "index.xml.gz"
+	const xsltFileName = "posts.xslt"
+	uri := LinkRelSelf(ent.Links).Href
+	ti, to := trace(strings.Join([]string{"App.PublishEntry", uri}, " "))
+
+	pathPrefix := rexPath.ReplaceAllString(uri, "..")
+	dstDirName := filepath.FromSlash(uri)
+	dstFileName := filepath.Join(dstDirName, feedFileName)
+
+	var feedOrEntry interface{} = ent
+	ent.Id = ent.XmlBase + ent.Id
+	mTime := time.Time(ent.Updated)
+
+	if fi, err := os.Stat(dstFileName); !force && (fi != nil && !fi.ModTime().Before(mTime)) && !os.IsNotExist(err) {
+		// log.Printf("skip %s, still up to date.", dstFileName)
+		return err
+	}
+
+	defer un(ti, to)
+	tmpFileName := dstFileName + "~"
+	xslt := path.Join(pathPrefix, dirAssets, app.cfg.Skin, xsltFileName)
+
+	var err error
+	if err = os.MkdirAll(dstDirName, newDirPerms); err == nil {
+		var gz *os.File
+		if gz, err = os.Create(tmpFileName); err == nil {
+			defer gz.Close() // just to be sure
+			var w *gzip.Writer
+			if w, err = gzip.NewWriterLevel(gz, gzip.BestCompression); err == nil {
+				defer w.Close() // just to be sure
+				enc := xml.NewEncoder(w)
+				enc.Indent("", "  ")
+				if err = xmlEncodeWithXslt(feedOrEntry, xslt, enc); err == nil {
+					if err = enc.Flush(); err == nil {
+						if err = w.Close(); err == nil {
 							os.Chtimes(tmpFileName, mTime, mTime)
 							return os.Rename(tmpFileName, dstFileName)
 						}

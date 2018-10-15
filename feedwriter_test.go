@@ -18,9 +18,11 @@
 package main
 
 import (
+	"os"
 	"path"
 	"regexp"
 	"sort"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -311,6 +313,15 @@ func TestPagedFeeds(t *testing.T) {
 	pages = feeds[1].Pages(100)
 	assert.Equal(t, uriPubPosts, pages[0].Id, "ja")
 	assert.Equal(t, uriPubPosts, LinkRelSelf(pages[0].Links).Href, "ja")
+}
+
+func BenchmarkFileStat(b *testing.B) {
+	t0 := time.Time{}
+	for i := 0; i < b.N; i++ {
+		if fi, err := os.Stat("."); (fi != nil && fi.ModTime().Before(t0)) || os.IsNotExist(err) {
+			// older or missing: (re-)create
+		}
+	}
 }
 
 /*
