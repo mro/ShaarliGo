@@ -66,7 +66,10 @@ func un(name string, start time.Time)       { log.Printf("%s took %s", name, tim
 
 // evtl. as a server, too: http://www.dav-muz.net/blog/2013/09/how-to-use-go-and-fastcgi/
 func main() {
-	{ // log to custom logfile rather than stderr (may not be reachable on shared hosting)
+	if false {
+		// lighttpd doesn't seem to like more than one (per-vhost) server.breakagelog
+		log.SetOutput(os.Stderr)
+	} else { // log to custom logfile rather than stderr (may not be reachable on shared hosting)
 		dst := filepath.Join(dirApp, "var", "log", "error.log")
 		if err := os.MkdirAll(filepath.Dir(dst), 0770); err != nil {
 			log.Fatal("Couldn't create app/var/log dir: " + err.Error())
