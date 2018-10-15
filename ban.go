@@ -21,10 +21,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"gopkg.in/yaml.v2"
@@ -46,11 +46,8 @@ type BanPenalties struct {
 }
 
 func remoteAddressToKey(addr string) string {
-	// strip port number
-	if idx := strings.LastIndex(addr, ":"); idx > -1 {
-		addr = addr[:idx]
-	}
-	return addr
+	h, _, _ := net.SplitHostPort(addr)
+	return h
 }
 
 func isBanned(r *http.Request, now time.Time) (bool, error) {
