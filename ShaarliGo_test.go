@@ -227,8 +227,8 @@ func TestPostConfig(t *testing.T) {
 
 	assert.Equal(t, 1, len(r.Header["Set-Cookie"]), "naja")
 
-	stat, _ := os.Stat(uriPub)
-	assert.Equal(t, 0755, int(stat.Mode()&os.ModePerm), "ach, wieso?")
+	// stat, _ := os.Stat(uriPub)
+	// assert.Equal(t, 0755, int(stat.Mode()&os.ModePerm), "ach, wieso?")
 }
 
 func TestGetLoginWithoutRedir(t *testing.T) {

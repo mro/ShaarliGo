@@ -421,7 +421,7 @@ table.prev-next a {
         <p class="categories" title="Schlagworte">
           <xsl:for-each select="a:category">
             <xsl:sort select="@term"/>
-            <a href="{@scheme}{@term}/">#<xsl:value-of select="@term"/></a><xsl:text>, </xsl:text>
+            <a href="{@scheme}{@term}/" class="tag">#<xsl:value-of select="@term"/></a><xsl:text>, </xsl:text>
           </xsl:for-each>
         </p>
       </div>

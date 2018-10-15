@@ -59,8 +59,7 @@
       <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
       <!-- meta name="viewport" content="width=400"/ -->
       <link rel="icon" data-emoji="🌺" type="image/png"/>
-      <link href="{$skin_base}/bootstrap.css" rel="stylesheet" type="text/css"/>
-      <link href="{$skin_base}/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
+      <link href="{$skin_base}/combined.css" rel="stylesheet" type="text/css"/>
 
       <style type="text/css">
 .hidden-logged-in { display:initial; }
@@ -96,7 +95,10 @@ form {
   min-width: 40px;
 }
 
-br.br { display:none; }
+/* This is a workaround for Browsers that insert additional br tags.
+ * See http://purl.mro.name/safari-xslt-br-bug */
+br { display:none; }
+br.br { display:inline; }
       </style>
       <title>Tools</title>
     </head>

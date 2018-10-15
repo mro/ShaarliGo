@@ -50,13 +50,20 @@ document.onreadystatechange = function () {
   var fontMax = 32;
   const tag0 = document.getElementById('tags');
   if (tag0) {
-    const tags = tag0.getElementsByClassName('tag');
+    var countMax = 0;
+    const tags = tag0.getElementsByTagName('a');
     const counts = new Array(tags.length);
     for (var i = tags.length - 1; i >= 0; i--) {
+      const lbl = tags[i].getElementsByClassName('label')[0];
+      if ('2018-01-15T12:52' == lbl.innerText) {
+        counts[i] = 1;
+        continue;
+      }
       const elm = tags[i].getElementsByClassName('count')[0];
-      counts[i] = 1 * elm.innerText;
+      countMax = Math.max(countMax, counts[i] = 1 * elm.innerText);
     }
-    const countMaxLog = Math.log(Math.max.apply(Math, counts)); // https://johnresig.com/blog/fast-javascript-maxmin/
+    const countMaxLog = Math.log(countMax);
+    // const countMaxLog = Math.log(Math.max.apply(Math, counts)); // https://johnresig.com/blog/fast-javascript-maxmin/
     const factor = 1.0 / countMaxLog * (fontMax - fontMin);
     for (var i = tags.length - 1; i >= 0; i--) {
       // https://stackoverflow.com/a/3717340
@@ -77,10 +84,10 @@ document.onreadystatechange = function () {
   const elmsRendered = document.getElementById('entries').getElementsByClassName('rendered');
   for (var i = 0; i < elmsRendered.length; i++) {
     const elm = elmsRendered[i];
-    elm.innerHTML = elm.innerHTML.replace(/(https?:\/\/\S+[^ \t\r\n.,;()])/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
+    elm.innerHTML = elm.innerHTML.replace(/(https?:\/\/[^ \t\r\n"']+[^ \t\r\n"'.,;()])/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
     // https://alanstorm.com/url_regex_explained/ \b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))
     // elm.innerHTML = elm.innerHTML.replace(/\b(([\w-]+:\/\/?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
-    elm.innerHTML = elm.innerHTML.replace(/geo:(-?\d+.\d+),(-?\d+.\d+)/gi, '<a class="geo" href="https://opentopomap.org/#marker=12/$1/$2">geo:<span class="latitude">$1</span>,<span class="longitude">$2</span></a>');
+    elm.innerHTML = elm.innerHTML.replace(/geo:(-?\d+.\d+),(-?\d+.\d+)(\?z=(\d+))?/gi, '<a class="geo" href="https://opentopomap.org/#marker=12/$1/$2" title="zoom=$4">geo:<span class="latitude">$1</span>,<span class="longitude">$2</span>$3</a>');
   }
 
   // https://koddsson.com/posts/emoji-favicon/
