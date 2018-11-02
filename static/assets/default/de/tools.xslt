@@ -34,7 +34,7 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:variable name="xml_base_pub">../../=</xsl:variable>
+  <xsl:variable name="xml_base_pub">../../o</xsl:variable>
   <xsl:variable name="skin_base" select="concat($xml_base_pub,'/../assets/default')"/>
   <xsl:variable name="cgi_base" select="concat($xml_base_pub,'/../shaarligo.cgi')"/>
 

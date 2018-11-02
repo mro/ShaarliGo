@@ -1,4 +1,4 @@
-ShaarliGo-linux-amd64-*.*.*
+ShaarliGo-linux-*-*.*.*
 testdata/links.atom.bak
 testdata/links.gob
 testdata/sebsauvage.atom
@@ -9,8 +9,6 @@ neu0.graphmlz
 body.txt
 head.txt
 *~
-t/
 tmp/
 body*.txt
 head*.txt
-shaarligo_cgi.gz
