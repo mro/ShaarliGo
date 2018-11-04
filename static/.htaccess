@@ -17,13 +17,16 @@ AddType application/javascript    js jsonp
 AddType application/json          json
 AddType image/svg+xml             svg
 AddType text/css                  css
+AddType text/html                 html
 AddType text/xml                  xml xslt
-AddOutputFilter DEFLATE xml xslt css js json svg
+AddOutputFilter DEFLATE html xml xslt css js json svg
 
 # https://stackoverflow.com/questions/21062290/set-rewritebase-to-the-current-folder-path-dynamically/21063276#21063276
 RewriteEngine On
 RewriteCond %{REQUEST_URI}::$1 ^(.*?/)(.*)::\2$
 RewriteRule ^(.*)$ - [E=BASE:%1]
+
+ErrorDocument 404 %{ENV:BASE}assets/404.html
 
 # redirect legacy shaarli posting
 RewriteCond %{QUERY_STRING} ^((.*&)?post=.*)$
