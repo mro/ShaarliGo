@@ -345,12 +345,12 @@ table.prev-next a {
   <xsl:template name="footer">
     <hr style="clear:left;"/>
     <p id="footer">
-      <a title="Subscribe" href="{$xml_base}{a:link[@rel='self']/@href}">
+      <a title="Abonnieren" href="{$xml_base}{a:link[@rel='self']/@href}">
         <img alt="Feed" src="{$skin_base}/feed-icon.svg" style="border:0;width:27px;height:27px"/>
       </a>
       <xsl:text> </xsl:text>
-       <a title="Validate my Atom 1.0 feed" href="https://validator.w3.org/feed/check.cgi?url={$xml_base}{a:link[@rel='self']/@href}">
-        <img alt="Valid Atom 1.0" src="{$skin_base}/valid-atom.svg" style="border:0;width:77px;height:27px"/>
+       <a title="Prüfen (Atom 1.0)" href="https://validator.w3.org/feed/check.cgi?url={$xml_base}{a:link[@rel='self']/@href}">
+        <img alt="Prüfplakette (Atom 1.0)" src="{$skin_base}/valid-atom.svg" style="border:0;width:77px;height:27px"/>
       </a>
       <!-- <xsl:text> </xsl:text>
       <a href="https://validator.w3.org/check?uri=referer">
@@ -361,7 +361,23 @@ table.prev-next a {
       </a>
       -->
       <xsl:text> </xsl:text>
-      <a href="http://purl.mro.name/ShaarliGo"><img style="background-color:#10b210;width:27px;height:27px" src="{$skin_base}/qrcode.png" alt="QR Code"/> ShaarliGo</a>
+      <a href="{a:link[@rel='license']/@href}">
+        <xsl:value-of select="a:link[@rel='license']/@title"/>
+      </a>
+      <xsl:text> </xsl:text>
+      <a href="{a:link[@rel='terms-of-service']/@href}">
+        Impressum
+      </a>
+      <xsl:text> </xsl:text>
+      <a href="{a:link[@rel='privacy-policy']/@href}">
+        Datenschutzerklärung
+      </a>
+      <xsl:text> </xsl:text>
+      <a title="Generator" href="{a:generator/@uri}#{a:generator/@version}">
+        <xsl:value-of select="a:generator"/>
+        <xsl:text> </xsl:text>
+        <img style="background-color:#10b210;width:27px;height:27px" src="{$skin_base}/qrcode.png" alt="QR Code (Generator URI)"/>
+      </a>
     </p>
   </xsl:template>
 

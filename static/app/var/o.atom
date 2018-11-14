@@ -1,5 +1,9 @@
-<feed xmlns="http://www.w3.org/2005/Atom">
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-GB">
+  <!-- https://www.w3.org/TR/xml/#sec-lang-tag -->
   <title>Seed entries for new feeds</title>
+  <link rel="license" title="CC BY-NC-SA 4.0" href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"></link>
+  <link rel="privacy-policy" href="http://example.com/my/privacy-declaration"></link>
+  <link rel="terms-of-service" href="http://example.com/my/imprint"></link>
   <entry xmlns="http://www.w3.org/2005/Atom">
     <title>Hello, #Atom!</title>
     <id>voo8Uo</id>
