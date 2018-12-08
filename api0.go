@@ -460,12 +460,12 @@ func (entry Entry) api0LinkFormMap() map[string]interface{} {
 			set[c.Term] = struct{}{}
 		}
 		// 2. minus #tags from title
-		for _, tag := range tagsFromString(entry.Title.Body) {
+		for tag, _ := range tagsFromString(entry.Title.Body) {
 			delete(set, tag)
 		}
 		// 2. minus #tags from content
 		if entry.Content != nil {
-			for _, tag := range tagsFromString(entry.Content.Body) {
+			for tag, _ := range tagsFromString(entry.Content.Body) {
 				delete(set, tag)
 			}
 		}

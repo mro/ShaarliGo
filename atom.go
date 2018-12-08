@@ -49,6 +49,17 @@ const lengthyAtomPreambleComment string = `
 
 const atomNamespace = "http://www.w3.org/2005/Atom"
 
+var emojiRunes map[rune]struct{}
+
+func init() {
+	emojiRunes = make(map[rune]struct{}, len(emojiCodeMap))
+	for _, v := range emojiCodeMap {
+		r := []rune(v)[0]
+		emojiRunes[r] = struct{}{}
+	}
+	emojiCodeMap = nil
+}
+
 func FeedFromFileName(file string) (Feed, error) {
 	if read, err := os.Open(file); nil == read || nil != err {
 		return Feed{}, err
@@ -432,48 +443,39 @@ func uniqCategory(data []Category) []Category {
 
 func (ht HumanText) Categories() []Category {
 	ret := make([]Category, 0, 10)
-	for _, t := range tagsFromString(ht.Body) {
+	for t, _ := range tagsFromString(ht.Body) {
 		ret = append(ret, Category{Term: t})
 	}
 	return ret
 }
 
-// save string allocations but todo handle atEOF?
-func tagsFromString1(str string) []string {
-	scanner := bufio.NewScanner(strings.NewReader(str))
-	split := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
-		advance, token, err = bufio.ScanWords(data, atEOF)
-		if token != nil {
-			if byte('#') == token[0] {
-				token = token[1:] // de-prefix token
-			} else {
-				token = nil // drop token
-			}
+func isTag(s string) bool {
+	for _, r := range s {
+		if '#' == r {
+			return true
 		}
-		return
+		_, ok := emojiRunes[r]
+		return ok
 	}
-	scanner.Split(split)
-
-	ret := make([]string, 0, 10)
-	for scanner.Scan() {
-		t := scanner.Text()
-		ret = append(ret, strings.TrimRightFunc(t, unicode.IsPunct))
-	}
-	return ret
+	return false
 }
 
-func tagsFromString(str string) []string {
+func tagsFromString(str string) map[string]struct{} {
 	scanner := bufio.NewScanner(strings.NewReader(str))
 	scanner.Split(bufio.ScanWords)
 
-	ret := make([]string, 0, 10)
+	ret := make(map[string]struct{}, 10)
 	for scanner.Scan() {
-		token := scanner.Text()
-		if len(token) > 0 && byte('#') == token[0] {
-			term := strings.TrimRightFunc(token[1:], unicode.IsPunct)
-			if len(term) > 0 {
-				ret = append(ret, term)
-			}
+		term := scanner.Text()
+		if !isTag(term) {
+			continue
+		}
+		term = strings.TrimLeft(term, "#")
+		term = strings.TrimRightFunc(term, func(r rune) bool {
+			return !('§' == r || '†' == r) && unicode.IsPunct(r)
+		})
+		if "" != term {
+			ret[term] = struct{}{}
 		}
 	}
 	return ret
