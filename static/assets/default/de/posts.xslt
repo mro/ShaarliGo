@@ -361,16 +361,20 @@ table.prev-next a {
       </a>
       -->
       <xsl:text> </xsl:text>
+      <a href="{a:link[@rel='about']/@href}">
+        Über<xsl:if test="string-length(a:link[@rel='about']/@href) &lt; 2"><span>&lt;= Link fehlt!</span></xsl:if>
+      </a>
+      <xsl:text> </xsl:text>
       <a href="{a:link[@rel='license']/@href}">
-        <xsl:value-of select="a:link[@rel='license']/@title"/>
+        <xsl:value-of select="a:link[@rel='license']/@title"/><xsl:if test="string-length(a:link[@rel='license']/@href) &lt; 2"><span>&lt;= Link fehlt!</span></xsl:if>
       </a>
       <xsl:text> </xsl:text>
       <a href="{a:link[@rel='terms-of-service']/@href}">
-        Impressum
+        Impressum<xsl:if test="string-length(a:link[@rel='terms-of-service']/@href) &lt; 2"><span>&lt;= Link fehlt!</span></xsl:if>
       </a>
       <xsl:text> </xsl:text>
       <a href="{a:link[@rel='privacy-policy']/@href}">
-        Datenschutzerklärung
+        Datenschutzerklärung<xsl:if test="string-length(a:link[@rel='terms-of-service']/@href) &lt; 2"><span>&lt;= Link fehlt!</span></xsl:if>
       </a>
       <xsl:text> </xsl:text>
       <a title="Generator" href="{a:generator/@uri}#{a:generator/@version}">
