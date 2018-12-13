@@ -300,6 +300,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 				} else {
 					log.Println("todo: use returnurl ", returnurl)
 
+					// make persistent
 					feed, _ := app.LoadFeed()
 					feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
 
@@ -314,6 +315,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 					}
 					ent0 := *ent
 
+					// prepare redirect
 					location = strings.Join([]string{location, ent.Id}, "?#")
 
 					ent.Updated = iso8601(now)
@@ -349,7 +351,8 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 						http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
 						return
 					}
-					feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
+					// todo: POSSE
+					// refresh feeds
 					if err := app.PublishFeedsForModifiedEntries(feed, []*Entry{ent, &ent0}); err != nil {
 						log.Println("couldn't write feeds: ", err.Error())
 						http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
@@ -362,12 +365,15 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		} else if "" != r.FormValue("delete_edit") {
 			token := r.FormValue("token")
 			log.Println("todo: check token ", token)
+			// make persistent
 			feed, _ := app.LoadFeed()
 			if ent := feed.deleteEntry(identifier); nil != ent {
 				if err := app.SaveFeed(feed); err != nil {
 					http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
 					return
 				}
+				// todo: POSSE
+				// refresh feeds
 				feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
 				if err := app.PublishFeedsForModifiedEntries(feed, []*Entry{ent}); err != nil {
 					log.Println("couldn't write feeds: ", err.Error())
