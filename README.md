@@ -12,7 +12,7 @@ templating, JS optional.
 
 ## Design Goals
 
-- [x] backwards compatible posting (https://git.mro.name/mro/Shaarli-API-test)
+- [x] backwards compatible posting (https://code.mro.name/mro/Shaarli-API-test)
 - [x] trivial installation and minimal hosting requirements (run on simple hosted webspace),
 - [x] keep server lean, especially for readers,
 - [ ] standards compliant ([Atom](https://tools.ietf.org/html/rfc4287),
@@ -81,5 +81,5 @@ See example `static/.htaccess` or `static/app/lighttpd.conf` how to set up webse
 
 ### Shaarli(OS|er) Compatibilty
 
-see https://git.mro.name/mro/ShaarliOS/src/master/ios/ShaarliOS/API/ShaarliCmdUpdateEndpoint.m
-and https://git.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
+see https://code.mro.name/mro/ShaarliOS/src/master/ios/ShaarliOS/API/ShaarliCmdUpdateEndpoint.m
+and https://code.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh

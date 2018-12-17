@@ -247,7 +247,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, path.Join(r.URL.Path, "config")+"/", http.StatusSeeOther)
 			return
 
-		// legacy API, https://git.mro.name/mro/Shaarli-API-test
+		// legacy API, https://code.mro.name/mro/Shaarli-API-test
 		case 1 == len(params["post"]):
 			app.handleDoPost(w, r)
 			return

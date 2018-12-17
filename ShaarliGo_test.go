@@ -167,7 +167,7 @@ func TestGetConfigRaw(t *testing.T) {
 
   The main reason is backward compatibility for e.g. http://app.mro.name/ShaarliOS and
   https://github.com/dimtion/Shaarlier as tested via
-  https://git.mro.name/mro/Shaarli-API-test
+  https://code.mro.name/mro/Shaarli-API-test
 -->
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head/>

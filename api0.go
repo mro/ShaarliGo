@@ -54,7 +54,7 @@ func parseLinkUrl(raw string) *url.URL {
 func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	switch r.Method {
-	// and https://git.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
+	// and https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
 	case http.MethodGet:
 		returnurl := r.Referer()
 		if ru := r.URL.Query()["returnurl"]; ru != nil && 1 == len(ru) && "" != ru[0] {
@@ -78,8 +78,8 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
 			io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-login.xslt'?>
 <!--
-  must be compatible with https://git.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
-  https://git.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
+  must be compatible with https://code.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
+  https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
 -->
 `)
 			if err := tmpl.Execute(w, map[string]string{
@@ -168,8 +168,8 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		// 'GET': send a form to the client
-		// must be compatible with https://git.mro.name/mro/Shaarli-API-Test/...
-		// and https://git.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
+		// must be compatible with https://code.mro.name/mro/Shaarli-API-Test/...
+		// and https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
 
 		if !app.IsLoggedIn(now) {
 			http.Redirect(w, r, cgiName+"?do=login&returnurl="+url.QueryEscape(r.URL.String()), http.StatusFound)
@@ -252,8 +252,8 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-post.xslt'?>
 <!--
-  must be compatible with https://git.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
-  https://git.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
+  must be compatible with https://code.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
+  https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
 -->
 `)
 			data := ent.api0LinkFormMap()
@@ -435,8 +435,8 @@ func (app *App) handleDoCheckLoginAfterTheFact(w http.ResponseWriter, r *http.Re
 			io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-changepassword.xslt'?>
 <!--
-  must be compatible with https://git.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
-  https://git.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
+  must be compatible with https://code.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
+  https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
 -->
 `)
 			data := make(map[string]string)

@@ -271,7 +271,7 @@ func base64ToBase24x7(b64 string) (string, error) {
 	}
 }
 
-// Being "super-careful" https://git.mro.name/mro/ProgrammableWebSwartz2013/src/master/content/pages/2-building-for-users.md
+// Being "super-careful" https://code.mro.name/mro/ProgrammableWebSwartz2013/src/master/content/pages/2-building-for-users.md
 //
 // 0123456789abcdefghijklmn ->
 // 23456789abcdefghkrstuxyz
