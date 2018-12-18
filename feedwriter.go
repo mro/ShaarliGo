@@ -53,18 +53,18 @@ const uriPosts = "p"
 const uriDays = "d"
 const uriTags = "t"
 
-const relSelf = "self"            // https://www.iana.org/assignments/link-relations/link-relations.xhtml
-const relAlternate = "alternate"  // https://www.iana.org/assignments/link-relations/link-relations.xhtml
-const relVia = "via"              // Atom https://tools.ietf.org/html/rfc4287
-const relEnclosure = "enclosure"  // Atom https://tools.ietf.org/html/rfc4287
-const relFirst = "first"          // paged feeds https://tools.ietf.org/html/rfc5005#section-3
-const relLast = "last"            // paged feeds https://tools.ietf.org/html/rfc5005#section-3
-const relNext = "next"            // paged feeds https://tools.ietf.org/html/rfc5005#section-3
-const relPrevious = "previous"    // paged feeds https://tools.ietf.org/html/rfc5005#section-3
-const relEdit = "edit"            // AtomPub https://tools.ietf.org/html/rfc5023
-const relEditMedia = "edit-media" // AtomPub https://tools.ietf.org/html/rfc5023
-const relUp = "up"                // https://www.iana.org/assignments/link-relations/link-relations.xhtml
-const relSearch = "search"        // http://www.opensearch.org/Specifications/OpenSearch/1.1#Autodiscovery_in_RSS.2FAtom
+const relSelf = Relation("self")            // https://www.iana.org/assignments/link-relations/link-relations.xhtml
+const relAlternate = Relation("alternate")  // https://www.iana.org/assignments/link-relations/link-relations.xhtml
+const relVia = Relation("via")              // Atom https://tools.ietf.org/html/rfc4287
+const relEnclosure = Relation("enclosure")  // Atom https://tools.ietf.org/html/rfc4287
+const relFirst = Relation("first")          // paged feeds https://tools.ietf.org/html/rfc5005#section-3
+const relLast = Relation("last")            // paged feeds https://tools.ietf.org/html/rfc5005#section-3
+const relNext = Relation("next")            // paged feeds https://tools.ietf.org/html/rfc5005#section-3
+const relPrevious = Relation("previous")    // paged feeds https://tools.ietf.org/html/rfc5005#section-3
+const relEdit = Relation("edit")            // AtomPub https://tools.ietf.org/html/rfc5023
+const relEditMedia = Relation("edit-media") // AtomPub https://tools.ietf.org/html/rfc5023
+const relUp = Relation("up")                // https://www.iana.org/assignments/link-relations/link-relations.xhtml
+const relSearch = Relation("search")        // http://www.opensearch.org/Specifications/OpenSearch/1.1#Autodiscovery_in_RSS.2FAtom
 
 const newDirPerms = 0775
 
@@ -91,7 +91,7 @@ func (entry Entry) FeedFilters(uri2filter map[string]func(*Entry) bool) map[stri
 	}
 
 	uri2filter[uriPubPosts] = func(*Entry) bool { return true }
-	uri2filter[uriPubPosts+entry.Id+"/"] = func(iEntry *Entry) bool { return entry.Id == iEntry.Id }
+	uri2filter[uriPubPosts+string(entry.Id)+"/"] = func(iEntry *Entry) bool { return entry.Id == iEntry.Id }
 
 	uri2filter[uriPubTags] = func(*Entry) bool { return false } // dummy to get an (empty) feed
 	for _, cat := range entry.Categories {
@@ -115,10 +115,10 @@ func (entry Entry) FeedFilters(uri2filter map[string]func(*Entry) bool) map[stri
 	return uri2filter
 }
 
-func LinkRel(rel string, links []Link) Link {
+func LinkRel(rel Relation, links []Link) Link {
 	for _, l := range links {
-		for _, r := range strings.Fields(l.Rel) { // may be worth caching
-			if rel == r {
+		for _, r := range strings.Fields(string(l.Rel)) { // may be worth caching
+			if rel == Relation(r) {
 				return l
 			}
 		}
@@ -152,7 +152,7 @@ func (seed Feed) CompleteFeeds(uri2filter map[string]func(*Entry) bool) []Feed {
 	for _, uri := range uriSliceSorted(uri2filter) {
 		entryFilter := uri2filter[uri]
 		feed := seed // clone
-		feed.Id = uri
+		feed.Id = Id(uri)
 		feed.Subtitle = uri2subtitle(feed.Subtitle, uri)
 		feed.Entries = nil // save reallocs?
 		for _, entry := range seed.Entries {
@@ -192,9 +192,9 @@ func (seed Feed) Pages(entriesPerPage int) []Feed {
 	totalEntries := len(seed.Entries)
 	pageCount := computePageCount(totalEntries, entriesPerPage)
 	ret := make([]Feed, 0, pageCount)
-	uri := seed.Id
+	uri := string(seed.Id)
 
-	link := func(rel string, page int) Link {
+	link := func(rel Relation, page int) Link {
 		return Link{Rel: rel, Href: appendPageNumber(uri, page, pageCount), Title: strconv.Itoa(page + 1)}
 	}
 
@@ -270,7 +270,7 @@ func (feed Feed) CompleteFeedsForModifiedEntries(entries []*Entry) []Feed {
 
 func (feed Feed) PagedFeeds(complete []Feed, linksPerPage int) ([]Feed, error) {
 	defer un(trace("Feed.PagedFeeds"))
-	xmlBase := mustParseURL(feed.XmlBase)
+	xmlBase := mustParseURL(string(feed.XmlBase))
 	if !xmlBase.IsAbs() || !strings.HasSuffix(xmlBase.Path, "/") {
 		log.Printf("xml:base is '%s'\n", xmlBase)
 		return []Feed{}, errors.New("feed/@xml:base must be set to an absolute URL with a trailing slash")
@@ -282,17 +282,17 @@ func (feed Feed) PagedFeeds(complete []Feed, linksPerPage int) ([]Feed, error) {
 	}
 
 	// do before writing but after all matching is done:
-	catScheme := xmlBase.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String() + "/"
+	catScheme := Iri(xmlBase.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String() + "/")
 	for _, entry := range feed.Entries {
-		entry.XmlBase = xmlBase.String()
+		entry.XmlBase = Iri(xmlBase.String())
 		if entry.Updated.IsZero() {
 			entry.Updated = entry.Published
 		}
 		// change entries for output but don't save the change:
 		upURL := mustParseURL(path.Join(uriPub, uriPosts) + "/")
-		selfURL := mustParseURL(path.Join(uriPub, uriPosts, entry.Id) + "/")
+		selfURL := mustParseURL(path.Join(uriPub, uriPosts, string(entry.Id)) + "/")
 		editURL := strings.Join([]string{cgiName, "?post=", selfURL.String()}, "")
-		entry.Id = xmlBase.ResolveReference(selfURL).String() // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
+		entry.Id = Id(xmlBase.ResolveReference(selfURL).String()) // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
 		entry.Links = append(entry.Links,
 			Link{Rel: relSelf, Href: selfURL.String()},
 			Link{Rel: relEdit, Href: editURL},
@@ -408,7 +408,7 @@ func (app App) PublishFeed(feed Feed, force bool) error {
 		return err
 	}
 
-	feed.Id = feed.XmlBase + feed.Id
+	feed.Id = Id(string(feed.XmlBase) + string(feed.Id))
 	mTime := time.Time(feed.Updated)
 	var feedOrEntry interface{} = feed
 	if "../../../" == pathPrefix && strings.HasPrefix(uri, uriPubPosts) {
@@ -467,7 +467,7 @@ func (app App) PublishEntry(ent *Entry, force bool) error {
 	dstFileName := filepath.Join(dstDirName, feedFileName)
 
 	var feedOrEntry interface{} = ent
-	ent.Id = ent.XmlBase + ent.Id
+	ent.Id = Id(string(ent.XmlBase) + string(ent.Id))
 	mTime := time.Time(ent.Updated)
 
 	if fi, err := os.Stat(dstFileName); !force && (fi != nil && !fi.ModTime().Before(mTime)) && !os.IsNotExist(err) {

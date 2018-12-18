@@ -41,7 +41,7 @@ func TestParseCombHeise(t *testing.T) {
 	ent, err := entryFromReader(f, mustParseURL("https://www.heise.de/security/meldung/Notfall-Patch-fuer-Windows-Co-Kritische-Sicherheitsluecke-im-Virenscanner-von-Microsoft-3913800.html"))
 
 	assert.Nil(t, err, "ouch")
-	assert.Equal(t, "de", ent.XmlLang, "ouch")
+	assert.Equal(t, Lang("de"), ent.XmlLang, "ouch")
 	assert.Equal(t, "Notfall-Patch für Windows & Co.: Kritische Sicherheitslücke im Virenscanner von Microsoft", ent.Title.Body, "ouch")
 	//assert.Equal(t, "", ent.Content.Body, "ouch")
 	assert.Equal(t, 5, len(ent.Categories), "ouch")
@@ -51,7 +51,7 @@ func TestParseCombHeise(t *testing.T) {
 	assert.Equal(t, 1, len(ent.Authors), "ouch")
 	assert.Equal(t, "Dennis Schirrmacher", ent.Authors[0].Name, "ouch")
 	assert.Equal(t, "2017-12-08T09:57:00+01:00", ent.Published.Format(time.RFC3339), "ouch")
-	assert.Equal(t, "https://www.heise.de/imgs/18/2/3/3/3/6/5/2/ms-27f2d5b32536ec59.png", ent.MediaThumbnail.Url, "ouch")
+	assert.Equal(t, Iri("https://www.heise.de/imgs/18/2/3/3/3/6/5/2/ms-27f2d5b32536ec59.png"), ent.MediaThumbnail.Url, "ouch")
 }
 
 func TestParseCombSpon(t *testing.T) {
@@ -63,7 +63,7 @@ func TestParseCombSpon(t *testing.T) {
 	ent, err := entryFromReader(f, mustParseURL("http://www.spiegel.de/netzwelt/web/bitcoin-blockchain-hashgraph-die-blase-die-bleibt-kolumne-a-1182013.html"))
 
 	assert.Nil(t, err, "ouch")
-	assert.Equal(t, "de", ent.XmlLang, "ouch")
+	assert.Equal(t, Lang("de"), ent.XmlLang, "ouch")
 	assert.Equal(t, "Bitcoin, Blockchain, Hashgraph: Die Blase, die bleibt - SPIEGEL ONLINE - Netzwelt", ent.Title.Body, "ouch")
 	//assert.Equal(t, "", ent.Content.Body, "ouch")
 	assert.Equal(t, 0, len(ent.Categories), "ouch")
@@ -71,5 +71,5 @@ func TestParseCombSpon(t *testing.T) {
 	assert.Equal(t, 1, len(ent.Authors), "ouch")
 	assert.Equal(t, "SPIEGEL ONLINE, Hamburg, Germany", ent.Authors[0].Name, "ouch")
 	assert.Equal(t, "2017-12-06T16:13:00+01:00", ent.Published.Format(time.RFC3339), "ouch")
-	assert.Equal(t, "http://cdn3.spiegel.de/images/image-1222932-galleryV9-yqyy-1222932.jpg", ent.MediaThumbnail.Url, "ouch")
+	assert.Equal(t, Iri("http://cdn3.spiegel.de/images/image-1222932-galleryV9-yqyy-1222932.jpg"), ent.MediaThumbnail.Url, "ouch")
 }

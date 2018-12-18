@@ -34,6 +34,7 @@ package main
 
 import (
 	"encoding/base64"
+	"encoding/gob"
 	"io"
 	"log"
 	"net/http"
@@ -56,6 +57,7 @@ var fileFeedStorage string
 
 func init() {
 	fileFeedStorage = filepath.Join(dirApp, "var", uriPub+".atom")
+	gob.Register(Id("")) // http://www.gorillatoolkit.org/pkg/sessions
 }
 
 // even cooler: https://stackoverflow.com/a/8363629
@@ -128,11 +130,11 @@ func (app App) LoadFeed() (Feed, error) {
 	} else {
 		for _, ent := range feed.Entries {
 			if 6 == len(ent.Id) {
-				if id, err := base64ToBase24x7(ent.Id); err != nil {
+				if id, err := base64ToBase24x7(string(ent.Id)); err != nil {
 					log.Printf("Error converting id \"%s\": %s\n", ent.Id, err)
 				} else {
 					log.Printf("shaarli_go_path_0 + \"?(%[1]s|\\?)%[2]s/?$\" => \"%[1]s%[3]s/\",\n", uriPubPosts, ent.Id, id)
-					ent.Id = id
+					ent.Id = Id(id)
 				}
 			}
 		}
@@ -169,7 +171,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 	path_info := os.Getenv("PATH_INFO")
 	//	script_name :=
-	urlBase := xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
+	urlBase := mustParseURL(string(xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))))
 
 	// unpack (nonexisting) static files
 	func() {

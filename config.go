@@ -31,12 +31,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func xmlBaseFromRequestURL(r *url.URL, scriptName string) *url.URL {
+func xmlBaseFromRequestURL(r *url.URL, scriptName string) Iri {
 	dir := path.Dir(scriptName)
 	if dir[len(dir)-1:] != "/" {
 		dir = dir + "/"
 	}
-	return mustParseURL(r.Scheme + "://" + r.Host + dir)
+	return Iri(r.Scheme + "://" + r.Host + dir)
 }
 
 func mustParseRFC3339(str string) time.Time {
@@ -85,8 +85,8 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "couldn't load seed feed feeds: "+err.Error(), http.StatusInternalServerError)
 			return
 		} else {
-			feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
-			feed.Id = feed.XmlBase // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
+			feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
+			feed.Id = Id(feed.XmlBase) // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
 			feed.Title = HumanText{Body: title}
 			feed.Authors = []Person{Person{Name: uid}}
 			feed.Links = []Link{
@@ -97,7 +97,6 @@ func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
-			feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
 			if err := app.PublishFeedsForModifiedEntries(feed, feed.Entries); err != nil {
 				log.Println("couldn't write feeds: ", err.Error())
 				http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)

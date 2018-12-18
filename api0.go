@@ -165,6 +165,7 @@ func urlFromPostParam(post string) *url.URL {
  */
 func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
+	xmlBase := func(u *url.URL) Iri { return xmlBaseFromRequestURL(u, os.Getenv("SCRIPT_NAME")) }
 	switch r.Method {
 	case http.MethodGet:
 		// 'GET': send a form to the client
@@ -175,6 +176,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, cgiName+"?do=login&returnurl="+url.QueryEscape(r.URL.String()), http.StatusFound)
 			return
 		}
+
 		params := r.URL.Query()
 		if 1 != len(params["post"]) {
 			http.Error(w, "StatusBadRequest", http.StatusBadRequest)
@@ -182,9 +184,9 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 		}
 
 		feed, _ := app.LoadFeed()
-		feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
 		post := sanitiseURLString(params["post"][0], app.cfg.UrlCleaner)
 
+		feed.XmlBase = xmlBase(r.URL)
 		_, ent := feed.findEntryByIdSelfOrUrl(post)
 		if nil == ent {
 			// nothing found, so we need a new (dangling, unsaved) entry:
@@ -276,10 +278,11 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		identifier, ok := app.ses.Values["identifier"].(string)
+		identifier, ok := app.ses.Values["identifier"].(Id)
 		if ok {
 			delete(app.ses.Values, "identifier")
 		}
+
 		log.Printf("pulled Id from cookie: %v", identifier)
 		app.KeepAlive(w, r, now)
 		location := path.Join(uriPub, uriPosts) + "/"
@@ -302,7 +305,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 
 					// make persistent
 					feed, _ := app.LoadFeed()
-					feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
+					feed.XmlBase = xmlBase(r.URL)
 
 					lf_url := r.FormValue("lf_url")
 					_, ent := feed.findEntryById(identifier)
@@ -316,7 +319,10 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 					ent0 := *ent
 
 					// prepare redirect
-					location = strings.Join([]string{location, ent.Id}, "?#")
+					location = strings.Join([]string{location, string(ent.Id)}, "?#")
+
+					// human := func(key string) HumanText { return HumanText{Body: strings.TrimSpace(r.FormValue(key)), Type: "text"} }
+					// humanP := func(key string) *HumanText { t := human(key); return &t }
 
 					ent.Updated = iso8601(now)
 					ent.Title = HumanText{Body: strings.TrimSpace(r.FormValue("lf_title")), Type: "text"}
@@ -328,7 +334,7 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 					}
 					ent.Content = &HumanText{Body: strings.TrimSpace(r.FormValue("lf_description")), Type: "text"}
 					if img := strings.TrimSpace(r.FormValue("lf_image")); "" != img {
-						ent.MediaThumbnail = &MediaThumbnail{Url: img}
+						ent.MediaThumbnail = &MediaThumbnail{Url: Iri(img)}
 					}
 
 					{
@@ -367,14 +373,14 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 			log.Println("todo: check token ", token)
 			// make persistent
 			feed, _ := app.LoadFeed()
-			if ent := feed.deleteEntry(identifier); nil != ent {
+			if ent := feed.deleteEntryById(identifier); nil != ent {
 				if err := app.SaveFeed(feed); err != nil {
 					http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
 					return
 				}
 				// todo: POSSE
 				// refresh feeds
-				feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME")).String()
+				feed.XmlBase = xmlBase(r.URL)
 				if err := app.PublishFeedsForModifiedEntries(feed, []*Entry{ent}); err != nil {
 					log.Println("couldn't write feeds: ", err.Error())
 					http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
@@ -517,7 +523,7 @@ func (feed *Feed) findEntryByIdSelfOrUrl(id_self_or_link string) (int, *Entry) {
 		}
 
 		doesMatch := func(entry *Entry) bool {
-			if id_self_or_link == entry.Id {
+			if id_self_or_link == string(entry.Id) {
 				return true
 			}
 			for _, l := range entry.Links {

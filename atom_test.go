@@ -27,10 +27,10 @@ import (
 	"testing"
 )
 
-func TestURLEqual(t *testing.T) {
+func TestIriAdd(t *testing.T) {
 	t.Parallel()
 
-	// todo!
+	assert.Equal(t, Iri("ab"), Iri("a")+Iri("b"), "uh")
 }
 
 func ta(tags ...string) map[string]struct{} {
@@ -44,7 +44,7 @@ func ta(tags ...string) map[string]struct{} {
 func TestTagsFromString(t *testing.T) {
 	t.Parallel()
 
-	assert.Equal(t, ta("ha"), tagsFromString("#ha, foo#nein"), "aha")
+	assert.Equal(t, ta("ha"), tagsFromString("#ha, 1.2 foo#nein"), "aha")
 	assert.Equal(t, ta("🐳"), tagsFromString("🐳, foo#nein"), "aha")
 	assert.Equal(t, ta("§", "$", "†"), tagsFromString("#§, #$ #† foo#nein"), "aha")
 	assert.Equal(t, ta("🐳"), tagsFromString("#🐳, foo#nein #"), "aha")
@@ -90,7 +90,7 @@ func TestFeedNewEntry(t *testing.T) {
 	f := Feed{}
 	ent := f.newEntry(time.Time{})
 	assert.True(t, ent.Published.IsZero(), "oha")
-	assert.Equal(t, "dzcz8k2", ent.Id, "soso")
+	assert.Equal(t, Id("dzcz8k2"), ent.Id, "soso")
 }
 
 func TestFeedFromFileName_Atom(t *testing.T) {
@@ -101,10 +101,10 @@ func TestFeedFromFileName_Atom(t *testing.T) {
 	assert.Equal(t, "2017-02-09T22:44:52+01:00", feed.Updated.Format(time.RFC3339), "soso")
 	assert.Equal(t, 0, len(feed.Links), "soso")
 	assert.Equal(t, "m", feed.Authors[0].Name, "soso")
-	assert.Equal(t, "", feed.Authors[0].Uri, "soso")
-	assert.Equal(t, "", feed.Id, "soso")
+	assert.Equal(t, Iri(""), feed.Authors[0].Uri, "soso")
+	assert.Equal(t, Id(""), feed.Id, "soso")
 
-	assert.Equal(t, "html", feed.Entries[0].Content.Type, "soso")
+	assert.Equal(t, TextType("html"), feed.Entries[0].Content.Type, "soso")
 	txt := `&quot;… Ein Vertreter der Bundesanwaltschaft (BAW) erklärte vor dem U-Ausschuss des Bundestages, Marschners Akte sei selbst für die BAW gesperrt. …&quot;<br />
 <br />
 Ach was, wen gibt's denn dann da noch so?<br>(<a href="https://links.mro.name/?aTh_gA">Permalink</a>)`
@@ -133,19 +133,19 @@ func TestFeedFromFileName_PhotosAtom(t *testing.T) {
 	assert.Equal(t, "Demo Album", feed.Title.Body, "soso")
 	assert.Equal(t, "2016-11-27T12:32:57+01:00", feed.Updated.Format(time.RFC3339), "soso")
 	assert.Equal(t, 2, len(feed.Links), "soso")
-	assert.Equal(t, "self", feed.Links[0].Rel, "soso")
+	assert.Equal(t, relSelf, feed.Links[0].Rel, "soso")
 	assert.Equal(t, "https://lager.mro.name/galleries/demo/", feed.Links[0].Href, "soso")
-	assert.Equal(t, "alternate", feed.Links[1].Rel, "soso")
+	assert.Equal(t, relAlternate, feed.Links[1].Rel, "soso")
 	assert.Equal(t, "https://lager.mro.name/galleries/demo/", feed.Links[1].Href, "soso")
 	assert.Equal(t, "Marcus Rohrmoser", feed.Authors[0].Name, "soso")
-	assert.Equal(t, "http://mro.name/me", feed.Authors[0].Uri, "soso")
-	assert.Equal(t, "https://lager.mro.name/galleries/demo/", feed.Id, "soso")
+	assert.Equal(t, Iri("http://mro.name/me"), feed.Authors[0].Uri, "soso")
+	assert.Equal(t, Id("https://lager.mro.name/galleries/demo/"), feed.Id, "soso")
 
 	assert.Equal(t, 127, len(feed.Entries), "soso")
 
-	assert.Equal(t, "https://lager.mro.name/galleries/demo/200p/fbb6669a533054da3747fb71790dc515bbf76da2.jpeg", feed.Entries[0].MediaThumbnail.Url, "soso")
-	assert.Equal(t, float32(48.047504), feed.Entries[0].GeoRssPoint.Lat, "soso")
-	assert.Equal(t, float32(10.871933), feed.Entries[0].GeoRssPoint.Lon, "soso")
+	assert.Equal(t, Iri("https://lager.mro.name/galleries/demo/200p/fbb6669a533054da3747fb71790dc515bbf76da2.jpeg"), feed.Entries[0].MediaThumbnail.Url, "soso")
+	assert.Equal(t, Latitude(48.047504), feed.Entries[0].GeoRssPoint.Lat, "soso")
+	assert.Equal(t, Longitude(10.871933), feed.Entries[0].GeoRssPoint.Lon, "soso")
 }
 
 func _TestFeedLargeToGob(t *testing.T) {
@@ -219,7 +219,7 @@ func _TestFeedFromFileName_Gob(t *testing.T) {
 	assert.Equal(t, "http://blog.mro.name/?pushpress=hub", feed.Links[1].Href, "soso")
 	assert.Equal(t, "https://links.mro.name/", feed.Authors[0].Name, "soso")
 	assert.Equal(t, "https://links.mro.name/", feed.Authors[0].Uri, "soso")
-	assert.Equal(t, "https://links.mro.name/", feed.Id, "soso")
+	assert.Equal(t, Id("https://links.mro.name/"), feed.Id, "soso")
 
 	assert.Equal(t, 3618, len(feed.Entries), "soso")
 }
@@ -248,7 +248,7 @@ func _TestFeedFromFileName_GobGz(t *testing.T) {
 	assert.Equal(t, "http://blog.mro.name/?pushpress=hub", feed.Links[1].Href, "soso")
 	assert.Equal(t, "https://links.mro.name/", feed.Authors[0].Name, "soso")
 	assert.Equal(t, "https://links.mro.name/", feed.Authors[0].Uri, "soso")
-	assert.Equal(t, "https://links.mro.name/", feed.Id, "soso")
+	assert.Equal(t, Id("https://links.mro.name/"), feed.Id, "soso")
 
 	assert.Equal(t, 3618, len(feed.Entries), "soso")
 }

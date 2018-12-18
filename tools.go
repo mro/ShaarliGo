@@ -124,7 +124,7 @@ $ rm -rf .htaccess assets app/delete_me_to_restore</code>
 `)
 			data := map[string]string{
 				"title":             app.cfg.Title,
-				"xml_base":          xmlBase.String() + cgiName,
+				"xml_base":          string(xmlBase + cgiName),
 				"tag_rename_old":    "",
 				"tag_rename_new":    "",
 				"other_shaarli_url": "",
@@ -152,7 +152,7 @@ $ rm -rf .htaccess assets app/delete_me_to_restore</code>
 						log.Printf("Import %d entries from %v\n", len(importedFeed.Entries), url)
 						cat := Category{Term: strings.TrimSpace(strings.TrimPrefix(r.FormValue("shaarli_import_tag"), "#"))}
 						feed, _ := app.LoadFeed()
-						feed.XmlBase = xmlBase.String()
+						feed.XmlBase = xmlBase
 						// feed.Id = feed.XmlBase
 						impEnt := make([]*Entry, 0, len(importedFeed.Entries))
 						for _, entry := range importedFeed.Entries {
@@ -174,7 +174,6 @@ $ rm -rf .htaccess assets app/delete_me_to_restore</code>
 							http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
 							return
 						}
-						feed.XmlBase = xmlBase.String()
 						if err := app.PublishFeedsForModifiedEntries(feed, feed.Entries); err != nil {
 							log.Println("couldn't write feeds: ", err.Error())
 							http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
@@ -184,14 +183,14 @@ $ rm -rf .htaccess assets app/delete_me_to_restore</code>
 				}
 			}
 		}
-		http.Redirect(w, r, xmlBase.String(), http.StatusFound)
+		http.Redirect(w, r, string(xmlBase), http.StatusFound)
 	}
 }
 
 func (entry Entry) NormaliseAfterImport() (Entry, error) {
 	// log.Printf("process entry: %s\n", entry.Id)
 	// normalise Id
-	if idx := strings.Index(entry.Id, "?"); idx >= 0 {
+	if idx := strings.Index(string(entry.Id), "?"); idx >= 0 {
 		entry.Id = entry.Id[idx+1:]
 	}
 	if entry.Published.IsZero() {

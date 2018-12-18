@@ -88,8 +88,8 @@ func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) {
 			}
 			qu := cgiName + "/search/" + "?" + "q" + "=" + url.QueryEscape(strings.Join(terms, " "))
 
-			xmlBase := xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
-			catScheme := xmlBase.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String() + "/"
+			xmlBase := mustParseURL(string(xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))))
+			catScheme := Iri(xmlBase.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String() + "/")
 
 			feed, _ := app.LoadFeed()
 
@@ -97,8 +97,8 @@ func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) {
 			matcher := search.New(lang, search.IgnoreDiacritics, search.IgnoreCase)
 			ret := feed.Search(func(entry *Entry) int { return rankEntryTerms(entry, terms, matcher) })
 
-			ret.XmlBase = xmlBase.String()
-			ret.Id = xmlBase.ResolveReference(mustParseURL(qu)).String()
+			ret.XmlBase = Iri(xmlBase.String())
+			ret.Id = Id(xmlBase.ResolveReference(mustParseURL(qu)).String())
 			ret.Generator = &Generator{Uri: myselfNamespace, Version: version + "+" + GitSHA1, Body: "ShaarliGo"}
 			ret.XmlNSShaarliGo = myselfNamespace
 			ret.SearchTerms = strings.Join(q, " ") // rather use http://www.opensearch.org/Specifications/OpenSearch/1.1#Example_of_OpenSearch_response_elements_in_Atom_1.0
@@ -123,9 +123,9 @@ func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) {
 			// prepare entries for Atom publication
 			for _, item := range ret.Entries {
 				// change entries for output but don't save the change:
-				selfURL := mustParseURL(path.Join(uriPub, uriPosts, item.Id) + "/")
+				selfURL := mustParseURL(path.Join(uriPub, uriPosts, string(item.Id)) + "/")
 				editURL := strings.Join([]string{cgiName, "?post=", selfURL.String()}, "")
-				item.Id = xmlBase.ResolveReference(selfURL).String() // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
+				item.Id = Id(xmlBase.ResolveReference(selfURL).String()) // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
 				item.Links = append(item.Links,
 					Link{Rel: relSelf, Href: selfURL.String()},
 					Link{Rel: relEdit, Href: editURL},

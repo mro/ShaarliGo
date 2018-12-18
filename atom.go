@@ -75,24 +75,32 @@ func FeedFromReader(file io.Reader) (Feed, error) {
 	return ret, err
 }
 
-// http://atomenabled.org/developers/syndication/
+type Iri string      // https://tools.ietf.org/html/rfc3987
+type Id Iri          // we allow relative Ids (in persistent store)
+type Lang string     // https://tools.ietf.org/html/rfc3066
+type Relation string // https://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1
+type MimeType string // https://tools.ietf.org/html/rfc2045#section-5.1
+type TextType string // https://tools.ietf.org/html/rfc4287#section-4.1.3.1
+
+// https://mro.github.io/atomenabled.org/
+// https://tools.ietf.org/html/rfc4287#section-4.1.1
 //
 // see also https://godoc.org/golang.org/x/tools/blog/atom#Feed
 type Feed struct {
 	XMLName         xml.Name   `xml:"http://www.w3.org/2005/Atom feed"`
-	XmlBase         string     `xml:"xml:base,attr,omitempty"`
-	XmlLang         string     `xml:"xml:lang,attr,omitempty"`
+	XmlBase         Iri        `xml:"xml:base,attr,omitempty"`
+	XmlLang         Lang       `xml:"xml:lang,attr,omitempty"`
 	XmlNSShaarliGo  string     `xml:"xmlns:sg,attr,omitempty"`         // https://github.com/golang/go/issues/9519#issuecomment-252196382
 	SearchTerms     string     `xml:"sg:searchTerms,attr,omitempty"`   // rather use http://www.opensearch.org/Specifications/OpenSearch/1.1#Example_of_OpenSearch_response_elements_in_Atom_1.0
 	XmlNSOpenSearch string     `xml:"xmlns:opensearch,attr,omitempty"` // https://github.com/golang/go/issues/9519#issuecomment-252196382
 	Query           string     `xml:"opensearch:Query,omitempty"`      // http://www.opensearch.org/Specifications/OpenSearch/1.1#Example_of_OpenSearch_response_elements_in_Atom_1.0
 	Title           HumanText  `xml:"title"`
 	Subtitle        *HumanText `xml:"subtitle,omitempty"`
-	Id              string     `xml:"id"`
+	Id              Id         `xml:"id"`
 	Updated         iso8601    `xml:"updated"`
 	Generator       *Generator `xml:"generator,omitempty"`
-	Icon            string     `xml:"icon,omitempty"`
-	Logo            string     `xml:"logo,omitempty"`
+	Icon            Iri        `xml:"icon,omitempty"`
+	Logo            Iri        `xml:"logo,omitempty"`
 	Links           []Link     `xml:"link"`
 	Categories      []Category `xml:"category"`
 	Authors         []Person   `xml:"author"`
@@ -102,7 +110,7 @@ type Feed struct {
 }
 
 type Generator struct {
-	Uri     string `xml:"uri,attr"`
+	Uri     Iri    `xml:"uri,attr"`
 	Version string `xml:"version,attr,omitempty"`
 	Body    string `xml:",chardata"`
 }
@@ -133,29 +141,29 @@ func (c *iso8601) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 
 // see also https://godoc.org/golang.org/x/tools/blog/atom#Link
 type Link struct {
-	Href     string `xml:"href,attr"`
-	Rel      string `xml:"rel,attr,omitempty"`
-	Type     string `xml:"type,attr,omitempty"`
-	HrefLang string `xml:"hreflang,attr,omitempty"`
-	Title    string `xml:"title,attr,omitempty"`
-	Length   int64  `xml:"length,attr,omitempty"`
+	Href     string   `xml:"href,attr"`
+	Rel      Relation `xml:"rel,attr,omitempty"`
+	Type     MimeType `xml:"type,attr,omitempty"`
+	HrefLang Lang     `xml:"hreflang,attr,omitempty"`
+	Title    string   `xml:"title,attr,omitempty"`
+	Length   int64    `xml:"length,attr,omitempty"`
 }
 
 // see also https://godoc.org/golang.org/x/tools/blog/atom#Person
 type Person struct {
 	Name  string `xml:"name"`
 	Email string `xml:"email,omitempty"`
-	Uri   string `xml:"uri,omitempty"`
+	Uri   Iri    `xml:"uri,omitempty"`
 }
 
 // see also https://godoc.org/golang.org/x/tools/blog/atom#Entry
 type Entry struct {
 	XMLName      xml.Name   `xml:"http://www.w3.org/2005/Atom entry,omitempty"`
-	XmlBase      string     `xml:"xml:base,attr,omitempty"`
-	XmlLang      string     `xml:"xml:lang,attr,omitempty"`
+	XmlBase      Iri        `xml:"xml:base,attr,omitempty"`
+	XmlLang      Lang       `xml:"xml:lang,attr,omitempty"`
 	Title        HumanText  `xml:"title"`
 	Summary      *HumanText `xml:"summary,omitempty"`
-	Id           string     `xml:"id"`
+	Id           Id         `xml:"id"`
 	Updated      iso8601    `xml:"updated"`
 	Published    iso8601    `xml:"published,omitempty"`
 	Links        []Link     `xml:"link"`
@@ -169,24 +177,28 @@ type Entry struct {
 }
 
 type HumanText struct {
-	XmlLang string `xml:"xml:lang,attr,omitempty"`
-	Body    string `xml:",chardata"`
-	Type    string `xml:"type,attr,omitempty"`
-	Src     string `xml:"src,attr,omitempty"`
+	XmlLang Lang     `xml:"xml:lang,attr,omitempty"`
+	Body    string   `xml:",chardata"`
+	Type    TextType `xml:"type,attr,omitempty"`
+	Src     Iri      `xml:"src,attr,omitempty"`
 }
 
 type Category struct {
 	Term   string `xml:"term,attr"`
-	Scheme string `xml:"scheme,attr,omitempty"`
+	Scheme Iri    `xml:"scheme,attr,omitempty"`
 	Label  string `xml:"label,attr,omitempty"`
 }
 
 type MediaThumbnail struct {
-	Url string `xml:"url,attr"`
+	Url Iri `xml:"url,attr"`
 }
 
+type Latitude float32
+type Longitude float32
+
 type GeoRssPoint struct {
-	Lat, Lon float32
+	Lat Latitude
+	Lon Longitude
 }
 
 func (v GeoRssPoint) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
@@ -209,7 +221,7 @@ func (c *GeoRssPoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error
 	if err != nil {
 		return err
 	}
-	*c = GeoRssPoint{Lat: float32(lat), Lon: float32(lon)}
+	*c = GeoRssPoint{Lat: Latitude(lat), Lon: Longitude(lon)}
 	return nil
 }
 
@@ -286,13 +298,13 @@ func mapBase24ToSuperCareful(r rune) rune {
 	panic("ouch")
 }
 
-func newRandomId(t time.Time) string {
+func newRandomId(t time.Time) Id {
 	ui32 := uint32(t.Unix() & 0xFFFFFFFF) // unix time in seconds as uint32
 	base24 := fmt.Sprintf("%07s", strconv.FormatUint(uint64(ui32), 24))
-	return strings.Map(mapBase24ToSuperCareful, base24)
+	return Id(strings.Map(mapBase24ToSuperCareful, base24))
 }
 
-func (feed Feed) newUniqueId(t time.Time) string {
+func (feed Feed) newUniqueId(t time.Time) Id {
 	id := newRandomId(t)
 	for _, entry := range feed.Entries {
 		if entry.Id == id {
@@ -323,21 +335,24 @@ func (feed *Feed) findEntry(doesMatch func(*Entry) bool) (int, *Entry) {
 	return -1, nil
 }
 
-func (feed *Feed) findEntryById(id string) (int, *Entry) {
-	defer un(trace(strings.Join([]string{"Feed.findEntryById('", id, "')"}, "")))
+func (feed *Feed) findEntryById(id Id) (int, *Entry) {
+	defer un(trace(strings.Join([]string{"Feed.findEntryById('", string(id), "')"}, "")))
 	if "" != id {
 		return feed.findEntry(func(entry *Entry) bool { return id == entry.Id })
 	}
 	return feed.findEntry(nil)
 }
 
-func (feed *Feed) deleteEntry(id string) *Entry {
-	if i, entry := feed.findEntryById(id); i >= 0 {
+func (feed *Feed) deleteEntryById(id Id) *Entry {
+	if i, entry := feed.findEntryById(id); i < 0 {
+		return nil
+	} else {
 		a := feed.Entries
 		// https://github.com/golang/go/wiki/SliceTricks
 		copy(a[i:], a[i+1:])
-		a[len(a)-1] = nil // or the zero value of T
+		// a[len(a)-1] = nil // or the zero value of T
 		feed.Entries = a[:len(a)-1]
+		feed.Updated = iso8601(time.Now())
 
 		// don' try to be smart. When removing days feeds, we rely on correct Published date.
 		// entry.Published = iso8601{time.Time{}}
@@ -345,7 +360,6 @@ func (feed *Feed) deleteEntry(id string) *Entry {
 
 		return entry
 	}
-	return nil
 }
 
 func (feed Feed) SaveToFile(dst string) error {
@@ -449,13 +463,29 @@ func (ht HumanText) Categories() []Category {
 	return ret
 }
 
+// https://stackoverflow.com/a/39425959
+func isEmojiRune(ru rune) bool {
+	r := int(ru)
+	return (0x1F600 <= r && r <= 0x1F64F) || // Emoticons
+		(0x1F300 <= r && r <= 0x1F5FF) || // Misc Symbols and Pictographs
+		(0x1F680 <= r && r <= 0x1F6FF) || // Transport and Map
+		(0x1F1E6 <= r && r <= 0x1F1FF) || // Regional country flags
+		(0x2600 <= r && r <= 0x26FF) || // Misc symbols
+		(0x2700 <= r && r <= 0x27BF) || // Dingbats
+		(0xFE00 <= r && r <= 0xFE0F) || // Variation Selectors
+		(0x1F900 <= r && r <= 0x1F9FF) || // Supplemental Symbols and Pictographs
+		(127000 <= r && r <= 127600) || // Various asian characters
+		(65024 <= r && r <= 65039) || // Variation selector
+		(9100 <= r && r <= 9300) || // Misc items
+		(8400 <= r && r <= 8447) // Combining Diacritical Marks for Symbols
+}
+
 func isTag(s string) bool {
 	for _, r := range s {
 		if '#' == r {
 			return true
 		}
-		_, ok := emojiRunes[r]
-		return ok
+		return isEmojiRune(r)
 	}
 	return false
 }

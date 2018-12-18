@@ -56,7 +56,7 @@ func entryFromNode(root *html.Node, ur *url.URL) (Entry, error) {
 	for _, node := range scrape.FindAll(root, func(n *html.Node) bool {
 		return n.Parent == root && n.Type == html.ElementNode && atom.Html == n.DataAtom
 	}) {
-		ret.XmlLang = scrape.Attr(node, "lang")
+		ret.XmlLang = Lang(scrape.Attr(node, "lang"))
 		break
 	}
 
@@ -102,7 +102,7 @@ func entryFromNode(root *html.Node, ur *url.URL) (Entry, error) {
 			ret.Summary = &HumanText{Body: strContent}
 
 		case nil == ret.MediaThumbnail && "og:image" == strProp:
-			ret.MediaThumbnail = &MediaThumbnail{Url: strContent}
+			ret.MediaThumbnail = &MediaThumbnail{Url: Iri(strContent)}
 		}
 	}
 	return ret, nil

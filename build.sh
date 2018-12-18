@@ -2,7 +2,7 @@
 # https://golang.org/doc/install/source#environment
 #
 
-cd "$(dirname "${0}")"
+cd "$(dirname "${0}")" || exit 1
 # $ uname -s -m
 # Darwin x86_64
 # Linux x86_64
@@ -12,25 +12,24 @@ say="say"
 parm="" # "-u"
 {
   "${say}" "go get"
-  go get ${parm} github.com/gorilla/sessions &
-  go get ${parm} github.com/jteeuwen/go-bindata/... &
-  go get ${parm} golang.org/x/crypto/bcrypt &
-  go get ${parm} golang.org/x/net/html &
-  go get ${parm} golang.org/x/net/html/atom &
-  go get ${parm} golang.org/x/text/language &
-  go get ${parm} golang.org/x/text/search &
-  go get ${parm} gopkg.in/yaml.v2 &
-  # for testing only:
-  go get ${parm} github.com/stretchr/testify &
-  go get ${parm} github.com/yhat/scrape &
-  go get ${parm} golang.org/x/tools/blog/atom &
-  wait
+  go get ${parm} github.com/gorilla/sessions \
+    github.com/jteeuwen/go-bindata/... \
+    golang.org/x/crypto/bcrypt \
+    golang.org/x/net/html \
+    golang.org/x/net/html/atom \
+    golang.org/x/text/language \
+    golang.org/x/text/search \
+    gopkg.in/yaml.v2 \
+    \
+    github.com/stretchr/testify \
+    github.com/yhat/scrape \
+    golang.org/x/tools/blog/atom
 }
 
 "$(go env GOPATH)/bin/go-bindata" -ignore=\\.DS_Store -prefix static static/...
 
 PROG_NAME="ShaarliGo"
-VERSION=`fgrep 'version = ' version.go | cut -d '"' -f 2`
+VERSION="$(grep -F 'version = ' version.go | cut -d '"' -f 2)"
 
 rm "${PROG_NAME}"-*-"${VERSION}" 2>/dev/null
 
