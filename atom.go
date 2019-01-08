@@ -466,7 +466,9 @@ func (ht HumanText) Categories() []Category {
 // https://stackoverflow.com/a/39425959
 func isEmojiRune(ru rune) bool {
 	r := int(ru)
-	return (0x1F600 <= r && r <= 0x1F64F) || // Emoticons
+	return false ||
+		(0x2b50 <= r && r <= 0x2b50) || // star
+		(0x1F600 <= r && r <= 0x1F64F) || // Emoticons
 		(0x1F300 <= r && r <= 0x1F5FF) || // Misc Symbols and Pictographs
 		(0x1F680 <= r && r <= 0x1F6FF) || // Transport and Map
 		(0x1F1E6 <= r && r <= 0x1F1FF) || // Regional country flags
@@ -474,10 +476,10 @@ func isEmojiRune(ru rune) bool {
 		(0x2700 <= r && r <= 0x27BF) || // Dingbats
 		(0xFE00 <= r && r <= 0xFE0F) || // Variation Selectors
 		(0x1F900 <= r && r <= 0x1F9FF) || // Supplemental Symbols and Pictographs
-		(127000 <= r && r <= 127600) || // Various asian characters
-		(65024 <= r && r <= 65039) || // Variation selector
-		(9100 <= r && r <= 9300) || // Misc items
-		(8400 <= r && r <= 8447) // Combining Diacritical Marks for Symbols
+		(0x1f018 <= r && r <= 0x1f270) || // Various asian characters
+		(0xfe00 <= r && r <= 0xfe0f) || // Variation selector
+		(0x238c <= r && r <= 0x2454) || // Misc items
+		(0x20d0 <= r && r <= 0x20ff) // Combining Diacritical Marks for Symbols
 }
 
 func isTag(s string) bool {
