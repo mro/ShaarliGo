@@ -29,7 +29,7 @@ parm="" # "-u"
 "$(go env GOPATH)/bin/go-bindata" -ignore=\\.DS_Store -prefix static static/...
 
 PROG_NAME="ShaarliGo"
-VERSION="$(grep -F 'version = ' version.go | cut -d '"' -f 2)"
+VERSION="$(grep -F 'version = ' version.go | cut -d \" -f 2)"
 
 rm "${PROG_NAME}"-*-"${VERSION}" 2>/dev/null
 

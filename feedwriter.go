@@ -310,7 +310,7 @@ func (feed Feed) PagedFeeds(complete []Feed, linksPerPage int) ([]Feed, error) {
 func (app App) PublishFeedsForModifiedEntries(feed Feed, entries []*Entry) error {
 	defer un(trace("App.PublishFeedsForModifiedEntries"))
 
-	feed.Generator = &Generator{Uri: myselfNamespace, Version: version + "+" + GitSHA1, Body: "ShaarliGo"}
+	feed.Generator = &Generator{Uri: myselfNamespace, Version: version + "+" + GitSHA1, Body: "🌺 ShaarliGo"}
 	sort.Sort(ByPublishedDesc(feed.Entries))
 	// entries = feed.Entries // force write all entries. Every single one.
 	complete := feed.CompleteFeedsForModifiedEntries(entries)

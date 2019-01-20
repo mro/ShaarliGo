@@ -222,6 +222,62 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch path_info {
+	case "/about":
+		base := *r.URL
+		base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "about") + "/"
+		http.Redirect(w, r, base.Path, http.StatusFound)
+
+		return
+	case "/about/":
+		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+		io.WriteString(w, `<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rfc="https://tools.ietf.org/html/"
+   xmlns="http://usefulinc.com/ns/doap#">
+  <Project>
+    <name>🌺 ShaarliGo</name>
+    <audience>Self-hosting Microbloggers</audience>
+    <short-description xml:lang="en">🌺 self-hosted microblogging inspired by http://sebsauvage.net/wiki/doku.php?id=php:shaarli. Destilled down to the bare minimum, with easy hosting and security in mind. No PHP, no DB, no server-side templating, JS optional.</short-description>
+    <implements rdf:resource="https://sebsauvage.net/wiki/doku.php?id=php:shaarli"/>
+    <implements rdf:resource="https://tools.ietf.org/html/rfc4287"/>
+    <implements rdf:resource="https://tools.ietf.org/html/rfc5005"/>
+    <!-- implements rdf:resource="https://tools.ietf.org/html/rfc5023"/ -->
+    <service-endpoint rdf:resource="https://demo.mro.name/shaarligo"/>
+    <blog rdf:resource="https://demo.mro.name/shaarligo"/>
+    <platform rdf:resource="https://httpd.apache.org/"/>
+    <platform rdf:resource="https://www.lighttpd.net/"/>
+    <platform rdf:resource="https://tools.ietf.org/html/rfc3875"/>
+    <homepage rdf:resource="http://purl.mro.name/ShaarliGo"/>
+    <wiki rdf:resource="https://code.mro.name/mro/ShaarliGo/wiki"/>
+    <bug-database rdf:resource="https://code.mro.name/mro/ShaarliGo/issues"/>
+    <maintainer rdf:resource="http://mro.name/~me"/>
+    <programming-language>golang</programming-language>
+    <programming-language>xslt</programming-language>
+    <programming-language>js</programming-language>
+    <category>self-hosting</category>
+    <category>microblogging</category>
+    <category>shaarli</category>
+    <category>nodb</category>
+    <category>static</category>
+    <category>atom</category>
+    <category>cgi</category>
+    <repository>
+      <GitRepository>
+        <browse rdf:resource="https://code.mro.name/mro/ShaarliGo"/>
+        <location rdf:resource="https://code.mro.name/mro/ShaarliGo.git"/>
+      </GitRepository>
+    </repository>
+    <release>
+      <Version>
+        <name>`+version+"+"+GitSHA1+`</name>
+        <revision>`+GitSHA1+`</revision>
+        <description xml:lang="en">…</description>
+      </Version>
+    </release>
+  </Project>
+</rdf:RDF>`)
+
+		return
 	case "/config/":
 		// make a 404 (fallthrough) if already configured but not currently logged in
 		if !app.cfg.IsConfigured() || app.IsLoggedIn(now) {
