@@ -370,11 +370,11 @@ table.prev-next a {
       </a>
       <xsl:text> </xsl:text>
       <a href="{a:link[@rel='terms-of-service']/@href}">
-        Impressum<xsl:if test="string-length(a:link[@rel='terms-of-service']/@href) &lt; 2"><span>&lt;= Link fehlt!</span></xsl:if>
+        § Impressum<xsl:if test="string-length(a:link[@rel='terms-of-service']/@href) &lt; 2"><span>&lt;= Link fehlt!</span></xsl:if>
       </a>
       <xsl:text> </xsl:text>
       <a href="{a:link[@rel='privacy-policy']/@href}">
-        Datenschutzerklärung<xsl:if test="string-length(a:link[@rel='terms-of-service']/@href) &lt; 2"><span>&lt;= Link fehlt!</span></xsl:if>
+        🤫 Datenschutzerklärung<xsl:if test="string-length(a:link[@rel='terms-of-service']/@href) &lt; 2"><span>&lt;= Link fehlt!</span></xsl:if>
       </a>
       <xsl:text> </xsl:text>
       <a title="Generator" href="{a:generator/@uri}#{a:generator/@version}">

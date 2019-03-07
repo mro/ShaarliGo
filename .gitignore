@@ -12,3 +12,5 @@ head.txt
 tmp/
 body*.txt
 head*.txt
+static/assets/default/*.woff
+static/assets/default/*.woff2
