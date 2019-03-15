@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ShaarliGo, microblogging detox
-  Copyright (C) 2017-2018  Marcus Rohrmoser, http://purl.mro.name/ShaarliGo
+  Copyright (C) 2017-2019  Marcus Rohrmoser, http://purl.mro.name/ShaarliGo
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
