@@ -100,7 +100,14 @@
   <!-- http://stackoverflow.com/a/16328207 -->
   <xsl:key name="CategorY" match="a:entry/a:category" use="@term" />
 
-  <xsl:variable name="xml_base" select="/*/@xml:base"/>
+  <!-- a bit hairy, but actually works -->
+  <xsl:variable name="xml_base_relative">../../<xsl:choose>
+      <xsl:when test="'' = substring-after(substring(/*/a:link[@rel = 'self']/@href, 3), '/')"/>
+      <xsl:otherwise>../</xsl:otherwise>
+    </xsl:choose>
+  </xsl:variable>
+  <xsl:variable name="xml_base_absolute" select="/*/@xml:base"/>
+  <xsl:variable name="xml_base" select="normalize-space($xml_base_relative)"/>
   <xsl:variable name="xml_base_pub" select="concat($xml_base,'o')"/>
   <xsl:variable name="skin_base" select="concat($xml_base,'assets/default')"/>
   <xsl:variable name="cgi_base" select="concat($xml_base,'shaarligo.cgi')"/>
@@ -346,11 +353,11 @@ table.prev-next a {
   <xsl:template name="footer">
     <hr style="clear:left;"/>
     <p id="footer">
-      <a title="Abonnieren" href="{$xml_base}{a:link[@rel='self']/@href}">
+      <a title="Abonnieren" href="{$xml_base_absolute}{a:link[@rel='self']/@href}">
         <img alt="Feed" src="{$skin_base}/feed-icon.svg" style="border:0;width:27px;height:27px"/>
       </a>
       <xsl:text> </xsl:text>
-       <a title="Prüfen (Atom 1.0)" href="https://validator.w3.org/feed/check.cgi?url={$xml_base}{a:link[@rel='self']/@href}">
+       <a title="Prüfen (Atom 1.0)" href="https://validator.w3.org/feed/check.cgi?url={$xml_base_absolute}{a:link[@rel='self']/@href}">
         <img alt="Prüfplakette (Atom 1.0)" src="{$skin_base}/valid-atom.svg" style="border:0;width:77px;height:27px"/>
       </a>
       <!-- <xsl:text> </xsl:text>
@@ -455,7 +462,7 @@ table.prev-next a {
         <xsl:variable name="entry_published" select="a:published"/>
         <xsl:variable name="entry_published_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_published"/></xsl:call-template></xsl:variable>
 
-				<a class="time" title="zuletzt: {$entry_updated_human}" href="{$xml_base}{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_published_human"/> 🔗</a>
+        <a class="time" title="zuletzt: {$entry_updated_human}" href="{$xml_base}{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_published_human"/> 🔗</a>
         <xsl:if test="$link">
           <xsl:text> ~ </xsl:text>
           <a title="Archiv" href="{$archive}{$link}" rel="noopener noreferrer" referrerpolicy="no-referrer">@archive.org</a>
