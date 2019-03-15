@@ -18,6 +18,7 @@
 package main
 
 import (
+	"encoding/xml"
 	"html/template"
 	"io"
 	"log"
@@ -130,7 +131,7 @@ func (cfg Config) renderSettingsPage(w http.ResponseWriter, code int) {
 		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 		w.WriteHeader(code)
 
-		io.WriteString(w, "<?xml version='1.0' encoding='UTF-8'?>\n"+
+		io.WriteString(w, xml.Header+
 			"<?xml-stylesheet type='text/xsl' href='"+path.Join("..", "..", "assets", cfg.Skin, "config.xslt")+"'?>\n")
 		io.WriteString(w, `<!--
   The html you see here is for compatibilty with vanilla shaarli.

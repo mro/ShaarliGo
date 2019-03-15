@@ -18,6 +18,7 @@
 package main
 
 import (
+	"encoding/xml"
 	"html/template"
 	"io"
 	"log"
@@ -119,8 +120,8 @@ $ rm -rf .htaccess assets app/delete_me_to_restore</code>
 </html>
 `); err == nil {
 			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-			io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='../../assets/`+app.cfg.Skin+`/tools.xslt'?>
+			io.WriteString(w, xml.Header)
+			io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='../../assets/`+app.cfg.Skin+`/tools.xslt'?>
 `)
 			data := map[string]string{
 				"title":             app.cfg.Title,

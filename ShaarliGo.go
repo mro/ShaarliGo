@@ -35,6 +35,7 @@ package main
 import (
 	"encoding/base64"
 	"encoding/gob"
+	"encoding/xml"
 	"io"
 	"log"
 	"net/http"
@@ -230,8 +231,8 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		return
 	case "/about/":
 		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-		io.WriteString(w, `<?xml version="1.0" encoding="utf-8"?>
-<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		io.WriteString(w, xml.Header)
+		io.WriteString(w, `<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:rfc="https://tools.ietf.org/html/"
    xmlns="http://usefulinc.com/ns/doap#">
   <Project>

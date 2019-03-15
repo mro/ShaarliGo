@@ -1,19 +1,84 @@
 
+// list tags with font-size in relation to frequency
+// https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1254
+function computeTagFontsize(tag0) {
+  if (!tag0)
+    return;
+  const fontMin = 8;
+  const fontMax = 32;
+  var countMaxLog = Math.log(1);
+  const tags = tag0.getElementsByTagName('a');
+  const counts = new Array(tags.length);
+  const map = {};
+  for (var i = tags.length - 1; i >= 0; i--) {
+    const lbl = tags[i].getElementsByClassName('label')[0].textContent;
+    if ('2018-01-15T12:52' == lbl) {
+      counts[i] = 1;
+      continue;
+    }
+    const elm = tags[i].getElementsByClassName('count')[0];
+    const txt = elm.textContent;
+    var v = map[txt];
+    if (!v)
+      map[txt] = v = Math.log(parseInt(txt, 10));
+    counts[i] = v;
+    countMaxLog = Math.max(countMaxLog, counts[i]);
+  }
+  map.length = 0;
+  const factor = 1.0 / countMaxLog * (fontMax - fontMin);
+  requestAnimationFrame(function() { // http://wilsonpage.co.uk/preventing-layout-thrashing/
+    for (var i = tags.length - 1; i >= 0; i--) {
+      const k = counts[i];
+      var v = map[k];
+      if (!v)
+        // https://stackoverflow.com/a/3717340
+        map[k] = v = Math.ceil(k * factor + fontMin) + 'pt';
+      tags[i].style.fontSize = v;
+    }
+  });
+}
+
+// https://varvy.com/pagespeed/defer-images.html
+function loadDeferredImages(imgsDefer) {
+  // console.log('loadDeferredImages: ' + imgsDefer.length);
+  for (var i = imgsDefer.length - 1; i >= 0 ; i--) {
+    const v = imgsDefer[i].getAttribute('data-src');
+    if (!v)
+      continue;
+    imgsDefer[i].setAttribute('src', v);
+  }
+}
+
+// make http and geo URIs (RFC 5870) clickable + microformat
+function clickableTextLinks(elmsRendered) {
+  // console.log('make http and geo URIs (RFC 5870) clickable + microformat');
+  for (var i = elmsRendered.length - 1; i >= 0 ; i--) {
+    const elm = elmsRendered[i];
+    elm.innerHTML = elm.innerHTML.replace(/(https?:\/\/[^ \t\r\n"']+[^ \t\r\n"'.,;()])/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
+    // https://alanstorm.com/url_regex_explained/ \b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))
+    // elm.innerHTML = elm.innerHTML.replace(/\b(([\w-]+:\/\/?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
+    elm.innerHTML = elm.innerHTML.replace(/geo:(-?\d+.\d+),(-?\d+.\d+)(\?z=(\d+))?/gi, '<a class="geo" href="https://opentopomap.org/#marker=12/$1/$2" title="zoom=$4">geo:<span class="latitude">$1</span>,<span class="longitude">$2</span>$3</a>');
+  }
+}
+
 const xml_base_pub = document.documentElement.getAttribute("data-xml-base-pub");
 {
+  document.documentElement.classList.add('logged-out'); // do in js early on load
   // check if we're logged-in (AJAX or Cookie?).
   const xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function(data0) {
-    if (xhr.readyState > 3) {
-      // console.log('xhr.status = ' + xhr.status);
-      document.documentElement.classList.add(xhr.status === 200 ? 'logged-in' : 'logged-out');
-      // store the result locally and use as initial value for later calls?
+    if (this.readyState === XMLHttpRequest.HEADERS_RECEIVED) {
+      if (this.status === 200) {
+        document.documentElement.classList.add('logged-in');
+        document.documentElement.classList.remove('logged-out');
+      }
+      // store the result locally and use as initial value for later calls to avoid a logged-in flicker?
     }
   }
   xhr.timeout = 1000;
   xhr.open('GET', xml_base_pub + '/../shaarligo.cgi/session/');
   xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-  xhr.send(null);
+  xhr.send();
 }
 
 // onload="document.getElementById('q').removeAttribute('autofocus');document.getElementById('post').setAttribute('autofocus', 'autofocus');"
@@ -36,62 +101,21 @@ document.onreadystatechange = function () {
 
   const xhr = new XMLHttpRequest()
   xhr.onreadystatechange = function() {
-    if (xhr.readyState > 3 && xhr.status == 200)
-      addlink.list = JSON.parse(xhr.response);
+    if (this.readyState === XMLHttpRequest.DONE && this.status == 200)
+      addlink.list = JSON.parse(this.response);
   };
   xhr.timeout = 1000;
   xhr.open('GET', xml_base_pub + '/t/index.json');
   xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
   xhr.send();
 
-  // list tags with font-size in relation to frequency
-  // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1254
-  var fontMin = 8;
-  var fontMax = 32;
-  const tag0 = document.getElementById('tags');
-  if (tag0) {
-    var countMax = 0;
-    const tags = tag0.getElementsByTagName('a');
-    const counts = new Array(tags.length);
-    for (var i = tags.length - 1; i >= 0; i--) {
-      const lbl = tags[i].getElementsByClassName('label')[0];
-      if ('2018-01-15T12:52' == lbl.innerText) {
-        counts[i] = 1;
-        continue;
-      }
-      const elm = tags[i].getElementsByClassName('count')[0];
-      countMax = Math.max(countMax, counts[i] = 1 * elm.innerText);
-    }
-    const countMaxLog = Math.log(countMax);
-    // const countMaxLog = Math.log(Math.max.apply(Math, counts)); // https://johnresig.com/blog/fast-javascript-maxmin/
-    const factor = 1.0 / countMaxLog * (fontMax - fontMin);
-    for (var i = tags.length - 1; i >= 0; i--) {
-      // https://stackoverflow.com/a/3717340
-      const size = Math.ceil(Math.log(counts[i]) * factor) + fontMin;
-      tags[i].style.fontSize = size + 'pt';
-    }
-  }
-
-  // https://varvy.com/pagespeed/defer-images.html
-  const imgDefer = document.getElementsByTagName('img');
-  for (var i = 0; i < imgDefer.length; i++) {
-    if (imgDefer[i].getAttribute('data-src')) {
-      imgDefer[i].setAttribute('src', imgDefer[i].getAttribute('data-src'));
-    }
-  }
-
-  // console.log('make http and geo URIs (RFC 5870) clickable + microformat');
-  const elmsRendered = document.getElementById('entries').getElementsByClassName('rendered');
-  for (var i = 0; i < elmsRendered.length; i++) {
-    const elm = elmsRendered[i];
-    elm.innerHTML = elm.innerHTML.replace(/(https?:\/\/[^ \t\r\n"']+[^ \t\r\n"'.,;()])/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
-    // https://alanstorm.com/url_regex_explained/ \b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))
-    // elm.innerHTML = elm.innerHTML.replace(/\b(([\w-]+:\/\/?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
-    elm.innerHTML = elm.innerHTML.replace(/geo:(-?\d+.\d+),(-?\d+.\d+)(\?z=(\d+))?/gi, '<a class="geo" href="https://opentopomap.org/#marker=12/$1/$2" title="zoom=$4">geo:<span class="latitude">$1</span>,<span class="longitude">$2</span>$3</a>');
-  }
+  document.getElementById('q').focus();
+  computeTagFontsize(document.getElementById('tags'));
+  loadDeferredImages(document.getElementsByTagName('img'));
+  clickableTextLinks(document.getElementById('entries').getElementsByClassName('rendered'));
 
   // https://koddsson.com/posts/emoji-favicon/
-  const favicon = document.querySelector("link[rel=icon]");
+  const favicon = document.querySelector("html > head > link[rel=icon]");
   if (favicon) {
     const emoji = favicon.getAttribute("data-emoji");
     if (emoji) {

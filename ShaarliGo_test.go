@@ -19,6 +19,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/xml"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -160,8 +161,7 @@ func TestGetConfigRaw(t *testing.T) {
 	assert.Nil(t, r.Header["Status"], "aha")
 	body, err := ioutil.ReadAll(r.Body)
 	assert.Nil(t, err, "aha")
-	assert.Equal(t, `<?xml version='1.0' encoding='UTF-8'?>
-<?xml-stylesheet type='text/xsl' href='../../assets/default/de/config.xslt'?>
+	assert.Equal(t, xml.Header+`<?xml-stylesheet type='text/xsl' href='../../assets/default/de/config.xslt'?>
 <!--
   The html you see here is for compatibilty with vanilla shaarli.
 

@@ -20,6 +20,7 @@ package main
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/xml"
 	"html/template"
 	"io"
 	"log"
@@ -75,8 +76,8 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
 </html>
 `); err == nil {
 			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-			io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-login.xslt'?>
+			io.WriteString(w, xml.Header)
+			io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-login.xslt'?>
 <!--
   must be compatible with https://code.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
   https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
@@ -251,8 +252,8 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 </html>
 `); err == nil {
 			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-			io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-post.xslt'?>
+			io.WriteString(w, xml.Header)
+			io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-post.xslt'?>
 <!--
   must be compatible with https://code.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
   https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
@@ -438,8 +439,8 @@ func (app *App) handleDoCheckLoginAfterTheFact(w http.ResponseWriter, r *http.Re
 </html>
 `); err == nil {
 			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-			io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-changepassword.xslt'?>
+			io.WriteString(w, xml.Header)
+			io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-changepassword.xslt'?>
 <!--
   must be compatible with https://code.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
   https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386

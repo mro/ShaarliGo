@@ -136,7 +136,7 @@
       <link href="." rel="alternate" type="application/atom+xml"/>
       <link href="." rel="self" type="application/xhtml+xml"/>
 
-      <style type="text/css">
+      <style type="text/css">/* <![CDATA[ */
 .hidden-logged-in { display:initial; }
 .logged-in .hidden-logged-in { display:none; }
 .visible-logged-in { display:none; }
@@ -205,6 +205,7 @@ div.awesomplete { display: block; }
 table.prev-next a {
   padding: 0.75ex;
 }
+/* ]]> */
       </style>
       <title><xsl:value-of select="a:*/a:title"/></title>
     </head>
@@ -295,14 +296,14 @@ table.prev-next a {
     <xsl:comment> https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ </xsl:comment>
     <form id="form_search" name="form_search" class="form-horizontal form-search" action="{$cgi_base}/search/">
       <div class="input-group">
-        <input tabindex="100" name="q" value="{@sg:searchTerms}" autofocus="autofocus" type="text" placeholder="Suche Wort oder #Tag..." class="awesomplete form-control search-query" data-multiple="true"/>
+        <input tabindex="100" name="q" id="q" value="{@sg:searchTerms}" autofocus="autofocus" type="text" placeholder="🔍 Suche Wort oder #Tag..." class="awesomplete form-control search-query" data-multiple="true"/>
         <span class="input-group-btn">
           <button tabindex="200" type="submit" class="btn btn-primary">Suche</button>
         </span>
       </div>
     </form>
 
-    <form id="form_post" name="form_post" class="form-horizontal" action="{$cgi_base}">
+    <form id="form_post" name="form_post" class="form-horizontal hidden-logged-out" action="{$cgi_base}">
       <div class="input-group">
         <input tabindex="300" name="post" type="text" placeholder="Was gibt's #Neues? (Notiz oder URL)" class="awesomplete form-control" data-multiple="true"/>
         <span class="input-group-btn">
@@ -454,7 +455,7 @@ table.prev-next a {
         <xsl:variable name="entry_published" select="a:published"/>
         <xsl:variable name="entry_published_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_published"/></xsl:call-template></xsl:variable>
 
-        <a class="time" title="zuletzt: {$entry_updated_human}" href="{$xml_base}{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_published_human"/></a>
+				<a class="time" title="zuletzt: {$entry_updated_human}" href="{$xml_base}{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_published_human"/> 🔗</a>
         <xsl:if test="$link">
           <xsl:text> ~ </xsl:text>
           <a title="Archiv" href="{$archive}{$link}" rel="noopener noreferrer" referrerpolicy="no-referrer">@archive.org</a>

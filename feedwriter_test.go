@@ -343,7 +343,7 @@ func TestWriteFeedsEmpty1(t *testing.T) {
   https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
 
   Note that Firefox will override your XSLT stylesheet if your XML is
-  detected as an RSS or Atom feed. A known workaround is to add a
+  detected as a RSS or Atom feed. A known workaround is to add a
   sufficiently long XML comment to the beginning of your XML file in
   order to 'push' the <.feed> or <.rss> tag out of the first 512 bytes,
   which is analyzed by Firefox to determine if it's a feed or not. See
@@ -401,7 +401,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
   https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
 
   Note that Firefox will override your XSLT stylesheet if your XML is
-  detected as an RSS or Atom feed. A known workaround is to add a
+  detected as a RSS or Atom feed. A known workaround is to add a
   sufficiently long XML comment to the beginning of your XML file in
   order to 'push' the <.feed> or <.rss> tag out of the first 512 bytes,
   which is analyzed by Firefox to determine if it's a feed or not. See
@@ -437,7 +437,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
   https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
 
   Note that Firefox will override your XSLT stylesheet if your XML is
-  detected as an RSS or Atom feed. A known workaround is to add a
+  detected as a RSS or Atom feed. A known workaround is to add a
   sufficiently long XML comment to the beginning of your XML file in
   order to 'push' the <.feed> or <.rss> tag out of the first 512 bytes,
   which is analyzed by Firefox to determine if it's a feed or not. See
@@ -506,7 +506,7 @@ func TestWriteFeedsPaged(t *testing.T) {
   https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
 
   Note that Firefox will override your XSLT stylesheet if your XML is
-  detected as an RSS or Atom feed. A known workaround is to add a
+  detected as a RSS or Atom feed. A known workaround is to add a
   sufficiently long XML comment to the beginning of your XML file in
   order to 'push' the <.feed> or <.rss> tag out of the first 512 bytes,
   which is analyzed by Firefox to determine if it's a feed or not. See
@@ -553,7 +553,7 @@ func TestWriteFeedsPaged(t *testing.T) {
   https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
 
   Note that Firefox will override your XSLT stylesheet if your XML is
-  detected as an RSS or Atom feed. A known workaround is to add a
+  detected as a RSS or Atom feed. A known workaround is to add a
   sufficiently long XML comment to the beginning of your XML file in
   order to 'push' the <.feed> or <.rss> tag out of the first 512 bytes,
   which is analyzed by Firefox to determine if it's a feed or not. See
@@ -591,7 +591,7 @@ func TestWriteFeedsPaged(t *testing.T) {
   https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
 
   Note that Firefox will override your XSLT stylesheet if your XML is
-  detected as an RSS or Atom feed. A known workaround is to add a
+  detected as a RSS or Atom feed. A known workaround is to add a
   sufficiently long XML comment to the beginning of your XML file in
   order to 'push' the <.feed> or <.rss> tag out of the first 512 bytes,
   which is analyzed by Firefox to determine if it's a feed or not. See
