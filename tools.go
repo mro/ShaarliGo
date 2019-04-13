@@ -31,26 +31,27 @@ import (
 
 const timeoutShaarliImportFetch = time.Minute
 
-func (app *App) handleTools(w http.ResponseWriter, r *http.Request) {
-	now := time.Now()
+func (app *App) handleTools() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		now := time.Now()
 
-	if !app.IsLoggedIn(now) {
-		http.Redirect(w, r, cgiName+"?do=login&returnurl="+url.QueryEscape(r.URL.String()), http.StatusUnauthorized)
-		return
-	}
+		if !app.IsLoggedIn(now) {
+			http.Redirect(w, r, cgiName+"?do=login&returnurl="+url.QueryEscape(r.URL.String()), http.StatusUnauthorized)
+			return
+		}
 
-	if !app.cfg.IsConfigured() {
-		http.Redirect(w, r, cgiName+"/config", http.StatusPreconditionFailed)
-		return
-	}
+		if !app.cfg.IsConfigured() {
+			http.Redirect(w, r, cgiName+"/config", http.StatusPreconditionFailed)
+			return
+		}
 
-	xmlBase := xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
+		xmlBase := xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
 
-	switch r.Method {
-	case http.MethodGet:
-		app.KeepAlive(w, r, now)
+		switch r.Method {
+		case http.MethodGet:
+			app.KeepAlive(w, r, now)
 
-		if tmpl, err := template.New("tools").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
+			if tmpl, err := template.New("tools").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
 <head><title>{{.title}}</title></head>
 <body>
   <ol>
@@ -119,72 +120,73 @@ $ rm -rf .htaccess assets app/delete_me_to_restore</code>
 </body>
 </html>
 `); err == nil {
-			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-			io.WriteString(w, xml.Header)
-			io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='../../assets/`+app.cfg.Skin+`/tools.xslt'?>
+				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+				io.WriteString(w, xml.Header)
+				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='../../assets/`+app.cfg.Skin+`/tools.xslt'?>
 `)
-			data := map[string]string{
-				"title":             app.cfg.Title,
-				"xml_base":          string(xmlBase + cgiName),
-				"tag_rename_old":    "",
-				"tag_rename_new":    "",
-				"other_shaarli_url": "",
-				"other_shaarli_tag": time.Now().Format(time.RFC3339[:16]),
-				"version":           version,
-				"gitsha1":           GitSHA1,
-			}
+				data := map[string]string{
+					"title":             app.cfg.Title,
+					"xml_base":          string(xmlBase + cgiName),
+					"tag_rename_old":    "",
+					"tag_rename_new":    "",
+					"other_shaarli_url": "",
+					"other_shaarli_tag": time.Now().Format(time.RFC3339[:16]),
+					"version":           version,
+					"gitsha1":           GitSHA1,
+				}
 
-			if err := tmpl.Execute(w, data); err != nil {
-				http.Error(w, "Coudln't render tools: "+err.Error(), http.StatusInternalServerError)
+				if err := tmpl.Execute(w, data); err != nil {
+					http.Error(w, "Coudln't render tools: "+err.Error(), http.StatusInternalServerError)
+				}
 			}
-		}
-	case http.MethodPost:
-		app.KeepAlive(w, r, now)
-		if "" != r.FormValue("shaarli_import_submit") {
-			if url, err := url.Parse(strings.TrimSpace(r.FormValue("shaarli_import_url")) + "?do=atom&nb=all"); err != nil {
-				http.Error(w, "Coudln't parse shaarli_import_url "+err.Error(), http.StatusBadRequest)
-			} else {
-				if rq, err := HttpGetBody(url, timeoutShaarliImportFetch); err != nil {
-					http.Error(w, "Coudln't fetch shaarli_import_url "+err.Error(), http.StatusBadRequest)
+		case http.MethodPost:
+			app.KeepAlive(w, r, now)
+			if "" != r.FormValue("shaarli_import_submit") {
+				if url, err := url.Parse(strings.TrimSpace(r.FormValue("shaarli_import_url")) + "?do=atom&nb=all"); err != nil {
+					http.Error(w, "Coudln't parse shaarli_import_url "+err.Error(), http.StatusBadRequest)
 				} else {
-					if importedFeed, err := FeedFromReader(rq); err != nil {
-						http.Error(w, "Coudln't parse feed from shaarli_import_url "+err.Error(), http.StatusBadRequest)
+					if rq, err := HttpGetBody(url, timeoutShaarliImportFetch); err != nil {
+						http.Error(w, "Coudln't fetch shaarli_import_url "+err.Error(), http.StatusBadRequest)
 					} else {
-						log.Printf("Import %d entries from %v\n", len(importedFeed.Entries), url)
-						cat := Category{Term: strings.TrimSpace(strings.TrimPrefix(r.FormValue("shaarli_import_tag"), "#"))}
-						feed, _ := app.LoadFeed()
-						feed.XmlBase = xmlBase
-						// feed.Id = feed.XmlBase
-						impEnt := make([]*Entry, 0, len(importedFeed.Entries))
-						for _, entry := range importedFeed.Entries {
-							if et, err := entry.NormaliseAfterImport(); err != nil {
-								log.Printf("Error with %v: %v\n", entry.Id, err.Error())
-							} else {
-								// log.Printf("done entry: %s\n", et.Id)
-								if "" != cat.Term {
-									et.Categories = append(et.Categories, cat)
-								}
-								if _, err := feed.Append(&et); err == nil {
-									impEnt = append(impEnt, &et)
+						if importedFeed, err := FeedFromReader(rq); err != nil {
+							http.Error(w, "Coudln't parse feed from shaarli_import_url "+err.Error(), http.StatusBadRequest)
+						} else {
+							log.Printf("Import %d entries from %v\n", len(importedFeed.Entries), url)
+							cat := Category{Term: strings.TrimSpace(strings.TrimPrefix(r.FormValue("shaarli_import_tag"), "#"))}
+							feed, _ := app.LoadFeed()
+							feed.XmlBase = xmlBase
+							// feed.Id = feed.XmlBase
+							impEnt := make([]*Entry, 0, len(importedFeed.Entries))
+							for _, entry := range importedFeed.Entries {
+								if et, err := entry.NormaliseAfterImport(); err != nil {
+									log.Printf("Error with %v: %v\n", entry.Id, err.Error())
 								} else {
-									log.Printf("couldn't add entry: %s\n", err.Error())
+									// log.Printf("done entry: %s\n", et.Id)
+									if "" != cat.Term {
+										et.Categories = append(et.Categories, cat)
+									}
+									if _, err := feed.Append(&et); err == nil {
+										impEnt = append(impEnt, &et)
+									} else {
+										log.Printf("couldn't add entry: %s\n", err.Error())
+									}
 								}
 							}
-						}
-						if err := app.SaveFeed(feed); err != nil {
-							http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
-							return
-						}
-						if err := app.PublishFeedsForModifiedEntries(feed, feed.Entries); err != nil {
-							log.Println("couldn't write feeds: ", err.Error())
-							http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
-							return
+							if err := app.SaveFeed(feed); err != nil {
+								http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
+								return
+							}
+							if err := app.PublishFeedsForModifiedEntries(feed, feed.Entries); err != nil {
+								log.Println("couldn't write feeds: ", err.Error())
+								http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
+								return
+							}
 						}
 					}
 				}
 			}
+			http.Redirect(w, r, string(xmlBase), http.StatusFound)
 		}
-		http.Redirect(w, r, string(xmlBase), http.StatusFound)
 	}
 }
 

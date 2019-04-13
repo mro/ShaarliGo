@@ -48,69 +48,71 @@ func mustParseRFC3339(str string) time.Time {
 	}
 }
 
-func (app *App) handleSettings(w http.ResponseWriter, r *http.Request) {
-	now := time.Now()
-	if app.cfg.IsConfigured() && !app.IsLoggedIn(now) {
-		http.Error(w, "double check failed.", http.StatusInternalServerError)
-		return
-	}
-
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "couldn't parse form: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	switch r.Method {
-	case http.MethodPost:
-		uid := strings.TrimSpace(r.FormValue("setlogin"))
-		pwd := strings.TrimSpace(r.FormValue("setpassword"))
-		title := strings.TrimSpace(r.FormValue("title"))
-		// https://astaxie.gitbooks.io/build-web-application-with-golang/en/09.5.html
-		// $GLOBALS['salt'] = sha1(uniqid('',true).'_'.mt_rand()); // Salt renders rainbow-tables attacks useless.
-		// original shaarli did $hash = sha1($password.$login.$GLOBALS['salt']);
-		if pwdBcrypt, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost); err != nil {
-			http.Error(w, "couldn't crypt pwd: "+err.Error(), http.StatusInternalServerError)
+func (app *App) handleSettings() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		now := time.Now()
+		if app.cfg.IsConfigured() && !app.IsLoggedIn(now) {
+			http.Error(w, "double check failed.", http.StatusInternalServerError)
 			return
-		} else {
-			if len(uid) < 1 || len([]rune(pwd)) < 12 {
-				app.cfg.renderSettingsPage(w, http.StatusBadRequest)
-				return
-			}
-			app.cfg.Title = title
-			app.cfg.Uid = uid
-			app.cfg.PwdBcrypt = string(pwdBcrypt)
-			err = app.cfg.Save()
 		}
 
-		if feed, err := app.LoadFeed(); err != nil {
-			http.Error(w, "couldn't load seed feed feeds: "+err.Error(), http.StatusInternalServerError)
+		if err := r.ParseForm(); err != nil {
+			http.Error(w, "couldn't parse form: "+err.Error(), http.StatusInternalServerError)
 			return
-		} else {
-			feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
-			feed.Id = Id(feed.XmlBase) // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
-			feed.Title = HumanText{Body: title}
-			feed.Authors = []Person{Person{Name: uid}}
-			feed.Links = []Link{
-				Link{Rel: relEdit, Href: path.Join(cgiName, uriPub, uriPosts), Title: "PostURI, maybe better a app:collection https://tools.ietf.org/html/rfc5023#section-8.3.3"},
-			}
-
-			if err := app.SaveFeed(feed); err != nil {
-				http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
-				return
-			}
-			if err := app.PublishFeedsForModifiedEntries(feed, feed.Entries); err != nil {
-				log.Println("couldn't write feeds: ", err.Error())
-				http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			app.startSession(w, r, now)
-			http.Redirect(w, r, path.Join("..", "..", uriPub, uriPosts)+"/", http.StatusFound)
 		}
-	case http.MethodGet:
-		app.cfg.renderSettingsPage(w, http.StatusOK)
-	default:
-		http.Error(w, "MethodNotAllowed", http.StatusMethodNotAllowed)
+
+		switch r.Method {
+		case http.MethodPost:
+			uid := strings.TrimSpace(r.FormValue("setlogin"))
+			pwd := strings.TrimSpace(r.FormValue("setpassword"))
+			title := strings.TrimSpace(r.FormValue("title"))
+			// https://astaxie.gitbooks.io/build-web-application-with-golang/en/09.5.html
+			// $GLOBALS['salt'] = sha1(uniqid('',true).'_'.mt_rand()); // Salt renders rainbow-tables attacks useless.
+			// original shaarli did $hash = sha1($password.$login.$GLOBALS['salt']);
+			if pwdBcrypt, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost); err != nil {
+				http.Error(w, "couldn't crypt pwd: "+err.Error(), http.StatusInternalServerError)
+				return
+			} else {
+				if len(uid) < 1 || len([]rune(pwd)) < 12 {
+					app.cfg.renderSettingsPage(w, http.StatusBadRequest)
+					return
+				}
+				app.cfg.Title = title
+				app.cfg.Uid = uid
+				app.cfg.PwdBcrypt = string(pwdBcrypt)
+				err = app.cfg.Save()
+			}
+
+			if feed, err := app.LoadFeed(); err != nil {
+				http.Error(w, "couldn't load seed feed feeds: "+err.Error(), http.StatusInternalServerError)
+				return
+			} else {
+				feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
+				feed.Id = Id(feed.XmlBase) // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
+				feed.Title = HumanText{Body: title}
+				feed.Authors = []Person{Person{Name: uid}}
+				feed.Links = []Link{
+					Link{Rel: relEdit, Href: path.Join(cgiName, uriPub, uriPosts), Title: "PostURI, maybe better a app:collection https://tools.ietf.org/html/rfc5023#section-8.3.3"},
+				}
+
+				if err := app.SaveFeed(feed); err != nil {
+					http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
+					return
+				}
+				if err := app.PublishFeedsForModifiedEntries(feed, feed.Entries); err != nil {
+					log.Println("couldn't write feeds: ", err.Error())
+					http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				app.startSession(w, r, now)
+				http.Redirect(w, r, path.Join("..", "..", uriPub, uriPosts)+"/", http.StatusFound)
+			}
+		case http.MethodGet:
+			app.cfg.renderSettingsPage(w, http.StatusOK)
+		default:
+			http.Error(w, "MethodNotAllowed", http.StatusMethodNotAllowed)
+		}
 	}
 }
 

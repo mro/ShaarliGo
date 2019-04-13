@@ -89,7 +89,7 @@ func main() {
 
 	// - check non-write perm of program?
 	// - check non-http read perm on ./app
-	if err := cgi.Serve(http.HandlerFunc(handleMux)); err != nil {
+	if err := cgi.Serve(http.HandlerFunc(handleMux())); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -154,85 +154,86 @@ func (app App) SaveFeed(feed Feed) error {
 	return feed.SaveToFile(fileFeedStorage)
 }
 
-func handleMux(w http.ResponseWriter, r *http.Request) {
-	defer un(trace(strings.Join([]string{"v", version, "+", GitSHA1, " ", r.RemoteAddr, " ", r.Method, " ", r.URL.String()}, "")))
-	// w.Header().Set("Server", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
-	// w.Header().Set("X-Powered-By", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
-	now := time.Now()
+func handleMux() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		defer un(trace(strings.Join([]string{"v", version, "+", GitSHA1, " ", r.RemoteAddr, " ", r.Method, " ", r.URL.String()}, "")))
+		// w.Header().Set("Server", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
+		// w.Header().Set("X-Powered-By", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
+		now := time.Now()
 
-	// check if the request is from a banned client
-	if banned, err := isBanned(r, now); err != nil || banned {
-		if err != nil {
-			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
-		} else {
-			http.Error(w, "Sorry, banned", http.StatusNotAcceptable)
-		}
-		return
-	}
-
-	path_info := os.Getenv("PATH_INFO")
-	//	script_name :=
-	urlBase := mustParseURL(string(xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))))
-
-	// unpack (nonexisting) static files
-	func() {
-		if _, err := os.Stat(filepath.Join(dirApp, "delete_me_to_restore")); !os.IsNotExist(err) {
-			return
-		}
-		defer un(trace("RestoreAssets"))
-		for _, filename := range AssetNames() {
-			if _, err := os.Stat(filename); os.IsNotExist(err) {
-				if err := RestoreAsset(".", filename); err != nil {
-					http.Error(w, "failed "+filename+": "+err.Error(), http.StatusInternalServerError)
-					return
-				} else {
-					log.Printf("create %s\n", filename)
-				}
+		// check if the request is from a banned client
+		if banned, err := isBanned(r, now); err != nil || banned {
+			if err != nil {
+				http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 			} else {
-				log.Printf("keep   %s\n", filename)
+				http.Error(w, "Sorry, banned", http.StatusNotAcceptable)
+			}
+			return
+		}
+
+		path_info := os.Getenv("PATH_INFO")
+		//	script_name :=
+		urlBase := mustParseURL(string(xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))))
+
+		// unpack (nonexisting) static files
+		func() {
+			if _, err := os.Stat(filepath.Join(dirApp, "delete_me_to_restore")); !os.IsNotExist(err) {
+				return
+			}
+			defer un(trace("RestoreAssets"))
+			for _, filename := range AssetNames() {
+				if _, err := os.Stat(filename); os.IsNotExist(err) {
+					if err := RestoreAsset(".", filename); err != nil {
+						http.Error(w, "failed "+filename+": "+err.Error(), http.StatusInternalServerError)
+						return
+					} else {
+						log.Printf("create %s\n", filename)
+					}
+				} else {
+					log.Printf("keep   %s\n", filename)
+				}
+			}
+			// os.Chmod(dirApp, os.FileMode(0750)) // not sure if this is a good idea.
+		}()
+
+		// get config and session
+		app := App{}
+		{
+			var err error
+			if app.cfg, err = LoadConfig(); err != nil {
+				http.Error(w, "Couldn't load config: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+			var buf []byte
+			if buf, err = base64.StdEncoding.DecodeString(app.cfg.CookieStoreSecret); err != nil {
+				http.Error(w, "Couldn't get seed: "+err.Error(), http.StatusInternalServerError)
+				return
+			} else {
+				// what if the cookie has changed? Ignore cookie errors, especially on new/changed keys.
+				app.ses, _ = sessions.NewCookieStore(buf).Get(r, "ShaarliGo")
+				app.ses.Options = &sessions.Options{
+					Path:     urlBase.EscapedPath(), // to match all requests
+					MaxAge:   int(toSession / time.Second),
+					HttpOnly: true,
+				}
+			}
+			if app.tz, err = time.LoadLocation(app.cfg.TimeZone); err != nil {
+				http.Error(w, "Invalid timezone '"+app.cfg.TimeZone+"': "+err.Error(), http.StatusInternalServerError)
+				return
 			}
 		}
-		// os.Chmod(dirApp, os.FileMode(0750)) // not sure if this is a good idea.
-	}()
 
-	// get config and session
-	app := App{}
-	{
-		var err error
-		if app.cfg, err = LoadConfig(); err != nil {
-			http.Error(w, "Couldn't load config: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		var buf []byte
-		if buf, err = base64.StdEncoding.DecodeString(app.cfg.CookieStoreSecret); err != nil {
-			http.Error(w, "Couldn't get seed: "+err.Error(), http.StatusInternalServerError)
-			return
-		} else {
-			// what if the cookie has changed? Ignore cookie errors, especially on new/changed keys.
-			app.ses, _ = sessions.NewCookieStore(buf).Get(r, "ShaarliGo")
-			app.ses.Options = &sessions.Options{
-				Path:     urlBase.EscapedPath(), // to match all requests
-				MaxAge:   int(toSession / time.Second),
-				HttpOnly: true,
-			}
-		}
-		if app.tz, err = time.LoadLocation(app.cfg.TimeZone); err != nil {
-			http.Error(w, "Invalid timezone '"+app.cfg.TimeZone+"': "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
+		switch path_info {
+		case "/about":
+			base := *r.URL
+			base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "about") + "/"
+			http.Redirect(w, r, base.Path, http.StatusFound)
 
-	switch path_info {
-	case "/about":
-		base := *r.URL
-		base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "about") + "/"
-		http.Redirect(w, r, base.Path, http.StatusFound)
-
-		return
-	case "/about/":
-		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-		io.WriteString(w, xml.Header)
-		io.WriteString(w, `<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+			return
+		case "/about/":
+			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+			io.WriteString(w, xml.Header)
+			io.WriteString(w, `<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:rfc="https://tools.ietf.org/html/"
    xmlns="http://usefulinc.com/ns/doap#">
   <Project>
@@ -278,69 +279,70 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
   </Project>
 </rdf:RDF>`)
 
-		return
-	case "/config/":
-		// make a 404 (fallthrough) if already configured but not currently logged in
-		if !app.cfg.IsConfigured() || app.IsLoggedIn(now) {
+			return
+		case "/config/":
+			// make a 404 (fallthrough) if already configured but not currently logged in
+			if !app.cfg.IsConfigured() || app.IsLoggedIn(now) {
+				app.KeepAlive(w, r, now)
+				app.handleSettings()(w, r)
+				return
+			}
+		case "/session/":
+			// maybe cache a bit, but never KeepAlive
+			if app.IsLoggedIn(now) {
+				w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+				// w.Header().Set("Etag", r.URL.Path)
+				// w.Header().Set("Cache-Control", "max-age=59") // 59 Seconds
+				io.WriteString(w, app.cfg.Uid)
+			} else {
+				// don't squeal to ban.
+				http.NotFound(w, r)
+			}
+			return
+		case "":
 			app.KeepAlive(w, r, now)
-			app.handleSettings(w, r)
-			return
-		}
-	case "/session/":
-		// maybe cache a bit, but never KeepAlive
-		if app.IsLoggedIn(now) {
-			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-			// w.Header().Set("Etag", r.URL.Path)
-			// w.Header().Set("Cache-Control", "max-age=59") // 59 Seconds
-			io.WriteString(w, app.cfg.Uid)
-		} else {
-			// don't squeal to ban.
-			http.NotFound(w, r)
-		}
-		return
-	case "":
-		app.KeepAlive(w, r, now)
-		params := r.URL.Query()
-		switch {
-		case "" == r.URL.RawQuery && !app.cfg.IsConfigured():
-			http.Redirect(w, r, path.Join(r.URL.Path, "config")+"/", http.StatusSeeOther)
-			return
+			params := r.URL.Query()
+			switch {
+			case "" == r.URL.RawQuery && !app.cfg.IsConfigured():
+				http.Redirect(w, r, path.Join(r.URL.Path, "config")+"/", http.StatusSeeOther)
+				return
 
-		// legacy API, https://code.mro.name/mro/Shaarli-API-test
-		case 1 == len(params["post"]):
-			app.handleDoPost(w, r)
-			return
-		case (1 == len(params["do"]) && "login" == params["do"][0]) ||
-			(http.MethodPost == r.Method && "" != r.FormValue("login")): // really. https://github.com/sebsauvage/Shaarli/blob/master/index.php#L402
-			app.handleDoLogin(w, r)
-			return
-		case 1 == len(params["do"]) && "logout" == params["do"][0]:
-			app.handleDoLogout(w, r)
-			return
-		case 1 == len(params["do"]) && "changepasswd" == params["do"][0]:
-			app.handleDoCheckLoginAfterTheFact(w, r)
-			return
-		case 1 == len(params):
-			// redirect legacy Ids [A-Za-z0-9_-]{6} in case
-			for k, v := range params {
-				if 1 == len(v) && "" == v[0] && len(k) == 6 {
-					if id, err := base64ToBase24x7(k); err != nil {
-						http.Error(w, "Invalid Id '"+k+"': "+err.Error(), http.StatusNotAcceptable)
-					} else {
-						log.Printf("shaarli_go_path_0 + \"?(%[1]s|\\?)%[2]s/?$\" => \"%[1]s%[3]s/\",\n", uriPubPosts, k, id)
-						http.Redirect(w, r, path.Join(r.URL.Path, "..", uriPub, uriPosts, id)+"/", http.StatusMovedPermanently)
+			// legacy API, https://code.mro.name/mro/Shaarli-API-test
+			case 1 == len(params["post"]):
+				app.handleDoPost()(w, r)
+				return
+			case (1 == len(params["do"]) && "login" == params["do"][0]) ||
+				(http.MethodPost == r.Method && "" != r.FormValue("login")): // really. https://github.com/sebsauvage/Shaarli/blob/master/index.php#L402
+				app.handleDoLogin()(w, r)
+				return
+			case 1 == len(params["do"]) && "logout" == params["do"][0]:
+				app.handleDoLogout()(w, r)
+				return
+			case 1 == len(params["do"]) && "changepasswd" == params["do"][0]:
+				app.handleDoCheckLoginAfterTheFact()(w, r)
+				return
+			case 1 == len(params):
+				// redirect legacy Ids [A-Za-z0-9_-]{6} in case
+				for k, v := range params {
+					if 1 == len(v) && "" == v[0] && len(k) == 6 {
+						if id, err := base64ToBase24x7(k); err != nil {
+							http.Error(w, "Invalid Id '"+k+"': "+err.Error(), http.StatusNotAcceptable)
+						} else {
+							log.Printf("shaarli_go_path_0 + \"?(%[1]s|\\?)%[2]s/?$\" => \"%[1]s%[3]s/\",\n", uriPubPosts, k, id)
+							http.Redirect(w, r, path.Join(r.URL.Path, "..", uriPub, uriPosts, id)+"/", http.StatusMovedPermanently)
+						}
+						return
 					}
-					return
 				}
 			}
+		case "/search/":
+			app.handleSearch()(w, r)
+			return
+		case "/tools/":
+			app.handleTools()(w, r)
+			return
 		}
-	case "/search/":
-		app.handleSearch(w, r)
-		return
-	case "/tools/":
-		app.handleTools(w, r)
-		return
+		squealFailure(r, now, "404")
+		http.NotFound(w, r)
 	}
-	squealFailure(r, now, "404")
-	http.NotFound(w, r)
 }

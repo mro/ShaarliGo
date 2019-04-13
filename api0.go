@@ -52,16 +52,17 @@ func parseLinkUrl(raw string) *url.URL {
 	}
 }
 
-func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
-	now := time.Now()
-	switch r.Method {
-	// and https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
-	case http.MethodGet:
-		returnurl := r.Referer()
-		if ru := r.URL.Query()["returnurl"]; ru != nil && 1 == len(ru) && "" != ru[0] {
-			returnurl = ru[0]
-		}
-		if tmpl, err := template.New("login").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
+func (app *App) handleDoLogin() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		now := time.Now()
+		switch r.Method {
+		// and https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
+		case http.MethodGet:
+			returnurl := r.Referer()
+			if ru := r.URL.Query()["returnurl"]; ru != nil && 1 == len(ru) && "" != ru[0] {
+				returnurl = ru[0]
+			}
+			if tmpl, err := template.New("login").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
 <head><title>{{.title}}</title></head>
 <body>
   <form method="post" name="loginform">
@@ -75,62 +76,65 @@ func (app *App) handleDoLogin(w http.ResponseWriter, r *http.Request) {
 </body>
 </html>
 `); err == nil {
-			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-			io.WriteString(w, xml.Header)
-			io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-login.xslt'?>
+				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+				io.WriteString(w, xml.Header)
+				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-login.xslt'?>
 <!--
   must be compatible with https://code.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
   https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
 -->
 `)
-			if err := tmpl.Execute(w, map[string]string{
-				"title":     app.cfg.Title,
-				"token":     "ff13e7eaf9541ca2ba30fd44e864c3ff014d2bc9",
-				"returnurl": returnurl,
-			}); err != nil {
-				http.Error(w, "Couldn't send login form: "+err.Error(), http.StatusInternalServerError)
+				if err := tmpl.Execute(w, map[string]string{
+					"title":     app.cfg.Title,
+					"token":     "ff13e7eaf9541ca2ba30fd44e864c3ff014d2bc9",
+					"returnurl": returnurl,
+				}); err != nil {
+					http.Error(w, "Couldn't send login form: "+err.Error(), http.StatusInternalServerError)
+				}
 			}
-		}
-	case http.MethodPost:
-		// todo: verify token
-		uid := strings.TrimSpace(r.FormValue("login"))
-		pwd := strings.TrimSpace(r.FormValue("password"))
-		returnurl := strings.TrimSpace(r.FormValue("returnurl"))
-		// compute anyway (a bit more time constantness)
-		err := bcrypt.CompareHashAndPassword([]byte(app.cfg.PwdBcrypt), []byte(pwd))
-		if uid != app.cfg.Uid || err == bcrypt.ErrMismatchedHashAndPassword {
-			squealFailure(r, now, "Unauthorised.")
-			// http.Error(w, "<script>alert(\"Wrong login/password.\");document.location='?do=login&returnurl='"+url.QueryEscape(returnurl)+"';</script>", http.StatusUnauthorized)
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Header().Set("Content-Type", "application/javascript")
-			io.WriteString(w, "<script>alert(\"Wrong login/password.\");document.location='?do=login&returnurl='"+url.QueryEscape(returnurl)+"';</script>")
-			return
-		}
-		if err == nil {
-			err = app.startSession(w, r, now)
-		}
-		if err == nil {
-			if "" == returnurl { // TODO restrict to local urls within app scope
-				returnurl = path.Join(uriPub, uriPosts) + "/"
+		case http.MethodPost:
+			// todo: verify token
+			uid := strings.TrimSpace(r.FormValue("login"))
+			pwd := strings.TrimSpace(r.FormValue("password"))
+			returnurl := strings.TrimSpace(r.FormValue("returnurl"))
+			// compute anyway (a bit more time constantness)
+			err := bcrypt.CompareHashAndPassword([]byte(app.cfg.PwdBcrypt), []byte(pwd))
+			if uid != app.cfg.Uid || err == bcrypt.ErrMismatchedHashAndPassword {
+				squealFailure(r, now, "Unauthorised.")
+				// http.Error(w, "<script>alert(\"Wrong login/password.\");document.location='?do=login&returnurl='"+url.QueryEscape(returnurl)+"';</script>", http.StatusUnauthorized)
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Header().Set("Content-Type", "application/javascript")
+				io.WriteString(w, "<script>alert(\"Wrong login/password.\");document.location='?do=login&returnurl='"+url.QueryEscape(returnurl)+"';</script>")
+				return
 			}
-			http.Redirect(w, r, returnurl, http.StatusFound)
-			return
+			if err == nil {
+				err = app.startSession(w, r, now)
+			}
+			if err == nil {
+				if "" == returnurl { // TODO restrict to local urls within app scope
+					returnurl = path.Join(uriPub, uriPosts) + "/"
+				}
+				http.Redirect(w, r, returnurl, http.StatusFound)
+				return
+			}
+			http.Error(w, "Fishy post: "+err.Error(), http.StatusInternalServerError)
+		default:
+			squealFailure(r, now, "MethodNotAllowed "+r.Method)
+			http.Error(w, "MethodNotAllowed", http.StatusMethodNotAllowed)
 		}
-		http.Error(w, "Fishy post: "+err.Error(), http.StatusInternalServerError)
-	default:
-		squealFailure(r, now, "MethodNotAllowed "+r.Method)
-		http.Error(w, "MethodNotAllowed", http.StatusMethodNotAllowed)
-	}
-	//     NSString *xpath = [NSString stringWithFormat:@"/html/body//form[@name='%1$@']//input[(@type='text' or @type='password' or @type='hidden' or @type='checkbox') and @name] | /html/body//form[@name='%1$@']//textarea[@name]
+		//     NSString *xpath = [NSString stringWithFormat:@"/html/body//form[@name='%1$@']//input[(@type='text' or @type='password' or @type='hidden' or @type='checkbox') and @name] | /html/body//form[@name='%1$@']//textarea[@name]
 
-	// 'POST' validate, respond error (and squeal) or set session and redirect
+		// 'POST' validate, respond error (and squeal) or set session and redirect
+	}
 }
 
-func (app *App) handleDoLogout(w http.ResponseWriter, r *http.Request) {
-	if err := app.stopSession(w, r); err != nil {
-		http.Error(w, "Couldn't end session: "+err.Error(), http.StatusInternalServerError)
-	} else {
-		http.Redirect(w, r, path.Join(uriPub, uriPosts)+"/", http.StatusFound)
+func (app *App) handleDoLogout() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := app.stopSession(w, r); err != nil {
+			http.Error(w, "Couldn't end session: "+err.Error(), http.StatusInternalServerError)
+		} else {
+			http.Redirect(w, r, path.Join(uriPub, uriPosts)+"/", http.StatusFound)
+		}
 	}
 }
 
@@ -164,74 +168,75 @@ func urlFromPostParam(post string) *url.URL {
 
 /* Store identifier of edited entry in cookie.
  */
-func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
-	now := time.Now()
-	xmlBase := func(u *url.URL) Iri { return xmlBaseFromRequestURL(u, os.Getenv("SCRIPT_NAME")) }
-	switch r.Method {
-	case http.MethodGet:
-		// 'GET': send a form to the client
-		// must be compatible with https://code.mro.name/mro/Shaarli-API-Test/...
-		// and https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
+func (app *App) handleDoPost() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		now := time.Now()
+		xmlBase := func(u *url.URL) Iri { return xmlBaseFromRequestURL(u, os.Getenv("SCRIPT_NAME")) }
+		switch r.Method {
+		case http.MethodGet:
+			// 'GET': send a form to the client
+			// must be compatible with https://code.mro.name/mro/Shaarli-API-Test/...
+			// and https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
 
-		if !app.IsLoggedIn(now) {
-			http.Redirect(w, r, cgiName+"?do=login&returnurl="+url.QueryEscape(r.URL.String()), http.StatusFound)
-			return
-		}
+			if !app.IsLoggedIn(now) {
+				http.Redirect(w, r, cgiName+"?do=login&returnurl="+url.QueryEscape(r.URL.String()), http.StatusFound)
+				return
+			}
 
-		params := r.URL.Query()
-		if 1 != len(params["post"]) {
-			http.Error(w, "StatusBadRequest", http.StatusBadRequest)
-			return
-		}
+			params := r.URL.Query()
+			if 1 != len(params["post"]) {
+				http.Error(w, "StatusBadRequest", http.StatusBadRequest)
+				return
+			}
 
-		feed, _ := app.LoadFeed()
-		post := sanitiseURLString(params["post"][0], app.cfg.UrlCleaner)
+			feed, _ := app.LoadFeed()
+			post := sanitiseURLString(params["post"][0], app.cfg.UrlCleaner)
 
-		feed.XmlBase = xmlBase(r.URL)
-		_, ent := feed.findEntryByIdSelfOrUrl(post)
-		if nil == ent {
-			// nothing found, so we need a new (dangling, unsaved) entry:
-			if url := urlFromPostParam(post); url == nil {
-				// post parameter doesn't look like an url, so we treat it as a note.
-				ent = &Entry{}
-				ent.Title = HumanText{Body: post}
-			} else {
-				// post parameter looks like an url, so we try to GET it
-				{
-					ee, err := entryFromURL(url, time.Second*3/2)
-					if nil != err {
-						ee.Title.Body = err.Error()
+			feed.XmlBase = xmlBase(r.URL)
+			_, ent := feed.findEntryByIdSelfOrUrl(post)
+			if nil == ent {
+				// nothing found, so we need a new (dangling, unsaved) entry:
+				if url := urlFromPostParam(post); url == nil {
+					// post parameter doesn't look like an url, so we treat it as a note.
+					ent = &Entry{}
+					ent.Title = HumanText{Body: post}
+				} else {
+					// post parameter looks like an url, so we try to GET it
+					{
+						ee, err := entryFromURL(url, time.Second*3/2)
+						if nil != err {
+							ee.Title.Body = err.Error()
+						}
+						ent = &ee
 					}
-					ent = &ee
+					if nil == ent.Content || "" == ent.Content.Body {
+						ent.Content = ent.Summary
+					}
+					ent.Links = []Link{Link{Href: url.String()}}
 				}
-				if nil == ent.Content || "" == ent.Content.Body {
-					ent.Content = ent.Summary
+				ent.Updated = iso8601(now)
+				const SetPublishedToNowInitially = true
+				if SetPublishedToNowInitially || ent.Published.IsZero() {
+					ent.Published = ent.Updated
 				}
-				ent.Links = []Link{Link{Href: url.String()}}
+				// do not append to feed yet, keep dangling
+			} else {
+				log.Printf("storing Id in cookie: %v", ent.Id)
+				app.ses.Values["identifier"] = ent.Id
 			}
-			ent.Updated = iso8601(now)
-			const SetPublishedToNowInitially = true
-			if SetPublishedToNowInitially || ent.Published.IsZero() {
-				ent.Published = ent.Updated
+			app.KeepAlive(w, r, now)
+
+			if 1 == len(params["title"]) && "" != params["title"][0] {
+				ent.Title = HumanText{Body: params["title"][0]}
 			}
-			// do not append to feed yet, keep dangling
-		} else {
-			log.Printf("storing Id in cookie: %v", ent.Id)
-			app.ses.Values["identifier"] = ent.Id
-		}
-		app.KeepAlive(w, r, now)
+			if 1 == len(params["description"]) && "" != params["description"][0] {
+				ent.Content = &HumanText{Body: params["description"][0]}
+			}
+			if 1 == len(params["source"]) {
+				// data["lf_source"] = params["source"][0]
+			}
 
-		if 1 == len(params["title"]) && "" != params["title"][0] {
-			ent.Title = HumanText{Body: params["title"][0]}
-		}
-		if 1 == len(params["description"]) && "" != params["description"][0] {
-			ent.Content = &HumanText{Body: params["description"][0]}
-		}
-		if 1 == len(params["source"]) {
-			// data["lf_source"] = params["source"][0]
-		}
-
-		if tmpl, err := template.New("linkform").Parse(`<html xmlns="http://www.w3.org/1999/xhtml" xml:base="{{.xml_base}}">
+			if tmpl, err := template.New("linkform").Parse(`<html xmlns="http://www.w3.org/1999/xhtml" xml:base="{{.xml_base}}">
 <head><title>{{.title}}</title></head>
 <body>
   <ul id="taglist" style="display:none">{{ range $idx, $cat := .categories }}<li>#{{ $cat.Term }}</li>{{ end }}</ul>
@@ -251,181 +256,183 @@ func (app *App) handleDoPost(w http.ResponseWriter, r *http.Request) {
 </body>
 </html>
 `); err == nil {
-			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-			io.WriteString(w, xml.Header)
-			io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-post.xslt'?>
+				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+				io.WriteString(w, xml.Header)
+				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-post.xslt'?>
 <!--
   must be compatible with https://code.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
   https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
 -->
 `)
-			data := ent.api0LinkFormMap()
-			data["title"] = feed.Title
-			data["categories"] = feed.Categories
-			bTok := make([]byte, 20) // keep in local session or encrypted cookie
-			io.ReadFull(rand.Reader, bTok)
-			data["token"] = hex.EncodeToString(bTok)
-			data["returnurl"] = ""
-			data["xml_base"] = feed.XmlBase
+				data := ent.api0LinkFormMap()
+				data["title"] = feed.Title
+				data["categories"] = feed.Categories
+				bTok := make([]byte, 20) // keep in local session or encrypted cookie
+				io.ReadFull(rand.Reader, bTok)
+				data["token"] = hex.EncodeToString(bTok)
+				data["returnurl"] = ""
+				data["xml_base"] = feed.XmlBase
 
-			if err := tmpl.Execute(w, data); err != nil {
-				http.Error(w, "Coudln't send linkform: "+err.Error(), http.StatusInternalServerError)
+				if err := tmpl.Execute(w, data); err != nil {
+					http.Error(w, "Coudln't send linkform: "+err.Error(), http.StatusInternalServerError)
+				}
 			}
-		}
-	case http.MethodPost:
-		// 'POST' validate, respond error (and squeal) or post and redirect
-		if !app.IsLoggedIn(now) {
-			squealFailure(r, now, "Unauthorised")
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		identifier, ok := app.ses.Values["identifier"].(Id)
-		if ok {
-			delete(app.ses.Values, "identifier")
-		}
-
-		log.Printf("pulled Id from cookie: %v", identifier)
-		app.KeepAlive(w, r, now)
-		location := path.Join(uriPub, uriPosts) + "/"
-
-		// https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1479
-		if "" != r.FormValue("save_edit") {
-			if lf_linkdate, err := time.ParseInLocation(fmtTimeLfTime, strings.TrimSpace(r.FormValue("lf_linkdate")), app.tz); err != nil {
-				squealFailure(r, now, "BadRequest: "+err.Error())
-				http.Error(w, "Looks like a forged request: "+err.Error(), http.StatusBadRequest)
+		case http.MethodPost:
+			// 'POST' validate, respond error (and squeal) or post and redirect
+			if !app.IsLoggedIn(now) {
+				squealFailure(r, now, "Unauthorised")
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
-			} else {
-				token := r.FormValue("token")
-				log.Println("todo: check token ", token)
-				if returnurl, err := url.Parse(r.FormValue("returnurl")); err != nil {
-					log.Println("Error parsing returnurl: ", err.Error())
-					http.Error(w, "couldn't parse returnurl: "+err.Error(), http.StatusInternalServerError)
+			}
+			identifier, ok := app.ses.Values["identifier"].(Id)
+			if ok {
+				delete(app.ses.Values, "identifier")
+			}
+
+			log.Printf("pulled Id from cookie: %v", identifier)
+			app.KeepAlive(w, r, now)
+			location := path.Join(uriPub, uriPosts) + "/"
+
+			// https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1479
+			if "" != r.FormValue("save_edit") {
+				if lf_linkdate, err := time.ParseInLocation(fmtTimeLfTime, strings.TrimSpace(r.FormValue("lf_linkdate")), app.tz); err != nil {
+					squealFailure(r, now, "BadRequest: "+err.Error())
+					http.Error(w, "Looks like a forged request: "+err.Error(), http.StatusBadRequest)
 					return
 				} else {
-					log.Println("todo: use returnurl ", returnurl)
+					token := r.FormValue("token")
+					log.Println("todo: check token ", token)
+					if returnurl, err := url.Parse(r.FormValue("returnurl")); err != nil {
+						log.Println("Error parsing returnurl: ", err.Error())
+						http.Error(w, "couldn't parse returnurl: "+err.Error(), http.StatusInternalServerError)
+						return
+					} else {
+						log.Println("todo: use returnurl ", returnurl)
 
-					// make persistent
-					feed, _ := app.LoadFeed()
-					feed.XmlBase = xmlBase(r.URL)
+						// make persistent
+						feed, _ := app.LoadFeed()
+						feed.XmlBase = xmlBase(r.URL)
 
-					lf_url := r.FormValue("lf_url")
-					_, ent := feed.findEntryById(identifier)
-					if nil == ent {
-						ent = feed.newEntry(lf_linkdate)
-						if _, err := feed.Append(ent); err != nil {
+						lf_url := r.FormValue("lf_url")
+						_, ent := feed.findEntryById(identifier)
+						if nil == ent {
+							ent = feed.newEntry(lf_linkdate)
+							if _, err := feed.Append(ent); err != nil {
+								http.Error(w, "couldn't add entry: "+err.Error(), http.StatusInternalServerError)
+								return
+							}
+						}
+						ent0 := *ent
+
+						// prepare redirect
+						location = strings.Join([]string{location, string(ent.Id)}, "?#")
+
+						// human := func(key string) HumanText { return HumanText{Body: strings.TrimSpace(r.FormValue(key)), Type: "text"} }
+						// humanP := func(key string) *HumanText { t := human(key); return &t }
+
+						ent.Updated = iso8601(now)
+						ent.Title = HumanText{Body: strings.TrimSpace(r.FormValue("lf_title")), Type: "text"}
+						url := mustParseURL(lf_url)
+						if url.IsAbs() && "" != url.Host {
+							ent.Links = []Link{Link{Href: lf_url}}
+						} else {
+							ent.Links = []Link{}
+						}
+						ent.Content = &HumanText{Body: strings.TrimSpace(r.FormValue("lf_description")), Type: "text"}
+						if img := strings.TrimSpace(r.FormValue("lf_image")); "" != img {
+							ent.MediaThumbnail = &MediaThumbnail{Url: Iri(img)}
+						}
+
+						{
+							tags := strings.Split(r.FormValue("lf_tags"), " ")
+							a := make([]Category, 0, len(tags))
+							for _, tg := range tags {
+								if "" != tg {
+									a = append(a, Category{Term: tg})
+								}
+							}
+							ent.Categories = a // discard old categories and only use from POST.
+							ent.Categories = ent.CategoriesMerged()
+						}
+						if err := ent.Validate(); err != nil {
 							http.Error(w, "couldn't add entry: "+err.Error(), http.StatusInternalServerError)
 							return
 						}
-					}
-					ent0 := *ent
 
-					// prepare redirect
-					location = strings.Join([]string{location, string(ent.Id)}, "?#")
-
-					// human := func(key string) HumanText { return HumanText{Body: strings.TrimSpace(r.FormValue(key)), Type: "text"} }
-					// humanP := func(key string) *HumanText { t := human(key); return &t }
-
-					ent.Updated = iso8601(now)
-					ent.Title = HumanText{Body: strings.TrimSpace(r.FormValue("lf_title")), Type: "text"}
-					url := mustParseURL(lf_url)
-					if url.IsAbs() && "" != url.Host {
-						ent.Links = []Link{Link{Href: lf_url}}
-					} else {
-						ent.Links = []Link{}
-					}
-					ent.Content = &HumanText{Body: strings.TrimSpace(r.FormValue("lf_description")), Type: "text"}
-					if img := strings.TrimSpace(r.FormValue("lf_image")); "" != img {
-						ent.MediaThumbnail = &MediaThumbnail{Url: Iri(img)}
-					}
-
-					{
-						tags := strings.Split(r.FormValue("lf_tags"), " ")
-						a := make([]Category, 0, len(tags))
-						for _, tg := range tags {
-							if "" != tg {
-								a = append(a, Category{Term: tg})
-							}
+						if err := app.SaveFeed(feed); err != nil {
+							http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
+							return
 						}
-						ent.Categories = a // discard old categories and only use from POST.
-						ent.Categories = ent.CategoriesMerged()
+						// todo: POSSE
+						// refresh feeds
+						if err := app.PublishFeedsForModifiedEntries(feed, []*Entry{ent, &ent0}); err != nil {
+							log.Println("couldn't write feeds: ", err.Error())
+							http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
+							return
+						}
 					}
-					if err := ent.Validate(); err != nil {
-						http.Error(w, "couldn't add entry: "+err.Error(), http.StatusInternalServerError)
-						return
-					}
+				}
+			} else if "" != r.FormValue("cancel_edit") {
 
+			} else if "" != r.FormValue("delete_edit") {
+				token := r.FormValue("token")
+				log.Println("todo: check token ", token)
+				// make persistent
+				feed, _ := app.LoadFeed()
+				if ent := feed.deleteEntryById(identifier); nil != ent {
 					if err := app.SaveFeed(feed); err != nil {
 						http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
 						return
 					}
 					// todo: POSSE
 					// refresh feeds
-					if err := app.PublishFeedsForModifiedEntries(feed, []*Entry{ent, &ent0}); err != nil {
+					feed.XmlBase = xmlBase(r.URL)
+					if err := app.PublishFeedsForModifiedEntries(feed, []*Entry{ent}); err != nil {
 						log.Println("couldn't write feeds: ", err.Error())
 						http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
 						return
 					}
-				}
-			}
-		} else if "" != r.FormValue("cancel_edit") {
-
-		} else if "" != r.FormValue("delete_edit") {
-			token := r.FormValue("token")
-			log.Println("todo: check token ", token)
-			// make persistent
-			feed, _ := app.LoadFeed()
-			if ent := feed.deleteEntryById(identifier); nil != ent {
-				if err := app.SaveFeed(feed); err != nil {
-					http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
-					return
-				}
-				// todo: POSSE
-				// refresh feeds
-				feed.XmlBase = xmlBase(r.URL)
-				if err := app.PublishFeedsForModifiedEntries(feed, []*Entry{ent}); err != nil {
-					log.Println("couldn't write feeds: ", err.Error())
-					http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
+				} else {
+					squealFailure(r, now, "Not Found")
+					log.Println("entry not found: ", identifier)
+					http.Error(w, "Not Found", http.StatusNotFound)
 					return
 				}
 			} else {
-				squealFailure(r, now, "Not Found")
-				log.Println("entry not found: ", identifier)
-				http.Error(w, "Not Found", http.StatusNotFound)
+				squealFailure(r, now, "BadRequest")
+				http.Error(w, "BadRequest", http.StatusBadRequest)
 				return
 			}
-		} else {
-			squealFailure(r, now, "BadRequest")
-			http.Error(w, "BadRequest", http.StatusBadRequest)
+			if "bookmarklet" == r.FormValue("source") {
+				w.WriteHeader(http.StatusOK)
+				w.Header().Set("Content-Type", "application/javascript")
+				// CSP script-src 'sha256-hGqewLn4csF93PEX/0TCk2jdnAytXBZFxFBzKt7wcgo='
+				// echo -n "self.close(); // close bookmarklet popup" | openssl dgst -sha256 -binary | base64
+				io.WriteString(w, "<script>self.close(); // close bookmarklet popup</script>")
+			} else {
+				http.Redirect(w, r, location, http.StatusFound)
+			}
+			return
+		default:
+			squealFailure(r, now, "MethodNotAllowed: "+r.Method)
+			http.Error(w, "MethodNotAllowed", http.StatusMethodNotAllowed)
 			return
 		}
-		if "bookmarklet" == r.FormValue("source") {
-			w.WriteHeader(http.StatusOK)
-			w.Header().Set("Content-Type", "application/javascript")
-			// CSP script-src 'sha256-hGqewLn4csF93PEX/0TCk2jdnAytXBZFxFBzKt7wcgo='
-			// echo -n "self.close(); // close bookmarklet popup" | openssl dgst -sha256 -binary | base64
-			io.WriteString(w, "<script>self.close(); // close bookmarklet popup</script>")
-		} else {
-			http.Redirect(w, r, location, http.StatusFound)
-		}
-		return
-	default:
-		squealFailure(r, now, "MethodNotAllowed: "+r.Method)
-		http.Error(w, "MethodNotAllowed", http.StatusMethodNotAllowed)
-		return
 	}
 }
 
-func (app *App) handleDoCheckLoginAfterTheFact(w http.ResponseWriter, r *http.Request) {
-	now := time.Now()
-	switch r.Method {
-	case http.MethodGet:
-		if !app.IsLoggedIn(now) {
-			http.Redirect(w, r, cgiName+"?do=login&returnurl="+url.QueryEscape(r.URL.String()), http.StatusFound)
-			return
-		}
-		app.KeepAlive(w, r, now)
+func (app *App) handleDoCheckLoginAfterTheFact() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		now := time.Now()
+		switch r.Method {
+		case http.MethodGet:
+			if !app.IsLoggedIn(now) {
+				http.Redirect(w, r, cgiName+"?do=login&returnurl="+url.QueryEscape(r.URL.String()), http.StatusFound)
+				return
+			}
+			app.KeepAlive(w, r, now)
 
-		if tmpl, err := template.New("changepasswordform").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
+			if tmpl, err := template.New("changepasswordform").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
 <head><title>{{.title}}</title></head>
 <body>
   <a href="?do=logout">Logout</a>
@@ -438,23 +445,24 @@ func (app *App) handleDoCheckLoginAfterTheFact(w http.ResponseWriter, r *http.Re
 </body>
 </html>
 `); err == nil {
-			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-			io.WriteString(w, xml.Header)
-			io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-changepassword.xslt'?>
+				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+				io.WriteString(w, xml.Header)
+				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-changepassword.xslt'?>
 <!--
   must be compatible with https://code.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
   https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
 -->
 `)
-			data := make(map[string]string)
-			data["title"] = app.cfg.Title
-			bTok := make([]byte, 20) // keep in local session or encrypted cookie
-			io.ReadFull(rand.Reader, bTok)
-			data["token"] = hex.EncodeToString(bTok)
-			data["returnurl"] = ""
+				data := make(map[string]string)
+				data["title"] = app.cfg.Title
+				bTok := make([]byte, 20) // keep in local session or encrypted cookie
+				io.ReadFull(rand.Reader, bTok)
+				data["token"] = hex.EncodeToString(bTok)
+				data["returnurl"] = ""
 
-			if err := tmpl.Execute(w, data); err != nil {
-				http.Error(w, "Coudln't send changepasswordform: "+err.Error(), http.StatusInternalServerError)
+				if err := tmpl.Execute(w, data); err != nil {
+					http.Error(w, "Coudln't send changepasswordform: "+err.Error(), http.StatusInternalServerError)
+				}
 			}
 		}
 	}

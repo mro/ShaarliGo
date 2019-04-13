@@ -61,96 +61,98 @@ func rankEntryTerms(entry *Entry, terms []string, matcher *search.Matcher) int {
 	return rank
 }
 
-func (app *App) handleSearch(w http.ResponseWriter, r *http.Request) {
-	now := time.Now()
+func (app *App) handleSearch() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		now := time.Now()
 
-	// evtl. check permission to search (non-logged-in visitor?)
-	if !app.cfg.IsConfigured() {
-		http.Redirect(w, r, cgiName+"/config", http.StatusPreconditionFailed)
-		return
-	}
+		// evtl. check permission to search (non-logged-in visitor?)
+		if !app.cfg.IsConfigured() {
+			http.Redirect(w, r, cgiName+"/config", http.StatusPreconditionFailed)
+			return
+		}
 
-	switch r.Method {
-	case http.MethodGet:
-		app.KeepAlive(w, r, now)
-		// pull out parameters q, offset, limit
-		query := r.URL.Query()
-		if q := query["q"]; q != nil && 0 < len(q) {
-			terms := strings.Fields(strings.TrimSpace(strings.Join(q, " ")))
-			if 0 == len(terms) {
-				http.Redirect(w, r, path.Join("..", "..", uriPub, uriPosts)+"/", http.StatusFound)
-				return
-			}
-			limit := max(1, app.cfg.LinksPerPage)
-			offset := 0
-			if o := query["offset"]; o != nil {
-				offset, _ = strconv.Atoi(o[0]) // just ignore conversion errors. 0 is a fine fallback
-			}
-			qu := cgiName + "/search/" + "?" + "q" + "=" + url.QueryEscape(strings.Join(terms, " "))
-
-			xmlBase := mustParseURL(string(xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))))
-			catScheme := Iri(xmlBase.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String() + "/")
-
-			feed, _ := app.LoadFeed()
-
-			lang := language.Make("de") // todo: should come from the entry, feed, settings, default (in that order)
-			matcher := search.New(lang, search.IgnoreDiacritics, search.IgnoreCase)
-			ret := feed.Search(func(entry *Entry) int { return rankEntryTerms(entry, terms, matcher) })
-
-			ret.XmlBase = Iri(xmlBase.String())
-			ret.Id = Id(xmlBase.ResolveReference(mustParseURL(qu)).String())
-			ret.Generator = &Generator{Uri: myselfNamespace, Version: version + "+" + GitSHA1, Body: "🌺 ShaarliGo"}
-			ret.XmlNSShaarliGo = myselfNamespace
-			ret.SearchTerms = strings.Join(q, " ") // rather use http://www.opensearch.org/Specifications/OpenSearch/1.1#Example_of_OpenSearch_response_elements_in_Atom_1.0
-			ret.XmlNSOpenSearch = "http://a9.com/-/spec/opensearch/1.1/"
-
-			// paging / RFC5005
-			clamp := func(x int) int { return min(len(ret.Entries), x) }
-			offset = clamp(max(0, offset))
-			count := len(ret.Entries)
-			ret.Links = append(ret.Links, Link{Rel: relSelf, Href: qu + "&" + "offset" + "=" + strconv.Itoa(offset), Title: strconv.Itoa(1 + offset/limit)})
-			if count > limit {
-				ret.Links = append(ret.Links, Link{Rel: relFirst, Href: qu, Title: strconv.Itoa(1 + 0)})
-				ret.Links = append(ret.Links, Link{Rel: relLast, Href: qu + "&" + "offset" + "=" + strconv.Itoa(count-(count%limit)), Title: strconv.Itoa(1 + count/limit)})
-				if intPrev := offset - limit; intPrev >= 0 {
-					ret.Links = append(ret.Links, Link{Rel: relPrevious, Href: qu + "&" + "offset" + "=" + strconv.Itoa(intPrev), Title: strconv.Itoa(1 + intPrev/limit)})
-				}
-				if intNext := offset + limit; intNext < count {
-					ret.Links = append(ret.Links, Link{Rel: relNext, Href: qu + "&" + "offset" + "=" + strconv.Itoa(intNext), Title: strconv.Itoa(1 + intNext/limit)})
-				}
-				ret.Entries = ret.Entries[offset:clamp(offset+limit)]
-			}
-			// prepare entries for Atom publication
-			for _, item := range ret.Entries {
-				// change entries for output but don't save the change:
-				selfURL := mustParseURL(path.Join(uriPub, uriPosts, string(item.Id)) + "/")
-				editURL := strings.Join([]string{cgiName, "?post=", selfURL.String()}, "")
-				item.Id = Id(xmlBase.ResolveReference(selfURL).String()) // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
-				item.Links = append(item.Links,
-					Link{Rel: relSelf, Href: selfURL.String()},
-					Link{Rel: relEdit, Href: editURL},
-				)
-				for i, _ := range item.Categories {
-					item.Categories[i].Scheme = catScheme
-				}
-				if item.Updated.IsZero() {
-					item.Updated = item.Published
-				}
-				if item.Updated.After(ret.Updated) {
-					ret.Updated = item.Updated
-				}
-			}
-			ret.Categories = AggregateCategories(ret.Entries)
-			if ret.Updated.IsZero() {
-				ret.Updated = iso8601(now)
-			}
-
-			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-			enc := xml.NewEncoder(w)
-			enc.Indent("", "  ")
-			if err := xmlEncodeWithXslt(ret, "../../assets/"+app.cfg.Skin+"/posts.xslt", enc); err == nil {
-				if err := enc.Flush(); err == nil {
+		switch r.Method {
+		case http.MethodGet:
+			app.KeepAlive(w, r, now)
+			// pull out parameters q, offset, limit
+			query := r.URL.Query()
+			if q := query["q"]; q != nil && 0 < len(q) {
+				terms := strings.Fields(strings.TrimSpace(strings.Join(q, " ")))
+				if 0 == len(terms) {
+					http.Redirect(w, r, path.Join("..", "..", uriPub, uriPosts)+"/", http.StatusFound)
 					return
+				}
+				limit := max(1, app.cfg.LinksPerPage)
+				offset := 0
+				if o := query["offset"]; o != nil {
+					offset, _ = strconv.Atoi(o[0]) // just ignore conversion errors. 0 is a fine fallback
+				}
+				qu := cgiName + "/search/" + "?" + "q" + "=" + url.QueryEscape(strings.Join(terms, " "))
+
+				xmlBase := mustParseURL(string(xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))))
+				catScheme := Iri(xmlBase.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String() + "/")
+
+				feed, _ := app.LoadFeed()
+
+				lang := language.Make("de") // todo: should come from the entry, feed, settings, default (in that order)
+				matcher := search.New(lang, search.IgnoreDiacritics, search.IgnoreCase)
+				ret := feed.Search(func(entry *Entry) int { return rankEntryTerms(entry, terms, matcher) })
+
+				ret.XmlBase = Iri(xmlBase.String())
+				ret.Id = Id(xmlBase.ResolveReference(mustParseURL(qu)).String())
+				ret.Generator = &Generator{Uri: myselfNamespace, Version: version + "+" + GitSHA1, Body: "🌺 ShaarliGo"}
+				ret.XmlNSShaarliGo = myselfNamespace
+				ret.SearchTerms = strings.Join(q, " ") // rather use http://www.opensearch.org/Specifications/OpenSearch/1.1#Example_of_OpenSearch_response_elements_in_Atom_1.0
+				ret.XmlNSOpenSearch = "http://a9.com/-/spec/opensearch/1.1/"
+
+				// paging / RFC5005
+				clamp := func(x int) int { return min(len(ret.Entries), x) }
+				offset = clamp(max(0, offset))
+				count := len(ret.Entries)
+				ret.Links = append(ret.Links, Link{Rel: relSelf, Href: qu + "&" + "offset" + "=" + strconv.Itoa(offset), Title: strconv.Itoa(1 + offset/limit)})
+				if count > limit {
+					ret.Links = append(ret.Links, Link{Rel: relFirst, Href: qu, Title: strconv.Itoa(1 + 0)})
+					ret.Links = append(ret.Links, Link{Rel: relLast, Href: qu + "&" + "offset" + "=" + strconv.Itoa(count-(count%limit)), Title: strconv.Itoa(1 + count/limit)})
+					if intPrev := offset - limit; intPrev >= 0 {
+						ret.Links = append(ret.Links, Link{Rel: relPrevious, Href: qu + "&" + "offset" + "=" + strconv.Itoa(intPrev), Title: strconv.Itoa(1 + intPrev/limit)})
+					}
+					if intNext := offset + limit; intNext < count {
+						ret.Links = append(ret.Links, Link{Rel: relNext, Href: qu + "&" + "offset" + "=" + strconv.Itoa(intNext), Title: strconv.Itoa(1 + intNext/limit)})
+					}
+					ret.Entries = ret.Entries[offset:clamp(offset+limit)]
+				}
+				// prepare entries for Atom publication
+				for _, item := range ret.Entries {
+					// change entries for output but don't save the change:
+					selfURL := mustParseURL(path.Join(uriPub, uriPosts, string(item.Id)) + "/")
+					editURL := strings.Join([]string{cgiName, "?post=", selfURL.String()}, "")
+					item.Id = Id(xmlBase.ResolveReference(selfURL).String()) // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
+					item.Links = append(item.Links,
+						Link{Rel: relSelf, Href: selfURL.String()},
+						Link{Rel: relEdit, Href: editURL},
+					)
+					for i, _ := range item.Categories {
+						item.Categories[i].Scheme = catScheme
+					}
+					if item.Updated.IsZero() {
+						item.Updated = item.Published
+					}
+					if item.Updated.After(ret.Updated) {
+						ret.Updated = item.Updated
+					}
+				}
+				ret.Categories = AggregateCategories(ret.Entries)
+				if ret.Updated.IsZero() {
+					ret.Updated = iso8601(now)
+				}
+
+				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+				enc := xml.NewEncoder(w)
+				enc.Indent("", "  ")
+				if err := xmlEncodeWithXslt(ret, "../../assets/"+app.cfg.Skin+"/posts.xslt", enc); err == nil {
+					if err := enc.Flush(); err == nil {
+						return
+					}
 				}
 			}
 		}
