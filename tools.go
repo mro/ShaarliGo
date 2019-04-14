@@ -48,80 +48,14 @@ func (app *Server) handleTools() http.HandlerFunc {
 		case http.MethodGet:
 			app.KeepAlive(w, r, now)
 
-			if tmpl, err := template.New("tools").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
-<head><title>{{.title}}</title></head>
-<body>
-  <ol>
-    <li id="disclosure">
-      <b>Responsible Disclosure:</b> In case you are reluctant to <a
-      href="http://purl.mro.name/ShaarliGo/">file a public issue</a>, feel free to
-      email <a href="mailto:ShaarliGo@mro.name?subject=">ShaarliGo@mro.name</a>.
-    </li>
-
-    <li id="update">
-      <b>Update:</b> Just replace the file <code>shaarligo.cgi</code>. To update the assets, delete them and
-      <code>app/delete_me_to_restore</code>, then clear your browser cache and visit the CGI, e.g.
-      the <a href="../search/?q=foo">search</a>.
-      <br class="br"/>
-      <code>$ ssh <kbd>myserver.example.com</kbd><br class="br"/>
-$ cd <kbd>filesystem/path/to/</kbd><br class="br"/>
-$ curl -R -L -o shaarligo.cgi.gz <a href="http://purl.mro.name/shaarligo_cgi.gz">http://purl.mro.name/shaarligo_cgi.gz</a> &amp;&amp; gunzip shaarligo.cgi.gz<br class="br"/>
-$ chmod a+x shaarligo.cgi<br class="br"/>
-$ ls -l shaarligo?cgi*<br class="br"/>
-$ rm -rf .htaccess assets app/delete_me_to_restore</code>
-    </li>
-
-    <li id="config"><a href="../config/">Config</a></li>
-
-    <li>
-      <form class="form-inline" name="tag_rename">
-        <div class="form-group">
-          <label for="tag_rename_old">Rename Tag:</label>
-          <input type="text" class="form-control" id="tag_rename_old" placeholder="#before" value="{{ .tag_rename_old }}"/>
-        </div>
-        <div class="form-group">
-          <label for="tag_rename_new" class="sr-only">To:</label>
-          <input type="text" class="form-control" id="tag_rename_new" placeholder="#after" value="{{ .tag_rename_new }}"/>
-        </div>
-        <button type="submit" class="btn btn-primary">Rename</button>
-      </form>    
-    </li>
-
-    <li>
-      <form class="form-inline" name="shaarli_import" method="post">
-        <div class="form-group">
-          <label for="shaarli_import_url">Import Other Shaarli:</label>
-          <input type="url" class="form-control" name="shaarli_import_url" placeholder="https://demo.shaarli.org/?" value="{{ .other_shaarli_url }}"/>
-        </div>
-        <div class="form-group">
-          <label for="shaarli_import_tag" class="sr-only">#MarkerForThisImport</label>
-          <input type="text" class="form-control" name="shaarli_import_tag" placeholder="#MarkerTagForThisImport" value="#{{ .other_shaarli_tag }}"/>
-        </div>
-        <button name="shaarli_import_submit" type="submit" value="shaarli_import_submit" class="btn btn-primary">Import</button>
-      </form>    
-    </li>
-
-    <li id="bookmarklet">
-      <b>Bookmarklet:</b> <a
-        onclick="alert('Drag this link to your bookmarks toolbar, or right-click it and choose Bookmark This Link...');return false;"
-        href="javascript:javascript:(function(){var%20url%20=%20location.href;var%20title%20=%20document.title%20||%20url;window.open('{{.xml_base}}?post='%20+%20encodeURIComponent(url)+'&amp;title='%20+%20encodeURIComponent(title)+'&amp;description='%20+%20encodeURIComponent(document.getSelection())+'&amp;source=bookmarklet','_blank','menubar=no,height=450,width=600,toolbar=no,scrollbars=no,status=no,dialog=1');})();"
-      >✚ShaarliGo 🌺</a>
-      <span>⇐ Drag this link to your bookmarks toolbar (or right-click it and choose Bookmark This Link…).
-      Then click "✚ShaarliGo 🌺" button in any page you want to share.</span>
-    </li>
-
-    <li id="version">
-    	<b>Version:</b> <span id="number">v{{.version}}</span>+<span id="gitsha1">{{.gitsha1}}</span>
-    </li>
-  </ol>
-</body>
-</html>
-`); err == nil {
+			byt, _ := tplToolsHtmlBytes()
+			if tmpl, err := template.New("tools").Parse(string(byt)); err == nil {
 				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 				io.WriteString(w, xml.Header)
 				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='../../assets/`+app.cfg.Skin+`/tools.xslt'?>
 `)
 				data := map[string]string{
+					"skin":              app.cfg.Skin,
 					"title":             app.cfg.Title,
 					"xml_base":          app.cgi.String(),
 					"tag_rename_old":    "",

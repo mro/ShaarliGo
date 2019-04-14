@@ -26,7 +26,7 @@ parm="" # "-u"
     golang.org/x/tools/blog/atom
 }
 
-"$(go env GOPATH)/bin/go-bindata" -ignore="\\.DS_Store" -ignore=".+\\.woff" -prefix static static/...
+"$(go env GOPATH)/bin/go-bindata" -ignore="\\.DS_Store" -ignore=".+\\.woff" -prefix static static/... tpl/...
 
 PROG_NAME="ShaarliGo"
 VERSION="$(grep -F 'version = ' version.go | cut -d \" -f 2)"

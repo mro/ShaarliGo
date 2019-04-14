@@ -107,18 +107,8 @@ func (app *Server) handleSettings() http.HandlerFunc {
 }
 
 func (cfg Config) renderSettingsPage(w http.ResponseWriter, code int) {
-	tmpl, err := template.New("settings").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
-  <head/>
-  <body>
-    <form method="post" name="installform" id="installform">
-      <input type="text" name="setlogin" value="{{index . "setlogin"}}"/>
-      <input type="password" name="setpassword" />
-      <input type="text" name="title" value="{{index . "title"}}"/>
-      <input type="submit" name="Save" value="Save config" />
-    </form>
-  </body>
-</html>
-`)
+	byt, _ := tplSettingsHtmlBytes()
+	tmpl, err := template.New("settings").Parse(string(byt))
 	if err == nil {
 		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 		w.WriteHeader(code)
@@ -134,6 +124,7 @@ func (cfg Config) renderSettingsPage(w http.ResponseWriter, code int) {
 -->
 `)
 		err = tmpl.Execute(w, map[string]string{
+			"skin":     cfg.Skin,
 			"title":    cfg.Title,
 			"setlogin": cfg.Uid,
 		})

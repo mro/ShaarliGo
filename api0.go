@@ -61,20 +61,9 @@ func (app *Server) handleDoLogin() http.HandlerFunc {
 			if ru := r.URL.Query()["returnurl"]; ru != nil && 1 == len(ru) && "" != ru[0] {
 				returnurl = ru[0]
 			}
-			if tmpl, err := template.New("login").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
-<head><title>{{.title}}</title></head>
-<body>
-  <form method="post" name="loginform">
-    <input type="text" name="login" />
-    <input type="password" name="password" />
-    <input type="submit" value="Login" />
-    <input type="checkbox" name="longlastingsession" />
-    <input type="hidden" name="token" value="{{.token}}" />
-    <input type="hidden" name="returnurl" value="{{.returnurl}}" />
-  </form>
-</body>
-</html>
-`); err == nil {
+
+			byt, _ := tplLoginHtmlBytes()
+			if tmpl, err := template.New("login").Parse(string(byt)); err == nil {
 				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 				io.WriteString(w, xml.Header)
 				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-login.xslt'?>
@@ -84,6 +73,7 @@ func (app *Server) handleDoLogin() http.HandlerFunc {
 -->
 `)
 				if err := tmpl.Execute(w, map[string]string{
+					"skin":      app.cfg.Skin,
 					"title":     app.cfg.Title,
 					"token":     "ff13e7eaf9541ca2ba30fd44e864c3ff014d2bc9",
 					"returnurl": returnurl,
@@ -234,26 +224,8 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 				// data["lf_source"] = params["source"][0]
 			}
 
-			if tmpl, err := template.New("linkform").Parse(`<html xmlns="http://www.w3.org/1999/xhtml" xml:base="{{.xml_base}}">
-<head><title>{{.title}}</title></head>
-<body>
-  <ul id="taglist" style="display:none">{{ range $idx, $cat := .categories }}<li>#{{ $cat.Term }}</li>{{ end }}</ul>
-  <form method="post" name="linkform">
-    <input name="lf_linkdate" type="hidden" value="{{.lf_linkdate}}"/>
-    <input name="lf_url" type="text" value="{{.lf_url}}"/>
-    <input name="lf_title" type="text" value="{{.lf_title}}"/>
-    <textarea name="lf_description" rows="4" cols="25">{{.lf_description}}</textarea>
-    <input name="lf_tags" type="text" data-multiple="data-multiple" value="{{.lf_tags}}"/>
-    <input name="lf_private" type="checkbox" value="{{.lf_private}}"/>
-    <input name="save_edit" type="submit" value="Save"/>
-    <input name="cancel_edit" type="submit" value="Cancel"/>
-    <input name="token" type="hidden" value="{{.token}}"/>
-    <input name="returnurl" type="hidden" value="{{.returnurl}}"/>
-    <input name="lf_image" type="hidden" value="{{.lf_image}}"/>
-  </form>
-</body>
-</html>
-`); err == nil {
+			byt, _ := tplLinkformHtmlBytes()
+			if tmpl, err := template.New("linkform").Parse(string(byt)); err == nil {
 				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 				io.WriteString(w, xml.Header)
 				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-post.xslt'?>
@@ -263,6 +235,7 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 -->
 `)
 				data := ent.api0LinkFormMap()
+				data["skin"] = app.cfg.Skin
 				data["title"] = feed.Title
 				data["categories"] = feed.Categories
 				bTok := make([]byte, 20) // keep in local session or encrypted cookie
@@ -430,19 +403,8 @@ func (app *Server) handleDoCheckLoginAfterTheFact() http.HandlerFunc {
 			}
 			app.KeepAlive(w, r, now)
 
-			if tmpl, err := template.New("changepasswordform").Parse(`<html xmlns="http://www.w3.org/1999/xhtml">
-<head><title>{{.title}}</title></head>
-<body>
-  <a href="?do=logout">Logout</a>
-  <form method="post" name="changepasswordform">
-    <input type="password" name="oldpassword" />
-    <input type="password" name="setpassword" />
-    <input type="hidden" name="token" value="{{.token}}" />
-    <input type="submit" name="Save" value="Save password" />
-  </form>
-</body>
-</html>
-`); err == nil {
+			byt, _ := tplChangepasswordformHtmlBytes()
+			if tmpl, err := template.New("changepasswordform").Parse(string(byt)); err == nil {
 				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 				io.WriteString(w, xml.Header)
 				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-changepassword.xslt'?>
@@ -452,6 +414,7 @@ func (app *Server) handleDoCheckLoginAfterTheFact() http.HandlerFunc {
 -->
 `)
 				data := make(map[string]string)
+				data["skin"] = app.cfg.Skin
 				data["title"] = app.cfg.Title
 				bTok := make([]byte, 20) // keep in local session or encrypted cookie
 				io.ReadFull(rand.Reader, bTok)

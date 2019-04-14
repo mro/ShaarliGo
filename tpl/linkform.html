@@ -1,0 +1,19 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:base="{{.xml_base}}">
+<head><title>{{.title}}</title></head>
+<body>
+  <ul id="taglist" style="display:none">{{ range $idx, $cat := .categories }}<li>#{{ $cat.Term }}</li>{{ end }}</ul>
+  <form method="post" name="linkform">
+    <input name="lf_linkdate" type="hidden" value="{{.lf_linkdate}}"/>
+    <input name="lf_url" type="text" value="{{.lf_url}}"/>
+    <input name="lf_title" type="text" value="{{.lf_title}}"/>
+    <textarea name="lf_description" rows="4" cols="25">{{.lf_description}}</textarea>
+    <input name="lf_tags" type="text" data-multiple="data-multiple" value="{{.lf_tags}}"/>
+    <input name="lf_private" type="checkbox" value="{{.lf_private}}"/>
+    <input name="save_edit" type="submit" value="Save"/>
+    <input name="cancel_edit" type="submit" value="Cancel"/>
+    <input name="token" type="hidden" value="{{.token}}"/>
+    <input name="returnurl" type="hidden" value="{{.returnurl}}"/>
+    <input name="lf_image" type="hidden" value="{{.lf_image}}"/>
+  </form>
+</body>
+</html>
