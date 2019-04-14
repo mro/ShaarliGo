@@ -40,6 +40,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/cgi"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -94,38 +95,40 @@ func main() {
 	}
 }
 
-type App struct {
+type Server struct {
 	cfg Config
 	ses *sessions.Session
 	tz  *time.Location
+	url url.URL
+	cgi url.URL
 }
 
-func (app *App) startSession(w http.ResponseWriter, r *http.Request, now time.Time) error {
+func (app *Server) startSession(w http.ResponseWriter, r *http.Request, now time.Time) error {
 	app.ses.Values["timeout"] = now.Add(toSession).Unix()
 	return app.ses.Save(r, w)
 }
 
-func (app *App) stopSession(w http.ResponseWriter, r *http.Request) error {
+func (app *Server) stopSession(w http.ResponseWriter, r *http.Request) error {
 	delete(app.ses.Values, "timeout")
 	return app.ses.Save(r, w)
 }
 
-func (app *App) KeepAlive(w http.ResponseWriter, r *http.Request, now time.Time) error {
+func (app *Server) KeepAlive(w http.ResponseWriter, r *http.Request, now time.Time) error {
 	if app.IsLoggedIn(now) {
 		return app.startSession(w, r, now)
 	}
 	return nil
 }
 
-func (app App) IsLoggedIn(now time.Time) bool {
+func (app Server) IsLoggedIn(now time.Time) bool {
 	// https://gowebexamples.com/sessions/
 	// or https://stackoverflow.com/questions/28616830/gorilla-sessions-how-to-automatically-update-cookie-expiration-on-request
 	timeout, ok := app.ses.Values["timeout"].(int64)
 	return ok && now.Before(time.Unix(timeout, 0))
 }
 
-func (app App) LoadFeed() (Feed, error) {
-	defer un(trace("App.LoadFeed"))
+func (app Server) LoadFeed() (Feed, error) {
+	defer un(trace("Server.LoadFeed"))
 	if feed, err := FeedFromFileName(fileFeedStorage); err != nil {
 		return feed, err
 	} else {
@@ -144,8 +147,8 @@ func (app App) LoadFeed() (Feed, error) {
 }
 
 // Internal storage, not publishing.
-func (app App) SaveFeed(feed Feed) error {
-	defer un(trace("App.SaveFeed"))
+func (app Server) SaveFeed(feed Feed) error {
+	defer un(trace("Server.SaveFeed"))
 	feed.Id = ""
 	feed.XmlBase = ""
 	feed.Generator = nil
@@ -172,8 +175,6 @@ func handleMux() http.HandlerFunc {
 		}
 
 		path_info := os.Getenv("PATH_INFO")
-		//	script_name :=
-		urlBase := mustParseURL(string(xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))))
 
 		// unpack (nonexisting) static files
 		func() {
@@ -197,8 +198,18 @@ func handleMux() http.HandlerFunc {
 		}()
 
 		// get config and session
-		app := App{}
+		app := Server{}
 		{
+			app.cgi = func(u url.URL, cgi string) url.URL {
+				u.Path = cgi
+				return u
+			}(*r.URL, os.Getenv("SCRIPT_NAME"))
+			app.url = app.cgi
+			app.url.Path = path.Dir(app.cgi.Path)
+			if !strings.HasSuffix(app.url.Path, "/") {
+				app.url.Path += "/"
+			}
+
 			var err error
 			if app.cfg, err = LoadConfig(); err != nil {
 				http.Error(w, "Couldn't load config: "+err.Error(), http.StatusInternalServerError)
@@ -212,7 +223,7 @@ func handleMux() http.HandlerFunc {
 				// what if the cookie has changed? Ignore cookie errors, especially on new/changed keys.
 				app.ses, _ = sessions.NewCookieStore(buf).Get(r, "ShaarliGo")
 				app.ses.Options = &sessions.Options{
-					Path:     urlBase.EscapedPath(), // to match all requests
+					Path:     app.url.EscapedPath(), // to match all requests
 					MaxAge:   int(toSession / time.Second),
 					HttpOnly: true,
 				}
@@ -225,9 +236,7 @@ func handleMux() http.HandlerFunc {
 
 		switch path_info {
 		case "/about":
-			base := *r.URL
-			base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "about") + "/"
-			http.Redirect(w, r, base.Path, http.StatusFound)
+			http.Redirect(w, r, "about/", http.StatusFound)
 
 			return
 		case "/about/":

@@ -105,7 +105,7 @@ func TestAppendPageNumber(t *testing.T) {
 }
 
 func TestWriteFeedsEmpty0(t *testing.T) {
-	assert.Equal(t, "feed/@xml:base must be set to an absolute URL with a trailing slash", App{}.PublishFeedsForModifiedEntries(Feed{}, nil).Error(), "aha")
+	assert.Equal(t, "feed/@xml:base must be set to an absolute URL with a trailing slash", Server{}.PublishFeedsForModifiedEntries(Feed{}, nil).Error(), "aha")
 }
 
 func TestWriteFeedsAddOneAndOneAndRemoveFirst(t *testing.T) {

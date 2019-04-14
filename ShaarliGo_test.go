@@ -29,26 +29,28 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/yhat/scrape"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 
 	"github.com/stretchr/testify/assert"
+	"net/http/httptest"
 	"testing"
 )
 
 const dirTmp = "go-test~"
 
 // https://stackoverflow.com/a/42310257
-func setupTest(t *testing.T) func(t *testing.T) {
-	// t.Log("sub test")
+func prepTeardown(t *testing.T) func() {
+	// t.Log("sub test [")
 	assert.Nil(t, os.RemoveAll(dirTmp), "aha")
 	assert.Nil(t, os.MkdirAll(dirTmp, 0700), "aha")
 	cwd, _ := os.Getwd()
 	os.Chdir(dirTmp)
-	return func(t *testing.T) {
-		// t.Log("sub test")
+	return func() {
+		// t.Log("] sub test")
 		os.Chdir(cwd)
 		// assert.Nil(t, os.RemoveAll(dirTmp), "aha")
 	}
@@ -84,6 +86,45 @@ func TestUrlParseµ(t *testing.T) {
 	u := mustParseURL("http://example.com/µ/")
 	assert.Equal(t, "/µ/", u.Path, "omg")
 	assert.Equal(t, "/%C2%B5/", u.EscapedPath(), "omg")
+}
+
+func _Test_GetConfigRaw(t *testing.T) {
+	defer prepTeardown(t)()
+
+	os.Setenv("PATH_INFO", "/config/")
+	os.Setenv("SCRIPT_NAME", ".")
+	ts := httptest.NewServer(handleMux())
+	defer ts.Close()
+
+	c := http.Client{Timeout: time.Second}
+	r, err := c.Get(ts.URL + "/config/")
+	assert.Nil(t, err, "aha")
+	assert.Equal(t, http.StatusOK, r.StatusCode, "aha")
+
+	assert.Equal(t, "go-test", r.Header.Get("Server"), "aha")
+	assert.Nil(t, r.Header["Status"], "aha")
+	b, err := ioutil.ReadAll(r.Body)
+	assert.Nil(t, err, "aha")
+	assert.Equal(t, xml.Header+`<?xml-stylesheet type='text/xsl' href='../../assets/default/de/config.xslt'?>
+<!--
+  The html you see here is for compatibilty with vanilla shaarli.
+
+  The main reason is backward compatibility for e.g. http://app.mro.name/ShaarliOS and
+  https://github.com/dimtion/Shaarlier as tested via
+  https://code.mro.name/mro/Shaarli-API-test
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head/>
+  <body>
+    <form method="post" name="installform" id="installform">
+      <input type="text" name="setlogin" value=""/>
+      <input type="password" name="setpassword" />
+      <input type="text" name="title" value=""/>
+      <input type="submit" name="Save" value="Save config" />
+    </form>
+  </body>
+</html>
+`, string(b), "aha")
 }
 
 func doHttp(method, path_info string) (*http.Response, error) {
@@ -149,8 +190,7 @@ func doPost(path_info string, body []byte) (*http.Response, error) {
 }
 
 func TestGetConfigRaw(t *testing.T) {
-	teardownTest := setupTest(t)
-	defer teardownTest(t)
+	defer prepTeardown(t)()
 
 	r, err := doGet("/config/")
 
@@ -184,8 +224,7 @@ func TestGetConfigRaw(t *testing.T) {
 }
 
 func TestGetConfigScraped(t *testing.T) {
-	teardownTest := setupTest(t)
-	defer teardownTest(t)
+	defer prepTeardown(t)()
 
 	r, err := doGet("/config/")
 
@@ -208,8 +247,7 @@ func TestGetConfigScraped(t *testing.T) {
 }
 
 func TestPostConfig(t *testing.T) {
-	teardownTest := setupTest(t)
-	defer teardownTest(t)
+	defer prepTeardown(t)()
 
 	r, err := doPost("/config/", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
 
@@ -232,8 +270,7 @@ func TestPostConfig(t *testing.T) {
 }
 
 func TestGetLoginWithoutRedir(t *testing.T) {
-	teardownTest := setupTest(t)
-	defer teardownTest(t)
+	defer prepTeardown(t)()
 
 	r, err := doPost("/config/", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
 	assert.Nil(t, err, "aha")
@@ -258,8 +295,7 @@ func TestGetLoginWithoutRedir(t *testing.T) {
 }
 
 func TestGetLoginWithRedir(t *testing.T) {
-	teardownTest := setupTest(t)
-	defer teardownTest(t)
+	defer prepTeardown(t)()
 
 	os.Unsetenv("COOKIE")
 	r, err := doPost("/config/", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
@@ -286,8 +322,7 @@ func TestGetLoginWithRedir(t *testing.T) {
 }
 
 func _TestGetPostNew(t *testing.T) {
-	teardownTest := setupTest(t)
-	defer teardownTest(t)
+	defer prepTeardown(t)()
 
 	r, err := doPost("/config", []byte(`title=A&setlogin=B&setpassword=123456789012&import_shaarli_url=&import_shaarli_setlogin=&import_shaarli_setpassword=`))
 	assert.Nil(t, err, "aha")

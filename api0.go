@@ -26,7 +26,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
 	"regexp"
 	"sort"
@@ -52,7 +51,7 @@ func parseLinkUrl(raw string) *url.URL {
 	}
 }
 
-func (app *App) handleDoLogin() http.HandlerFunc {
+func (app *Server) handleDoLogin() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		now := time.Now()
 		switch r.Method {
@@ -128,7 +127,7 @@ func (app *App) handleDoLogin() http.HandlerFunc {
 	}
 }
 
-func (app *App) handleDoLogout() http.HandlerFunc {
+func (app *Server) handleDoLogout() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := app.stopSession(w, r); err != nil {
 			http.Error(w, "Couldn't end session: "+err.Error(), http.StatusInternalServerError)
@@ -168,10 +167,9 @@ func urlFromPostParam(post string) *url.URL {
 
 /* Store identifier of edited entry in cookie.
  */
-func (app *App) handleDoPost() http.HandlerFunc {
+func (app *Server) handleDoPost() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		now := time.Now()
-		xmlBase := func(u *url.URL) Iri { return xmlBaseFromRequestURL(u, os.Getenv("SCRIPT_NAME")) }
 		switch r.Method {
 		case http.MethodGet:
 			// 'GET': send a form to the client
@@ -192,7 +190,7 @@ func (app *App) handleDoPost() http.HandlerFunc {
 			feed, _ := app.LoadFeed()
 			post := sanitiseURLString(params["post"][0], app.cfg.UrlCleaner)
 
-			feed.XmlBase = xmlBase(r.URL)
+			feed.XmlBase = Iri(app.url.String())
 			_, ent := feed.findEntryByIdSelfOrUrl(post)
 			if nil == ent {
 				// nothing found, so we need a new (dangling, unsaved) entry:
@@ -311,7 +309,7 @@ func (app *App) handleDoPost() http.HandlerFunc {
 
 						// make persistent
 						feed, _ := app.LoadFeed()
-						feed.XmlBase = xmlBase(r.URL)
+						feed.XmlBase = Iri(app.url.String())
 
 						lf_url := r.FormValue("lf_url")
 						_, ent := feed.findEntryById(identifier)
@@ -386,7 +384,7 @@ func (app *App) handleDoPost() http.HandlerFunc {
 					}
 					// todo: POSSE
 					// refresh feeds
-					feed.XmlBase = xmlBase(r.URL)
+					feed.XmlBase = Iri(app.url.String())
 					if err := app.PublishFeedsForModifiedEntries(feed, []*Entry{ent}); err != nil {
 						log.Println("couldn't write feeds: ", err.Error())
 						http.Error(w, "couldn't write feeds: "+err.Error(), http.StatusInternalServerError)
@@ -421,7 +419,7 @@ func (app *App) handleDoPost() http.HandlerFunc {
 	}
 }
 
-func (app *App) handleDoCheckLoginAfterTheFact() http.HandlerFunc {
+func (app *Server) handleDoCheckLoginAfterTheFact() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		now := time.Now()
 		switch r.Method {

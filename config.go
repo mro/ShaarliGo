@@ -23,22 +23,12 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/url"
-	"os"
 	"path"
 	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
-
-func xmlBaseFromRequestURL(r *url.URL, scriptName string) Iri {
-	dir := path.Dir(scriptName)
-	if dir[len(dir)-1:] != "/" {
-		dir = dir + "/"
-	}
-	return Iri(r.Scheme + "://" + r.Host + dir)
-}
 
 func mustParseRFC3339(str string) time.Time {
 	if ret, err := time.Parse(time.RFC3339, str); err != nil {
@@ -48,7 +38,7 @@ func mustParseRFC3339(str string) time.Time {
 	}
 }
 
-func (app *App) handleSettings() http.HandlerFunc {
+func (app *Server) handleSettings() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		now := time.Now()
 		if app.cfg.IsConfigured() && !app.IsLoggedIn(now) {
@@ -87,7 +77,7 @@ func (app *App) handleSettings() http.HandlerFunc {
 				http.Error(w, "couldn't load seed feed feeds: "+err.Error(), http.StatusInternalServerError)
 				return
 			} else {
-				feed.XmlBase = xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
+				feed.XmlBase = Iri(app.url.String())
 				feed.Id = Id(feed.XmlBase) // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
 				feed.Title = HumanText{Body: title}
 				feed.Authors = []Person{Person{Name: uid}}

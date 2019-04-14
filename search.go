@@ -21,7 +21,6 @@ import (
 	"encoding/xml"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
 	"sort"
 	"strconv"
@@ -61,7 +60,7 @@ func rankEntryTerms(entry *Entry, terms []string, matcher *search.Matcher) int {
 	return rank
 }
 
-func (app *App) handleSearch() http.HandlerFunc {
+func (app *Server) handleSearch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		now := time.Now()
 
@@ -89,8 +88,7 @@ func (app *App) handleSearch() http.HandlerFunc {
 				}
 				qu := cgiName + "/search/" + "?" + "q" + "=" + url.QueryEscape(strings.Join(terms, " "))
 
-				xmlBase := mustParseURL(string(xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))))
-				catScheme := Iri(xmlBase.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String() + "/")
+				catScheme := Iri(app.url.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String() + "/")
 
 				feed, _ := app.LoadFeed()
 
@@ -98,8 +96,8 @@ func (app *App) handleSearch() http.HandlerFunc {
 				matcher := search.New(lang, search.IgnoreDiacritics, search.IgnoreCase)
 				ret := feed.Search(func(entry *Entry) int { return rankEntryTerms(entry, terms, matcher) })
 
-				ret.XmlBase = Iri(xmlBase.String())
-				ret.Id = Id(xmlBase.ResolveReference(mustParseURL(qu)).String())
+				ret.XmlBase = Iri(app.url.String())
+				ret.Id = Id(app.url.ResolveReference(mustParseURL(qu)).String())
 				ret.Generator = &Generator{Uri: myselfNamespace, Version: version + "+" + GitSHA1, Body: "🌺 ShaarliGo"}
 				ret.XmlNSShaarliGo = myselfNamespace
 				ret.SearchTerms = strings.Join(q, " ") // rather use http://www.opensearch.org/Specifications/OpenSearch/1.1#Example_of_OpenSearch_response_elements_in_Atom_1.0
@@ -126,7 +124,7 @@ func (app *App) handleSearch() http.HandlerFunc {
 					// change entries for output but don't save the change:
 					selfURL := mustParseURL(path.Join(uriPub, uriPosts, string(item.Id)) + "/")
 					editURL := strings.Join([]string{cgiName, "?post=", selfURL.String()}, "")
-					item.Id = Id(xmlBase.ResolveReference(selfURL).String()) // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
+					item.Id = Id(app.url.ResolveReference(selfURL).String()) // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
 					item.Links = append(item.Links,
 						Link{Rel: relSelf, Href: selfURL.String()},
 						Link{Rel: relEdit, Href: editURL},

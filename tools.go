@@ -24,14 +24,13 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 )
 
 const timeoutShaarliImportFetch = time.Minute
 
-func (app *App) handleTools() http.HandlerFunc {
+func (app *Server) handleTools() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		now := time.Now()
 
@@ -44,8 +43,6 @@ func (app *App) handleTools() http.HandlerFunc {
 			http.Redirect(w, r, cgiName+"/config", http.StatusPreconditionFailed)
 			return
 		}
-
-		xmlBase := xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))
 
 		switch r.Method {
 		case http.MethodGet:
@@ -126,7 +123,7 @@ $ rm -rf .htaccess assets app/delete_me_to_restore</code>
 `)
 				data := map[string]string{
 					"title":             app.cfg.Title,
-					"xml_base":          string(xmlBase + cgiName),
+					"xml_base":          app.cgi.String(),
 					"tag_rename_old":    "",
 					"tag_rename_new":    "",
 					"other_shaarli_url": "",
@@ -154,7 +151,7 @@ $ rm -rf .htaccess assets app/delete_me_to_restore</code>
 							log.Printf("Import %d entries from %v\n", len(importedFeed.Entries), url)
 							cat := Category{Term: strings.TrimSpace(strings.TrimPrefix(r.FormValue("shaarli_import_tag"), "#"))}
 							feed, _ := app.LoadFeed()
-							feed.XmlBase = xmlBase
+							feed.XmlBase = Iri(app.url.String())
 							// feed.Id = feed.XmlBase
 							impEnt := make([]*Entry, 0, len(importedFeed.Entries))
 							for _, entry := range importedFeed.Entries {
@@ -185,7 +182,7 @@ $ rm -rf .htaccess assets app/delete_me_to_restore</code>
 					}
 				}
 			}
-			http.Redirect(w, r, string(xmlBase), http.StatusFound)
+			http.Redirect(w, r, "../..", http.StatusFound)
 		}
 	}
 }

@@ -307,7 +307,7 @@ func (feed Feed) PagedFeeds(complete []Feed, linksPerPage int) ([]Feed, error) {
 	return pages, nil
 }
 
-func (app App) PublishFeedsForModifiedEntries(feed Feed, entries []*Entry) error {
+func (app Server) PublishFeedsForModifiedEntries(feed Feed, entries []*Entry) error {
 	defer un(trace("App.PublishFeedsForModifiedEntries"))
 
 	feed.Generator = &Generator{Uri: myselfNamespace, Version: version + "+" + GitSHA1, Body: "🌺 ShaarliGo"}
@@ -332,7 +332,7 @@ func (app App) PublishFeedsForModifiedEntries(feed Feed, entries []*Entry) error
 }
 
 // create a lock file to avoid races and then call PublishFeed in loop
-func (app App) PublishFeeds(feeds []Feed, force bool) error {
+func (app Server) PublishFeeds(feeds []Feed, force bool) error {
 	defer un(trace("App.PublishFeeds"))
 	strFileLock := filepath.Join(dirApp, "var", "lock")
 
@@ -387,7 +387,7 @@ func (app App) PublishFeeds(feeds []Feed, force bool) error {
 	return nil
 }
 
-func (app App) PublishFeed(feed Feed, force bool) error {
+func (app Server) PublishFeed(feed Feed, force bool) error {
 	const feedFileName = "index.xml.gz"
 	const xsltFileName = "posts.xslt"
 	uri := LinkRelSelf(feed.Links).Href
@@ -456,7 +456,7 @@ func (app App) PublishFeed(feed Feed, force bool) error {
 	return err
 }
 
-func (app App) PublishEntry(ent *Entry, force bool) error {
+func (app Server) PublishEntry(ent *Entry, force bool) error {
 	const feedFileName = "index.xml.gz"
 	const xsltFileName = "posts.xslt"
 	uri := LinkRelSelf(ent.Links).Href

@@ -39,13 +39,6 @@ func TestBcrypt(t *testing.T) {
 	assert.NotNil(t, err, "soso")
 }
 
-func TestXmlBaseFromRequestURL(t *testing.T) {
-	t.Parallel()
-	assert.Equal(t, Iri("http://example.com/"), xmlBaseFromRequestURL(mustParseURL("http://example.com/shaarligo.cgi"), "/shaarligo.cgi"), "soso")
-	assert.Equal(t, Iri("http://example.com/b/"), xmlBaseFromRequestURL(mustParseURL("http://example.com/b/shaarligo.cgi"), "/b/shaarligo.cgi"), "soso")
-	assert.Equal(t, Iri("http://example.com/b/"), xmlBaseFromRequestURL(mustParseURL("http://example.com/b/shaarligo.cgi/tools/?post=http://example.com/b/shaarligo.cgi/tools"), "/b/shaarligo.cgi"), "soso")
-}
-
 func TestLoadFeedSeed(t *testing.T) {
 	t.Parallel()
 	feed, err := FeedFromFileName("testdata/config-feed-seed.xml")
