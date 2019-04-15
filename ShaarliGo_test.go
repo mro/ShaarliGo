@@ -40,7 +40,7 @@ import (
 	"testing"
 )
 
-const dirTmp = "go-test~"
+const dirTmp = "go-test~" // volatile cwd while testing
 
 // https://stackoverflow.com/a/42310257
 func prepTeardown(t *testing.T) func() {
@@ -48,11 +48,12 @@ func prepTeardown(t *testing.T) func() {
 	assert.Nil(t, os.RemoveAll(dirTmp), "aha")
 	assert.Nil(t, os.MkdirAll(dirTmp, 0700), "aha")
 	cwd, _ := os.Getwd()
+
 	os.Chdir(dirTmp)
 	return func() {
 		// t.Log("] sub test")
 		os.Chdir(cwd)
-		// assert.Nil(t, os.RemoveAll(dirTmp), "aha")
+		assert.Nil(t, os.RemoveAll(dirTmp), "aha")
 	}
 }
 
@@ -88,23 +89,19 @@ func TestUrlParseµ(t *testing.T) {
 	assert.Equal(t, "/%C2%B5/", u.EscapedPath(), "omg")
 }
 
-func _Test_GetConfigRaw(t *testing.T) {
+func TestGetConfigRaw(t *testing.T) {
 	defer prepTeardown(t)()
 
-	os.Setenv("PATH_INFO", "/config/")
-	os.Setenv("SCRIPT_NAME", ".")
+	pi := "/config/"
+	os.Setenv("PATH_INFO", pi)
 	ts := httptest.NewServer(handleMux())
 	defer ts.Close()
-
 	c := http.Client{Timeout: time.Second}
-	r, err := c.Get(ts.URL + "/config/")
-	assert.Nil(t, err, "aha")
+
+	r, _ := c.Get(ts.URL + pi)
 	assert.Equal(t, http.StatusOK, r.StatusCode, "aha")
 
-	assert.Equal(t, "go-test", r.Header.Get("Server"), "aha")
-	assert.Nil(t, r.Header["Status"], "aha")
-	b, err := ioutil.ReadAll(r.Body)
-	assert.Nil(t, err, "aha")
+	b, _ := ioutil.ReadAll(r.Body)
 	assert.Equal(t, xml.Header+`<?xml-stylesheet type='text/xsl' href='../../assets/default/de/config.xslt'?>
 <!--
   The html you see here is for compatibilty with vanilla shaarli.
@@ -125,6 +122,30 @@ func _Test_GetConfigRaw(t *testing.T) {
   </body>
 </html>
 `, string(b), "aha")
+
+	fi, _ := os.Stat(filepath.Join("app", "var", "o.atom"))
+	assert.Equal(t, int64(4037), fi.Size(), "uhu")
+}
+
+func TestGetConfigScraped(t *testing.T) {
+	defer prepTeardown(t)()
+
+	pi := "/config/"
+	os.Setenv("PATH_INFO", pi)
+	ts := httptest.NewServer(handleMux())
+	defer ts.Close()
+	c := http.Client{Timeout: time.Second}
+
+	r, _ := c.Get(ts.URL + pi)
+	assert.Equal(t, http.StatusOK, r.StatusCode, "aha")
+	assert.Equal(t, "200 OK", r.Status, "aha")
+	fo, _ := formValuesFromReader(r.Body, "installform")
+	assert.Equal(t, url.Values(url.Values{
+		"setlogin":    []string{""},
+		"setpassword": []string{""},
+		"title":       []string{""},
+		"Save":        []string{"Save config"},
+	}), fo, "aha")
 }
 
 func doHttp(method, path_info string) (*http.Response, error) {
@@ -187,63 +208,6 @@ func doPost(path_info string, body []byte) (*http.Response, error) {
 	ret, err := doHttp("POST", path_info)
 
 	return ret, err
-}
-
-func TestGetConfigRaw(t *testing.T) {
-	defer prepTeardown(t)()
-
-	r, err := doGet("/config/")
-
-	assert.Nil(t, err, "aha")
-	assert.Equal(t, http.StatusOK, r.StatusCode, "aha")
-	assert.Equal(t, "200 OK", r.Status, "aha")
-	assert.Equal(t, "go-test", r.Header["Server"][0], "aha")
-	assert.Nil(t, r.Header["Status"], "aha")
-	body, err := ioutil.ReadAll(r.Body)
-	assert.Nil(t, err, "aha")
-	assert.Equal(t, xml.Header+`<?xml-stylesheet type='text/xsl' href='../../assets/default/de/config.xslt'?>
-<!--
-  The html you see here is for compatibilty with vanilla shaarli.
-
-  The main reason is backward compatibility for e.g. http://app.mro.name/ShaarliOS and
-  https://github.com/dimtion/Shaarlier as tested via
-  https://code.mro.name/mro/Shaarli-API-test
--->
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head/>
-  <body>
-    <form method="post" name="installform" id="installform">
-      <input type="text" name="setlogin" value=""/>
-      <input type="password" name="setpassword" />
-      <input type="text" name="title" value=""/>
-      <input type="submit" name="Save" value="Save config" />
-    </form>
-  </body>
-</html>
-`, string(body), "aha")
-}
-
-func TestGetConfigScraped(t *testing.T) {
-	defer prepTeardown(t)()
-
-	r, err := doGet("/config/")
-
-	assert.Nil(t, err, "aha")
-	assert.Equal(t, http.StatusOK, r.StatusCode, "aha")
-	assert.Equal(t, "200 OK", r.Status, "aha")
-	assert.Equal(t, "go-test", r.Header["Server"][0], "aha")
-	assert.Nil(t, r.Header["Status"], "aha")
-
-	root, err := html.Parse(r.Body)
-	assert.Nil(t, err, "aha")
-	assert.NotNil(t, root, "aha")
-
-	all := scrape.FindAll(root, func(n *html.Node) bool { return atom.Input == n.DataAtom })
-	assert.Equal(t, 4, len(all), "aha")
-	assert.Equal(t, "setlogin", scrape.Attr(all[0], "name"), "aha")
-	assert.Equal(t, "setpassword", scrape.Attr(all[1], "name"), "aha")
-	assert.Equal(t, "title", scrape.Attr(all[2], "name"), "aha")
-	assert.Equal(t, "Save", scrape.Attr(all[3], "name"), "aha")
 }
 
 func TestPostConfig(t *testing.T) {

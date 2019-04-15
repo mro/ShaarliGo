@@ -25,6 +25,10 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/yhat/scrape"
+	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 func contains(haystack []string, needle string) bool {
@@ -56,4 +60,37 @@ func HttpGetBody(url *url.URL, timeout time.Duration) (io.Reader, error) {
 		}
 		return resp.Body, err
 	}
+}
+
+func formValuesFromReader(r io.Reader, name string) (ret url.Values, err error) {
+	root, err := html.Parse(r) // assumes r is UTF8
+	if err != nil {
+		return ret, err
+	}
+
+	for _, form := range scrape.FindAll(root, func(n *html.Node) bool {
+		return atom.Form == n.DataAtom &&
+			(name == scrape.Attr(n, "name") || name == scrape.Attr(n, "id"))
+	}) {
+		ret := url.Values{}
+		for _, inp := range scrape.FindAll(form, func(n *html.Node) bool {
+			return atom.Input == n.DataAtom || atom.Textarea == n.DataAtom
+		}) {
+			n := scrape.Attr(inp, "name")
+			if n == "" {
+				n = scrape.Attr(inp, "id")
+			}
+
+			ty := scrape.Attr(inp, "type")
+			v := scrape.Attr(inp, "value")
+			if atom.Textarea == inp.DataAtom {
+				v = scrape.Text(inp)
+			} else if v == "" && ty == "checkbox" {
+				v = scrape.Attr(inp, "checked")
+			}
+			ret.Set(n, v)
+		}
+		return ret, err // return on first occurence
+	}
+	return ret, err
 }
