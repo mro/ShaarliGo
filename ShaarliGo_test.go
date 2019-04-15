@@ -125,6 +125,9 @@ func TestGetConfigRaw(t *testing.T) {
 
 	fi, _ := os.Stat(filepath.Join("app", "var", "o.atom"))
 	assert.Equal(t, int64(4037), fi.Size(), "uhu")
+
+	_, err := os.Stat(filepath.Join("tpl", "tools.html"))
+	assert.Equal(t, true, os.IsNotExist(err), "oje")
 }
 
 func TestGetConfigScraped(t *testing.T) {

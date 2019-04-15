@@ -183,6 +183,9 @@ func handleMux() http.HandlerFunc {
 			}
 			defer un(trace("RestoreAssets"))
 			for _, filename := range AssetNames() {
+				if filepath.Dir(filename) == "tpl" {
+					continue
+				}
 				if _, err := os.Stat(filename); os.IsNotExist(err) {
 					if err := RestoreAsset(".", filename); err != nil {
 						http.Error(w, "failed "+filename+": "+err.Error(), http.StatusInternalServerError)

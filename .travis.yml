@@ -32,6 +32,6 @@ install:
 - go get github.com/stretchr/testify
 - go get golang.org/x/tools/blog/atom
 script:
-- go-bindata -ignore=.DS_Store -prefix static static/...
-- go vet -x
+- go-bindata -ignore=.DS_Store -prefix static static/... tpl/...
+- go vet
 - go test -v
