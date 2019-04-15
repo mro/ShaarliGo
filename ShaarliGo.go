@@ -202,6 +202,7 @@ func handleMux() http.HandlerFunc {
 		{
 			app.cgi = func(u url.URL, cgi string) url.URL {
 				u.Path = cgi
+				u.RawQuery = ""
 				return u
 			}(*r.URL, os.Getenv("SCRIPT_NAME"))
 			app.url = app.cgi
