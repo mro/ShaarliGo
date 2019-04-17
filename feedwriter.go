@@ -273,7 +273,7 @@ func (feed Feed) PagedFeeds(complete []Feed, linksPerPage int) ([]Feed, error) {
 	xmlBase := mustParseURL(string(feed.XmlBase))
 	if !xmlBase.IsAbs() || !strings.HasSuffix(xmlBase.Path, "/") {
 		log.Printf("xml:base is '%s'\n", xmlBase)
-		return []Feed{}, errors.New("feed/@xml:base must be set to an absolute URL with a trailing slash")
+		return []Feed{}, errors.New("feed/@xml:base must be set to an absolute URL with a trailing slash but not '" + xmlBase.String() + "'")
 	}
 
 	pages := make([]Feed, 0, 2*len(complete))

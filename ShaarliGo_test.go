@@ -151,6 +151,59 @@ func TestGetConfigScraped(t *testing.T) {
 	}), fo, "aha")
 }
 
+func _TestHttpServer(t *testing.T) {
+	defer prepTeardown(t)()
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//assert.Equal(t, true, r.URL.IsAbs(), "aha")
+		//panic(r.URL.String())
+	}))
+	defer ts.Close()
+
+	c := http.Client{Timeout: time.Second}
+	_, err := c.Get("/uhu")
+	assert.Equal(t, nil, err, "aha")
+}
+
+func _TestPostConfigG(t *testing.T) {
+	defer prepTeardown(t)()
+
+	cgi := "/sub/shaarligo.cgi"
+	pi := "/config/"
+	os.Setenv("SCRIPT_NAME", cgi)
+	os.Setenv("PATH_INFO", pi)
+
+	ts := httptest.NewServer(handleMux())
+	defer ts.Close()
+
+	c := http.Client{Timeout: time.Second}
+
+	r, err := c.PostForm(ts.URL+cgi+pi, url.Values{
+		"title":                      []string{"A"},
+		"setlogin":                   []string{"B"},
+		"setpassword":                []string{"123456789012"},
+		"import_shaarli_url":         []string{""},
+		"import_shaarli_setlogin":    []string{""},
+		"import_shaarli_setpassword": []string{""},
+	})
+
+	assert.Equal(t, nil, err, "aha")
+	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
+	assert.Equal(t, "/sub/"+uriPubPosts, r.Header["Location"], "aha")
+
+	body, _ := ioutil.ReadAll(r.Body)
+	assert.Equal(t, "", string(body), "soso")
+
+	cfg, err := ioutil.ReadFile(filepath.Join(dirApp, "config.yaml"))
+	assert.Nil(t, err, "aha")
+	assert.True(t, strings.HasPrefix(string(cfg), "title: A\nuid: B\n"), string(cfg))
+
+	//	assert.Equal(t, 1, len(r.Header["Set-Cookie"]), "naja")
+
+	// stat, _ := os.Stat(uriPub)
+	// assert.Equal(t, 0755, int(stat.Mode()&os.ModePerm), "ach, wieso?")
+}
+
 func doHttp(method, path_info string) (*http.Response, error) {
 	cgi := "shaarligo.cgi"
 	os.Setenv("SCRIPT_NAME", "/sub/"+cgi)
