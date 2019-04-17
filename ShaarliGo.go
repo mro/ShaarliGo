@@ -160,6 +160,10 @@ func (app Server) SaveFeed(feed Feed) error {
 func handleMux() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer un(trace(strings.Join([]string{"v", version, "+", GitSHA1, " ", r.RemoteAddr, " ", r.Method, " ", r.URL.String()}, "")))
+		if !r.URL.IsAbs() {
+			log.Printf("request URL not absolute >>> %s <<<", r.URL)
+		}
+
 		// w.Header().Set("Server", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
 		// w.Header().Set("X-Powered-By", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
 		now := time.Now()

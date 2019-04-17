@@ -151,17 +151,17 @@ func TestGetConfigScraped(t *testing.T) {
 	}), fo, "aha")
 }
 
-func _TestHttpServer(t *testing.T) {
+func TestHttpServer(t *testing.T) {
 	defer prepTeardown(t)()
 
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//assert.Equal(t, true, r.URL.IsAbs(), "aha")
-		//panic(r.URL.String())
-	}))
+	// Using this server doesn't result in absolute request urls as is the case running as CGI.
+	// And Atom needs absolute urls.
+	// Shaarligo relies on them, however.
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 	defer ts.Close()
 
 	c := http.Client{Timeout: time.Second}
-	_, err := c.Get("/uhu")
+	_, err := c.Get(ts.URL + "/uhu")
 	assert.Equal(t, nil, err, "aha")
 }
 
