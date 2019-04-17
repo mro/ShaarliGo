@@ -209,7 +209,7 @@ func handleMux() http.HandlerFunc {
 				return u
 			}(*r.URL, os.Getenv("SCRIPT_NAME"))
 			app.url = app.cgi
-			app.url.Path += "/.."
+			app.url.Path = path.Dir(app.cgi.Path)
 			if !strings.HasSuffix(app.url.Path, "/") {
 				app.url.Path += "/"
 			}
