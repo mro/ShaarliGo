@@ -28,7 +28,7 @@
 // app/var/stage/
 // app/var/old/
 // assets/default/de/
-// pub/posts/
+// o/p/
 //
 package main
 
@@ -36,6 +36,7 @@ import (
 	"encoding/base64"
 	"encoding/gob"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -68,8 +69,17 @@ func init() {
 func trace(name string) (string, time.Time) { return name, time.Now() }
 func un(name string, start time.Time)       { log.Printf("%s took %s", name, time.Since(start)) }
 
+// are we running cli
+func isCli() bool {
+	return 0 == len(os.Getenv("REQUEST_METHOD"))
+}
+
 // evtl. as a server, too: http://www.dav-muz.net/blog/2013/09/how-to-use-go-and-fastcgi/
 func main() {
+	if isCli() {
+		fmt.Fprintf(os.Stdout, "%sv%s+%s\n", myselfNamespace, version, GitSHA1)
+		return
+	}
 	if false {
 		// lighttpd doesn't seem to like more than one (per-vhost) server.breakagelog
 		log.SetOutput(os.Stderr)

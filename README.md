@@ -58,9 +58,9 @@ URL.
 
 ## Install / Update
 
-Linux amd64:
+bash:
 
-1. `$ curl -L http://purl.mro.name/shaarligo_cgi.gz | tee shaarligo_cgi.gz | gunzip > shaarligo.cgi && chmod a+x shaarligo.cgi`
+1. `$ curl -L http://purl.mro.name/shaarligo-$(uname -s)-$(uname -m).cgi.gz | tee shaarligo.cgi.gz | gunzip > shaarligo.cgi && chmod a+x shaarligo.cgi`
 2. visit in your browser: http://my.web.space/subdir/shaarligo.cgi
 
 done!

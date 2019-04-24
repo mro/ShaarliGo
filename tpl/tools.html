@@ -15,10 +15,9 @@
       <br class="br"/>
       <code>$ ssh <kbd>myserver.example.com</kbd><br class="br"/>
 $ cd <kbd>filesystem/path/to/</kbd><br class="br"/>
-$ curl -R -L -o shaarligo.cgi.gz <a href="http://purl.mro.name/shaarligo_cgi.gz">http://purl.mro.name/shaarligo_cgi.gz</a> &amp;&amp; gunzip shaarligo.cgi.gz<br class="br"/>
-$ chmod a+x shaarligo.cgi<br class="br"/>
+$ curl -L http://purl.mro.name/shaarligo-$(uname -s)-$(uname -m).cgi.gz | tee shaarligo.cgi.gz | gunzip &gt;         shaarligo.cgi &amp;&amp; chmod a+x shaarligo.cgi<br class="br"/>
 $ ls -l shaarligo?cgi*<br class="br"/>
-$ rm -rf .htaccess assets app/delete_me_to_restore</code>
+$ rm -rf .htaccess assets app/delete_me_to_restore app/.htaccess app/lighttpd.conf</code>
     </li>
 
     <li id="config"><a href="../config/">Config</a></li>
