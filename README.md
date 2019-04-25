@@ -32,9 +32,9 @@ templating, JS optional.
 | Functionality   |           |      |    ×   |            |
 | Reliability     |           |  ×   |        |            |
 | Usability       |     ×     |      |        |            |
-| Efficiency      |           |      |    ×   |            |
+| Efficiency      |           |  ×   |        |            |
 | Changeability   |           |  ×   |        |            |
-| Portability     |     ×     |      |        |            |
+| Portability     |           |  ×   |        |            |
 
 ## Dependencies
 

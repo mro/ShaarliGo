@@ -73,7 +73,7 @@ func (app *Server) handleSettings() http.HandlerFunc {
 				err = app.cfg.Save()
 			}
 
-			if feed, err := app.LoadFeed(); err != nil {
+			if feed, err := LoadFeed(); err != nil {
 				http.Error(w, "couldn't load seed feed feeds: "+err.Error(), http.StatusInternalServerError)
 				return
 			} else {

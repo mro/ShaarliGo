@@ -1,8 +1,9 @@
+shaarligo.cgi
 shaarligo-*-*.cgi*
+ServerInfo.cgi
 testdata/links.atom.bak
 testdata/links.gob
 testdata/sebsauvage.atom
-ServerInfo.cgi
 settings.sh
 flow.pdf
 neu0.graphmlz

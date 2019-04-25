@@ -177,7 +177,7 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 				return
 			}
 
-			feed, _ := app.LoadFeed()
+			feed, _ := LoadFeed()
 			post := sanitiseURLString(params["post"][0], app.cfg.UrlCleaner)
 
 			feed.XmlBase = Iri(app.url.String())
@@ -281,7 +281,7 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 						log.Println("todo: use returnurl ", returnurl)
 
 						// make persistent
-						feed, _ := app.LoadFeed()
+						feed, _ := LoadFeed()
 						feed.XmlBase = Iri(app.url.String())
 
 						lf_url := r.FormValue("lf_url")
@@ -349,7 +349,7 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 				token := r.FormValue("token")
 				log.Println("todo: check token ", token)
 				// make persistent
-				feed, _ := app.LoadFeed()
+				feed, _ := LoadFeed()
 				if ent := feed.deleteEntryById(identifier); nil != ent {
 					if err := app.SaveFeed(feed); err != nil {
 						http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)

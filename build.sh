@@ -40,7 +40,8 @@ go fmt && go vet && go test --short || { exit $?; }
 tar -czf testdata.tar.gz testdata/*.html testdata/*.atom testdata/*.gob
 
 "${say}" "build localhost"
-go build -ldflags "-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)" -o ~/public_html/b/shaarligo.cgi || { echo "Aua" 1>&2 && exit 1; }
+go build -ldflags "-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)" -o "shaarligo.cgi" || { echo "Aua" 1>&2 && exit 1; }
+cp "shaarligo.cgi" ~/"public_html/b/shaarligo.cgi"
 "${say}" "ok"
 # open "http://localhost/~$(whoami)/b/shaarligo.cgi"
 

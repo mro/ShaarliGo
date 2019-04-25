@@ -90,7 +90,7 @@ func (app *Server) handleSearch() http.HandlerFunc {
 
 				catScheme := Iri(app.url.ResolveReference(mustParseURL(path.Join(uriPub, uriTags))).String() + "/")
 
-				feed, _ := app.LoadFeed()
+				feed, _ := LoadFeed()
 
 				lang := language.Make("de") // todo: should come from the entry, feed, settings, default (in that order)
 				matcher := search.New(lang, search.IgnoreDiacritics, search.IgnoreCase)

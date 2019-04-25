@@ -69,17 +69,64 @@ func init() {
 func trace(name string) (string, time.Time) { return name, time.Now() }
 func un(name string, start time.Time)       { log.Printf("%s took %s", name, time.Since(start)) }
 
+func LoadFeed() (Feed, error) {
+	defer un(trace("LoadFeed"))
+	if feed, err := FeedFromFileName(fileFeedStorage); err != nil {
+		return feed, err
+	} else {
+		for _, ent := range feed.Entries {
+			if 6 == len(ent.Id) {
+				if id, err := base64ToBase24x7(string(ent.Id)); err != nil {
+					log.Printf("Error converting id \"%s\": %s\n", ent.Id, err)
+				} else {
+					log.Printf("shaarli_go_path_0 + \"?(%[1]s|\\?)%[2]s/?$\" => \"%[1]s%[3]s/\",\n", uriPubPosts, ent.Id, id)
+					ent.Id = Id(id)
+				}
+			}
+		}
+		return feed, nil
+	}
+}
+
 // are we running cli
-func isCli() bool {
-	return 0 == len(os.Getenv("REQUEST_METHOD"))
+func runsCli() bool {
+	if 0 != len(os.Getenv("REQUEST_METHOD")) {
+		return false
+	}
+	fmt.Printf("%sv%s+%s#:\n", myselfNamespace, version, GitSHA1)
+
+	cfg, err := LoadConfig()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("  timezone: %s\n", cfg.TimeZone)
+
+	feed, err := LoadFeed()
+	if os.IsNotExist(err) {
+		cwd, _ := os.Getwd()
+		fmt.Fprintf(os.Stderr, "%s: cannot access %s: No such file or directory\n", filepath.Base(os.Args[0]), filepath.Join(cwd, fileFeedStorage))
+		os.Exit(1)
+		return true
+	}
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("  posts: %d\n", len(feed.Entries))
+	//fmt.Printf("  tags:  %d\n", len(feed.Categories))
+	if 0 < len(feed.Entries) {
+		fmt.Printf("  first: %v\n", feed.Entries[len(feed.Entries)-1].Published.Format(time.RFC3339))
+		fmt.Printf("  last:  %v\n", feed.Entries[0].Published.Format(time.RFC3339))
+	}
+
+	return true
 }
 
 // evtl. as a server, too: http://www.dav-muz.net/blog/2013/09/how-to-use-go-and-fastcgi/
 func main() {
-	if isCli() {
-		fmt.Fprintf(os.Stdout, "%sv%s+%s\n", myselfNamespace, version, GitSHA1)
+	if runsCli() {
 		return
 	}
+
 	if false {
 		// lighttpd doesn't seem to like more than one (per-vhost) server.breakagelog
 		log.SetOutput(os.Stderr)
@@ -137,25 +184,6 @@ func (app Server) IsLoggedIn(now time.Time) bool {
 	return ok && now.Before(time.Unix(timeout, 0))
 }
 
-func (app Server) LoadFeed() (Feed, error) {
-	defer un(trace("Server.LoadFeed"))
-	if feed, err := FeedFromFileName(fileFeedStorage); err != nil {
-		return feed, err
-	} else {
-		for _, ent := range feed.Entries {
-			if 6 == len(ent.Id) {
-				if id, err := base64ToBase24x7(string(ent.Id)); err != nil {
-					log.Printf("Error converting id \"%s\": %s\n", ent.Id, err)
-				} else {
-					log.Printf("shaarli_go_path_0 + \"?(%[1]s|\\?)%[2]s/?$\" => \"%[1]s%[3]s/\",\n", uriPubPosts, ent.Id, id)
-					ent.Id = Id(id)
-				}
-			}
-		}
-		return feed, nil
-	}
-}
-
 // Internal storage, not publishing.
 func (app Server) SaveFeed(feed Feed) error {
 	defer un(trace("Server.SaveFeed"))
@@ -170,9 +198,6 @@ func (app Server) SaveFeed(feed Feed) error {
 func handleMux() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer un(trace(strings.Join([]string{"v", version, "+", GitSHA1, " ", r.RemoteAddr, " ", r.Method, " ", r.URL.String()}, "")))
-		if !r.URL.IsAbs() {
-			log.Printf("request URL not absolute >>> %s <<<", r.URL)
-		}
 
 		// w.Header().Set("Server", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
 		// w.Header().Set("X-Powered-By", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
@@ -185,6 +210,20 @@ func handleMux() http.HandlerFunc {
 			} else {
 				http.Error(w, "Sorry, banned", http.StatusNotAcceptable)
 			}
+			return
+		}
+
+		if !r.URL.IsAbs() {
+			log.Printf("request URL not absolute >>> %s <<<", r.URL)
+		}
+		cfg, err := LoadConfig()
+		if err != nil {
+			http.Error(w, "Couldn't load config: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		tz, err := time.LoadLocation(cfg.TimeZone)
+		if err != nil {
+			http.Error(w, "Invalid timezone '"+cfg.TimeZone+"': "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -215,7 +254,7 @@ func handleMux() http.HandlerFunc {
 		}()
 
 		// get config and session
-		app := Server{}
+		app := Server{cfg: cfg, tz: tz}
 		{
 			app.cgi = func(u url.URL, cgi string) url.URL {
 				u.Path = cgi
@@ -229,10 +268,6 @@ func handleMux() http.HandlerFunc {
 			}
 
 			var err error
-			if app.cfg, err = LoadConfig(); err != nil {
-				http.Error(w, "Couldn't load config: "+err.Error(), http.StatusInternalServerError)
-				return
-			}
 			var buf []byte
 			if buf, err = base64.StdEncoding.DecodeString(app.cfg.CookieStoreSecret); err != nil {
 				http.Error(w, "Couldn't get seed: "+err.Error(), http.StatusInternalServerError)
@@ -245,10 +280,6 @@ func handleMux() http.HandlerFunc {
 					MaxAge:   int(toSession / time.Second),
 					HttpOnly: true,
 				}
-			}
-			if app.tz, err = time.LoadLocation(app.cfg.TimeZone); err != nil {
-				http.Error(w, "Invalid timezone '"+app.cfg.TimeZone+"': "+err.Error(), http.StatusInternalServerError)
-				return
 			}
 		}
 

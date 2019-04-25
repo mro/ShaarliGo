@@ -123,7 +123,7 @@ func TestGetConfigRaw(t *testing.T) {
 </html>
 `, string(b), "aha")
 
-	fi, _ := os.Stat(filepath.Join("app", "var", "o.atom"))
+	fi, _ := os.Stat(fileFeedStorage)
 	assert.Equal(t, int64(4037), fi.Size(), "uhu")
 
 	_, err := os.Stat(filepath.Join("tpl", "tools.html"))

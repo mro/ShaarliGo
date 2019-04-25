@@ -84,7 +84,7 @@ func (app *Server) handleTools() http.HandlerFunc {
 						} else {
 							log.Printf("Import %d entries from %v\n", len(importedFeed.Entries), url)
 							cat := Category{Term: strings.TrimSpace(strings.TrimPrefix(r.FormValue("shaarli_import_tag"), "#"))}
-							feed, _ := app.LoadFeed()
+							feed, _ := LoadFeed()
 							feed.XmlBase = Iri(app.url.String())
 							// feed.Id = feed.XmlBase
 							impEnt := make([]*Entry, 0, len(importedFeed.Entries))
