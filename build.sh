@@ -29,6 +29,7 @@ parm="" # "-u"
 "$(go env GOPATH)/bin/go-bindata" -ignore="\\.DS_Store" -ignore=".+\\.woff" -prefix static static/... tpl/...
 
 VERSION="$(grep -F 'version = ' version.go | cut -d \" -f 2)"
+LDFLAGS="-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)"
 
 rm "shaarligo"-*-*".cgi"* 2>/dev/null
 
@@ -40,7 +41,7 @@ go fmt && go vet && go test --short || { exit $?; }
 tar -czf testdata.tar.gz testdata/*.html testdata/*.atom testdata/*.gob
 
 "${say}" "build localhost"
-go build -ldflags "-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)" -o "shaarligo.cgi" || { echo "Aua" 1>&2 && exit 1; }
+go build -ldflags "${LDFLAGS}" -o "shaarligo.cgi" || { echo "Aua" 1>&2 && exit 1; }
 cp "shaarligo.cgi" ~/"public_html/b/shaarligo.cgi"
 "${say}" "ok"
 # open "http://localhost/~$(whoami)/b/shaarligo.cgi"
@@ -51,8 +52,8 @@ go test -bench=.
 
 "${say}" "linux build"
 # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
-env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)" -o "shaarligo-Linux-x86_64.cgi" || { echo "Aua" 1>&2 && exit 1; }
-env GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)" -o "shaarligo-Linux-armv6l.cgi" || { echo "Aua" 1>&2 && exit 1; }
+env GOOS=linux GOARCH=amd64       go build -ldflags="${LDFLAGS}" -o "shaarligo-Linux-x86_64.cgi" || { echo "Aua" 1>&2 && exit 1; }
+env GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="${LDFLAGS}" -o "shaarligo-Linux-armv6l.cgi" || { echo "Aua" 1>&2 && exit 1; }
 # env GOOS=linux GOARCH=386 GO386=387 go build -o "shaarligo-linux-386-${VERSION}" # https://github.com/golang/go/issues/11631
 # env GOOS=darwin GOARCH=amd64 go build -o "shaarligo-darwin-amd64-${VERSION}"
 

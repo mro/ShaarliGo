@@ -46,6 +46,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gorilla/sessions"
@@ -89,7 +90,7 @@ func LoadFeed() (Feed, error) {
 }
 
 // are we running cli
-func runsCli() bool {
+func runCli() bool {
 	if 0 != len(os.Getenv("REQUEST_METHOD")) {
 		return false
 	}
@@ -123,7 +124,7 @@ func runsCli() bool {
 
 // evtl. as a server, too: http://www.dav-muz.net/blog/2013/09/how-to-use-go-and-fastcgi/
 func main() {
-	if runsCli() {
+	if runCli() {
 		return
 	}
 
@@ -145,11 +146,13 @@ func main() {
 		}
 	}
 
+	wg := &sync.WaitGroup{}
 	// - check non-write perm of program?
 	// - check non-http read perm on ./app
-	if err := cgi.Serve(http.HandlerFunc(handleMux())); err != nil {
+	if err := cgi.Serve(http.HandlerFunc(handleMux(wg))); err != nil {
 		log.Fatal(err)
 	}
+	wg.Wait()
 }
 
 type Server struct {
@@ -195,7 +198,7 @@ func (app Server) SaveFeed(feed Feed) error {
 	return feed.SaveToFile(fileFeedStorage)
 }
 
-func handleMux() http.HandlerFunc {
+func handleMux(wg *sync.WaitGroup) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer un(trace(strings.Join([]string{"v", version, "+", GitSHA1, " ", r.RemoteAddr, " ", r.Method, " ", r.URL.String()}, "")))
 

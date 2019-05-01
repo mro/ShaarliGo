@@ -118,7 +118,7 @@ func Htaccess() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: ".htaccess", size: 2334, mode: os.FileMode(436), modTime: time.Unix(1544606277, 0)}
+	info := bindataFileInfo{name: ".htaccess", size: 2334, mode: os.FileMode(420), modTime: time.Unix(1544994709, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -138,7 +138,7 @@ func appHtaccess() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "app/.htaccess", size: 30, mode: os.FileMode(436), modTime: time.Unix(1510177793, 0)}
+	info := bindataFileInfo{name: "app/.htaccess", size: 30, mode: os.FileMode(420), modTime: time.Unix(1499974795, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -158,7 +158,7 @@ func appDelete_me_to_restore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "app/delete_me_to_restore", size: 77, mode: os.FileMode(436), modTime: time.Unix(1541163862, 0)}
+	info := bindataFileInfo{name: "app/delete_me_to_restore", size: 77, mode: os.FileMode(420), modTime: time.Unix(1524993765, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -178,7 +178,7 @@ func appIMustBe403Svg() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "app/i-must-be-403.svg", size: 365, mode: os.FileMode(436), modTime: time.Unix(1512427190, 0)}
+	info := bindataFileInfo{name: "app/i-must-be-403.svg", size: 365, mode: os.FileMode(420), modTime: time.Unix(1511052654, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -198,7 +198,7 @@ func appLighttpdConf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "app/lighttpd.conf", size: 3801, mode: os.FileMode(436), modTime: time.Unix(1552144009, 0)}
+	info := bindataFileInfo{name: "app/lighttpd.conf", size: 3801, mode: os.FileMode(420), modTime: time.Unix(1556467123, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -218,7 +218,7 @@ func appVarOAtom() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "app/var/o.atom", size: 4037, mode: os.FileMode(436), modTime: time.Unix(1544606277, 0)}
+	info := bindataFileInfo{name: "app/var/o.atom", size: 4037, mode: os.FileMode(420), modTime: time.Unix(1544994709, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -238,7 +238,7 @@ func assetsHtaccess() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/.htaccess", size: 71, mode: os.FileMode(436), modTime: time.Unix(1541163862, 0)}
+	info := bindataFileInfo{name: "assets/.htaccess", size: 71, mode: os.FileMode(420), modTime: time.Unix(1521129108, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -258,7 +258,7 @@ func assets404Html() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/404.html", size: 15282, mode: os.FileMode(436), modTime: time.Unix(1556038738, 0)}
+	info := bindataFileInfo{name: "assets/404.html", size: 15282, mode: os.FileMode(420), modTime: time.Unix(1549733356, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -278,7 +278,7 @@ func assetsDefaultB612Sh() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/B612.sh", size: 258, mode: os.FileMode(509), modTime: time.Unix(1552144009, 0)}
+	info := bindataFileInfo{name: "assets/default/B612.sh", size: 258, mode: os.FileMode(493), modTime: time.Unix(1556467123, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -298,7 +298,7 @@ func assetsDefaultAwesompleteCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/awesomplete.css", size: 1979, mode: os.FileMode(436), modTime: time.Unix(1541163862, 0)}
+	info := bindataFileInfo{name: "assets/default/awesomplete.css", size: 1979, mode: os.FileMode(420), modTime: time.Unix(1523306359, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -318,7 +318,7 @@ func assetsDefaultAwesompleteJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/awesomplete.js", size: 11884, mode: os.FileMode(436), modTime: time.Unix(1517102556, 0)}
+	info := bindataFileInfo{name: "assets/default/awesomplete.js", size: 11884, mode: os.FileMode(420), modTime: time.Unix(1515245091, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -338,7 +338,7 @@ func assetsDefaultBootstrapThemeCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/bootstrap-theme.css", size: 25930, mode: os.FileMode(436), modTime: time.Unix(1541163862, 0)}
+	info := bindataFileInfo{name: "assets/default/bootstrap-theme.css", size: 25930, mode: os.FileMode(420), modTime: time.Unix(1523306359, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -358,7 +358,7 @@ func assetsDefaultBootstrapCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/bootstrap.css", size: 63058, mode: os.FileMode(436), modTime: time.Unix(1541163862, 0)}
+	info := bindataFileInfo{name: "assets/default/bootstrap.css", size: 63058, mode: os.FileMode(420), modTime: time.Unix(1523306359, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -378,7 +378,7 @@ func assetsDefaultCombinedCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/combined.css", size: 91689, mode: os.FileMode(436), modTime: time.Unix(1552144009, 0)}
+	info := bindataFileInfo{name: "assets/default/combined.css", size: 91689, mode: os.FileMode(420), modTime: time.Unix(1556467123, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -398,7 +398,7 @@ func assetsDefaultConfigJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/config.json", size: 17835, mode: os.FileMode(436), modTime: time.Unix(1541163862, 0)}
+	info := bindataFileInfo{name: "assets/default/config.json", size: 17835, mode: os.FileMode(420), modTime: time.Unix(1523306359, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -418,7 +418,7 @@ func assetsDefaultDeConfigXslt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/de/config.xslt", size: 8500, mode: os.FileMode(436), modTime: time.Unix(1541163862, 0)}
+	info := bindataFileInfo{name: "assets/default/de/config.xslt", size: 8500, mode: os.FileMode(420), modTime: time.Unix(1521129108, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -438,7 +438,7 @@ func assetsDefaultDeCopyXslt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/de/copy.xslt", size: 338, mode: os.FileMode(436), modTime: time.Unix(1510177793, 0)}
+	info := bindataFileInfo{name: "assets/default/de/copy.xslt", size: 338, mode: os.FileMode(420), modTime: time.Unix(1511714323, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -458,7 +458,7 @@ func assetsDefaultDeDoLoginXslt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/de/do-login.xslt", size: 5127, mode: os.FileMode(436), modTime: time.Unix(1541163890, 0)}
+	info := bindataFileInfo{name: "assets/default/de/do-login.xslt", size: 5127, mode: os.FileMode(420), modTime: time.Unix(1537038919, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -478,7 +478,7 @@ func assetsDefaultDeDoPostXslt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/de/do-post.xslt", size: 7020, mode: os.FileMode(436), modTime: time.Unix(1541163890, 0)}
+	info := bindataFileInfo{name: "assets/default/de/do-post.xslt", size: 7020, mode: os.FileMode(420), modTime: time.Unix(1537038876, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -498,7 +498,7 @@ func assetsDefaultDePostsXslt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/de/posts.xslt", size: 21379, mode: os.FileMode(436), modTime: time.Unix(1556038738, 0)}
+	info := bindataFileInfo{name: "assets/default/de/posts.xslt", size: 21379, mode: os.FileMode(420), modTime: time.Unix(1556467123, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -518,7 +518,7 @@ func assetsDefaultDeToolsXslt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/de/tools.xslt", size: 6963, mode: os.FileMode(436), modTime: time.Unix(1544606277, 0)}
+	info := bindataFileInfo{name: "assets/default/de/tools.xslt", size: 6963, mode: os.FileMode(420), modTime: time.Unix(1540933830, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -538,7 +538,7 @@ func assetsDefaultDoPostJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/do-post.js", size: 1695, mode: os.FileMode(436), modTime: time.Unix(1541163862, 0)}
+	info := bindataFileInfo{name: "assets/default/do-post.js", size: 1695, mode: os.FileMode(420), modTime: time.Unix(1523484272, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -558,7 +558,7 @@ func assetsDefaultFeedIconSvg() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/feed-icon.svg", size: 2194, mode: os.FileMode(436), modTime: time.Unix(1544606277, 0)}
+	info := bindataFileInfo{name: "assets/default/feed-icon.svg", size: 2194, mode: os.FileMode(420), modTime: time.Unix(1542211722, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -578,7 +578,7 @@ func assetsDefaultMoment2141MinJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/moment-2.14.1.min.js", size: 58686, mode: os.FileMode(436), modTime: time.Unix(1510177793, 0)}
+	info := bindataFileInfo{name: "assets/default/moment-2.14.1.min.js", size: 58686, mode: os.FileMode(420), modTime: time.Unix(1470174473, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -598,7 +598,7 @@ func assetsDefaultPostsJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/posts.js", size: 5494, mode: os.FileMode(436), modTime: time.Unix(1556038738, 0)}
+	info := bindataFileInfo{name: "assets/default/posts.js", size: 5494, mode: os.FileMode(420), modTime: time.Unix(1556467123, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -618,7 +618,7 @@ func assetsDefaultQrcodePng() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/qrcode.png", size: 270, mode: os.FileMode(436), modTime: time.Unix(1541163890, 0)}
+	info := bindataFileInfo{name: "assets/default/qrcode.png", size: 270, mode: os.FileMode(420), modTime: time.Unix(1536163336, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -638,7 +638,7 @@ func assetsDefaultStyleCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/style.css", size: 6, mode: os.FileMode(436), modTime: time.Unix(1517102556, 0)}
+	info := bindataFileInfo{name: "assets/default/style.css", size: 6, mode: os.FileMode(420), modTime: time.Unix(1516828933, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -658,7 +658,7 @@ func assetsDefaultValidAtomPng() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/valid-atom.png", size: 1935, mode: os.FileMode(436), modTime: time.Unix(1510177793, 0)}
+	info := bindataFileInfo{name: "assets/default/valid-atom.png", size: 1935, mode: os.FileMode(420), modTime: time.Unix(1509141440, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -678,7 +678,7 @@ func assetsDefaultValidAtomSvg() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/valid-atom.svg", size: 5499, mode: os.FileMode(436), modTime: time.Unix(1510177793, 0)}
+	info := bindataFileInfo{name: "assets/default/valid-atom.svg", size: 5499, mode: os.FileMode(420), modTime: time.Unix(1508879140, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -698,7 +698,7 @@ func assetsDefaultValidCssBlueVSvg() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/valid-css-blue-v.svg", size: 20262, mode: os.FileMode(436), modTime: time.Unix(1510177793, 0)}
+	info := bindataFileInfo{name: "assets/default/valid-css-blue-v.svg", size: 20262, mode: os.FileMode(420), modTime: time.Unix(1456604941, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -718,7 +718,7 @@ func assetsDefaultValidXhtml10BlueVSvg() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/default/valid-xhtml10-blue-v.svg", size: 14303, mode: os.FileMode(436), modTime: time.Unix(1510177793, 0)}
+	info := bindataFileInfo{name: "assets/default/valid-xhtml10-blue-v.svg", size: 14303, mode: os.FileMode(420), modTime: time.Unix(1456604941, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -738,7 +738,7 @@ func tplChangepasswordformHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tpl/changepasswordform.html", size: 419, mode: os.FileMode(436), modTime: time.Unix(1556038738, 0)}
+	info := bindataFileInfo{name: "tpl/changepasswordform.html", size: 419, mode: os.FileMode(420), modTime: time.Unix(1556467123, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -758,7 +758,7 @@ func tplLinkformHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tpl/linkform.html", size: 1047, mode: os.FileMode(436), modTime: time.Unix(1556038738, 0)}
+	info := bindataFileInfo{name: "tpl/linkform.html", size: 1047, mode: os.FileMode(420), modTime: time.Unix(1556467123, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -778,7 +778,7 @@ func tplLoginHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tpl/login.html", size: 467, mode: os.FileMode(436), modTime: time.Unix(1556038738, 0)}
+	info := bindataFileInfo{name: "tpl/login.html", size: 467, mode: os.FileMode(420), modTime: time.Unix(1556467123, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -798,7 +798,7 @@ func tplSettingsHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tpl/settings.html", size: 409, mode: os.FileMode(436), modTime: time.Unix(1556038738, 0)}
+	info := bindataFileInfo{name: "tpl/settings.html", size: 409, mode: os.FileMode(420), modTime: time.Unix(1556467123, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -818,7 +818,7 @@ func tplToolsHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tpl/tools.html", size: 3583, mode: os.FileMode(436), modTime: time.Unix(1556144853, 0)}
+	info := bindataFileInfo{name: "tpl/tools.html", size: 3583, mode: os.FileMode(420), modTime: time.Unix(1556467132, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

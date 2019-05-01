@@ -94,7 +94,7 @@ func TestGetConfigRaw(t *testing.T) {
 
 	pi := "/config/"
 	os.Setenv("PATH_INFO", pi)
-	ts := httptest.NewServer(handleMux())
+	ts := httptest.NewServer(handleMux(&sync.WaitGroup{}))
 	defer ts.Close()
 	c := http.Client{Timeout: time.Second}
 
@@ -135,7 +135,7 @@ func TestGetConfigScraped(t *testing.T) {
 
 	pi := "/config/"
 	os.Setenv("PATH_INFO", pi)
-	ts := httptest.NewServer(handleMux())
+	ts := httptest.NewServer(handleMux(&sync.WaitGroup{}))
 	defer ts.Close()
 	c := http.Client{Timeout: time.Second}
 
@@ -154,15 +154,20 @@ func TestGetConfigScraped(t *testing.T) {
 func TestHttpServer(t *testing.T) {
 	defer prepTeardown(t)()
 
+	var u *url.URL
 	// Using this server doesn't result in absolute request urls as is the case running as CGI.
 	// And Atom needs absolute urls.
 	// Shaarligo relies on them, however.
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "%s", u.String())
+	}))
 	defer ts.Close()
+	u, _ = url.Parse(ts.URL)
 
 	c := http.Client{Timeout: time.Second}
-	_, err := c.Get(ts.URL + "/uhu")
-	assert.Equal(t, nil, err, "aha")
+	re, _ := c.Get(ts.URL + "/uhu")
+	b, _ := ioutil.ReadAll(re.Body)
+	assert.Equal(t, ts.URL, string(b), "aha")
 }
 
 func _TestPostConfigG(t *testing.T) {
@@ -173,7 +178,7 @@ func _TestPostConfigG(t *testing.T) {
 	os.Setenv("SCRIPT_NAME", cgi)
 	os.Setenv("PATH_INFO", pi)
 
-	ts := httptest.NewServer(handleMux())
+	ts := httptest.NewServer(handleMux(&sync.WaitGroup{}))
 	defer ts.Close()
 
 	c := http.Client{Timeout: time.Second}
