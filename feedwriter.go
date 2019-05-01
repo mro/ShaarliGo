@@ -339,7 +339,7 @@ func (app Server) PublishFeeds(feeds []Feed, force bool) error {
 	// check race: if .lock exists kill pid?
 	if byPid, err := ioutil.ReadFile(strFileLock); err == nil {
 		if pid, err := strconv.Atoi(string(byPid)); err == nil {
-			if proc, err := os.FindProcess(pid); err == nil {
+			if proc, er := os.FindProcess(pid); er == nil {
 				err = proc.Kill()
 			}
 		}

@@ -46,9 +46,8 @@ func parseLinkUrl(raw string) *url.URL {
 			}
 		}
 		return ret
-	} else {
-		return nil
 	}
+	return nil
 }
 
 func (app *Server) handleDoLogin() http.HandlerFunc {

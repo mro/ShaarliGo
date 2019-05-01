@@ -116,7 +116,7 @@ func (cfg Config) renderSettingsPage(w http.ResponseWriter, code int) {
 		io.WriteString(w, xml.Header+
 			"<?xml-stylesheet type='text/xsl' href='"+path.Join("..", "..", "assets", cfg.Skin, "config.xslt")+"'?>\n")
 		io.WriteString(w, `<!--
-  The html you see here is for compatibilty with vanilla shaarli.
+  The html you see here is for compatibility with vanilla shaarli.
 
   The main reason is backward compatibility for e.g. http://app.mro.name/ShaarliOS and
   https://github.com/dimtion/Shaarlier as tested via

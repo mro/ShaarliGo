@@ -90,7 +90,7 @@ func formValuesFromReader(r io.Reader, name string) (ret url.Values, err error) 
 			}
 			ret.Set(n, v)
 		}
-		return ret, err // return on first occurence
+		return ret, err // return on first occurrence
 	}
 	return ret, err
 }

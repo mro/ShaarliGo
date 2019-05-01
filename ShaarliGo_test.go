@@ -104,7 +104,7 @@ func TestGetConfigRaw(t *testing.T) {
 	b, _ := ioutil.ReadAll(r.Body)
 	assert.Equal(t, xml.Header+`<?xml-stylesheet type='text/xsl' href='../../assets/default/de/config.xslt'?>
 <!--
-  The html you see here is for compatibilty with vanilla shaarli.
+  The html you see here is for compatibility with vanilla shaarli.
 
   The main reason is backward compatibility for e.g. http://app.mro.name/ShaarliOS and
   https://github.com/dimtion/Shaarlier as tested via

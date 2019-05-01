@@ -69,7 +69,7 @@ func TestIsRemoteAddrBanned(t *testing.T) {
 	assert.NotNil(t, &bp, "soso")
 	assert.Equal(t, -100, bp.Penalties["92.194.87.209"].Badness, "soso")
 
-	assert.False(t, BanPenalties{}.isRemoteAddrBanned("nix", time.Time{}), "unknown shouldn't be banned from teh start")
+	assert.False(t, BanPenalties{}.isRemoteAddrBanned("nix", time.Time{}), "unknown shouldn't be banned from the start")
 	assert.False(t, bp.isRemoteAddrBanned("nix", time.Time{}), "unknown shouldn't be banned from the start")
 	assert.False(t, bp.isRemoteAddrBanned("1.2.3.3", time.Time{}), "should not be banned yet")
 	assert.False(t, bp.isRemoteAddrBanned("1.2.3.3", now), "should not be banned yet")
