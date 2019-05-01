@@ -457,7 +457,7 @@ func uniqCategory(data []Category) []Category {
 
 func (ht HumanText) Categories() []Category {
 	ret := make([]Category, 0, 10)
-	for t, _ := range tagsFromString(ht.Body) {
+	for t := range tagsFromString(ht.Body) {
 		ret = append(ret, Category{Term: t})
 	}
 	return ret

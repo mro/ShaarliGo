@@ -200,7 +200,7 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 					if nil == ent.Content || "" == ent.Content.Body {
 						ent.Content = ent.Summary
 					}
-					ent.Links = []Link{Link{Href: url.String()}}
+					ent.Links = []Link{{Href: url.String()}}
 				}
 				ent.Updated = iso8601(now)
 				const SetPublishedToNowInitially = true
@@ -305,7 +305,7 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 						ent.Title = HumanText{Body: strings.TrimSpace(r.FormValue("lf_title")), Type: "text"}
 						url := mustParseURL(lf_url)
 						if url.IsAbs() && "" != url.Host {
-							ent.Links = []Link{Link{Href: lf_url}}
+							ent.Links = []Link{{Href: lf_url}}
 						} else {
 							ent.Links = []Link{}
 						}
@@ -442,18 +442,18 @@ func (entry Entry) api0LinkFormMap() map[string]interface{} {
 			set[c.Term] = struct{}{}
 		}
 		// 2. minus #tags from title
-		for tag, _ := range tagsFromString(entry.Title.Body) {
+		for tag := range tagsFromString(entry.Title.Body) {
 			delete(set, tag)
 		}
 		// 2. minus #tags from content
 		if entry.Content != nil {
-			for tag, _ := range tagsFromString(entry.Content.Body) {
+			for tag := range tagsFromString(entry.Content.Body) {
 				delete(set, tag)
 			}
 		}
 		// turn map keys into sorted array
 		tags := make([]string, 0, len(set))
-		for key, _ := range set {
+		for key := range set {
 			tags = append(tags, key)
 		}
 		sort.Slice(tags, func(i, j int) bool { return strings.Compare(tags[i], tags[j]) < 0 })

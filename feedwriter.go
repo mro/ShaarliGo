@@ -299,7 +299,7 @@ func (feed Feed) PagedFeeds(complete []Feed, linksPerPage int) ([]Feed, error) {
 			// Link{Rel: relEditMedia, Href: editURL},
 			Link{Rel: relUp, Href: upURL.String(), Title: feed.Title.Body}, // we need the feed-name somewhere.
 		)
-		for i, _ := range entry.Categories {
+		for i := range entry.Categories {
 			entry.Categories[i].Scheme = catScheme
 		}
 	}

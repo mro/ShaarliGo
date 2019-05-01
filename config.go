@@ -80,9 +80,9 @@ func (app *Server) handleSettings() http.HandlerFunc {
 				feed.XmlBase = Iri(app.url.String())
 				feed.Id = Id(feed.XmlBase) // expand XmlBase as required by https://validator.w3.org/feed/check.cgi?url=
 				feed.Title = HumanText{Body: title}
-				feed.Authors = []Person{Person{Name: uid}}
+				feed.Authors = []Person{{Name: uid}}
 				feed.Links = []Link{
-					Link{Rel: relEdit, Href: path.Join(cgiName, uriPub, uriPosts), Title: "PostURI, maybe better a app:collection https://tools.ietf.org/html/rfc5023#section-8.3.3"},
+					{Rel: relEdit, Href: path.Join(cgiName, uriPub, uriPosts), Title: "PostURI, maybe better a app:collection https://tools.ietf.org/html/rfc5023#section-8.3.3"},
 				}
 
 				if err := app.SaveFeed(feed); err != nil {

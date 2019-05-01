@@ -129,7 +129,7 @@ func (app *Server) handleSearch() http.HandlerFunc {
 						Link{Rel: relSelf, Href: selfURL.String()},
 						Link{Rel: relEdit, Href: editURL},
 					)
-					for i, _ := range item.Categories {
+					for i := range item.Categories {
 						item.Categories[i].Scheme = catScheme
 					}
 					if item.Updated.IsZero() {

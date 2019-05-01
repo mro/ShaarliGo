@@ -61,10 +61,10 @@ func TestEntryCategoriesMerged(t *testing.T) {
 	e := Entry{
 		Title:      HumanText{Body: "#ha, foo#nein"},
 		Content:    &HumanText{Body: "B #so, bar"},
-		Categories: []Category{Category{Term: "so"}, Category{Term: "da"}},
+		Categories: []Category{{Term: "so"}, {Term: "da"}},
 	}
 	assert.NotNil(t, e, "genau")
-	assert.Equal(t, []Category{Category{Term: "da"}, Category{Term: "ha"}, Category{Term: "so"}}, e.CategoriesMerged(), "genau")
+	assert.Equal(t, []Category{{Term: "da"}, {Term: "ha"}, {Term: "so"}}, e.CategoriesMerged(), "genau")
 }
 
 var b64Tob24Tests = []struct {
