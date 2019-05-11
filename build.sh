@@ -42,7 +42,7 @@ tar -czf testdata.tar.gz testdata/*.html testdata/*.atom testdata/*.gob
 
 "${say}" "build localhost"
 go build -ldflags "${LDFLAGS}" -o "shaarligo.cgi" || { echo "Aua" 1>&2 && exit 1; }
-cp "shaarligo.cgi" ~/"public_html/b/shaarligo.cgi"
+cp "shaarligo.cgi" ~/"public_html/c/shaarligo.cgi"
 "${say}" "ok"
 # open "http://localhost/~$(whoami)/b/shaarligo.cgi"
 
@@ -58,12 +58,13 @@ env GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="${LDFLAGS}" -o "shaarligo-L
 # env GOOS=darwin GOARCH=amd64 go build -o "shaarligo-darwin-amd64-${VERSION}"
 
 
-"${say}" "simply"
+"${say}" "s0"
 gzip --force --best "shaarligo-"*-*".cgi" \
-&& rsync -vp --bwlimit=1234 "shaarligo-"*-*".cgi.gz" "simply:/var/www/lighttpd/l.mro.name/public_html/" \
-&& ssh simply "sh -c 'cd /var/www/lighttpd/l.mro.name/public_html/ && gunzip < shaarligo-$(uname -s)-$(uname -m).cgi.gz > shaarligo.cgi && ls -l shaarligo*cgi*'" \
-&& ssh simply "sh -c 'cd /var/www/lighttpd/b.r-2.eu/public_html/u/ && cp /var/www/lighttpd/l.mro.name/public_html/shaarligo?cgi* . && ls -l shaarligo*cgi*'" \
-&& ssh simply "sh -c 'cd /var/www/lighttpd/b.mro.name/public_html/u/ && cp /var/www/lighttpd/l.mro.name/public_html/shaarligo?cgi* . && ls -l shaarligo*cgi*'"
+&& rsync -vp --bwlimit=1234 "shaarligo-"*-*".cgi.gz" "s0:/var/www/lighttpd/l.mro.name/public_html/" \
+&& ssh s0 "sh -c 'cd /var/www/lighttpd/l.mro.name/public_html/ && gunzip < shaarligo-$(uname -s)-$(uname -m).cgi.gz > shaarligo.cgi && ls -l shaarligo*cgi*'" \
+&& ssh s0 "sh -c 'cd /var/www/lighttpd/demo.mro.name/public_html/shaarligo/ && cp /var/www/lighttpd/l.mro.name/public_html/shaarligo?cgi* . && ls -l shaarligo*cgi*'" \
+&& ssh s0 "sh -c 'cd /var/www/lighttpd/b.r-2.eu/public_html/u/ && cp /var/www/lighttpd/l.mro.name/public_html/shaarligo?cgi* . && ls -l shaarligo*cgi*'" \
+&& ssh s0 "sh -c 'cd /var/www/lighttpd/b.mro.name/public_html/u/ && cp /var/www/lighttpd/l.mro.name/public_html/shaarligo?cgi* . && ls -l shaarligo*cgi*'"
 "${say}" "ok"
 
 "${say}" "vario"
