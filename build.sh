@@ -26,7 +26,7 @@ parm="" # "-u"
     golang.org/x/tools/blog/atom
 }
 
-"$(go env GOPATH)/bin/go-bindata" -ignore="\\.DS_Store" -ignore=".+\\.woff" -prefix static static/... tpl/...
+"$(go env GOPATH)/bin/go-bindata" -ignore="\\.DS_Store" -ignore="assets/dark/" -ignore=".+\\.woff" -prefix static static/... tpl/...
 
 VERSION="$(grep -F 'version = ' version.go | cut -d \" -f 2)"
 LDFLAGS="-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)"
