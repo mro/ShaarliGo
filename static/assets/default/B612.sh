@@ -6,6 +6,6 @@ do
   for fmt in woff2 woff
   do
     f="B612-${fo}.${fmt}"
-    curl --location --output "${f}" --remote-time --time-cond "${f}" "http://b612-font.com/fonts/${f}"
+    curl --output "${f}" --remote-time --time-cond "${f}" "http://b612-font.com/fonts/${f}"
   done
 done

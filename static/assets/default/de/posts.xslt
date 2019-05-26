@@ -101,14 +101,15 @@
   <xsl:key name="CategorY" match="a:entry/a:category" use="@term" />
 
   <xsl:variable name="self" select="/*/a:link[@rel = 'self']/@href"/>
-  <xsl:variable name="xml_base_absolute" select="/*/@xml:base"/>
-  <!-- a bit hairy, but actually works -->
-  <xsl:variable name="xml_base_relative">../../<xsl:choose>
-      <xsl:when test="'shaarligo.cgi/search/?q=' = substring($self, 1, 24)"/>
-      <xsl:when test="'//' = translate($self, 'abcdefghijklmnopqrstuvwxyz0123456789-', '')"/>
-      <xsl:otherwise>../</xsl:otherwise>
+  <xsl:variable name="xml_base_relative">
+    <!-- a bit hairy, but actually works -->
+    ../../<xsl:choose>
+      <xsl:when test="'shaarligo.cgi/search/?q=' = substring($self, 1, 24)"/><!-- search result feed -->
+      <xsl:when test="'' = substring-after(substring($self, 3), '/')"/><!-- paged feed -->
+      <xsl:otherwise>../</xsl:otherwise><!-- single entry feed -->
     </xsl:choose>
   </xsl:variable>
+  <xsl:variable name="xml_base_absolute" select="/*/@xml:base"/>
   <xsl:variable name="xml_base" select="normalize-space($xml_base_relative)"/>
   <xsl:variable name="xml_base_pub" select="concat($xml_base,'o')"/>
   <xsl:variable name="skin_base" select="concat($xml_base,'assets/default')"/>

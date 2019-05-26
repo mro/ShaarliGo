@@ -61,7 +61,7 @@ env GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="${LDFLAGS}" -o "shaarligo-L
 "${say}" "s0"
 gzip --force --best "shaarligo-"*-*".cgi" \
 && rsync -vp --bwlimit=1234 "shaarligo-"*-*".cgi.gz" "s0:/var/www/lighttpd/l.mro.name/public_html/" \
-&& ssh s0 "sh -c 'cd /var/www/lighttpd/l.mro.name/public_html/ && gunzip < shaarligo-$(uname -s)-$(uname -m).cgi.gz > shaarligo.cgi && ls -l shaarligo*cgi*'" \
+&& ssh s0 'sh -c "cd /var/www/lighttpd/l.mro.name/public_html/ && gunzip < shaarligo-$(uname -s)-$(uname -m).cgi.gz > shaarligo.cgi && ls -l shaarligo*cgi*"' \
 && ssh s0 "sh -c 'cd /var/www/lighttpd/demo.mro.name/public_html/shaarligo/ && cp /var/www/lighttpd/l.mro.name/public_html/shaarligo?cgi* . && ls -l shaarligo*cgi*'" \
 && ssh s0 "sh -c 'cd /var/www/lighttpd/b.r-2.eu/public_html/u/ && cp /var/www/lighttpd/l.mro.name/public_html/shaarligo?cgi* . && ls -l shaarligo*cgi*'" \
 && ssh s0 "sh -c 'cd /var/www/lighttpd/b.mro.name/public_html/u/ && cp /var/www/lighttpd/l.mro.name/public_html/shaarligo?cgi* . && ls -l shaarligo*cgi*'"
