@@ -24,7 +24,7 @@
 html {
   font-family: Optima, Candara, Calibri, Arial, sans-serif;
   font-family: B612, sans-serif;
-  line-height: 1.6;
+  line-height: 1.5;
   font-size: 12pt;
 }
 html, input, textarea, .awesomplete > ul, .awesomplete > ul > li {
@@ -52,13 +52,25 @@ h3 {
   pointer-events: none;
 }
 body {
-  min-height: 400px;
+  min-height: 500px;
   margin: auto;
   max-width: 45rem;
-  padding: 1rem;
+  padding: 1ex;
+}
+#footer {
+  margin-top: 2.5ex;
+}
+.noentry body {
+  max-width: initial;
+}
+#do-post {
+  margin-top: -1rem;
 }
 form, table {
-  margin: 2ex 0;
+  margin: 1ex 0;
+}
+table {
+  margin-top: 2ex;
 }
 ol {
   list-style: none;
@@ -73,8 +85,10 @@ ol > li:nth-of-type(odd) {
 }
 ol > li > h3 img {
   float: right;
+  border: 1px dotted black;
   max-width: 120px;
   max-height: 120px;
+  display: none;
 }
 p {
   -webkit-hyphens: auto;
@@ -117,7 +131,12 @@ table {
 .text-right  { text-align: right; }
 .text-center { text-align: center; }
 
-
+/* https://www.w3schools.com/Css/css_float.asp */
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
 @media only screen and (max-width: 600px) {
   .hidden-xs { display: none; }
 }

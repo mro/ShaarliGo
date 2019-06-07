@@ -43,7 +43,7 @@
   </xsl:template>
 
   <xsl:template match="h:html">
-    <html xmlns="http://www.w3.org/1999/xhtml" class="logged-out" data-xml-base-pub="{$xml_base_pub}">
+    <html id="do-post" xmlns="http://www.w3.org/1999/xhtml" class="logged-in" data-xml-base-pub="{$xml_base_pub}">
       <xsl:apply-templates select="h:head"/>
       <xsl:apply-templates select="h:body"/>
     </html>
@@ -72,12 +72,10 @@
 
   <xsl:template match="h:body">
     <body>
-      <div class="container">
-        <noscript><p>JavaScript ist aus, es geht zwar (fast) alles auch ohne, aber mit ist's <em>schöner</em>.</p></noscript>
+      <noscript><p>JavaScript ist aus, es geht zwar (fast) alles auch ohne, aber mit ist's <em>schöner</em>.</p></noscript>
 
-        <xsl:copy-of select="h:ul"/>
-        <xsl:apply-templates select="h:form"/>
-      </div>
+      <xsl:copy-of select="h:ul"/>
+      <xsl:apply-templates select="h:form"/>
     </body>
   </xsl:template>
 
@@ -86,7 +84,7 @@
       <xsl:copy-of select=".//h:input[@type='hidden']"/>
       <input name="lf_url" type="text" placeholder="https://..." value="{h:input[@name='lf_url']/@value}"/>
       <input autofocus="autofocus" name="lf_title" type="text" placeholder="Ein Titel, gerne mit #Schlagwort" value="{h:input[@name='lf_title']/@value}" class="awesomplete" data-multiple="true"/>
-      <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="14" cols="25" data-multiple="true">
+      <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="8" cols="25" data-multiple="true">
         <xsl:value-of select="h:textarea[@name='lf_description']"/>
         <xsl:call-template name="tags_with_hash">
           <xsl:with-param name="string" select="h:input[@name='lf_tags']/@value"/>

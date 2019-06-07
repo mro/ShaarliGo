@@ -120,6 +120,9 @@
       If JavaScript is off, we need mixture between logged-in and -out.
     -->
     <html xmlns="http://www.w3.org/1999/xhtml" data-xml-base-pub="{$xml_base_pub}" style="background-color:#eee">
+      <xsl:if test="0 = count(a:feed/a:entry | a:entry)">
+        <xsl:attribute name="class">noentry</xsl:attribute>
+      </xsl:if>
       <xsl:call-template name="head"/>
 
       <body>
@@ -266,7 +269,6 @@
   </xsl:template>
 
   <xsl:template name="footer">
-    <hr style="clear:left;"/>
     <p id="footer">
       <a title="Abonnieren" href="{$xml_base_absolute}{a:link[@rel='self']/@href}">
         <img alt="Feed" src="{$skin_base}/feed-icon.svg" style="border:0;width:27px;height:27px"/>
