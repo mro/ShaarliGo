@@ -41,33 +41,31 @@ templating, JS optional.
 _tl;dr:_ a webserver that can execute [CGI](https://tools.ietf.org/html/rfc3875)s and serve files
 from disc.
 
-ShaarliGo is an old-school CGI binary executable, so it needs a webserver to drive it. Example
-configurations come for [Apache](http://httpd.apache.org/) (see `static/.htaccess`) and
+ShaarliGo is an old-school CGI binary executable, so it needs a webserver to drive it.
+Configurations come for [Apache](http://httpd.apache.org/) (automatic, see `static/.htaccess`) and
 [Lighttpd](http://www.lighttpd.net/) (see `static/app/lighttpd.conf`).
 
-As a self-contained, statically linked, [Go](https://golang.org/) executable, it has no software
-dependencies and can run on a variety of platforms.
+As a self-contained, statically linked, [Go](https://golang.org/) executable, it has no runtime
+dependencies and works on a variety of platforms.
 
-It needs write access to it's webserver's filesystem location to unpack the web assets and update
-the content when posting.
+ShaarliGo needs write access to the webroot filesystem to once unpack the web assets and when posting
+update the content.
 
 Storage footprint is <25 [KiB](https://en.wikipedia.org/wiki/Kibibyte) per post.
 
-When posting a page, it is once accessed via HTTP GET to suggest title, tags and a thumbnail image
+When posting a page, it is once accessed via HTTP GET to infer title, tags and a thumbnail image
 URL.
 
 ## Install / Update
 
-bash:
+1. `$ curl -LRo shaarligo.cgi.gz http://purl.mro.name/shaarligo-Linux-x86_64.cgi.gz  # uname -s; uname -m`
+2. `$ gunzip shaarligo.cgi.gz`
+3. `$ chmod a+x,a-w shaarligo.cgi`
+4. visit in your browser: http://my.web.space/subdir/shaarligo.cgi
 
-1. `$ curl -L http://purl.mro.name/shaarligo-$(uname -s)-$(uname -m).cgi.gz | tee shaarligo.cgi.gz | gunzip > shaarligo.cgi && chmod a+x shaarligo.cgi`
-2. visit in your browser: http://my.web.space/subdir/shaarligo.cgi
-
-done!
+done (Apache)! For lighttpd see `static/app/lighttpd.conf`.
 
 Or build from source at http://purl.mro.name/ShaarliGo
-
-See example `static/.htaccess` or `static/app/lighttpd.conf` how to set up webserver integration.
 
 ## Todos
 
