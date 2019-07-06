@@ -58,6 +58,8 @@ function clickableTextLinks(elmsRendered) {
     // https://alanstorm.com/url_regex_explained/ \b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))
     // elm.innerHTML = elm.innerHTML.replace(/\b(([\w-]+:\/\/?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
     elm.innerHTML = elm.innerHTML.replace(/geo:(-?\d+.\d+),(-?\d+.\d+)(\?z=(\d+))?/gi, '<a class="geo" href="https://opentopomap.org/#marker=12/$1/$2" title="zoom=$4">geo:<span class="latitude">$1</span>,<span class="longitude">$2</span>$3</a>');
+    elm.innerHTML = elm.innerHTML.replace(/(urn:ietf:rfc:(\d+)(#\S*[0-9a-z])?)/gi, '<a class="rfc" href="https://tools.ietf.org/html/rfc$2$3" title="RFC $2">$1</a>');
+    elm.innerHTML = elm.innerHTML.replace(/(urn:isbn:([0-9-]+)(#\S*[0-9a-z])?)/gi, '<a class="isbn" href="https://de.wikipedia.org/wiki/Spezial:ISBN-Suche?isbn=$2" title="ISBN $2">$1</a>');
   }
 }
 
