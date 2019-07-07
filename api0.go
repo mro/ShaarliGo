@@ -235,7 +235,7 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 `)
 				data := ent.api0LinkFormMap()
 				data["skin"] = app.cfg.Skin
-				data["title"] = feed.Title
+				data["title"] = feed.Title.Body
 				data["categories"] = feed.Categories
 				bTok := make([]byte, 20) // keep in local session or encrypted cookie
 				io.ReadFull(rand.Reader, bTok)
