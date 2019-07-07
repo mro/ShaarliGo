@@ -219,16 +219,6 @@ func handleMux(wg *sync.WaitGroup) http.HandlerFunc {
 		if !r.URL.IsAbs() {
 			log.Printf("request URL not absolute >>> %s <<<", r.URL)
 		}
-		cfg, err := LoadConfig()
-		if err != nil {
-			http.Error(w, "Couldn't load config: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		tz, err := time.LoadLocation(cfg.TimeZone)
-		if err != nil {
-			http.Error(w, "Invalid timezone '"+cfg.TimeZone+"': "+err.Error(), http.StatusInternalServerError)
-			return
-		}
 
 		path_info := os.Getenv("PATH_INFO")
 
@@ -255,6 +245,18 @@ func handleMux(wg *sync.WaitGroup) http.HandlerFunc {
 			}
 			// os.Chmod(dirApp, os.FileMode(0750)) // not sure if this is a good idea.
 		}()
+
+		cfg, err := LoadConfig()
+		if err != nil {
+			log.Printf("Couldn't load config: %s", err.Error())
+			http.Error(w, "Couldn't load config: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		tz, err := time.LoadLocation(cfg.TimeZone)
+		if err != nil {
+			http.Error(w, "Invalid timezone '"+cfg.TimeZone+"': "+err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		// get config and session
 		app := Server{cfg: cfg, tz: tz}

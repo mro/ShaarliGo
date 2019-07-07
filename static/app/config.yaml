@@ -1,0 +1,20 @@
+title: 
+uid: 
+pwd_bcrypt: 
+cookie_secret: 
+timezone: Europe/Paris
+skin: default/de
+links_per_page: 100
+ban_after: 4
+ban_seconds: 14400
+url_cleaner:
+- regexp: '[\?&]utm_source=.*$'
+  replace_all_string: ""
+- regexp: ^(?i)(?:https?://)?(?:(?:www|m)\.)?heise\.de/.*?(-\d+)(?:\.html)?(?:[\?#].*)?$
+  replace_all_string: https://heise.de/${1}
+- regexp: ^(?i)(?:https?://)?(?:(?:www|m)\.)?spiegel\.de/.*?-(\d+)(?:\.html.*)?$
+  replace_all_string: https://spiegel.de/article.do?id=${1}
+- regexp: ^(?i)(?:https?://)?(?:(?:www|m)\.)?sueddeutsche\.de/.*?-(\d+\.\d+)(?:\.html.*)?$
+  replace_all_string: https://sz.de/${1}
+- regexp: ^(?i)(?:https?://)?(?:(?:www|m)\.)?youtube.com/watch\?v=([^&]+)(?:.*&(t=[^&]+))?(?:.*)$
+  replace_all_string: https://youtu.be/${1}?${2}

@@ -41,12 +41,12 @@ type RegexpReplaceAllString struct {
 }
 
 type Config struct {
-	Title             string                   `yaml:"title"` // title for cheap non-feed screens (login, tools, etc)
-	Uid               string                   `yaml:"uid"`   // for login
+	Title             string                   `yaml:"title"`
+	Uid               string                   `yaml:"uid"`
 	PwdBcrypt         string                   `yaml:"pwd_bcrypt"`
 	CookieStoreSecret string                   `yaml:"cookie_secret"`
 	TimeZone          string                   `yaml:"timezone"`
-	Skin              string                   `yaml:"skin"`
+	Skin              string                   `yaml:"skin"`           // maybe should not be configurable, but rather be a filesystem softlink
 	LinksPerPage      int                      `yaml:"links_per_page"` // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L18
 	BanAfter          int                      `yaml:"ban_after"`      // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L20
 	BanSeconds        int                      `yaml:"ban_seconds"`    // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L21
@@ -55,38 +55,23 @@ type Config struct {
 }
 
 func LoadConfig() (Config, error) {
-	// seed the cookie store secret
-	buf := make([]byte, 32)
-	if _, err := io.ReadFull(rand.Reader, buf); err != nil {
+	if read, err := ioutil.ReadFile(configFileName); err != nil {
 		return Config{}, err
-	}
-	ret := Config{
-		CookieStoreSecret: base64.StdEncoding.EncodeToString(buf),
-		TimeZone:          "Europe/Paris",
-		Skin:              "default/de",
-		LinksPerPage:      100,   // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L18
-		BanAfter:          4,     // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L20
-		BanSeconds:        14400, // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L21
-		UrlCleaner: []RegexpReplaceAllString{
-			{Regexp: "[\\?&]utm_source=.*$", ReplaceAllString: ""}, // We remove the annoying parameters added by FeedBurner and GoogleFeedProxy (?utm_source=...)
-			{Regexp: "#xtor=RSS-.*$", ReplaceAllString: ""},
-			{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?heise\\.de/.*?(-\\d+)(?:\\.html)?(?:[\\?#].*)?$", ReplaceAllString: "https://heise.de/${1}"},
-			{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?spiegel\\.de/.*?-(\\d+)(?:\\.html.*)?", ReplaceAllString: "https://spiegel.de/article.do?id=${1}"},
-			{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?sueddeutsche\\.de/.*?-(\\d+\\.\\d+)(?:\\.html.*)?$", ReplaceAllString: "https://sz.de/${1}"},
-			{Regexp: "^(?i)(?:https?://)?(?:(?:www|m)\\.)?youtube.com/watch\\?v=([^&]+)(?:.*&(t=[^&]+))?(?:.*)$", ReplaceAllString: "https://youtu.be/${1}?${2}"},
-		},
-		// Redirector: "http://anonym.to/?",
-	}
-
-	if read, err := ioutil.ReadFile(configFileName); err == nil {
-		err = yaml.Unmarshal(read, &ret)
-		if ret.LinksPerPage < 1 {
-			ret.LinksPerPage = 1
-		}
-		return ret, err
-	} else if os.IsNotExist(err) {
-		return ret, nil
 	} else {
+		ret := Config{}
+		if err = yaml.Unmarshal(read, &ret); err != nil {
+			return Config{}, err
+		}
+		if ret.CookieStoreSecret == "" {
+			buf := make([]byte, 32)
+			if _, err := io.ReadFull(rand.Reader, buf); err != nil {
+				return Config{}, err
+			}
+			ret.CookieStoreSecret = base64.StdEncoding.EncodeToString(buf)
+		}
+		ret.LinksPerPage = max(1, ret.LinksPerPage)
+		ret.BanAfter = max(1, ret.BanAfter)
+		ret.BanSeconds = max(1, ret.BanSeconds)
 		return ret, err
 	}
 }

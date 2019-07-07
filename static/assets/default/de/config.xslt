@@ -86,7 +86,7 @@
     doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
     doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN"/>
 
-  <xsl:variable name="xml_base" select="/*/@xml:base"/>
+  <xsl:variable name="xml_base">../../</xsl:variable>
   <xsl:variable name="xml_base_pub" select="concat($xml_base,'o')"/>
   <xsl:variable name="skin_base" select="concat($xml_base,'assets/default')"/>
   <xsl:variable name="cgi_base" select="concat($xml_base,'shaarligo.cgi')"/>
