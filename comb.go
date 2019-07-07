@@ -54,17 +54,22 @@ func entryFromReader(r io.Reader, ur *url.URL) (Entry, error) {
 func entryFromNode(root *html.Node, ur *url.URL) (Entry, error) {
 	ret := Entry{}
 	for _, node := range scrape.FindAll(root, func(n *html.Node) bool {
-		return n.Parent == root && n.Type == html.ElementNode && atom.Html == n.DataAtom
+		return root == n.Parent && html.ElementNode == n.Type && atom.Html == n.DataAtom
 	}) {
 		ret.XmlLang = Lang(scrape.Attr(node, "lang"))
 		break
 	}
 
-	for _, node := range scrape.FindAll(root, func(n *html.Node) bool { return n.Type == html.ElementNode && atom.Meta == n.DataAtom }) {
+	for _, node := range scrape.FindAll(root, func(n *html.Node) bool {
+		return html.ElementNode == n.Type && (atom.Meta == n.DataAtom || atom.Title == n.DataAtom)
+	}) {
 		strName := scrape.Attr(node, "name")
 		strProp := scrape.Attr(node, "property")
 		strContent := scrape.Attr(node, "content")
 		switch {
+		case atom.Title == node.DataAtom:
+			ret.Title = HumanText{Body: scrape.Text(node)}
+
 		case "title" == strName:
 			ret.Title = HumanText{Body: strContent}
 

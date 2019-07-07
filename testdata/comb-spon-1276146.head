@@ -1,0 +1,66 @@
+HTTP/1.1 301 Moved Permanently
+Date: Sun, 07 Jul 2019 09:48:20 GMT
+Location: https://www.spiegel.de/article.do?id=1276146
+cache-control: max-age=3600
+X-SP-PR: 6127
+Content-Length: 0
+Connection: keep-alive
+
+HTTP/1.1 301 Moved Permanently
+Date: Sun, 07 Jul 2019 09:48:19 GMT
+Cache-Control: max-age=90
+Expires: Sun, 07 Jul 2019 09:49:50 GMT
+Location: https://m.spiegel.de/redirectoldmobileurls/article.do?id=1276146
+Content-Length: 0
+X-SP-AP: 6126
+Content-Type: text/plain
+Vary: isssl
+Age: 0
+X-SP-PR: 6126
+Connection: keep-alive
+
+HTTP/1.1 301 Moved Permanently
+Date: Sun, 07 Jul 2019 09:48:20 GMT
+Cache-Control: no-transform
+Expires: Sun, 07 Jul 2019 09:49:51 GMT
+X-SP-TE: 6154
+X-Robots-Tag: index, follow, noarchive, noodp
+Location: /artikel/a-1276146.html
+Content-Length: 0
+X-SP-AP: 6134
+Content-Type: text/plain
+Vary: isssl
+Age: 0
+X-SP-PR: 6134
+Connection: keep-alive
+
+HTTP/1.1 301 Moved Permanently
+Date: Sun, 07 Jul 2019 09:48:20 GMT
+Cache-Control: no-transform
+Expires: Sun, 07 Jul 2019 09:48:31 GMT
+X-SP-TE: 6149
+X-Robots-Tag: index, follow, noarchive, noodp
+Location: /kultur/musik/joao-gilberto-bossa-nova-legende-stirbt-mit-88-jahren-a-1276146.html
+Content-Length: 0
+X-SP-AP: 6134
+Content-Type: text/plain
+Vary: isssl
+Age: 0
+X-SP-PR: 6134
+Connection: keep-alive
+
+HTTP/1.1 200 OK
+Date: Sun, 07 Jul 2019 09:48:20 GMT
+Cache-Control: no-transform
+Expires: Sun, 07 Jul 2019 09:48:31 GMT
+X-SP-TE: 6140
+X-Robots-Tag: index, follow, noarchive, noodp
+Content-Type: text/html;charset=UTF-8
+X-SP-AP: 6134
+Vary: Accept-Encoding, isssl
+Age: 0
+X-SP-PR: 6134
+Accept-Ranges: bytes
+Transfer-Encoding: chunked
+Connection: keep-alive
+
