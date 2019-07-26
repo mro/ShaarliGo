@@ -482,14 +482,29 @@ func isEmojiRune(ru rune) bool {
 		(0x20d0 <= r && r <= 0x20ff) // Combining Diacritical Marks for Symbols
 }
 
-func isTag(s string) bool {
-	for _, r := range s {
-		if '#' == r {
-			return true
-		}
-		return isEmojiRune(r)
+const tpf = '#'
+
+func myPunct(r rune) bool {
+	switch r {
+	case '§', '†', tpf:
+		return false
+	default:
+		return unicode.IsPunct(r)
 	}
-	return false
+}
+
+func isTag(tag string) string {
+	for _, c := range tag {
+		if tpf == c {
+			tag = tag[1:]
+			break
+		}
+		if isEmojiRune(c) {
+			break
+		}
+		return ""
+	}
+	return strings.TrimFunc(tag, myPunct)
 }
 
 func tagsFromString(str string) map[string]struct{} {
@@ -498,18 +513,10 @@ func tagsFromString(str string) map[string]struct{} {
 
 	ret := make(map[string]struct{}, 10)
 	for scanner.Scan() {
-		term := scanner.Text()
-		if !isTag(term) {
-			continue
-		}
-		term = strings.TrimLeft(term, "#")
-		term = strings.TrimRightFunc(term, func(r rune) bool {
-			return !('§' == r || '†' == r) && unicode.IsPunct(r)
-		})
-		if "" != term {
-			ret[term] = struct{}{}
-		}
+		term := isTag(scanner.Text())
+		ret[term] = struct{}{}
 	}
+	delete(ret, "")
 	return ret
 }
 

@@ -44,6 +44,15 @@ func ta(tags ...string) map[string]struct{} {
 func TestTagsFromString(t *testing.T) {
 	t.Parallel()
 
+	assert.Equal(t, "", isTag(""), "aha")
+	assert.Equal(t, "ha", isTag("#ha"), "aha")
+	assert.Equal(t, "🐳", isTag("🐳"), "aha")
+	assert.Equal(t, "", isTag("foo#nein"), "aha")
+
+	assert.Equal(t, "><(((°>", isTag("#><(((°>"), "aha")
+	assert.Equal(t, "F#", isTag("#F#"), "aha")
+	assert.Equal(t, "#F#", isTag("##F#"), "aha")
+
 	assert.Equal(t, ta("ha"), tagsFromString("#ha, 1.2 foo#nein"), "aha")
 	assert.Equal(t, ta("🐳"), tagsFromString("🐳, foo#nein"), "aha")
 	assert.Equal(t, ta("§", "$", "†"), tagsFromString("#§, #$ #† foo#nein"), "aha")
