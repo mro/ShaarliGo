@@ -65,6 +65,23 @@ Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lo
 	assert.Equal(t, ta("⭐️"), tagsFromString("a single ⭐️ is also a tag"), "aha")
 }
 
+func TestFold(t *testing.T) {
+	t.Parallel()
+
+	assert.Equal(t, "hallo wyrld!", fold(" Hälló wÿrld! "), "2")
+	assert.Equal(t, "demaiziere", fold(" DeMaizière \n"), "1")
+	assert.Equal(t, "cegłowski", fold("\tCegłowski"), "-")
+}
+
+func TestTagsNormalise(t *testing.T) {
+	t.Parallel()
+
+	description, extended, tags := tagsNormalise("#A", "#B #C", []string{"a", "c", "D"}, []string{"c"})
+	assert.Equal(t, "#A", description, "u1")
+	assert.Equal(t, "#B #C #D", extended, "u2")
+	assert.Equal(t, []string{"B", "D", "a", "c"}, tags, "u3")
+}
+
 func TestEntryCategoriesMerged(t *testing.T) {
 	t.Parallel()
 	e := Entry{

@@ -33,6 +33,9 @@ import (
 	"unicode"
 	// "golang.org/x/tools/blog/atom"
 
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
+
 	"github.com/yhat/scrape"
 	"golang.org/x/net/html"
 )
@@ -518,6 +521,56 @@ func tagsFromString(str string) map[string]struct{} {
 	}
 	delete(ret, "")
 	return ret
+}
+
+// https://stackoverflow.com/a/26722698
+func fold(str string) string {
+	tr := transform.Chain(norm.NFD, transform.RemoveFunc(func(r rune) bool {
+		return unicode.Is(unicode.Mn, r) // Mn: nonspacing marks
+	}), norm.NFC)
+	// todo: chain lowercase + trim
+	if result, _, err := transform.String(tr, str); err != nil {
+		panic(err)
+	} else {
+		return strings.TrimSpace(strings.ToLower(result))
+	}
+}
+
+func tagsNormalise(ds string, ex string, ta []string, known []string) (description string, extended string, tags []string) {
+	// reduce the keys in ds and e
+	txdi := make(map[string]string, 20)
+	// used, but undeclared: new
+	all_ := make(map[string]string, 20)
+	for _, tx := range []string{ex, ds} {
+		for tag, _ := range tagsFromString(tx) {
+			k := fold(tag)
+			txdi[k] = tag
+			all_[k] = tag
+		}
+	}
+
+	// reduce ta into map key:folded value:ta
+	tadi := make(map[string]string, len(ta))
+	exar := make([]string, 0, len(all_))
+	for _, tag := range ta {
+		k := fold(tag)
+		tadi[k] = tag
+		all_[k] = tag // spelling of declared tag wins
+		if "" == txdi[k] {
+			exar = append(exar, tag)
+		}
+	}
+	sort.Strings(exar)
+
+	tags = make([]string, 0, len(all_))
+	for _, v := range all_ {
+		tags = append(tags, v)
+	}
+	sort.Strings(tags)
+
+	description = strings.TrimSpace(ds)
+	extended = strings.Join(append([]string{strings.TrimSpace(ex)}, exar...), " #")
+	return
 }
 
 const iWillBeALineFeedMarker = "+,zX@D4X#%`lGdX-vWU?/==v"
