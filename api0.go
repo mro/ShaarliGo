@@ -28,7 +28,6 @@ import (
 	"net/url"
 	"path"
 	"regexp"
-	"sort"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -301,29 +300,36 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 						// humanP := func(key string) *HumanText { t := human(key); return &t }
 
 						ent.Updated = iso8601(now)
-						ent.Title = HumanText{Body: strings.TrimSpace(r.FormValue("lf_title")), Type: "text"}
+
 						url := mustParseURL(lf_url)
 						if url.IsAbs() && "" != url.Host {
 							ent.Links = []Link{{Href: lf_url}}
 						} else {
 							ent.Links = []Link{}
 						}
-						ent.Content = &HumanText{Body: strings.TrimSpace(r.FormValue("lf_description")), Type: "text"}
+
+						known := make(map[string]string, 10000)
+						for _, ee := range feed.Entries {
+							for _, ca := range ee.Categories {
+								known[fold(ca.Term)] = ca.Term
+							}
+						}
+
+						ds, ex, tags := tagsNormalise(r.FormValue("lf_title"), r.FormValue("lf_description"), strings.Split(r.FormValue("lf_tags"), " "), known)
+						ent.Title = HumanText{Body: ds, Type: "text"}
+						ent.Content = &HumanText{Body: ex, Type: "text"}
+						{
+							a := make([]Category, 0, len(tags))
+							for _, tag := range tags {
+								a = append(a, Category{Term: tag})
+							}
+							ent.Categories = a
+						}
+
 						if img := strings.TrimSpace(r.FormValue("lf_image")); "" != img {
 							ent.MediaThumbnail = &MediaThumbnail{Url: Iri(img)}
 						}
 
-						{
-							tags := strings.Split(r.FormValue("lf_tags"), " ")
-							a := make([]Category, 0, len(tags))
-							for _, tg := range tags {
-								if "" != tg {
-									a = append(a, Category{Term: tg})
-								}
-							}
-							ent.Categories = a // discard old categories and only use from POST.
-							ent.Categories = ent.CategoriesMerged()
-						}
 						if err := ent.Validate(); err != nil {
 							http.Error(w, "couldn't add entry: "+err.Error(), http.StatusInternalServerError)
 							return
@@ -430,32 +436,24 @@ func (app *Server) handleDoCheckLoginAfterTheFact() http.HandlerFunc {
 
 // Aggregate all tags from #title, #description and <category and remove the first two groups from the set.
 func (entry Entry) api0LinkFormMap() map[string]interface{} {
+	body := func(t *HumanText) string {
+		if t == nil {
+			return ""
+		}
+		return t.Body
+	}
+
 	data := map[string]interface{}{
 		"lf_linkdate": entry.Published.Format(fmtTimeLfTime),
-		"lf_title":    entry.Title.Body,
 	}
 	{
-		// 1. get all atom categories
-		set := make(map[string]struct{}, len(entry.Categories))
+		data["lf_title"] = body(&entry.Title)
+		data["lf_description"] = body(entry.Content)
+
+		tags := make([]string, 0, len(entry.Categories))
 		for _, c := range entry.Categories {
-			set[c.Term] = struct{}{}
+			tags = append(tags, c.Term)
 		}
-		// 2. minus #tags from title
-		for tag := range tagsFromString(entry.Title.Body) {
-			delete(set, tag)
-		}
-		// 2. minus #tags from content
-		if entry.Content != nil {
-			for tag := range tagsFromString(entry.Content.Body) {
-				delete(set, tag)
-			}
-		}
-		// turn map keys into sorted array
-		tags := make([]string, 0, len(set))
-		for key := range set {
-			tags = append(tags, key)
-		}
-		sort.Slice(tags, func(i, j int) bool { return strings.Compare(tags[i], tags[j]) < 0 })
 		data["lf_tags"] = strings.Join(tags, " ")
 	}
 	for _, li := range entry.Links {
@@ -467,9 +465,6 @@ func (entry Entry) api0LinkFormMap() map[string]interface{} {
 	if "" == data["lf_url"] && "" != entry.Id {
 		// todo: also if it's not a note
 		data["lf_url"] = entry.Id
-	}
-	if nil != entry.Content {
-		data["lf_description"] = entry.Content.Body
 	}
 	if nil != entry.MediaThumbnail && len(entry.MediaThumbnail.Url) > 0 {
 		data["lf_image"] = entry.MediaThumbnail.Url

@@ -18,7 +18,6 @@
 package main
 
 import (
-	"bufio"
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/xml"
@@ -30,11 +29,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode"
 	// "golang.org/x/tools/blog/atom"
-
-	"golang.org/x/text/transform"
-	"golang.org/x/text/unicode/norm"
 
 	"github.com/yhat/scrape"
 	"golang.org/x/net/html"
@@ -51,17 +46,6 @@ const lengthyAtomPreambleComment string = `
 `
 
 const atomNamespace = "http://www.w3.org/2005/Atom"
-
-var emojiRunes map[rune]struct{}
-
-func init() {
-	emojiRunes = make(map[rune]struct{}, len(emojiCodeMap))
-	for _, v := range emojiCodeMap {
-		r := []rune(v)[0]
-		emojiRunes[r] = struct{}{}
-	}
-	emojiCodeMap = nil
-}
 
 func FeedFromFileName(file string) (Feed, error) {
 	if read, err := os.Open(file); nil == read || nil != err {
@@ -414,17 +398,6 @@ func (entry *Entry) Validate() error {
 	return nil
 }
 
-func (entry Entry) CategoriesMerged() []Category {
-	a := entry.Title.Categories()
-	b := entry.Content.Categories()
-	ret := make([]Category, 0, len(a)+len(b)+len(entry.Categories))
-	ret = append(ret, a...)
-	ret = append(ret, b...)
-	ret = append(ret, entry.Categories...)
-	sort.Slice(ret, func(i, j int) bool { return strings.Compare(ret[i].Term, ret[j].Term) < 0 })
-	return uniqCategory(ret)
-}
-
 func AggregateCategories(entries []*Entry) []Category {
 	// aggregate & count feed entry categories
 	cats := make(map[string]int, 1*len(entries)) // raw len guess
@@ -445,132 +418,12 @@ func AggregateCategories(entries []*Entry) []Category {
 	return cs
 }
 
-func uniqCategory(data []Category) []Category {
-	ret := make([]Category, 0, len(data))
-	for i, e := range data {
-		if "" == e.Term {
-			continue
-		}
-		if i == 0 || e.Term != data[i-1].Term {
-			ret = append(ret, e)
-		}
-	}
-	return ret
-}
-
 func (ht HumanText) Categories() []Category {
 	ret := make([]Category, 0, 10)
-	for t := range tagsFromString(ht.Body) {
+	for _, t := range tagsFromString(ht.Body) {
 		ret = append(ret, Category{Term: t})
 	}
 	return ret
-}
-
-// https://stackoverflow.com/a/39425959
-func isEmojiRune(ru rune) bool {
-	r := int(ru)
-	return false ||
-		(0x2b50 <= r && r <= 0x2b50) || // star
-		(0x1F600 <= r && r <= 0x1F64F) || // Emoticons
-		(0x1F300 <= r && r <= 0x1F5FF) || // Misc Symbols and Pictographs
-		(0x1F680 <= r && r <= 0x1F6FF) || // Transport and Map
-		(0x1F1E6 <= r && r <= 0x1F1FF) || // Regional country flags
-		(0x2600 <= r && r <= 0x26FF) || // Misc symbols
-		(0x2700 <= r && r <= 0x27BF) || // Dingbats
-		(0xFE00 <= r && r <= 0xFE0F) || // Variation Selectors
-		(0x1F900 <= r && r <= 0x1F9FF) || // Supplemental Symbols and Pictographs
-		(0x1f018 <= r && r <= 0x1f270) || // Various asian characters
-		(0xfe00 <= r && r <= 0xfe0f) || // Variation selector
-		(0x238c <= r && r <= 0x2454) || // Misc items
-		(0x20d0 <= r && r <= 0x20ff) // Combining Diacritical Marks for Symbols
-}
-
-const tpf = '#'
-
-func myPunct(r rune) bool {
-	switch r {
-	case '§', '†', tpf:
-		return false
-	default:
-		return unicode.IsPunct(r)
-	}
-}
-
-func isTag(tag string) string {
-	for _, c := range tag {
-		if tpf == c {
-			tag = tag[1:]
-			break
-		}
-		if isEmojiRune(c) {
-			break
-		}
-		return ""
-	}
-	return strings.TrimFunc(tag, myPunct)
-}
-
-func tagsFromString(str string) map[string]struct{} {
-	scanner := bufio.NewScanner(strings.NewReader(str))
-	scanner.Split(bufio.ScanWords)
-
-	ret := make(map[string]struct{}, 10)
-	for scanner.Scan() {
-		term := isTag(scanner.Text())
-		ret[term] = struct{}{}
-	}
-	delete(ret, "")
-	return ret
-}
-
-// https://stackoverflow.com/a/26722698
-func fold(str string) string {
-	tr := transform.Chain(norm.NFD, transform.RemoveFunc(func(r rune) bool {
-		return unicode.Is(unicode.Mn, r) // Mn: nonspacing marks
-	}), norm.NFC)
-	// todo: chain lowercase + trim
-	if result, _, err := transform.String(tr, str); err != nil {
-		panic(err)
-	} else {
-		return strings.TrimSpace(strings.ToLower(result))
-	}
-}
-
-func tagsNormalise(ds string, ex string, ta []string, known []string) (description string, extended string, tags []string) {
-	// reduce the keys in ds and e
-	txdi := make(map[string]string, 20)
-	// used, but undeclared: new
-	all_ := make(map[string]string, 20)
-	for _, tx := range []string{ex, ds} {
-		for tag, _ := range tagsFromString(tx) {
-			k := fold(tag)
-			txdi[k] = tag
-			all_[k] = tag
-		}
-	}
-
-	// reduce ta into map key:folded value:ta
-	tadi := make(map[string]string, len(ta))
-	exar := make([]string, 0, len(all_))
-	for _, tag := range ta {
-		k := fold(tag)
-		tadi[k] = tag
-		all_[k] = tag // spelling of declared tag wins
-		if "" == txdi[k] {
-			exar = append(exar, tag)
-		}
-	}
-	sort.Strings(exar)
-
-	tags = make([]string, 0, len(all_))
-	for _, v := range all_ {
-		tags = append(tags, v)
-	}
-	sort.Strings(tags)
-
-	description = strings.TrimSpace(ds)
-	extended = strings.Join(append([]string{strings.TrimSpace(ex)}, exar...), " #")
-	return
 }
 
 const iWillBeALineFeedMarker = "+,zX@D4X#%`lGdX-vWU?/==v"

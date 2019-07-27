@@ -12,27 +12,6 @@
     doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
     doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN"/>
 
-  <!-- tags -->
-  <xsl:template name="tags_with_hash">
-    <xsl:param name="string" select="''"/>
-    <xsl:param name="pattern" select="' '"/>
-    <xsl:if test="$string != ''">
-      <xsl:text> #</xsl:text>
-    </xsl:if>
-    <xsl:choose>
-      <xsl:when test="contains($string, $pattern)">
-        <xsl:value-of select="substring-before($string, $pattern)"/>
-        <xsl:call-template name="tags_with_hash">
-          <xsl:with-param name="string" select="substring-after($string, $pattern)"/>
-          <xsl:with-param name="pattern" select="$pattern"/>
-        </xsl:call-template>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:value-of select="$string"/>
-      </xsl:otherwise>
-    </xsl:choose>
-  </xsl:template>
-
   <xsl:variable name="xml_base" select="/*/@xml:base"/>
   <xsl:variable name="xml_base_pub" select="concat($xml_base,'o')"/>
   <xsl:variable name="skin_base" select="concat($xml_base,'assets/default')"/>
@@ -86,9 +65,6 @@
       <input autofocus="autofocus" name="lf_title" type="text" placeholder="Ein Titel, gerne mit #Schlagwort" value="{h:input[@name='lf_title']/@value}" class="awesomplete" data-multiple="true"/>
       <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="8" cols="25" data-multiple="true">
         <xsl:value-of select="h:textarea[@name='lf_description']"/>
-        <xsl:call-template name="tags_with_hash">
-          <xsl:with-param name="string" select="h:input[@name='lf_tags']/@value"/>
-        </xsl:call-template>
       </textarea>
   <!-- div class="input-group">
     <div class="col-sm-12">

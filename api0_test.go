@@ -169,18 +169,18 @@ func TestApi0LinkFormMap(t *testing.T) {
 	t.Parallel()
 
 	e := Entry{}
-	assert.Equal(t, map[string]interface{}{"lf_tags": "", "lf_linkdate": "00010101_000000", "lf_title": ""}, e.api0LinkFormMap(), "oha")
+	assert.Equal(t, map[string]interface{}{"lf_description": "", "lf_linkdate": "00010101_000000", "lf_tags": "", "lf_title": ""}, e.api0LinkFormMap(), "oha")
 
 	e = Entry{
 		Title: HumanText{Body: "My #Post"},
 	}
-	assert.Equal(t, map[string]interface{}{"lf_linkdate": "00010101_000000", "lf_title": "My #Post", "lf_tags": ""}, e.api0LinkFormMap(), "oha")
+	assert.Equal(t, map[string]interface{}{"lf_description": "", "lf_linkdate": "00010101_000000", "lf_tags": "", "lf_title": "My #Post"}, e.api0LinkFormMap(), "oha")
 
 	e = Entry{
 		Title:      HumanText{Body: "My #Post"},
 		Categories: []Category{{Term: "Post"}, {Term: "tag1"}},
 	}
-	assert.Equal(t, map[string]interface{}{"lf_tags": "tag1", "lf_linkdate": "00010101_000000", "lf_title": "My #Post"}, e.api0LinkFormMap(), "oha")
+	assert.Equal(t, map[string]interface{}{"lf_description": "", "lf_linkdate": "00010101_000000", "lf_tags": "Post tag1", "lf_title": "My #Post"}, e.api0LinkFormMap(), "oha")
 	// assert.Equal(t, map[string]string{"lf_linkdate": "00010101_000000", "lf_title": "My #Post", "lf_tags": "tag1"}, e.api0LinkFormMap(), "oha")
 }
 
