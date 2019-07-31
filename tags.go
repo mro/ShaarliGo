@@ -87,15 +87,15 @@ func tagsFromString(str string) []string {
 	scanner.Split(bufio.ScanWords)
 
 	ret := make([]string, 0, 10)
-	tmp := make(map[string]bool, 10)
-	tmp[""] = true
+	tmp := make(map[string]struct{}, 10)
+	tmp[""] = struct{}{}
 	for scanner.Scan() {
 		tag := isTag(scanner.Text())
-		if tmp[tag] {
+		if _, ok := tmp[tag]; ok {
 			continue
 		}
 		ret = append(ret, tag)
-		tmp[tag] = true
+		tmp[tag] = struct{}{}
 	}
 	return ret
 }
