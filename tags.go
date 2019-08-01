@@ -39,23 +39,22 @@ func init() {
 }
 
 // https://stackoverflow.com/a/39425959
+// http://cldr-build.unicode.org/UnicodeJsps/list-unicodeset.jsp?a=%5B%3Aemoji%3A%5D&g=emoji
 func isEmojiRune(ru rune) bool {
-	r := int(ru)
 	return false ||
-		(0x2b50 <= r && r <= 0x2b50) || // star
-		(0x1F600 <= r && r <= 0x1F64F) || // Emoticons
-		(0x1F300 <= r && r <= 0x1F5FF) || // Misc Symbols and Pictographs
-		(0x1F680 <= r && r <= 0x1F6FF) || // Transport and Map
-		(0x1F1E6 <= r && r <= 0x1F1FF) || // Regional country flags
-		(0x2328 == r) || // keyboard
-		(0x2600 <= r && r <= 0x26FF) || // Misc symbols
-		(0x2700 <= r && r <= 0x27BF) || // Dingbats
-		(0xFE00 <= r && r <= 0xFE0F) || // Variation Selectors
-		(0x1F900 <= r && r <= 0x1F9FF) || // Supplemental Symbols and Pictographs
-		(0x1f018 <= r && r <= 0x1f270) || // Various asian characters
-		(0xfe00 <= r && r <= 0xfe0f) || // Variation selector
-		(0x238c <= r && r <= 0x2454) || // Misc items
-		(0x20d0 <= r && r <= 0x20ff) // Combining Diacritical Marks for Symbols
+		('\u20d0' <= ru && ru <= '\u20ff') || // Combining Diacritical Marks for Symbols
+		('\u2328' == ru) || // keyboard
+		('\u238c' <= ru && ru <= '\u2454') || // Misc items
+		('\u2600' <= ru && ru <= '\u26FF') || // Misc symbols
+		('\u2700' <= ru && ru <= '\u27BF') || // Dingbats
+		('\u2b50' == ru) || // star
+		('\uFE00' <= ru && ru <= '\uFE0F') || // Variation Selectors
+		('\U0001f018' <= ru && ru <= '\U0001f270') || // Various asian characters
+		('\U0001F1E6' <= ru && ru <= '\U0001F1FF') || // Regional country flags
+		('\U0001F300' <= ru && ru <= '\U0001F5FF') || // Misc Symbols and Pictographs
+		('\U0001F600' <= ru && ru <= '\U0001F64F') || // Emoticons
+		('\U0001F680' <= ru && ru <= '\U0001F6FF') || // Transport and Map
+		('\U0001F900' <= ru && ru <= '\U0001F9FF') // Supplemental Symbols and Pictographs
 }
 
 const tpf = '#'
