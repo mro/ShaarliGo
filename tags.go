@@ -47,6 +47,7 @@ func isEmojiRune(ru rune) bool {
 		(0x1F300 <= r && r <= 0x1F5FF) || // Misc Symbols and Pictographs
 		(0x1F680 <= r && r <= 0x1F6FF) || // Transport and Map
 		(0x1F1E6 <= r && r <= 0x1F1FF) || // Regional country flags
+		(0x2328 == r) || // keyboard
 		(0x2600 <= r && r <= 0x26FF) || // Misc symbols
 		(0x2700 <= r && r <= 0x27BF) || // Dingbats
 		(0xFE00 <= r && r <= 0xFE0F) || // Variation Selectors

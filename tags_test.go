@@ -32,6 +32,7 @@ func TestTagsFromString(t *testing.T) {
 	assert.Equal(t, "", isTag(""), "aha")
 	assert.Equal(t, "ha", isTag("#ha"), "aha")
 	assert.Equal(t, "🐳", isTag("🐳"), "aha")
+	assert.Equal(t, "⌨️", isTag("⌨️"), "aha")
 	assert.Equal(t, "", isTag("foo#nein"), "aha")
 
 	assert.Equal(t, "><(((°>", isTag("#><(((°>"), "aha")
