@@ -67,7 +67,7 @@ func TestTagsNormalise(t *testing.T) {
 	description, extended, tags := tagsNormalise("#A", "#B #C", []string{"a", "c", "D"}, map[string]string{"c": "c"})
 	assert.Equal(t, "#A", description, "u1")
 	assert.Equal(t, "#B #C #D", extended, "u2")
-	assert.Equal(t, []string{"B", "D", "a", "c"}, tags, "u3")
+	assert.Equal(t, []string{"A", "B", "D", "c"}, tags, "u3")
 
 	description, extended, tags = tagsNormalise("#foo #Foo #fOo #foö", "", []string{}, map[string]string{})
 	assert.Equal(t, "#foo #Foo #fOo #foö", description, "u1")
@@ -81,10 +81,10 @@ func TestTagsNormalise(t *testing.T) {
 
 	description, extended, tags = tagsNormalise("#atöm und so weitr", "", []string{"Atom"}, map[string]string{})
 	assert.Equal(t, "", extended, "u2")
-	assert.Equal(t, []string{"Atom"}, tags, "u3")
+	assert.Equal(t, []string{"atöm"}, tags, "u3")
 
 	description, extended, tags = tagsNormalise("🏊 #Traunstein: Neue Wasserrutsche im Schwimmbad kommt in Sicht", "…Lieferung und Montage der 🚦 Ampelanlage und der ⏱ Rutschzeitnahme…", []string{"🏊", "🚦", "⏱ ", "Traunstein"}, map[string]string{})
 	assert.Equal(t, "🏊 #Traunstein: Neue Wasserrutsche im Schwimmbad kommt in Sicht", description, "u2")
 	assert.Equal(t, "…Lieferung und Montage der 🚦 Ampelanlage und der ⏱ Rutschzeitnahme…", extended, "u2")
-	assert.Equal(t, []string{"Traunstein", "⏱ ", "🏊", "🚦"}, tags, "u3")
+	assert.Equal(t, []string{"Traunstein", "⏱", "🏊", "🚦"}, tags, "u3")
 }

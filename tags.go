@@ -114,52 +114,39 @@ func fold(str string) string {
 }
 
 func tagsNormalise(ds string, ex string, ta []string, known map[string]string) (description string, extended string, tags []string) {
-	tadi := make(map[string]string, len(ta))
-	for _, tag := range ta {
+	tags = make([]string, 0, 20)
+	// 1. iterate text tags
+	tadi := make(map[string]string, 20)
+	tadi[""] = ""
+
+	add := func(tag string) string {
 		k := fold(tag)
-		if "" == k {
-			continue
-		}
 		if _, ok := tadi[k]; ok {
-			continue
+			return ""
 		}
 		if v, ok := known[k]; ok {
-			tadi[k] = v
-			continue
+			tag = v
 		}
 		tadi[k] = tag
+		tags = append(tags, tag) // updating the reference correctly?
+		return tag
 	}
 
-	midi := make(map[string]string, len(tadi))
-	for k, v := range tadi {
-		midi[k] = v
-	}
 	for _, tag := range append(tagsFromString(ds), tagsFromString(ex)...) {
-		k := fold(tag)
-		if _, ok := tadi[k]; ok {
-			delete(midi, k)
-			continue
-		}
-		if v, ok := known[k]; ok {
-			tadi[k] = v
-			continue
-		}
-		tadi[k] = tag
+		add(tag)
 	}
 
-	miss := make([]string, 0, len(midi))
-	for _, v := range midi {
-		miss = append(miss, v)
+	// 2. iterate all previous tags and add missing ones to tadi and extended
+	sort.Strings(ta)
+	for _, tag := range ta {
+		if t := add(tag); t == "" {
+			continue
+		}
+		ex += " #" + tag
 	}
-	sort.Strings(miss)
-
-	tags = make([]string, 0, len(tadi))
-	for _, v := range tadi {
-		tags = append(tags, v)
-	}
-	sort.Strings(tags)
 
 	description = strings.TrimSpace(ds)
-	extended = strings.TrimSpace(strings.Join(append([]string{strings.TrimSpace(ex)}, miss...), " #"))
+	extended = strings.TrimSpace(ex)
+	sort.Strings(tags)
 	return
 }
