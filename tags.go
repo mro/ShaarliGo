@@ -113,7 +113,12 @@ func fold(str string) string {
 	}
 }
 
-func tagsNormalise(ds string, ex string, ta []string, known map[string]string) (description string, extended string, tags []string) {
+func tagsNormalise(ds string, ex string, ta []string, known []string) (description string, extended string, tags []string) {
+	knodi := make(map[string]string, len(known))
+	for _, tag := range known {
+		knodi[fold(tag)] = tag
+	}
+
 	tags = make([]string, 0, 20)
 	// 1. iterate text tags
 	tadi := make(map[string]string, 20)
@@ -124,7 +129,7 @@ func tagsNormalise(ds string, ex string, ta []string, known map[string]string) (
 		if _, ok := tadi[k]; ok {
 			return ""
 		}
-		if v, ok := known[k]; ok {
+		if v, ok := knodi[k]; ok {
 			tag = v
 		}
 		tadi[k] = tag
@@ -142,7 +147,7 @@ func tagsNormalise(ds string, ex string, ta []string, known map[string]string) (
 		if t := add(tag); t == "" {
 			continue
 		}
-		ex += " #" + tag
+		ex += " #" + tag // todo: skip superfluous # before emojis
 	}
 
 	description = strings.TrimSpace(ds)

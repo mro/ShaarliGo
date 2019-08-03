@@ -308,10 +308,10 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 							ent.Links = []Link{}
 						}
 
-						known := make(map[string]string, 10000)
+						known := make([]string, 0, 4*len(feed.Entries))
 						for _, ee := range feed.Entries {
 							for _, ca := range ee.Categories {
-								known[fold(ca.Term)] = ca.Term
+								known = append(known, ca.Term)
 							}
 						}
 

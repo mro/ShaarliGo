@@ -64,26 +64,26 @@ func TestFold(t *testing.T) {
 func TestTagsNormalise(t *testing.T) {
 	t.Parallel()
 
-	description, extended, tags := tagsNormalise("#A", "#B #C", []string{"a", "c", "D"}, map[string]string{"c": "c"})
+	description, extended, tags := tagsNormalise("#A", "#B #C", []string{"a", "C", "D"}, []string{"c"})
 	assert.Equal(t, "#A", description, "u1")
 	assert.Equal(t, "#B #C #D", extended, "u2")
 	assert.Equal(t, []string{"A", "B", "D", "c"}, tags, "u3")
 
-	description, extended, tags = tagsNormalise("#foo #Foo #fOo #foö", "", []string{}, map[string]string{})
+	description, extended, tags = tagsNormalise("#foo #Foo #fOo #foö", "", []string{}, []string{})
 	assert.Equal(t, "#foo #Foo #fOo #foö", description, "u1")
 	assert.Equal(t, "", extended, "u2")
 	assert.Equal(t, []string{"foo"}, tags, "u3")
 
-	description, extended, tags = tagsNormalise("a b c", "nix", []string{"", ""}, map[string]string{})
+	description, extended, tags = tagsNormalise("a b c", "nix", []string{"", ""}, []string{})
 	assert.Equal(t, "a b c", description, "u1")
 	assert.Equal(t, "nix", extended, "u2")
 	assert.Equal(t, []string{}, tags, "u3")
 
-	description, extended, tags = tagsNormalise("#atöm und so weitr", "", []string{"Atom"}, map[string]string{})
+	description, extended, tags = tagsNormalise("#atöm und so weitr", "", []string{"Atom"}, []string{})
 	assert.Equal(t, "", extended, "u2")
 	assert.Equal(t, []string{"atöm"}, tags, "u3")
 
-	description, extended, tags = tagsNormalise("🏊 #Traunstein: Neue Wasserrutsche im Schwimmbad kommt in Sicht", "…Lieferung und Montage der 🚦 Ampelanlage und der ⏱ Rutschzeitnahme…", []string{"🏊", "🚦", "⏱ ", "Traunstein"}, map[string]string{})
+	description, extended, tags = tagsNormalise("🏊 #Traunstein: Neue Wasserrutsche im Schwimmbad kommt in Sicht", "…Lieferung und Montage der 🚦 Ampelanlage und der ⏱ Rutschzeitnahme…", []string{"🏊", "🚦", "⏱ ", "Traunstein"}, []string{})
 	assert.Equal(t, "🏊 #Traunstein: Neue Wasserrutsche im Schwimmbad kommt in Sicht", description, "u2")
 	assert.Equal(t, "…Lieferung und Montage der 🚦 Ampelanlage und der ⏱ Rutschzeitnahme…", extended, "u2")
 	assert.Equal(t, []string{"Traunstein", "⏱", "🏊", "🚦"}, tags, "u3")
