@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
+  https://www.w3.org/TR/xslt-10/
 -->
 <xsl:stylesheet
   xmlns="http://www.w3.org/1999/xhtml"
@@ -58,10 +59,30 @@
     </body>
   </xsl:template>
 
+  <xsl:template name="emoji_a_la_carte">
+    <p>
+      📄
+      📖
+      🛠
+      ⌨️
+      🚴
+      🐛
+      🐞
+      📱
+      🔐
+      🌀
+      🌐
+      🌧
+      ⭐
+      #λ
+    </p>
+  </xsl:template>
+
   <xsl:template match="h:form[@name='linkform']">
     <form method="{@method}" name="{@name}">
       <xsl:copy-of select=".//h:input[@type='hidden']"/>
       <input name="lf_url" type="text" placeholder="https://..." value="{h:input[@name='lf_url']/@value}"/>
+      <xsl:call-template name="emoji_a_la_carte"/>
       <input autofocus="autofocus" name="lf_title" type="text" placeholder="Ein Titel, gerne mit #Schlagwort" value="{h:input[@name='lf_title']/@value}" class="awesomplete" data-multiple="true"/>
       <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="8" cols="25" data-multiple="true">
         <xsl:value-of select="h:textarea[@name='lf_description']"/>

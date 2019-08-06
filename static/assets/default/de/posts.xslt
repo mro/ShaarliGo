@@ -365,7 +365,7 @@
           <a href="{@scheme}{@term}/" class="tag">#<xsl:value-of select="@term"/></a><xsl:text>, </xsl:text>
         </xsl:for-each>
       </p>
-      <p>
+      <p class="footer">
         <xsl:variable name="entry_updated" select="a:updated"/>
         <xsl:variable name="entry_updated_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_updated"/></xsl:call-template></xsl:variable>
         <xsl:variable name="entry_published" select="a:published"/>
