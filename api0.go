@@ -80,10 +80,11 @@ func (app *Server) handleDoLogin() http.HandlerFunc {
 				}
 			}
 		case http.MethodPost:
+			val := func(key string) string { return strings.TrimSpace(r.FormValue(key)) }
 			// todo: verify token
-			uid := strings.TrimSpace(r.FormValue("login"))
-			pwd := strings.TrimSpace(r.FormValue("password"))
-			returnurl := strings.TrimSpace(r.FormValue("returnurl"))
+			uid := val("login")
+			pwd := val("password")
+			returnurl := val("returnurl")
 			// compute anyway (a bit more time constantness)
 			err := bcrypt.CompareHashAndPassword([]byte(app.cfg.PwdBcrypt), []byte(pwd))
 			if uid != app.cfg.Uid || err == bcrypt.ErrMismatchedHashAndPassword {
@@ -222,7 +223,7 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 				// data["lf_source"] = params["source"][0]
 			}
 
-			byt, _ := tplLinkformHtmlBytes()
+			byt, _ := tplLinkformHtmlBytes() // todo: err => 500
 			if tmpl, err := template.New("linkform").Parse(string(byt)); err == nil {
 				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 				io.WriteString(w, xml.Header)
@@ -247,6 +248,7 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 				}
 			}
 		case http.MethodPost:
+			val := func(key string) string { return strings.TrimSpace(r.FormValue(key)) }
 			// 'POST' validate, respond error (and squeal) or post and redirect
 			if !app.IsLoggedIn(now) {
 				squealFailure(r, now, "Unauthorised")
@@ -263,15 +265,14 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 			location := path.Join(uriPub, uriPosts) + "/"
 
 			// https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1479
-			if "" != r.FormValue("save_edit") {
-				if lf_linkdate, err := time.ParseInLocation(fmtTimeLfTime, strings.TrimSpace(r.FormValue("lf_linkdate")), app.tz); err != nil {
+			if "" != val("save_edit") {
+				if lf_linkdate, err := time.ParseInLocation(fmtTimeLfTime, val("lf_linkdate"), app.tz); err != nil {
 					squealFailure(r, now, "BadRequest: "+err.Error())
 					http.Error(w, "Looks like a forged request: "+err.Error(), http.StatusBadRequest)
 					return
 				} else {
-					token := r.FormValue("token")
-					log.Println("todo: check token ", token)
-					if returnurl, err := url.Parse(r.FormValue("returnurl")); err != nil {
+					log.Println("todo: check token ", val("token"))
+					if returnurl, err := url.Parse(val("returnurl")); err != nil {
 						log.Println("Error parsing returnurl: ", err.Error())
 						http.Error(w, "couldn't parse returnurl: "+err.Error(), http.StatusInternalServerError)
 						return
@@ -282,7 +283,7 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 						feed, _ := LoadFeed()
 						feed.XmlBase = Iri(app.url.String())
 
-						lf_url := r.FormValue("lf_url")
+						lf_url := val("lf_url")
 						_, ent := feed.findEntryById(identifier)
 						if nil == ent {
 							ent = feed.newEntry(lf_linkdate)
@@ -296,7 +297,7 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 						// prepare redirect
 						location = strings.Join([]string{location, string(ent.Id)}, "?#")
 
-						// human := func(key string) HumanText { return HumanText{Body: strings.TrimSpace(r.FormValue(key)), Type: "text"} }
+						// human := func(key string) HumanText { return HumanText{Body: val(key), Type: "text"} }
 						// humanP := func(key string) *HumanText { t := human(key); return &t }
 
 						ent.Updated = iso8601(now)
@@ -326,7 +327,7 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 							ent.Categories = a
 						}
 
-						if img := strings.TrimSpace(r.FormValue("lf_image")); "" != img {
+						if img := val("lf_image"); "" != img {
 							ent.MediaThumbnail = &MediaThumbnail{Url: Iri(img)}
 						}
 
@@ -348,10 +349,10 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 						}
 					}
 				}
-			} else if "" != r.FormValue("cancel_edit") {
+			} else if "" != val("cancel_edit") {
 
-			} else if "" != r.FormValue("delete_edit") {
-				token := r.FormValue("token")
+			} else if "" != val("delete_edit") {
+				token := val("token")
 				log.Println("todo: check token ", token)
 				// make persistent
 				feed, _ := LoadFeed()
@@ -379,7 +380,7 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 				http.Error(w, "BadRequest", http.StatusBadRequest)
 				return
 			}
-			if "bookmarklet" == r.FormValue("source") {
+			if "bookmarklet" == val("source") {
 				w.WriteHeader(http.StatusOK)
 				w.Header().Set("Content-Type", "application/javascript")
 				// CSP script-src 'sha256-hGqewLn4csF93PEX/0TCk2jdnAytXBZFxFBzKt7wcgo='
