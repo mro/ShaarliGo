@@ -309,14 +309,14 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 							ent.Links = []Link{}
 						}
 
-						known := make([]string, 0, 4*len(feed.Entries))
-						for _, ee := range feed.Entries {
-							for _, ca := range ee.Categories {
-								known = append(known, ca.Term)
+						visitor := func(callback func(string)) {
+							for _, ee := range feed.Entries {
+								for _, ca := range ee.Categories {
+									callback(ca.Term)
+								}
 							}
 						}
-
-						ds, ex, tags := tagsNormalise(r.FormValue("lf_title"), r.FormValue("lf_description"), strings.Split(r.FormValue("lf_tags"), " "), known)
+						ds, ex, tags := tagsNormalise(val("lf_title"), val("lf_description"), strings.Split(val("lf_tags"), " "), visitor)
 						ent.Title = HumanText{Body: ds, Type: "text"}
 						ent.Content = &HumanText{Body: ex, Type: "text"}
 						{

@@ -113,11 +113,9 @@ func fold(str string) string {
 	}
 }
 
-func tagsNormalise(ds string, ex string, ta []string, known []string) (description string, extended string, tags []string) {
-	knodi := make(map[string]string, len(known))
-	for _, tag := range known {
-		knodi[fold(tag)] = tag
-	}
+func tagsNormalise(ds string, ex string, ta []string, known func(func(string))) (description string, extended string, tags []string) {
+	knodi := make(map[string]string, 1000)
+	known(func(tag string) { knodi[fold(tag)] = tag })
 
 	tags = make([]string, 0, 20)
 	// 1. iterate text tags

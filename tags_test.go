@@ -64,26 +64,35 @@ func TestFold(t *testing.T) {
 func TestTagsNormalise(t *testing.T) {
 	t.Parallel()
 
-	description, extended, tags := tagsNormalise("#A", "#B #C", []string{"a", "C", "D"}, []string{"c"})
+	// create a (helper) function that returns a (visitor) function taking a (callback) function
+	kno := func(tags ...string) func(func(string)) {
+		return func(callback func(string)) {
+			for _, tag := range tags {
+				callback(tag)
+			}
+		}
+	}
+
+	description, extended, tags := tagsNormalise("#A", "#B #C", []string{"a", "C", "D"}, kno("c"))
 	assert.Equal(t, "#A", description, "u1")
 	assert.Equal(t, "#B #C #D", extended, "u2")
 	assert.Equal(t, []string{"A", "B", "D", "c"}, tags, "u3")
 
-	description, extended, tags = tagsNormalise("#foo #Foo #fOo #foö", "", []string{}, []string{})
+	description, extended, tags = tagsNormalise("#foo #Foo #fOo #foö", "", []string{}, kno())
 	assert.Equal(t, "#foo #Foo #fOo #foö", description, "u1")
 	assert.Equal(t, "", extended, "u2")
 	assert.Equal(t, []string{"foo"}, tags, "u3")
 
-	description, extended, tags = tagsNormalise("a b c", "nix", []string{"", ""}, []string{})
+	description, extended, tags = tagsNormalise("a b c", "nix", []string{"", ""}, kno())
 	assert.Equal(t, "a b c", description, "u1")
 	assert.Equal(t, "nix", extended, "u2")
 	assert.Equal(t, []string{}, tags, "u3")
 
-	description, extended, tags = tagsNormalise("#atöm und so weitr", "", []string{"Atom"}, []string{})
+	description, extended, tags = tagsNormalise("#atöm und so weitr", "", []string{"Atom"}, kno())
 	assert.Equal(t, "", extended, "u2")
 	assert.Equal(t, []string{"atöm"}, tags, "u3")
 
-	description, extended, tags = tagsNormalise("🏊 #Traunstein: Neue Wasserrutsche im Schwimmbad kommt in Sicht", "…Lieferung und Montage der 🚦 Ampelanlage und der ⏱ Rutschzeitnahme…", []string{"🏊", "🚦", "⏱ ", "Traunstein"}, []string{})
+	description, extended, tags = tagsNormalise("🏊 #Traunstein: Neue Wasserrutsche im Schwimmbad kommt in Sicht", "…Lieferung und Montage der 🚦 Ampelanlage und der ⏱ Rutschzeitnahme…", []string{"🏊", "🚦", "⏱ ", "Traunstein"}, kno())
 	assert.Equal(t, "🏊 #Traunstein: Neue Wasserrutsche im Schwimmbad kommt in Sicht", description, "u2")
 	assert.Equal(t, "…Lieferung und Montage der 🚦 Ampelanlage und der ⏱ Rutschzeitnahme…", extended, "u2")
 	assert.Equal(t, []string{"Traunstein", "⏱", "🏊", "🚦"}, tags, "u3")
