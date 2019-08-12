@@ -154,6 +154,16 @@ func urlFromPostParam(post string) *url.URL {
 	}
 }
 
+func termsVisitor(entries ...*Entry) func(func(string)) {
+	return func(callback func(string)) {
+		for _, ee := range entries {
+			for _, ca := range ee.Categories {
+				callback(ca.Term)
+			}
+		}
+	}
+}
+
 /* Store identifier of edited entry in cookie.
  */
 func (app *Server) handleDoPost() http.HandlerFunc {
@@ -309,14 +319,12 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 							ent.Links = []Link{}
 						}
 
-						visitor := func(callback func(string)) {
-							for _, ee := range feed.Entries {
-								for _, ca := range ee.Categories {
-									callback(ca.Term)
-								}
-							}
-						}
-						ds, ex, tags := tagsNormalise(val("lf_title"), val("lf_description"), strings.Split(val("lf_tags"), " "), visitor)
+						ds, ex, tags := tagsNormalise(
+							val("lf_title"),
+							val("lf_description"),
+							tagsVisitor(strings.Split(val("lf_tags"), " ")...),
+							termsVisitor(feed.Entries...),
+						)
 						ent.Title = HumanText{Body: ds, Type: "text"}
 						ent.Content = &HumanText{Body: ex, Type: "text"}
 						{
@@ -448,14 +456,15 @@ func (entry Entry) api0LinkFormMap() map[string]interface{} {
 		"lf_linkdate": entry.Published.Format(fmtTimeLfTime),
 	}
 	{
-		data["lf_title"] = body(&entry.Title)
-		data["lf_description"] = body(entry.Content)
-
-		tags := make([]string, 0, len(entry.Categories))
-		for _, c := range entry.Categories {
-			tags = append(tags, c.Term)
-		}
-		data["lf_tags"] = strings.Join(tags, " ")
+		ti, de, ta := tagsNormalise(
+			body(&entry.Title),
+			body(entry.Content),
+			termsVisitor(&entry),
+			termsVisitor(&entry), // rather all the feed's tags, but as we don't have them it's ok, too.
+		)
+		data["lf_title"] = ti
+		data["lf_description"] = de
+		data["lf_tags"] = strings.Join(ta, " ")
 	}
 	for _, li := range entry.Links {
 		if "" == li.Rel {

@@ -113,9 +113,17 @@ func fold(str string) string {
 	}
 }
 
-func tagsNormalise(ds string, ex string, ta []string, known func(func(string))) (description string, extended string, tags []string) {
+func tagsVisitor(tags ...string) func(func(string)) {
+	return func(callback func(string)) {
+		for _, tag := range tags {
+			callback(tag)
+		}
+	}
+}
+
+func tagsNormalise(ds string, ex string, tavi func(func(string)), knovi func(func(string))) (description string, extended string, tags []string) {
 	knodi := make(map[string]string, 1000)
-	known(func(tag string) { knodi[fold(tag)] = tag })
+	knovi(func(tag string) { knodi[fold(tag)] = tag })
 
 	tags = make([]string, 0, 20)
 	// 1. iterate text tags
@@ -139,14 +147,13 @@ func tagsNormalise(ds string, ex string, ta []string, known func(func(string))) 
 		add(tag)
 	}
 
-	// 2. iterate all previous tags and add missing ones to tadi and extended
-	sort.Strings(ta)
-	for _, tag := range ta {
+	// 2. visit all previous tags and add missing ones to tadi and extended
+	tavi(func(tag string) {
 		if t := add(tag); t == "" {
-			continue
+			return
 		}
 		ex += " #" + tag // todo: skip superfluous # before emojis
-	}
+	})
 
 	description = strings.TrimSpace(ds)
 	extended = strings.TrimSpace(ex)
