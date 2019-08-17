@@ -381,6 +381,9 @@ func handleMux(wg *sync.WaitGroup) http.HandlerFunc {
 			case 1 == len(params["do"]) && "logout" == params["do"][0]:
 				app.handleDoLogout()(w, r)
 				return
+			case 1 == len(params["do"]) && "configure" == params["do"][0]:
+				http.Redirect(w, r, path.Join(r.URL.Path, "config")+"/", http.StatusSeeOther)
+				return
 			case 1 == len(params["do"]) && "changepasswd" == params["do"][0]:
 				app.handleDoCheckLoginAfterTheFact()(w, r)
 				return

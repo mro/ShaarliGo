@@ -107,8 +107,8 @@ func (app *Server) handleSettings() http.HandlerFunc {
 }
 
 func (cfg Config) renderSettingsPage(w http.ResponseWriter, code int) {
-	byt, _ := tplSettingsHtmlBytes()
-	tmpl, err := template.New("settings").Parse(string(byt))
+	byt, _ := tplConfigformHtmlBytes()
+	tmpl, err := template.New("configform").Parse(string(byt))
 	if err == nil {
 		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 		w.WriteHeader(code)

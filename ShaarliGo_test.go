@@ -113,7 +113,7 @@ func TestGetConfigRaw(t *testing.T) {
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head/>
   <body>
-    <form method="post" name="installform" id="installform">
+    <form method="post" name="configform" id="configform">
       <input type="text" name="setlogin" value=""/>
       <input type="password" name="setpassword" />
       <input type="text" name="title" value=""/>
@@ -142,7 +142,7 @@ func TestGetConfigScraped(t *testing.T) {
 	r, _ := c.Get(ts.URL + pi)
 	assert.Equal(t, http.StatusOK, r.StatusCode, "aha")
 	assert.Equal(t, "200 OK", r.Status, "aha")
-	fo, _ := formValuesFromReader(r.Body, "installform")
+	fo, _ := formValuesFromReader(r.Body, "configform")
 	assert.Equal(t, url.Values(url.Values{
 		"setlogin":    []string{""},
 		"setpassword": []string{""},
