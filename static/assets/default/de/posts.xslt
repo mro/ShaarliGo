@@ -120,8 +120,8 @@
       If JavaScript is off, we need mixture between logged-in and -out.
     -->
     <html xmlns="http://www.w3.org/1999/xhtml" data-xml-base-pub="{$xml_base_pub}" style="background-color:#eee">
-      <xsl:if test="0 = count(a:feed/a:entry | a:entry)">
-        <xsl:attribute name="class">noentry</xsl:attribute>
+      <xsl:if test="234 &lt; count(a:feed/a:category)">
+        <xsl:attribute name="class">manytags</xsl:attribute>
       </xsl:if>
       <xsl:call-template name="head"/>
 
