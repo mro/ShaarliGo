@@ -29,7 +29,7 @@ html {
 }
 html, input, textarea, .awesomplete > ul, .awesomplete > ul > li {
   background: hsl(0, 0%, 93%);
-  color: hsl(30, 50%, 35%);
+  color: hsl(30, 50%, 44%);
 }
 body, .awesomplete > ul > li:hover {
   background: hsl(30, 50%, 93%);
@@ -167,3 +167,36 @@ div.awesomplete { display: block; }
   color: inherit;
   text-decoration: underline;
 }
+
+@media (prefers-color-scheme: dark) {
+  html, input, textarea, .awesomplete > ul, .awesomplete > ul > li {
+		background-color: hsl(0,0%,23%);
+    color: hsl(30, 60%, 60%);
+  }
+  body, .awesomplete > ul > li:hover {
+    background: hsl(30, 0%, 25%);
+  }
+	ol > li:nth-of-type(2n+1) {
+		background-color: hsl(0,0%,23%);
+	}
+	a:any-link {
+		color: hsl(115, 50%, 45%);
+	}
+	button, .btn {
+		background-color: hsl(30, 20%, 30%);
+	}
+  .btn.disabled {
+		background-color: hsla(30, 20%, 30%, 0.2);
+		color: hsla(115, 50%, 42%, 0.2);
+	}
+	.btn, button, input, textarea {
+		border-color: #777;
+	}
+  .awesomplete > ul > li[aria-selected="true"] {
+    background: hsl(30, 60%, 23%);
+  }
+	img {
+		filter: grayscale(30%);
+	}
+}
+

@@ -54,7 +54,7 @@ function clickableTextLinks(elmsRendered) {
   // console.log('make http and geo URIs (RFC 5870) clickable + microformat');
   for (var i = elmsRendered.length - 1; i >= 0 ; i--) {
     const elm = elmsRendered[i];
-    elm.innerHTML = elm.innerHTML.replace(/(https?:\/\/[^ \t\r\n"']+[^ \t\r\n"'.,;()])/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
+    elm.innerHTML = elm.innerHTML.replace(/(https?:\/\/[^ \t\r\n"']+[^ ?\t\r\n"'.,;()])/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
     // https://alanstorm.com/url_regex_explained/ \b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))
     // elm.innerHTML = elm.innerHTML.replace(/\b(([\w-]+:\/\/?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
     elm.innerHTML = elm.innerHTML.replace(/geo:(-?\d+.\d+),(-?\d+.\d+)(\?z=(\d+))?/gi, '<a class="geo" href="https://opentopomap.org/#marker=12/$1/$2" title="zoom=$4">geo:<span class="latitude">$1</span>,<span class="longitude">$2</span>$3</a>');

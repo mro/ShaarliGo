@@ -119,7 +119,7 @@
       Do not set a class="logged-out" initially, but do via early JavaScript.
       If JavaScript is off, we need mixture between logged-in and -out.
     -->
-    <html xmlns="http://www.w3.org/1999/xhtml" data-xml-base-pub="{$xml_base_pub}" style="background-color:#eee">
+    <html xmlns="http://www.w3.org/1999/xhtml" data-xml-base-pub="{$xml_base_pub}">
       <xsl:if test="234 &lt; count(a:feed/a:category)">
         <xsl:attribute name="class">manytags</xsl:attribute>
       </xsl:if>
