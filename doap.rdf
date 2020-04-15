@@ -2,21 +2,41 @@
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns="http://usefulinc.com/ns/doap#">
   <Project>
-    <bug-database rdf:resource="https://code.mro.name/mro/ShaarliGo/issues"/>
-    <license rdf:resource="https://code.mro.name/mro/ShaarliGo/raw/master/LICENSE"/>
-    <maintainer rdf:resource="http://mro.name/~me"/>
     <name>ShaarliGo</name>
-    <homepage>http://purl.mro.name/ShaarliGo/</homepage>
-    <programming-language>go</programming-language>
-    <programming-language>xslt</programming-language>
-    <programming-language>js</programming-language>
+    <shortdesc>🌺 self-hosted microblogging inspired by http://sebsauvage.net/wiki/doku.php?id=php:shaarli. Destilled down to the bare minimum, with easy hosting and security in mind. No PHP, no DB, no server-side templating, JS optional.</shortdesc>
+    <homepage>http://mro.name/ShaarliGo</homepage>
+    <wiki rdf:resource="https://code.mro.name/mro/ShaarliGo/wiki"/>
+    <bug-database rdf:resource="https://code.mro.name/mro/ShaarliGo/issues"/>
+    <maintainer rdf:resource="http://mro.name/~me"/>
+    <license rdf:resource="https://code.mro.name/mro/ShaarliGo/raw/master/LICENSE"/>
+    <programming-language>Go</programming-language>
+    <programming-language>Xslt</programming-language>
+    <programming-language>JavaScript</programming-language>
     <repository>
       <GitRepository>
         <browse rdf:resource="https://code.mro.name/mro/ShaarliGo"/>
         <location rdf:resource="https://code.mro.name/mro/ShaarliGo.git"/>
       </GitRepository>
     </repository>
-    <short-description>🌺 self-hosted microblogging inspired by http://sebsauvage.net/wiki/doku.php?id=php:shaarli. Destilled down to the bare minimum, with easy hosting and security in mind. No PHP, no DB, no server-side templating, JS optional.</short-description>
-    <wiki rdf:resource="https://code.mro.name/mro/ShaarliGo/wiki"/>
+    <repository>
+      <GitRepository>
+        <browse rdf:resource="https://codeberg.org/mro/ShaarliGo"/>
+      </GitRepository>
+    </repository>
+    <repository>
+      <GitRepository>
+        <browse rdf:resource="https://notabug.org/mro/ShaarliGo"/>
+      </GitRepository>
+    </repository>
+     <repository>
+      <GitRepository>
+        <browse rdf:resource="https://github.com/mro/ShaarliGo"/>
+      </GitRepository>
+    </repository>
+    <repository>
+      <GitRepository>
+        <browse rdf:resource="https://gitlab.com/mro/ShaarliGo"/>
+      </GitRepository>
+    </repository>
   </Project>
 </rdf:RDF>

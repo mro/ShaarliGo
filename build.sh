@@ -12,7 +12,7 @@ say="say"
 parm="" # "-u"
 {
   "${say}" "go get"
-  go get ${parm} github.com/gorilla/sessions \
+  go get "${parm}" github.com/gorilla/sessions \
     github.com/jteeuwen/go-bindata/... \
     golang.org/x/crypto/bcrypt \
     golang.org/x/net/html \
@@ -31,7 +31,7 @@ parm="" # "-u"
 VERSION="$(grep -F 'version = ' version.go | cut -d \" -f 2)"
 LDFLAGS="-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)"
 
-rm "shaarligo"-*-*".cgi"* 2>/dev/null
+rm shaarligo-*.cgi 2>/dev/null
 
 "${say}" "test"
 umask 0022
@@ -42,7 +42,7 @@ tar -czf testdata.tar.gz testdata/*.html testdata/*.atom testdata/*.gob
 
 "${say}" "build localhost"
 go build -ldflags "${LDFLAGS}" -o "shaarligo.cgi" || { echo "Aua" 1>&2 && exit 1; }
-cp "shaarligo.cgi" ~/"public_html/c/shaarligo.cgi"
+mv "shaarligo.cgi" "shaarligo-${VERSION}-$(uname -s)-$(uname -m).cgi"
 "${say}" "ok"
 # open "http://localhost/~$(whoami)/b/shaarligo.cgi"
 
@@ -52,23 +52,9 @@ go test -bench=.
 
 "${say}" "linux build"
 # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
-env GOOS=linux GOARCH=amd64       go build -ldflags="${LDFLAGS}" -o "shaarligo-Linux-x86_64.cgi" || { echo "Aua" 1>&2 && exit 1; }
-env GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="${LDFLAGS}" -o "shaarligo-Linux-armv6l.cgi" || { echo "Aua" 1>&2 && exit 1; }
-# env GOOS=linux GOARCH=386 GO386=387 go build -o "shaarligo-linux-386-${VERSION}" # https://github.com/golang/go/issues/11631
-# env GOOS=darwin GOARCH=amd64 go build -o "shaarligo-darwin-amd64-${VERSION}"
-
+env GOOS=linux GOARCH=amd64       go build -ldflags="${LDFLAGS}" -o "shaarligo-${VERSION}-Linux-x86_64.cgi" || { echo "Aua" 1>&2 && exit 1; }
+env GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="${LDFLAGS}" -o "shaarligo-${VERSION}-Linux-armv6l.cgi" || { echo "Aua" 1>&2 && exit 1; }
 
 "${say}" "s0"
-gzip --force --best "shaarligo-"*-*".cgi" \
-&& rsync -vp --bwlimit=1234 "shaarligo-"*-*".cgi.gz" "s0:/var/www/lighttpd/l.mro.name/public_html/" \
-&& ssh s0 'sh -c "cd /var/www/lighttpd/l.mro.name/public_html/ && gunzip < shaarligo-$(uname -s)-$(uname -m).cgi.gz > shaarligo.cgi && ls -l shaarligo*cgi*"' \
-&& ssh s0 "sh -c 'cd /var/www/lighttpd/demo.mro.name/public_html/shaarligo/ && cp /var/www/lighttpd/l.mro.name/public_html/shaarligo?cgi* . && ls -l shaarligo*cgi*'" \
-&& ssh s0 "sh -c 'cd /var/www/lighttpd/b.r-2.eu/public_html/u/ && cp /var/www/lighttpd/l.mro.name/public_html/shaarligo?cgi* . && ls -l shaarligo*cgi*'" \
-&& ssh s0 "sh -c 'cd /var/www/lighttpd/b.mro.name/public_html/u/ && cp /var/www/lighttpd/l.mro.name/public_html/shaarligo?cgi* . && ls -l shaarligo*cgi*'"
-"${say}" "ok"
-
-"${say}" "vario"
-# scp "ServerInfo.cgi" vario:~/mro.name/webroot/b/"info.cgi"
-ssh vario "sh -c 'cd ~/mro.name/webroot/b/ && curl -L http://purl.mro.name/shaarligo-$(uname -s)-$(uname -m).cgi.gz | tee shaarligo.cgi.gz | gunzip > shaarligo.cgi && chmod a+x shaarligo.cgi && ls -l shaarligo?cgi*'"
-"${say}" "ok"
+rsync -avPz "shaarligo-${VERSION}-Linux-"*.cgi "s0:/var/www/lighttpd/demo.0x4c.de/"
 

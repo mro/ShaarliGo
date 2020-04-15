@@ -65,7 +65,7 @@ URL.
 
 done (Apache)! For lighttpd see `static/app/lighttpd.conf`.
 
-Or build from source at http://purl.mro.name/ShaarliGo
+Or build from source at http://mro.name/ShaarliGo
 
 ## Todos
 
