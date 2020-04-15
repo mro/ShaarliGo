@@ -38,8 +38,6 @@ umask 0022
 go fmt && go vet && go test --short || { exit $?; }
 "${say}" "ok"
 
-tar -czf testdata.tar.gz testdata/*.html testdata/*.atom testdata/*.gob
-
 "${say}" "build localhost"
 go build -ldflags "${LDFLAGS}" -o "shaarligo.cgi" || { echo "Aua" 1>&2 && exit 1; }
 mv "shaarligo.cgi" "shaarligo-${VERSION}-$(uname -s)-$(uname -m).cgi"
@@ -51,10 +49,18 @@ go test -bench=.
 "${say}" ok
 
 "${say}" "linux build"
+rm -rf build
+mkdir -p "build/${VERSION}-Linux-x86_64/"
+mkdir -p "build/${VERSION}-Linux-armv6l/"
 # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
-env GOOS=linux GOARCH=amd64       go build -ldflags="${LDFLAGS}" -o "shaarligo-${VERSION}-Linux-x86_64.cgi" || { echo "Aua" 1>&2 && exit 1; }
-env GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="${LDFLAGS}" -o "shaarligo-${VERSION}-Linux-armv6l.cgi" || { echo "Aua" 1>&2 && exit 1; }
+env GOOS=linux GOARCH=amd64       go build -ldflags="${LDFLAGS}" -o "build/${VERSION}-Linux-x86_64/shaarligo.cgi" || { echo "Aua" 1>&2 && exit 1; }
+env GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="${LDFLAGS}" -o "build/${VERSION}-Linux-armv6l/shaarligo.cgi" || { echo "Aua" 1>&2 && exit 1; }
 
 "${say}" "s0"
-rsync -avPz "shaarligo-${VERSION}-Linux-"*.cgi "s0:/var/www/lighttpd/demo.0x4c.de/"
+
+if [ "${1}" = "prod" ] ; then
+  rsync -avPz "build/" s0:"/var/www/lighttpd/darknet.mro.name/public_html/dev/shaarligo/"
+else
+  rsync -avPz "build/${VERSION}-Linux-x86_64/shaarligo.cgi" s0:"/var/www/lighttpd/demo.0x4c.de/"
+fi
 

@@ -211,7 +211,10 @@ func handleMux(wg *sync.WaitGroup) http.HandlerFunc {
 			if err != nil {
 				http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 			} else {
-				http.Error(w, "Sorry, banned", http.StatusNotAcceptable)
+				w.Header().Set("Retry-After", "14400") // https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.37
+				// evtl. 429 StatusTooManyRequests?
+				// or    503 StatusServiceUnavailable?
+				http.Error(w, "Sorry, banned", http.StatusTooManyRequests)
 			}
 			return
 		}

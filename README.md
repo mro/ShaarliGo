@@ -58,12 +58,14 @@ URL.
 
 ## Install / Update
 
-1. `$ curl -LRo shaarligo.cgi.gz http://purl.mro.name/shaarligo-Linux-x86_64.cgi.gz  # uname -s; uname -m`
-2. `$ gunzip shaarligo.cgi.gz`
-3. `$ chmod a+x,a-w shaarligo.cgi`
-4. visit in your browser: http://my.web.space/subdir/shaarligo.cgi
+If the webserver is Linux 64 bit Apache (the 98% case for shared hosting):
 
-done (Apache)! For lighttpd see `static/app/lighttpd.conf`.
+1. Download http://purl.mro.name/Linux-x86_64/shaarligo.cgi,
+2. copy to your webspace,
+3. set file permissions (chmod) to numeric 555 (readonly + executable for all),
+4. visit in your browser: http://my.web.space/subdir/shaarligo.cgi,
+
+done! For lighttpd see `static/app/lighttpd.conf`.
 
 Or build from source at http://mro.name/ShaarliGo
 
@@ -77,7 +79,3 @@ Or build from source at http://mro.name/ShaarliGo
 7. comments,
 8. trackback/pingback
 
-### Shaarli(OS|er) Compatibilty
-
-see https://code.mro.name/mro/ShaarliOS/src/master/ios/ShaarliOS/API/ShaarliCmdUpdateEndpoint.m
-and https://code.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
