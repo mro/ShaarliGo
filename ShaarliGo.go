@@ -371,7 +371,8 @@ func handleMux(wg *sync.WaitGroup) http.HandlerFunc {
 				return
 
 			// legacy API, https://code.mro.name/mro/Shaarli-API-test
-			case 1 == len(params["post"]):
+			case 1 == len(params["post"]) ||
+				("" == r.URL.RawQuery && r.Method == http.MethodPost && r.FormValue("save_edit") == "Save"):
 				app.handleDoPost()(w, r)
 				return
 			case (1 == len(params["do"]) && "login" == params["do"][0]) ||
