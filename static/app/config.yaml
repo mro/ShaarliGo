@@ -18,3 +18,6 @@ url_cleaner:
   replace_all_string: https://sz.de/${1}
 - regexp: ^(?i)(?:https?://)?(?:(?:www|m)\.)?youtube.com/watch\?v=([^&]+)(?:.*&(t=[^&]+))?(?:.*)$
   replace_all_string: https://youtu.be/${1}?${2}
+posse:
+- pinboard_rename_to_activate: https://api.pinboard.in/v1?auth_token=   <-  get from https://pinboard.in/settings/password
+  prefix:

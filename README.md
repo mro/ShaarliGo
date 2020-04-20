@@ -69,6 +69,28 @@ done! For lighttpd see `static/app/lighttpd.conf`.
 
 Or build from source at http://mro.name/ShaarliGo
 
+## POSSE
+
+> POSSE is an abbreviation for Publish (on your) Own Site, Syndicate Elsewhere, a content publishing model that starts with posting content on your own domain first, then syndicating out copies to 3rd party services with permashortlinks back to the original on your site.
+
+(says https://indieweb.org/POSSE)
+
+You can POSSE to
+
+### Pinboard.in
+
+by entering your Pinboard Auth Token from https://pinboard.in/settings/password into the end of `app/config.yaml` like this
+
+```yaml
+posse:
+- pinboard: https://api.pinboard.in/v1?auth_token=johndoe:XOG86E7JIYMI
+  prefix:
+```
+
+Each pinboard post gets an additional footer line with a backlink built from
+`prefix` + `id`. It's ok to leave `prefix` empty, then a superscript `¹ ` plus the
+baseurl plus `o/p/` is used to result a complete, clickable address.
+
 ## Todos
 
 1. private posts,

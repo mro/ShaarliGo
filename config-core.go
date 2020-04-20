@@ -40,6 +40,11 @@ type RegexpReplaceAllString struct {
 	ReplaceAllString string `yaml:"replace_all_string"`
 }
 
+type Pinboard struct {
+	Endpoint string `yaml:"pinboard"`
+	Prefix   string `yaml:"prefix"`
+}
+
 type Config struct {
 	Title             string                   `yaml:"title"`
 	Uid               string                   `yaml:"uid"`
@@ -51,6 +56,7 @@ type Config struct {
 	BanAfter          int                      `yaml:"ban_after"`      // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L20
 	BanSeconds        int                      `yaml:"ban_seconds"`    // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L21
 	UrlCleaner        []RegexpReplaceAllString `yaml:"url_cleaner"`
+	Posse             []Pinboard               `yaml:"posse"`
 	// Redirector     string                   `yaml:"redirector"` // actually a prefix to href - Hardcoded in xslt
 }
 

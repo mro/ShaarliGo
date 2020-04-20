@@ -166,7 +166,7 @@ func termsVisitor(entries ...*Entry) func(func(string)) {
 
 /* Store identifier of edited entry in cookie.
  */
-func (app *Server) handleDoPost() http.HandlerFunc {
+func (app *Server) handleDoPost(posse func(Entry)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		now := time.Now()
 		switch r.Method {
@@ -348,7 +348,9 @@ func (app *Server) handleDoPost() http.HandlerFunc {
 							http.Error(w, "couldn't store feed data: "+err.Error(), http.StatusInternalServerError)
 							return
 						}
-						// todo: POSSE
+						// todo: waiting group? fire and forget go function?
+						// we should, however, lock re-entrancy
+						posse(*ent)
 						// refresh feeds
 						if err := app.PublishFeedsForModifiedEntries(feed, []*Entry{ent, &ent0}); err != nil {
 							log.Println("couldn't write feeds: ", err.Error())

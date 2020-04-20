@@ -24,12 +24,23 @@ import (
 	"testing"
 )
 
-func TestPinboardAddUrl(t *testing.T) {
+func TestPinboardPostsAdd(t *testing.T) {
 	t.Parallel()
 
-	base, _ := url.Parse("https://api.pinboard.in/v1")
-	ur, _ := url.Parse("https://m.heise.de/")
-	tags := []string{"a", "b", "c"}
-	dt := mustParseRFC3339("1990-12-31T02:02:02+01:00")
-	assert.Equal(t, "https://api.pinboard.in/v1/posts/add?auth_token=fee%3AABCDE445566&description=desc%26rip%3Dtion&dt=1990-12-31T02%3A02%3A02%2B01%3A00&extended=ex%3Fte%3Dded&tags=a+b+c&url=https%3A%2F%2Fm.heise.de%2F", pinboardAddUrl(base, "fee:ABCDE445566", ur, "desc&rip=tion", "ex?te=ded", tags, dt).String(), "Na klar")
+	base, _ := url.Parse("https://api.pinboard.in/v1?auth_token=fee%3AABCDE445566")
+
+	// dt := mustParseRFC3339("1990-12-31T02:02:02+01:00")
+	en := Entry{
+		Id:    Id("foo"),
+		Links: []Link{Link{Href: "https://pinboard.in/api#posts_add"}},
+		Title: HumanText{Body: "#Hello, #world!"},
+		// Content: &HumanText{Body: "1st at l.mro.name/o/p/xyz"},
+		Categories: []Category{
+			Category{Term: "Uhu"},
+			Category{Term: "🦉"},
+		},
+	}
+	url, err := pinboardPostsAdd(*base, en, "=> "+string(en.Id))
+	assert.Equal(t, nil, err, "Na klar")
+	assert.Equal(t, "https://api.pinboard.in/v1/posts/add?auth_token=fee%3AABCDE445566&description=%23Hello%2C+%23world%21&dt=0001-01-01T00%3A00%3A00Z&extended=%3D%3E+foo&tags=Uhu+%F0%9F%A6%89&url=https%3A%2F%2Fpinboard.in%2Fapi%23posts_add", url.String(), "Na klar")
 }

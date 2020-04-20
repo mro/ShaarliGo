@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017-2019 Marcus Rohrmoser, http://purl.mro.name/ShaarliGo
+// Copyright (C) 2017-2020 Marcus Rohrmoser, http://purl.mro.name/ShaarliGo
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,7 +18,9 @@
 package main
 
 import (
+	"fmt"
 	"net/url"
+	"sort"
 	"strings"
 	"time"
 )
@@ -41,20 +43,51 @@ func yesno(yes bool) string {
 // replace	yes/no	Replace any existing bookmark with this URL. Default is yes. If set to no, will throw an error if bookmark exists
 // shared	yes/no	Make bookmark public. Default is "yes" unless user has enabled the "save all bookmarks as private" user setting, in which case default is "no"
 // toread	yes/no	Marks the bookmark as unread. Default is "no"
-func pinboardAddUrl(base *url.URL, auth_token string, ur *url.URL, description, extended string, tags []string, dt time.Time) *url.URL {
-	// _, err := HttpGetBody(&url, timeout)
-	pars := url.Values{}
-	pars.Add("url", ur.String())
-	pars.Add("auth_token", auth_token)
-	pars.Add("description", description)
-	pars.Add("extended", extended)
-	pars.Add("tags", strings.Join(tags, " "))
+func pinboardPostsAdd(base url.URL, en Entry, foot string) (url url.URL, err error) {
+	if 0 == len(en.Links) {
+		return url, fmt.Errorf("need an url.")
+	}
+	body := func(t *HumanText) string {
+		if t == nil {
+			return ""
+		}
+		return t.Body
+	}
+	pars := base.Query()
+	pars.Add("url", en.Links[0].Href)
+	{
+		ti := body(&en.Title)
+		// TODO: limit ti to 255
+		pars.Add("description", ti)
+	}
+	{
+		de := body(en.Content)
+		if "" != de && !strings.HasSuffix(de, "\n") {
+			foot = "\n" + foot
+		}
+		// limit de to 65535 - len(suff)
+		de += foot
+		pars.Add("extended", de)
+	}
+	{
+		tgs := make([]string, 0, len(en.Categories))
+		for _, ca := range en.Categories {
+			tgs = append(tgs, ca.Term)
+		}
+		sort.Strings(tgs)
+		ta := strings.Join(tgs, " ")
+		// limit ta to 255
+		pars.Add("tags", ta)
+	}
 	// pars.Add("replace", yesno(replace))
 	// pars.Add("shared", yesno(shared))
 	// pars.Add("toread", yesno(toread))
-	pars.Add("dt", dt.Format(time.RFC3339))
-	ret := &(*base)
-	ret.Path += "/posts/add"
-	ret.RawQuery = pars.Encode()
-	return ret
+	pars.Add("dt", en.Published.Format(time.RFC3339))
+	url = base
+	if !strings.HasSuffix(url.Path, "/") {
+		url.Path += "/"
+	}
+	url.Path += "posts/add"
+	url.RawQuery = pars.Encode()
+	return
 }

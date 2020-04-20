@@ -198,6 +198,31 @@ func (app Server) SaveFeed(feed Feed) error {
 	return feed.SaveToFile(fileFeedStorage)
 }
 
+func (app Server) Posse(en Entry) {
+	defer un(trace("Server.Posse"))
+	to := 4 * time.Second
+	for _, pi := range app.cfg.Posse {
+		if ep, err := url.Parse(pi.Endpoint); err != nil {
+			log.Printf("- posse %s error %s\n", pi, err)
+		} else {
+			foot := pi.Prefix
+			if "" == foot {
+				foot = "¹ " + app.url.String() + uriPubPosts
+			}
+			if url, err := pinboardPostsAdd(*ep, en, foot+string(en.Id)); err != nil {
+				log.Printf("- posse %s error %s\n", ep, err)
+			} else {
+				if _, err := HttpGetBody(&url, to); err != nil {
+					log.Printf("- posse %s error %s\n", url.String(), err)
+				} else {
+					// TODO: check response
+					log.Printf("- posse %s\n", url.String())
+				}
+			}
+		}
+	}
+}
+
 func handleMux(wg *sync.WaitGroup) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer un(trace(strings.Join([]string{"v", version, "+", GitSHA1, " ", r.RemoteAddr, " ", r.Method, " ", r.URL.String()}, "")))
@@ -376,7 +401,7 @@ func handleMux(wg *sync.WaitGroup) http.HandlerFunc {
 			// legacy API, https://code.mro.name/mro/Shaarli-API-test
 			case 1 == len(params["post"]) ||
 				("" == r.URL.RawQuery && r.Method == http.MethodPost && r.FormValue("save_edit") == "Save"):
-				app.handleDoPost()(w, r)
+				app.handleDoPost(app.Posse)(w, r)
 				return
 			case (1 == len(params["do"]) && "login" == params["do"][0]) ||
 				(http.MethodPost == r.Method && "" != r.FormValue("login")): // really. https://github.com/sebsauvage/Shaarli/blob/master/index.php#L402
