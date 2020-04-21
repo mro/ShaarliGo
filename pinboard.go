@@ -32,6 +32,14 @@ func yesno(yes bool) string {
 	return "yes"
 }
 
+// limit bytes brute force, breaks multibyte at the end in case.
+func limit(mx int, eli, str string) string {
+	if len(str) > mx {
+		return str[:mx-len(eli)] + eli
+	}
+	return str
+}
+
 // https://pinboard.in/api/#posts_add
 // https://api.pinboard.in/v1/posts/add
 //
@@ -56,8 +64,7 @@ func pinboardPostsAdd(base url.URL, en Entry, foot string) (url url.URL, err err
 	pars := base.Query()
 	pars.Add("url", en.Links[0].Href)
 	{
-		ti := body(&en.Title)
-		// TODO: limit ti to 255
+		ti := limit(255, "…", body(&en.Title))
 		pars.Add("description", ti)
 	}
 	{
@@ -65,7 +72,7 @@ func pinboardPostsAdd(base url.URL, en Entry, foot string) (url url.URL, err err
 		if "" != de && !strings.HasSuffix(de, "\n") {
 			foot = "\n" + foot
 		}
-		// limit de to 65535 - len(suff)
+		de = limit(65536-len(foot), "…", de)
 		de += foot
 		pars.Add("extended", de)
 	}
@@ -75,8 +82,7 @@ func pinboardPostsAdd(base url.URL, en Entry, foot string) (url url.URL, err err
 			tgs = append(tgs, ca.Term)
 		}
 		sort.Strings(tgs)
-		ta := strings.Join(tgs, " ")
-		// limit ta to 255
+		ta := limit(255, "…", strings.Join(tgs, " "))
 		pars.Add("tags", ta)
 	}
 	// pars.Add("replace", yesno(replace))
