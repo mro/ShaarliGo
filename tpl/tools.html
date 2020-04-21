@@ -4,7 +4,7 @@
   <ol>
     <li id="disclosure">
       <b>Responsible Disclosure:</b> In case you are reluctant to <a
-      href="http://purl.mro.name/ShaarliGo/">file a public issue</a>, feel free to
+      href="http://purl.mro.name/ShaarliGo/issues">file a public issue</a>, feel free to
       email <a href="mailto:security@mro.name?subject=ShaarliGo">security@mro.name</a>.
     </li>
 
@@ -15,8 +15,8 @@
       <br class="br"/>
       <br class="br"/>
       <code>$ curl -LRo shaarligo.cgi http://purl.mro.name/Linux-x86_64/shaarligo.cgi<br class="br"/>
-$ chmod 555 shaarligo.cgi<br class="br"/>
 # copy to your webspace<br class="br"/>
+$ chmod 555 shaarligo.cgi<br class="br"/>
 $ rm -rf app/delete_me_to_restore assets .htaccess app/.htaccess app/lighttpd.conf</code>
     </li>
 
@@ -33,7 +33,7 @@ $ rm -rf app/delete_me_to_restore assets .htaccess app/.htaccess app/lighttpd.co
           <input type="text" class="form-control" id="tag_rename_new" placeholder="#after" value="{{ .tag_rename_new }}"/>
         </div>
         <button type="submit" class="btn btn-primary">Rename</button>
-      </form>    
+      </form>
     </li>
 
     <li>
@@ -47,7 +47,7 @@ $ rm -rf app/delete_me_to_restore assets .htaccess app/.htaccess app/lighttpd.co
           <input type="text" class="form-control" name="shaarli_import_tag" placeholder="#MarkerTagForThisImport" value="#{{ .other_shaarli_tag }}"/>
         </div>
         <button name="shaarli_import_submit" type="submit" value="shaarli_import_submit" class="btn btn-primary">Import</button>
-      </form>    
+      </form>
     </li>
 
     <li id="bookmarklet">
@@ -60,7 +60,7 @@ $ rm -rf app/delete_me_to_restore assets .htaccess app/.htaccess app/lighttpd.co
     </li>
 
     <li id="version">
-    	<b>Version:</b> <span id="number">v{{.version}}</span>+<span id="gitsha1">{{.gitsha1}}</span>
+      <b>Version:</b> <a href="http://purl.mro.name/ShaarliGo/v{{.version}}+{{.gitsha1}}"><span id="number">v{{.version}}</span>+<span id="gitsha1">{{.gitsha1}}</span></a>
     </li>
   </ol>
 </body>
