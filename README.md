@@ -95,6 +95,28 @@ posse:
 It's ok to leave `prefix` empty. Each pinboard post gets a backlink as an
 additional footer line. If `prefix` is set, the footer line is `prefix` + `id`.
 
+### Mastodon
+
+at first manually obtain an access token (example server here is
+https://social.tchncs.de/):
+
+1. create an application in https://social.tchncs.de/settings/applications
+2. give it permission `write:statuses`
+3. note the access token and enter it below.
+
+Then enter the server endpoint plus `/api/v1/` and access token into
+`app/config.yaml` like so:
+
+```yaml
+posse:
+- mastodon: https://social.tchncs.de/api/v1/
+  token: …boph1koomie4eikaiG…
+  prefix:
+```
+
+It's ok to leave `prefix` empty. Each mastodon post gets a backlink as an
+additional footer line. If `prefix` is set, the footer line is `prefix` + `id`.
+
 ## Todos
 
 1. private posts,

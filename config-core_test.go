@@ -16,3 +16,24 @@
 //
 
 package main
+
+import (
+	"github.com/stretchr/testify/assert"
+	"testing"
+)
+
+func TestYamlDeser(t *testing.T) {
+	t.Parallel()
+
+	cfg, err := loadConfi([]byte("posse:\n- pinboard: foo\n- mastodon: bar"))
+	assert.Equal(t, nil, err, "Na klar")
+	assert.Equal(t, 2, len(cfg.Posse), "Na klar")
+	{
+		pi := (cfg.Posse[0]).(Pinboard)
+		assert.Equal(t, "foo", pi.Endpoint, "Na klar")
+	}
+	{
+		ma := (cfg.Posse[1]).(Mastodon)
+		assert.Equal(t, "bar", ma.Endpoint, "Na klar")
+	}
+}

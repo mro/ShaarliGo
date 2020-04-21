@@ -201,24 +201,41 @@ func (app Server) SaveFeed(feed Feed) error {
 func (app Server) Posse(en Entry) {
 	defer un(trace("Server.Posse"))
 	to := 4 * time.Second
-	for _, pi := range app.cfg.Posse {
-		if ep, err := url.Parse(pi.Endpoint); err != nil {
-			log.Printf("- posse %s error %s\n", pi, err)
-		} else {
-			foot := pi.Prefix
-			if "" == foot {
-				foot = "¹ " + app.url.String() + uriPubPosts
-			}
-			if url, err := pinboardPostsAdd(*ep, en, foot+string(en.Id)); err != nil {
-				log.Printf("- posse %s error %s\n", ep, err)
+	back := func(prefix string, base url.URL, id Id) string {
+		if "" == prefix {
+			prefix = "¹ " + base.String() + uriPubPosts
+		}
+		return prefix + string(id)
+	}
+	for _, po := range app.cfg.Posse {
+		switch pi := po.(type) {
+		case Pinboard:
+			if ep, err := url.Parse(pi.Endpoint); err != nil {
+				log.Printf("- posse %s error %s\n", pi.Endpoint, err)
 			} else {
-				if _, err := HttpGetBody(&url, to); err != nil {
-					log.Printf("- posse %s error %s\n", url.String(), err)
+				if ur, err := pinboardPostsAdd(*ep, en, back(pi.Prefix, app.url, en.Id)); err != nil {
+					log.Printf("- posse %s error %s\n", ep, err)
 				} else {
-					// TODO: check response
-					log.Printf("- posse %s\n", url.String())
+					if _, err := HttpGetBody(&ur, to); err != nil {
+						log.Printf("- posse %s error %s\n", ur.String(), err)
+					} else {
+						// TODO: check response
+						log.Printf("- posse %s\n", ur.String())
+					}
 				}
 			}
+
+		case Mastodon:
+			if ep, err := url.Parse(pi.Endpoint); err != nil {
+				log.Printf("- posse %s error %s\n", pi.Endpoint, err)
+			} else {
+				if err := mastodonStatusPost(*ep, pi.Token, en, back(pi.Prefix, app.url, en.Id)); err != nil {
+					log.Printf("- posse %s error %s\n", ep, err)
+				}
+			}
+
+		default:
+			log.Printf("I don't know about type '%T'\n", pi)
 		}
 	}
 }

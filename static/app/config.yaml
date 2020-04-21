@@ -20,3 +20,7 @@ url_cleaner:
 posse:
 - pinboard_rename_to_activate: https://api.pinboard.in/v1?auth_token=   <-  get from https://pinboard.in/settings/password
   prefix:
+- mastodon_rename_to_activate: https://social.tchncs.de/api/v1/
+  token:     <-  get access Token (only write:statuses) via new app at https://social.tchncs.de/settings/applications
+  prefix:
+
