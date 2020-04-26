@@ -52,7 +52,7 @@
 
   <xsl:template match="h:body">
     <body>
-      <noscript><p>JavaScript ist aus, es geht zwar (fast) alles auch ohne, aber mit ist's <em>schöner</em>.</p></noscript>
+      <noscript><p>JavaScript deactivated, almost fully functional, but <em>nicer</em> if on.</p></noscript>
 
       <xsl:copy-of select="h:ul"/>
       <xsl:apply-templates select="h:form"/>
@@ -86,7 +86,7 @@
       <xsl:copy-of select=".//h:input[@type='hidden']"/>
       <input name="lf_url" type="text" placeholder="https://..." value="{h:input[@name='lf_url']/@value}"/>
       <xsl:call-template name="emoji_a_la_carte"/>
-      <input autofocus="autofocus" name="lf_title" type="text" placeholder="Ein Titel, gerne mit #Schlagwort" value="{h:input[@name='lf_title']/@value}" class="awesomplete" data-multiple="true"/>
+      <input autofocus="autofocus" name="lf_title" type="text" placeholder="A Title, feel free to add #tags" value="{h:input[@name='lf_title']/@value}" class="awesomplete" data-multiple="true"/>
       <textarea name="lf_description" placeholder="Lorem #ipsum…" rows="8" cols="25" data-multiple="true">
         <xsl:value-of select="h:textarea[@name='lf_description']"/>
       </textarea>
@@ -101,9 +101,9 @@
     </div>
   </div -->
       <div style="display:flex; justify-content:space-between;">
-        <button name="save_edit" type="submit" value="Save">Speichern</button>
-        <button name="cancel_edit" type="submit" value="Cancel">Abbrechen</button>
-        <button name="delete_edit" type="submit" value="Delete">Löschen</button>
+        <button name="save_edit" type="submit" value="Save">Save</button>
+        <button name="cancel_edit" type="submit" value="Cancel">Cancel</button>
+        <button name="delete_edit" type="submit" value="Delete">Delete</button>
       </div>
     </form>
   </xsl:template>

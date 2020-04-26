@@ -58,11 +58,12 @@ URL.
 
 ## Install / Update
 
-If the webserver is Linux 64 bit Apache (the 98% case for shared hosting):
+If the webserver is Apache (Linux, 64 bit, set up and running, modules cgi and
+rewrite):
 
 1. Download http://purl.mro.name/Linux-x86_64/shaarli.cgi,
-2. copy to your webspace,
-3. set file permissions (chmod) to numeric 555 (readonly + executable for all),
+2. copy this single file to your webspace,
+3. set it's file permissions (chmod) to numeric 555 (readonly + executable for all),
 4. visit in your browser: http://my.web.space/subdir/shaarli.cgi,
 
 done! For lighttpd see `static/app/lighttpd.conf`.
@@ -71,7 +72,10 @@ Or build from source at http://mro.name/ShaarliGo
 
 ## POSSE
 
-> POSSE is an abbreviation for Publish (on your) Own Site, Syndicate Elsewhere, a content publishing model that starts with posting content on your own domain first, then syndicating out copies to 3rd party services with permashortlinks back to the original on your site.
+> POSSE is an abbreviation for Publish (on your) Own Site, Syndicate Elsewhere, a
+> content publishing model that starts with posting content on your own domain
+> first, then syndicating out copies to 3rd party services with permashortlinks
+> back to the original on your site.
 
 (says https://indieweb.org/POSSE)
 
@@ -79,7 +83,8 @@ You can POSSE to
 
 ### Pinboard.in
 
-by entering your Pinboard Auth Token from https://pinboard.in/settings/password into the end of `app/config.yaml` like this
+enter your Pinboard Auth Token from https://pinboard.in/settings/password at the
+end of `app/config.yaml` like this
 
 ```yaml
 posse:
@@ -87,9 +92,8 @@ posse:
   prefix:
 ```
 
-Each pinboard post gets an additional footer line with a backlink built from
-`prefix` + `id`. It's ok to leave `prefix` empty, then a superscript `¹ ` plus the
-baseurl plus `o/p/` is used to result a complete, clickable address.
+It's ok to leave `prefix` empty. Each pinboard post gets a backlink as an
+additional footer line. If `prefix` is set, the footer line is `prefix` + `id`.
 
 ## Todos
 

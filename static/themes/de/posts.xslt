@@ -371,14 +371,14 @@
         <xsl:variable name="entry_published" select="a:published"/>
         <xsl:variable name="entry_published_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_published"/></xsl:call-template></xsl:variable>
 
-        <a class="time" title="zuletzt: {$entry_updated_human}" href="{$xml_base}{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_published_human"/> 🔗</a>
+        <a class="time" title="zuletzt: {$entry_updated_human}" href="{$xml_base}{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_published_human"/></a>
         <xsl:if test="$link">
           <xsl:text> ~ </xsl:text>
           <a title="Archiv" href="{$archive}{$link}" rel="noopener noreferrer" referrerpolicy="no-referrer">@archive.org</a>
         </xsl:if>
         <span class="hidden-logged-out" title="Bearbeiten">
           <xsl:text> ~ </xsl:text>
-          <a href="{$xml_base}{a:link[@rel='edit']/@href}" rel="nofollow"><span class="hidden-xs">🔧</span>🔨</a><xsl:text> </xsl:text>
+          <a href="{$xml_base}{a:link[@rel='edit']/@href}" rel="nofollow">Bearbeiten</a><xsl:text> </xsl:text>
         </span>
       </p>
     </li>

@@ -215,8 +215,8 @@
             </a>
           </td>
           <td tabindex="20" class="text-right"><a href="{$xml_base_pub}/t/">⛅ <span class="hidden-xs"># Tags</span></a></td>
-          <td tabindex="30" class="text-right"><a href="{$xml_base_pub}/d/">📅 <span class="hidden-xs">Days</span></a></td>
-          <td tabindex="40" class="text-right"><a href="{$xml_base_pub}/i/">🎨 <span class="hidden-xs">Images</span></a></td>
+          <td tabindex="30" class="text-right"><a href="{$xml_base_pub}/d/" title="Not implemented yet.">📅 <span class="hidden-xs">Days</span></a></td>
+          <td tabindex="40" class="text-right"><a href="{$xml_base_pub}/i/" title="Not implemented yet.">🎨 <span class="hidden-xs">Images</span></a></td>
           <td class="text-right"><!-- I'd prefer a class="text-right hidden-logged-out" but just don't get it right -->
             <a class="hidden-logged-out" href="{$cgi_base}/tools/" rel="nofollow">🔨 <span class="hidden-xs">Tools</span></a>
           </td>
@@ -235,7 +235,7 @@ Search word or #tag..." class="awesomplete" data-multiple="true"/>
     </form>
 
     <form id="form_post" name="form_post" class="hidden-logged-out" action="{$cgi_base}">
-      <input tabindex="300" name="post" type="text" placeholder="What's #new? (note or URL)"/>
+      <input tabindex="300" name="post" type="text" placeholder="What to #post? (note or URL)"/>
     </form>
   </xsl:template>
 
@@ -253,7 +253,7 @@ Search word or #tag..." class="awesomplete" data-multiple="true"/>
               <a href="{$xml_base}{a:link[@rel='previous']/@href}" class="{$disabled} btn">&#160;&lt;&#160;</a>
             </td>
             <td class="text-center">
-              <span class="hidden-xs">Seite&#160;</span><xsl:value-of select="a:link[@rel='self']/@title"/>
+              <span class="hidden-xs">Page&#160;</span><xsl:value-of select="a:link[@rel='self']/@title"/>
             </td>
             <td class="text-center">
               <xsl:variable name="disabled"><xsl:if test="not(a:link[@rel='next'])">disabled</xsl:if></xsl:variable>
@@ -271,12 +271,12 @@ Search word or #tag..." class="awesomplete" data-multiple="true"/>
 
   <xsl:template name="footer">
     <p id="footer">
-      <a title="Abonnieren" href="{$xml_base_absolute}{a:link[@rel='self']/@href}">
+      <a title="Syndicate" href="{$xml_base_absolute}{a:link[@rel='self']/@href}">
         <img alt="Feed" src="{$skin_base}/feed-icon.svg" style="border:0;width:27px;height:27px"/>
       </a>
       <xsl:text> </xsl:text>
-       <a title="Prüfen (Atom 1.0)" href="https://validator.w3.org/feed/check.cgi?url={$xml_base_absolute}{a:link[@rel='self']/@href}">
-        <img alt="Prüfplakette (Atom 1.0)" src="{$skin_base}/valid-atom.svg" style="border:0;width:77px;height:27px"/>
+       <a title="Validate (Atom 1.0)" href="https://validator.w3.org/feed/check.cgi?url={$xml_base_absolute}{a:link[@rel='self']/@href}">
+        <img alt="Validity badge (Atom 1.0)" src="{$skin_base}/valid-atom.svg" style="border:0;width:77px;height:27px"/>
       </a>
       <!-- <xsl:text> </xsl:text>
       <a href="https://validator.w3.org/check?uri=referer">
@@ -337,7 +337,7 @@ Search word or #tag..." class="awesomplete" data-multiple="true"/>
         </xsl:if>
          <xsl:choose>
           <xsl:when test="$link">
-            <a href="{$redirector}{$link}" title="Original" rel="noopener noreferrer" referrerpolicy="no-referrer"><xsl:value-of select="a:title"/></a>
+            <a href="{$redirector}{$link}" rel="noopener noreferrer" referrerpolicy="no-referrer"><xsl:value-of select="a:title"/></a>
           </xsl:when>
           <xsl:otherwise>
             <xsl:value-of select="a:title"/>
@@ -360,7 +360,7 @@ Search word or #tag..." class="awesomplete" data-multiple="true"/>
       <!-- xsl:value-of select="substring-before(a:content[not(@src)], '&lt;br&gt;(&lt;a href=&quot;https://links.mro.name/?')" disable-output-escaping="yes" / -->
       <xsl:apply-templates select="a:content"/>
 
-      <p class="categories" title="Tags">
+      <p class="categories">
         <xsl:for-each select="a:category">
           <xsl:sort select="@term"/>
           <a href="{@scheme}{@term}/" class="tag">#<xsl:value-of select="@term"/></a><xsl:text>, </xsl:text>
@@ -372,14 +372,14 @@ Search word or #tag..." class="awesomplete" data-multiple="true"/>
         <xsl:variable name="entry_published" select="a:published"/>
         <xsl:variable name="entry_published_human"><xsl:call-template name="human_time"><xsl:with-param name="time" select="$entry_published"/></xsl:call-template></xsl:variable>
 
-        <a class="time" title="zuletzt: {$entry_updated_human}" href="{$xml_base}{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_published_human"/> 🔗</a>
+        <a class="time" title="last: {$entry_updated_human}" href="{$xml_base}{a:link[@rel='self']/@href}"><xsl:value-of select="$entry_published_human"/></a>
         <xsl:if test="$link">
           <xsl:text> * </xsl:text>
-          <a title="Archiv" href="{$archive}{$link}" rel="noopener noreferrer" referrerpolicy="no-referrer">@archive.org</a>
+          <a href="{$archive}{$link}" rel="noopener noreferrer" referrerpolicy="no-referrer">@archive.org</a>
         </xsl:if>
-        <span class="hidden-logged-out" title="Edit">
+        <span class="hidden-logged-out">
           <xsl:text> * </xsl:text>
-          <a href="{$xml_base}{a:link[@rel='edit']/@href}" rel="nofollow"><span class="hidden-xs">🔧</span>🔨</a><xsl:text> </xsl:text>
+          <a href="{$xml_base}{a:link[@rel='edit']/@href}" rel="nofollow">Edit</a><xsl:text> </xsl:text>
         </span>
       </p>
     </li>

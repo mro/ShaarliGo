@@ -130,7 +130,7 @@ button {
   min-width: 14ex;
   padding: .5ex;
 }
-button[name='delete_edit'] { background: red; }
+button[name='delete_edit'] { background: hsla(0, 99%, 50%, 0.75); }
 table {
   width: 100%;
 }

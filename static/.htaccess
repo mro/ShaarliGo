@@ -19,7 +19,7 @@ AddType image/svg+xml             svg
 AddType text/css                  css
 AddType text/html                 html
 AddType text/xml                  xml xslt
-AddOutputFilter DEFLATE html xml xslt css js json svg
+AddOutputFilter DEFLATE html xslt css js json svg
 
 # https://stackoverflow.com/questions/21062290/set-rewritebase-to-the-current-folder-path-dynamically/21063276#21063276
 RewriteEngine On

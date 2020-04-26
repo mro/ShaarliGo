@@ -44,12 +44,10 @@ umask 0022
 go fmt || { exit $?; }
 go vet || { exit $?; }
 go test || { exit $?; }
-"${say}" "ok"
 
 "${say}" "build localhost"
 go build -ldflags "${LDFLAGS}" -o "shaarli.cgi" || { echo "Aua" 1>&2 && exit 1; }
 mv "shaarli.cgi" "shaarligo-${VERSION}-$(uname -s)-$(uname -m).cgi"
-"${say}" "ok"
 # open "http://localhost/~$(whoami)/b/shaarli.cgi"
 
 "${say}" bench
