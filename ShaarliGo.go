@@ -18,7 +18,7 @@
 // Files & Directories
 //
 // .htaccess
-// shaarligo.cgi
+// shaarli.cgi
 // app/.htaccess
 // app/config.yaml
 // app/posts.gob.gz
@@ -27,7 +27,7 @@
 // app/var/error.log
 // app/var/stage/
 // app/var/old/
-// assets/default/de/
+// themes/current/
 // o/p/
 //
 package main
@@ -335,8 +335,8 @@ func handleMux(wg *sync.WaitGroup) http.HandlerFunc {
     <implements rdf:resource="https://tools.ietf.org/html/rfc4287"/>
     <implements rdf:resource="https://tools.ietf.org/html/rfc5005"/>
     <!-- implements rdf:resource="https://tools.ietf.org/html/rfc5023"/ -->
-    <service-endpoint rdf:resource="https://demo.mro.name/shaarligo"/>
-    <blog rdf:resource="https://demo.mro.name/shaarligo"/>
+    <service-endpoint rdf:resource="https://demo.0x4c.de/shaarligo"/>
+    <blog rdf:resource="https://demo.0x4c.de/shaarligo"/>
     <platform rdf:resource="https://httpd.apache.org/"/>
     <platform rdf:resource="https://www.lighttpd.net/"/>
     <platform rdf:resource="https://tools.ietf.org/html/rfc3875"/>

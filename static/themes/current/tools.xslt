@@ -36,8 +36,8 @@
 
   <xsl:variable name="xml_base">../../</xsl:variable>
   <xsl:variable name="xml_base_pub" select="concat($xml_base,'o')"/>
-  <xsl:variable name="skin_base" select="concat($xml_base,'assets/default')"/>
-  <xsl:variable name="cgi_base" select="concat($xml_base,'shaarligo.cgi')"/>
+  <xsl:variable name="skin_base" select="concat($xml_base,'theme')"/>
+  <xsl:variable name="cgi_base" select="concat($xml_base,'shaarli.cgi')"/>
 
   <xsl:template match="/">
     <xsl:apply-templates select="h:html"/>

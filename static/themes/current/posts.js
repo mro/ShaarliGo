@@ -1,4 +1,23 @@
 
+function toggle() {
+	switch(document.cookie) {
+	case 'dark':
+			document.cookie = 'light';
+			break;
+	case 'light':
+			document.cookie = '';
+			break;
+	default:
+			document.cookie = 'dark';
+			break;
+	}
+  console.log("uhu: "+document.cookie);
+	const lst = document.documentElement.classList;
+	lst.remove('dark');
+	lst.remove('light');
+	lst.add(document.cookie);
+}
+
 // list tags with font-size in relation to frequency
 // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1254
 function computeTagFontsize(tag0) {
@@ -9,7 +28,7 @@ function computeTagFontsize(tag0) {
   var countMaxLog = Math.log(1);
   const tags = tag0.getElementsByTagName('a');
   const counts = new Array(tags.length);
-  const map = {};
+  const log = {};
   for (var i = tags.length - 1; i >= 0; i--) {
     const lbl = tags[i].getElementsByClassName('label')[0].textContent;
     if ('2018-01-15T12:52' == lbl) {
@@ -18,21 +37,21 @@ function computeTagFontsize(tag0) {
     }
     const elm = tags[i].getElementsByClassName('count')[0];
     const txt = elm.textContent;
-    var v = map[txt];
+    var v = log[txt];
     if (!v)
-      map[txt] = v = Math.log(parseInt(txt, 10));
+      log[txt] = v = Math.log(parseInt(txt, 10));
     counts[i] = v;
     countMaxLog = Math.max(countMaxLog, counts[i]);
   }
-  map.length = 0;
+  log.length = 0;
   const factor = 1.0 / countMaxLog * (fontMax - fontMin);
   requestAnimationFrame(function() { // http://wilsonpage.co.uk/preventing-layout-thrashing/
     for (var i = tags.length - 1; i >= 0; i--) {
       const k = counts[i];
-      var v = map[k];
+      var v = log[k];
       if (!v)
         // https://stackoverflow.com/a/3717340
-        map[k] = v = Math.ceil(k * factor + fontMin) + 'pt';
+        log[k] = v = Math.ceil(k * factor + fontMin) + 'pt';
       tags[i].style.fontSize = v;
     }
   });
@@ -54,10 +73,13 @@ function clickableTextLinks(elmsRendered) {
   // console.log('make http and geo URIs (RFC 5870) clickable + microformat');
   for (var i = elmsRendered.length - 1; i >= 0 ; i--) {
     const elm = elmsRendered[i];
-    elm.innerHTML = elm.innerHTML.replace(/(https?:\/\/[^ \t\r\n"']+[^ \t\r\n"'.,;()])/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
+    elm.innerHTML = elm.innerHTML.replace(/(https?:\/\/[^ \t\r\n"']+[^ ?\t\r\n"'.,;()])/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
     // https://alanstorm.com/url_regex_explained/ \b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))
     // elm.innerHTML = elm.innerHTML.replace(/\b(([\w-]+:\/\/?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
     elm.innerHTML = elm.innerHTML.replace(/geo:(-?\d+.\d+),(-?\d+.\d+)(\?z=(\d+))?/gi, '<a class="geo" href="https://opentopomap.org/#marker=12/$1/$2" title="zoom=$4">geo:<span class="latitude">$1</span>,<span class="longitude">$2</span>$3</a>');
+    elm.innerHTML = elm.innerHTML.replace(/(urn:ietf:rfc:(\d+)(#\S*[0-9a-z])?)/gi, '<a class="rfc" href="https://tools.ietf.org/html/rfc$2$3" title="RFC $2">$1</a>');
+    elm.innerHTML = elm.innerHTML.replace(/(urn:isbn:([0-9-]+)(#\S*[0-9a-z])?)/gi, '<a class="isbn" href="https://de.wikipedia.org/wiki/Spezial:ISBN-Suche?isbn=$2" title="ISBN $2">$1</a>');
+    elm.innerHTML = elm.innerHTML.replace(/(CVE-[0-9-]+-[0-9]+)/gi, '<a class="cve" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=$1">$1</a>');
   }
 }
 
@@ -76,7 +98,7 @@ const xml_base_pub = document.documentElement.getAttribute("data-xml-base-pub");
     }
   }
   xhr.timeout = 1000;
-  xhr.open('GET', xml_base_pub + '/../shaarligo.cgi/session/');
+  xhr.open('GET', xml_base_pub + '/../shaarli.cgi/session/');
   xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
   xhr.send();
 }

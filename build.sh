@@ -32,7 +32,7 @@ parm="" # "-u"
     golang.org/x/tools/blog/atom
 }
 
-"$(go env GOBIN)/go-bindata" -ignore="\\.DS_Store" -ignore="assets/dark/" -ignore=".+\\.woff" -prefix static static/... tpl/...
+"$(go env GOBIN)/go-bindata" -ignore="\\.DS_Store" -ignore=".+\\.woff" -prefix static static/... tpl/...
 
 VERSION="$(grep -F 'version = ' version.go | cut -d \" -f 2)"
 LDFLAGS="-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)"
@@ -47,10 +47,10 @@ go test || { exit $?; }
 "${say}" "ok"
 
 "${say}" "build localhost"
-go build -ldflags "${LDFLAGS}" -o "shaarligo.cgi" || { echo "Aua" 1>&2 && exit 1; }
-mv "shaarligo.cgi" "shaarligo-${VERSION}-$(uname -s)-$(uname -m).cgi"
+go build -ldflags "${LDFLAGS}" -o "shaarli.cgi" || { echo "Aua" 1>&2 && exit 1; }
+mv "shaarli.cgi" "shaarligo-${VERSION}-$(uname -s)-$(uname -m).cgi"
 "${say}" "ok"
-# open "http://localhost/~$(whoami)/b/shaarligo.cgi"
+# open "http://localhost/~$(whoami)/b/shaarli.cgi"
 
 "${say}" bench
 go test -bench=.
@@ -61,14 +61,14 @@ rm -rf build
 mkdir -p "build/${VERSION}-Linux-x86_64/"
 mkdir -p "build/${VERSION}-Linux-armv6l/"
 # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
-env GOOS=linux GOARCH=amd64       go build -ldflags="${LDFLAGS}" -o "build/${VERSION}-Linux-x86_64/shaarligo.cgi" || { echo "Aua" 1>&2 && exit 1; }
-env GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="${LDFLAGS}" -o "build/${VERSION}-Linux-armv6l/shaarligo.cgi" || { echo "Aua" 1>&2 && exit 1; }
+env GOOS=linux GOARCH=amd64       go build -ldflags="${LDFLAGS}" -o "build/${VERSION}-Linux-x86_64/shaarli.cgi" || { echo "Aua" 1>&2 && exit 1; }
+env GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="${LDFLAGS}" -o "build/${VERSION}-Linux-armv6l/shaarli.cgi" || { echo "Aua" 1>&2 && exit 1; }
 
 "${say}" "deploy to dev server"
 
 if [ "${1}" = "prod" ] ; then
   rsync -avPz "build/" s0:"/var/www/lighttpd/darknet.mro.name/public_html/dev/shaarligo/"
 else
-  rsync -avPz "build/${VERSION}-Linux-x86_64/shaarligo.cgi" s0:"/var/www/lighttpd/demo.0x4c.de/"
+  rsync -avPz "build/${VERSION}-Linux-x86_64/shaarli.cgi" s0:"/var/www/lighttpd/demo.0x4c.de/"
 fi
 

@@ -52,10 +52,9 @@ func (app *Server) handleTools() http.HandlerFunc {
 			if tmpl, err := template.New("tools").Parse(string(byt)); err == nil {
 				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 				io.WriteString(w, xml.Header)
-				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='../../assets/`+app.cfg.Skin+`/tools.xslt'?>
+				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='../../themes/current/tools.xslt'?>
 `)
 				data := map[string]string{
-					"skin":              app.cfg.Skin,
 					"title":             app.cfg.Title,
 					"xml_base":          app.cgi.String(),
 					"tag_rename_old":    "",

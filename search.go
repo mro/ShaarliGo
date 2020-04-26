@@ -147,7 +147,7 @@ func (app *Server) handleSearch() http.HandlerFunc {
 				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 				enc := xml.NewEncoder(w)
 				enc.Indent("", "  ")
-				if err := xmlEncodeWithXslt(ret, "../../assets/"+app.cfg.Skin+"/posts.xslt", enc); err == nil {
+				if err := xmlEncodeWithXslt(ret, "../../themes/current/posts.xslt", enc); err == nil {
 					if err := enc.Flush(); err == nil {
 						return
 					}

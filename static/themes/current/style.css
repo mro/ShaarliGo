@@ -28,15 +28,18 @@ html {
   font-size: 12pt;
 }
 html, input, textarea, .awesomplete > ul, .awesomplete > ul > li {
-  background: hsl(0, 0%, 93%);
+  background: hsl(30, 0%, 93%);
   color: hsl(30, 50%, 44%);
 }
 body, .awesomplete > ul > li:hover {
   background: hsl(30, 50%, 93%);
 }
-a:any-link {
+button, .btn, a:any-link {
   color: hsl(115, 100%, 25%);
   text-decoration: none;
+}
+a img {
+	background: hsl(115, 50%, 55%);
 }
 h2 {
   font-size: 2.5em;
@@ -102,6 +105,10 @@ p {
 }
 p#tags {
   line-height: 1;
+}
+img.qrcode {
+	width: 27px;
+	height: 27px;
 }
 .btn, button, input, textarea {
   border-radius: 4px;
@@ -179,18 +186,18 @@ div.awesomplete { display: block; }
 	ol > li:nth-of-type(2n+1) {
 		background-color: hsl(0,0%,23%);
 	}
-	a:any-link {
+	.btn, button, a:any-link {
 		color: hsl(115, 50%, 45%);
 	}
-	button, .btn {
-		background-color: hsl(30, 20%, 30%);
-	}
-  .btn.disabled {
-		background-color: hsla(30, 20%, 30%, 0.2);
-		color: hsla(115, 50%, 42%, 0.2);
+	.btn, button {
+		background: hsla(30, 60%, 60%, 0.40);
 	}
 	.btn, button, input, textarea {
 		border-color: #777;
+	}
+  .btn.disabled {
+		background: hsla(30, 60%, 60%, 0.05);
+		color: hsla(115, 50%, 42%, 0.2);
 	}
   .awesomplete > ul > li[aria-selected="true"] {
     background: hsl(30, 60%, 23%);

@@ -103,16 +103,16 @@
   <xsl:variable name="self" select="/*/a:link[@rel = 'self']/@href"/>
   <xsl:variable name="xml_base_absolute" select="/*/@xml:base"/>
   <!-- a bit hairy, but actually works -->
-  <xsl:variable name="xml_base_relative">../../<xsl:choose>
-      <xsl:when test="'shaarligo.cgi/search/?q=' = substring($self, 1, 24)"/>
+	<xsl:variable name="xml_base_relative">../../<xsl:choose>
+      <xsl:when test="'shaarli.cgi/search/?q=' = substring($self, 1, 22)"/>
       <xsl:when test="'//' = translate($self, 'abcdefghijklmnopqrstuvwxyz0123456789-', '')"/>
-      <xsl:otherwise>../</xsl:otherwise>
+      <xsl:otherwise>./</xsl:otherwise>
     </xsl:choose>
   </xsl:variable>
   <xsl:variable name="xml_base" select="normalize-space($xml_base_relative)"/>
   <xsl:variable name="xml_base_pub" select="concat($xml_base,'o')"/>
-  <xsl:variable name="skin_base" select="concat($xml_base,'assets/default')"/>
-  <xsl:variable name="cgi_base" select="concat($xml_base,'shaarligo.cgi')"/>
+  <xsl:variable name="skin_base" select="concat($xml_base,'theme')"/>
+  <xsl:variable name="cgi_base" select="concat($xml_base,'shaarli.cgi')"/>
 
   <xsl:template match="/">
     <!--
@@ -181,11 +181,11 @@
           <xsl:value-of select="@label"/>
         </xsl:for-each>
       </xsl:variable>
-      <xsl:for-each select="a:category">
+			<xsl:for-each select="a:category[@label >= 1]">
         <xsl:sort select="@term" order="ascending"/>
         <!-- not log, just linear, similar to https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1254 -->
         <xsl:variable name="size" select="8 + 40 * @label div $countMax"/>
-        <a style="font-size:{$size}pt" href="{$cgi_base}/search/?q=%23{@term}+" class="tag"><span class="label"><xsl:value-of select="@term"/></span><span style="font-size:8pt">&#160;(<span class="count"><xsl:value-of select="@label"/></span>)</span></a><xsl:text>, </xsl:text>
+        <a style="font-size:{$size}pt" href="{$cgi_base}/search/?q=%23{@term}+" class="tag"><span class="label"><xsl:value-of select="@term"/></span><span style="font-size:8pt">&#160;(<span class="count"><xsl:value-of select="@label"/></span>)</span></a><xsl:text> </xsl:text>
       </xsl:for-each>
     </p>
 
@@ -305,7 +305,7 @@
       <a title="Generator" href="{a:generator/@uri}#{a:generator/@version}">
         <xsl:value-of select="a:generator"/>
         <xsl:text> </xsl:text>
-        <img style="width:27px;height:27px" src="{$skin_base}/qrcode.png" alt="QR Code (Generator URI)"/>
+        <img class="qrcode" src="{$skin_base}/qrcode.png" alt="QR Code (Generator URI)"/>
       </a>
     </p>
   </xsl:template>

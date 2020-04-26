@@ -64,14 +64,13 @@ func (app *Server) handleDoLogin() http.HandlerFunc {
 			if tmpl, err := template.New("login").Parse(string(byt)); err == nil {
 				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 				io.WriteString(w, xml.Header)
-				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-login.xslt'?>
+				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./themes/current/do-login.xslt'?>
 <!--
   must be compatible with https://code.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
   https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
 -->
 `)
 				if err := tmpl.Execute(w, map[string]string{
-					"skin":      app.cfg.Skin,
 					"title":     app.cfg.Title,
 					"token":     "ff13e7eaf9541ca2ba30fd44e864c3ff014d2bc9",
 					"returnurl": returnurl,
@@ -237,14 +236,13 @@ func (app *Server) handleDoPost(posse func(Entry)) http.HandlerFunc {
 			if tmpl, err := template.New("linkform").Parse(string(byt)); err == nil {
 				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 				io.WriteString(w, xml.Header)
-				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-post.xslt'?>
+				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./themes/current/do-post.xslt'?>
 <!--
   must be compatible with https://code.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
   https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
 -->
 `)
 				data := ent.api0LinkFormMap()
-				data["skin"] = app.cfg.Skin
 				data["title"] = feed.Title.Body
 				data["categories"] = feed.Categories
 				bTok := make([]byte, 20) // keep in local session or encrypted cookie
@@ -423,14 +421,13 @@ func (app *Server) handleDoCheckLoginAfterTheFact() http.HandlerFunc {
 			if tmpl, err := template.New("changepasswordform").Parse(string(byt)); err == nil {
 				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 				io.WriteString(w, xml.Header)
-				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./assets/`+app.cfg.Skin+`/do-changepassword.xslt'?>
+				io.WriteString(w, `<?xml-stylesheet type='text/xsl' href='./themes/current/do-changepassword.xslt'?>
 <!--
   must be compatible with https://code.mro.name/mro/Shaarli-API-test/src/master/tests/test-post.sh
   https://code.mro.name/mro/ShaarliOS/src/1d124e012933d1209d64071a90237dc5ec6372fc/ios/ShaarliOS/API/ShaarliCmd.m#L386
 -->
 `)
 				data := make(map[string]string)
-				data["skin"] = app.cfg.Skin
 				data["title"] = app.cfg.Title
 				bTok := make([]byte, 20) // keep in local session or encrypted cookie
 				io.ReadFull(rand.Reader, bTok)

@@ -3,7 +3,6 @@ uid:
 pwd_bcrypt: 
 cookie_secret: 
 timezone: Europe/Paris
-skin: default/de
 links_per_page: 100
 ban_after: 4
 ban_seconds: 14400

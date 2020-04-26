@@ -51,7 +51,6 @@ type Config struct {
 	PwdBcrypt         string                   `yaml:"pwd_bcrypt"`
 	CookieStoreSecret string                   `yaml:"cookie_secret"`
 	TimeZone          string                   `yaml:"timezone"`
-	Skin              string                   `yaml:"skin"`           // maybe should not be configurable, but rather be a filesystem softlink
 	LinksPerPage      int                      `yaml:"links_per_page"` // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L18
 	BanAfter          int                      `yaml:"ban_after"`      // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L20
 	BanSeconds        int                      `yaml:"ban_seconds"`    // https://github.com/sebsauvage/Shaarli/blob/master/index.php#L21

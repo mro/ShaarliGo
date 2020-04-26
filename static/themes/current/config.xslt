@@ -86,6 +86,11 @@
     doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
     doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN"/>
 
+  <xsl:variable name="xml_base">../../</xsl:variable>
+  <xsl:variable name="xml_base_pub" select="concat($xml_base,'o')"/>
+  <xsl:variable name="skin_base" select="concat($xml_base,'theme')"/>
+  <xsl:variable name="cgi_base" select="concat($xml_base,'shaarli.cgi')"/>
+
   <xsl:template match="/h:html/h:body/h:form">
     <html xmlns="http://www.w3.org/1999/xhtml">
       <head>
@@ -96,21 +101,8 @@
         <!-- http://www.quirksmode.org/blog/archives/2013/10/initialscale1_m.html -->
         <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
         <!-- meta name="viewport" content="width=400"/ -->
-        <link href="../../assets/default/bootstrap.css" rel="stylesheet" type="text/css"/>
-        <link href="../../assets/default/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
+        <link href="{$skin_base}/style.css" rel="stylesheet" type="text/css"/>
 
-        <style type="text/css">
-.table {
-  width: 100%;
-  max-width: 100%;
-}
-li {
-  background-color: #F8F8F8;
-  margin: 1em 0;
-}
-div.if_hasdiv_pwd { display:none; }
-.has_pwd div.if_has_pwd { display:block; }
-        </style>
         <title><xsl:value-of select="title"/></title>
       </head>
       <body onload="document.{@name}.title.focus();">

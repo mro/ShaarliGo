@@ -44,8 +44,8 @@ func mustParseURL(u string) *url.URL {
 	}
 }
 
-const cgiName = "shaarligo.cgi"
-const dirAssets = "assets"
+const cgiName = "shaarli.cgi"
+const dirThemes = "themes"
 const dirApp = "app"
 
 const uriPub = "o"
@@ -430,7 +430,7 @@ func (app Server) PublishFeed(feed Feed, force bool) error {
 
 	defer un(ti, to)
 	tmpFileName := dstFileName + "~"
-	xslt := path.Join(pathPrefix, dirAssets, app.cfg.Skin, xsltFileName)
+	xslt := path.Join(pathPrefix, dirThemes, "current", xsltFileName)
 
 	var err error
 	if err = os.MkdirAll(dstDirName, newDirPerms); err == nil {
@@ -477,7 +477,7 @@ func (app Server) PublishEntry(ent *Entry, force bool) error {
 
 	defer un(ti, to)
 	tmpFileName := dstFileName + "~"
-	xslt := path.Join(pathPrefix, dirAssets, app.cfg.Skin, xsltFileName)
+	xslt := path.Join(pathPrefix, dirThemes, "current", xsltFileName)
 
 	var err error
 	if err = os.MkdirAll(dstDirName, newDirPerms); err == nil {

@@ -114,7 +114,7 @@ func (cfg Config) renderSettingsPage(w http.ResponseWriter, code int) {
 		w.WriteHeader(code)
 
 		io.WriteString(w, xml.Header+
-			"<?xml-stylesheet type='text/xsl' href='"+path.Join("..", "..", "assets", cfg.Skin, "config.xslt")+"'?>\n")
+			"<?xml-stylesheet type='text/xsl' href='"+path.Join("..", "..", "themes", "current", "config.xslt")+"'?>\n")
 		io.WriteString(w, `<!--
   The html you see here is for compatibility with vanilla shaarli.
 
@@ -124,7 +124,6 @@ func (cfg Config) renderSettingsPage(w http.ResponseWriter, code int) {
 -->
 `)
 		err = tmpl.Execute(w, map[string]string{
-			"skin":     cfg.Skin,
 			"title":    cfg.Title,
 			"setlogin": cfg.Uid,
 		})
