@@ -1,4 +1,4 @@
 bindata.go
-shaarligo*.cgi
-static/assets/default/*.woff
-static/assets/default/*.woff2
+shaarli*.cgi
+static/themes/*/*.woff
+static/themes/*/*.woff2

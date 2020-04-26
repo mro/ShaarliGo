@@ -1,0 +1,2 @@
+# Cache 1/100th Year
+Header set Cache-Control "max-age=315576, public"

@@ -1,0 +1,209 @@
+@font-face {
+ font-family:B612;
+ font-style:normal;
+ src:url(./B612-Regular.woff2) format("woff2"),url(./B612-Regular.woff) format("woff")
+}
+@font-face {
+ font-family:B612;
+ font-style:italic;
+ src:url(./B612-Italic.woff2) format("woff2"),url(./B612-Italic.woff) format("woff")
+}
+@font-face {
+ font-family:B612;
+ font-style:normal;
+ font-weight:700;
+ src:url(./B612-Bold.woff2) format("woff2"),url(./B612-Bold.woff) format("woff")
+}
+@font-face {
+ font-family:B612;
+ font-style:italic;
+ font-weight:700;
+ src:url(./B612-BoldItalic.woff2) format("woff2"),url(./B612-BoldItalic.woff) format("woff")
+}
+
+html {
+  font-family: Optima, Candara, Calibri, Arial, sans-serif;
+  font-family: B612, sans-serif;
+  line-height: 1.5;
+  font-size: 12pt;
+}
+html, input, textarea, .awesomplete > ul, .awesomplete > ul > li {
+  background: hsl(30, 0%, 93%);
+  color: hsl(30, 50%, 44%);
+}
+body, .awesomplete > ul > li:hover {
+  background: hsl(30, 50%, 93%);
+}
+button, .btn, a:any-link {
+  color: hsl(115, 100%, 25%);
+  text-decoration: none;
+}
+a img {
+	background: hsl(115, 50%, 55%);
+}
+h2 {
+  font-size: 2.5em;
+  margin: 0;
+}
+h3 {
+  font-size: 1.2em;
+  margin: 3ex 0 .1ex 0;
+}
+.btn.disabled {
+  color: hsla(115, 100%, 25%, 0.2);
+  background: hsla(30, 80%, 80%, 0.4);
+  pointer-events: none;
+}
+body {
+  min-height: 500px;
+  margin: auto;
+  max-width: 45rem;
+  padding: 1ex;
+}
+#footer {
+  margin-top: 2.5ex;
+}
+.manytags body {
+  max-width: initial;
+}
+#do-post {
+  margin-top: -1rem;
+}
+form, table {
+  margin: 1ex 0;
+}
+table {
+  margin-top: 2ex;
+}
+ol {
+  list-style: none;
+  padding: 0;
+}
+ol > li {
+  margin: 2ex 0;
+  clear: both;
+}
+ol > li:nth-of-type(odd) {
+  background: hsl(30, 45%, 90%);
+}
+ol > li > h3 img {
+  float: right;
+  border: 1px dotted black;
+  max-width: 120px;
+  max-height: 120px;
+  display: none;
+}
+p {
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
+  hyphens: auto;
+  margin: .2ex 0;
+  overflow-wrap: break-word;
+  overflow: hidden;
+  word-break: break-word;
+  word-wrap: break-word;
+}
+p#tags {
+  line-height: 1;
+}
+img.qrcode {
+	width: 27px;
+	height: 27px;
+}
+.btn, button, input, textarea {
+  border-radius: 4px;
+  border: 1px solid darkgrey;
+  min-height: 3.5ex;
+}
+input, textarea {
+  font: inherit;
+  margin: .5ex 0;
+  padding: 0 1ex;
+  width: 97%;
+}
+button, .btn {
+  background: hsl(30, 80%, 80%);
+  padding: 1ex;
+}
+button {
+  font: inherit;
+  min-width: 14ex;
+  padding: .5ex;
+}
+button[name='delete_edit'] { background: red; }
+table {
+  width: 100%;
+}
+.text-left   { text-align: left; }
+.text-right  { text-align: right; }
+.text-center { text-align: center; }
+
+/* https://www.w3schools.com/Css/css_float.asp */
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+@media only screen and (max-width: 600px) {
+  .hidden-xs { display: none; }
+}
+
+
+.hidden-logged-in { display:initial; }
+.logged-in .hidden-logged-in { display:none; }
+.visible-logged-in { display:none; }
+.logged-in .visible-logged-in { display:initial; }
+
+.hidden-logged-out { display:initial; }
+.logged-out .hidden-logged-out { display:none; }
+.visible-logged-out { display:none; }
+.logged-out .visible-logged-out { display:initial; }
+
+/* This is a workaround for Browsers that insert additional br tags.
+ * See http://purl.mro.name/safari-xslt-br-bug */
+.rendered.type-text br { display:none; }
+.rendered.type-text br.br { display:inline; }
+
+
+div.awesomplete { display: block; }
+.awesomplete > ul > li[aria-selected="true"] {
+  background: hsl(30, 60%, 83%);
+}
+.awesomplete mark, .awesomplete li:hover mark, .awesomplete li[aria-selected="true"] mark {
+  background: inherit;
+  color: inherit;
+  text-decoration: underline;
+}
+
+@media (prefers-color-scheme: dark) {
+  html, input, textarea, .awesomplete > ul, .awesomplete > ul > li {
+		background-color: hsl(0,0%,23%);
+    color: hsl(30, 60%, 60%);
+  }
+  body, .awesomplete > ul > li:hover {
+    background: hsl(30, 0%, 25%);
+  }
+	ol > li:nth-of-type(2n+1) {
+		background-color: hsl(0,0%,23%);
+	}
+	.btn, button, a:any-link {
+		color: hsl(115, 50%, 45%);
+	}
+	.btn, button {
+		background: hsla(30, 60%, 60%, 0.40);
+	}
+	.btn, button, input, textarea {
+		border-color: #777;
+	}
+  .btn.disabled {
+		background: hsla(30, 60%, 60%, 0.05);
+		color: hsla(115, 50%, 42%, 0.2);
+	}
+  .awesomplete > ul > li[aria-selected="true"] {
+    background: hsl(30, 60%, 23%);
+  }
+	img {
+		filter: grayscale(30%);
+	}
+}
+
