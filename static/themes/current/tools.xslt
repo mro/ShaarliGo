@@ -82,7 +82,7 @@
             <a class="hidden-logged-out" href="{$cgi_base}/tools/">🔨 <span class="hidden-xs">Tools</span></a>
           </td>
           <td class="text-right">
-            <a tabindex="50" id="link_login" href="{$cgi_base}?do=login" class="visible-logged-out"><span class="hidden-xs">Logon</span> 🌺 </a>
+            <a tabindex="50" id="link_login" href="{$cgi_base}?do=login" class="visible-logged-out"><span class="hidden-xs">Login</span> 🌺 </a>
             <a tabindex="51" id="link_logout" href="{$cgi_base}?do=logout" class="hidden-logged-out"><span class="hidden-xs">Logoff</span> 🐾 </a>
           </td>
         </tr>

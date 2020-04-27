@@ -215,13 +215,13 @@
             </a>
           </td>
           <td tabindex="20" class="text-right"><a href="{$xml_base_pub}/t/">⛅ <span class="hidden-xs"># Tags</span></a></td>
-          <td tabindex="30" class="text-right"><a href="{$xml_base_pub}/d/" title="Not implemented yet.">📅 <span class="hidden-xs">Days</span></a></td>
+          <td tabindex="30" class="text-right"><a href="{$xml_base_pub}/d/" title="Not implemented yet.">📅 <span class="hidden-xs">Daily</span></a></td>
           <td tabindex="40" class="text-right"><a href="{$xml_base_pub}/i/" title="Not implemented yet.">🎨 <span class="hidden-xs">Images</span></a></td>
           <td class="text-right"><!-- I'd prefer a class="text-right hidden-logged-out" but just don't get it right -->
             <a class="hidden-logged-out" href="{$cgi_base}/tools/" rel="nofollow">🔨 <span class="hidden-xs">Tools</span></a>
           </td>
           <td class="text-right">
-            <a tabindex="50" id="link_login" href="{$cgi_base}?do=login" class="visible-logged-out" rel="nofollow"><span class="hidden-xs">Logon</span> 🌺 </a>
+            <a tabindex="50" id="link_login" href="{$cgi_base}?do=login" class="visible-logged-out" rel="nofollow"><span class="hidden-xs">Login</span> 🌺 </a>
             <a tabindex="51" id="link_logout" href="{$cgi_base}?do=logout" class="hidden-logged-out" rel="nofollow"><span class="hidden-xs">Logout</span> 🐾 </a>
           </td>
         </tr>
@@ -231,7 +231,7 @@
     <xsl:comment> https://stackoverflow.com/a/18520870 http://jsfiddle.net/66Ynx/ </xsl:comment>
     <form id="form_search" name="form_search" action="{$cgi_base}/search/">
 			<input tabindex="100" name="q" id="q" value="{@sg:searchTerms}" autofocus="autofocus" type="text" placeholder="🔍
-Search word or #tag..." class="awesomplete" data-multiple="true"/>
+Search text or #tag..." class="awesomplete" data-multiple="true"/>
     </form>
 
     <form id="form_post" name="form_post" class="hidden-logged-out" action="{$cgi_base}">
