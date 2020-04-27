@@ -61,10 +61,10 @@ URL.
 If the webserver is Apache (Linux, 64 bit, set up and running, modules cgi and
 rewrite):
 
-1. Download http://purl.mro.name/Linux-x86_64/shaarli.cgi,
+1. Download http://purl.mro.name/Linux-x86_64/shaarligo.cgi,
 2. copy this single file to your webspace,
 3. set it's file permissions (chmod) to numeric 555 (readonly + executable for all),
-4. visit in your browser: http://my.web.space/subdir/shaarli.cgi,
+4. visit in your browser: http://my.web.space/subdir/shaarligo.cgi,
 
 done! For lighttpd see `static/app/lighttpd.conf`.
 

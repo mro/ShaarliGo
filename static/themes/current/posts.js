@@ -98,7 +98,7 @@ const xml_base_pub = document.documentElement.getAttribute("data-xml-base-pub");
     }
   }
   xhr.timeout = 1000;
-  xhr.open('GET', xml_base_pub + '/../shaarli.cgi/session/');
+  xhr.open('GET', xml_base_pub + '/../shaarligo.cgi/session/');
   xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
   xhr.send();
 }

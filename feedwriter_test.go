@@ -365,7 +365,7 @@ func TestWriteFeedsEmpty1(t *testing.T) {
     <updated>0001-01-01T00:00:00Z</updated>
     <published>0001-01-01T00:00:00Z</published>
     <link href=uriPubPosts+"abcd/" rel="self"></link>
-    <link href="shaarli.cgi?post="+uriPubPosts+"abcd/" rel="edit"></link>
+    <link href="shaarligo.cgi?post="+uriPubPosts+"abcd/" rel="edit"></link>
     <link href="../" rel="up"></link>
   </entry>
 </feed>
@@ -424,7 +424,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
     <updated>1990-12-31T01:02:03+01:00</updated>
     <published>0001-01-01T00:00:00Z</published>
     <link href=uriPubPosts+"e0/" rel="self"></link>
-    <link href="shaarli.cgi?post="+uriPubPosts+"e0/" rel="edit"></link>
+    <link href="shaarligo.cgi?post="+uriPubPosts+"e0/" rel="edit"></link>
     <link href="../" rel="up" title="Hello, Atom!"></link>
     <category term="aha" scheme="http://example.com/"+uriPubTags></category>
   </entry>
@@ -454,7 +454,7 @@ func TestWriteFeedsUnpaged(t *testing.T) {
   <updated>1990-12-31T01:02:03+01:00</updated>
   <published>0001-01-01T00:00:00Z</published>
   <link href=uriPubPosts+"e0/" rel="self"></link>
-  <link href="shaarli.cgi?post="+uriPubPosts+"e0/" rel="edit"></link>
+  <link href="shaarligo.cgi?post="+uriPubPosts+"e0/" rel="edit"></link>
   <link href="../" rel="up" title="Hello, Atom!"></link>
   <category term="aha" scheme="http://example.com/"+uriPubTags></category>
 </entry>
@@ -531,7 +531,7 @@ func TestWriteFeedsPaged(t *testing.T) {
     <updated>1990-12-30T00:00:00+01:00</updated>
     <published>0001-01-01T00:00:00Z</published>
     <link href=uriPubPosts+"e0/" rel="self"></link>
-    <link href="shaarli.cgi?post="+uriPubPosts+"e0/" rel="edit"></link>
+    <link href="shaarligo.cgi?post="+uriPubPosts+"e0/" rel="edit"></link>
     <link href="../" rel="up" title="Hello, Atom!"></link>
   </entry>
   <entry xmlns="http://www.w3.org/2005/Atom" xml:base="http://example.com/">
@@ -540,7 +540,7 @@ func TestWriteFeedsPaged(t *testing.T) {
     <updated>1990-12-31T01:01:01+01:00</updated>
     <published>0001-01-01T00:00:00Z</published>
     <link href=uriPubPosts+"e1/" rel="self"></link>
-    <link href="shaarli.cgi?post="+uriPubPosts+"e1/" rel="edit"></link>
+    <link href="shaarligo.cgi?post="+uriPubPosts+"e1/" rel="edit"></link>
     <link href="../" rel="up" title="Hello, Atom!"></link>
   </entry>
 </feed>
@@ -578,7 +578,7 @@ func TestWriteFeedsPaged(t *testing.T) {
     <updated>1990-12-31T02:02:02+01:00</updated>
     <published>0001-01-01T00:00:00Z</published>
     <link href=uriPubPosts+"e2/" rel="self"></link>
-    <link href="shaarli.cgi?post="+uriPubPosts+"e2/" rel="edit"></link>
+    <link href="shaarligo.cgi?post="+uriPubPosts+"e2/" rel="edit"></link>
     <link href="../" rel="up" title="Hello, Atom!"></link>
   </entry>
 </feed>
@@ -608,7 +608,7 @@ func TestWriteFeedsPaged(t *testing.T) {
   <updated>1990-12-30T00:00:00+01:00</updated>
   <published>0001-01-01T00:00:00Z</published>
   <link href=uriPubPosts+"e0/" rel="self"></link>
-  <link href="shaarli.cgi?post="+uriPubPosts+"e0/" rel="edit"></link>
+  <link href="shaarligo.cgi?post="+uriPubPosts+"e0/" rel="edit"></link>
   <link href="../" rel="up" title="Hello, Atom!"></link>
 </entry>
 `,

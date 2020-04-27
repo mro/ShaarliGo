@@ -104,7 +104,7 @@
   <xsl:variable name="xml_base_absolute" select="/*/@xml:base"/>
   <!-- a bit hairy, but actually works -->
 	<xsl:variable name="xml_base_relative">../../<xsl:choose>
-      <xsl:when test="'shaarli.cgi/search/?q=' = substring($self, 1, 22)"/>
+      <xsl:when test="'shaarligo.cgi/search/?q=' = substring($self, 1, 24)"/>
       <xsl:when test="'//' = translate($self, 'abcdefghijklmnopqrstuvwxyz0123456789-', '')"/>
       <xsl:otherwise>../</xsl:otherwise>
     </xsl:choose>
@@ -112,7 +112,7 @@
   <xsl:variable name="xml_base" select="normalize-space($xml_base_relative)"/>
   <xsl:variable name="xml_base_pub" select="concat($xml_base,'o')"/>
 	<xsl:variable name="skin_base" select="concat($xml_base,'themes/current')"/>
-  <xsl:variable name="cgi_base" select="concat($xml_base,'shaarli.cgi')"/>
+  <xsl:variable name="cgi_base" select="concat($xml_base,'shaarligo.cgi')"/>
 
   <xsl:template match="/">
     <!--

@@ -59,9 +59,9 @@ func prepTeardown(t *testing.T) func() {
 
 func TestQueryParse(t *testing.T) {
 	t.Parallel()
-	u := mustParseURL("http://example.com/a/shaarli.cgi?do=login&foo=bar&do=auch")
+	u := mustParseURL("http://example.com/a/shaarligo.cgi?do=login&foo=bar&do=auch")
 
-	assert.Equal(t, "http://example.com/a/shaarli.cgi?do=login&foo=bar&do=auch", u.String(), "ach")
+	assert.Equal(t, "http://example.com/a/shaarligo.cgi?do=login&foo=bar&do=auch", u.String(), "ach")
 	assert.Equal(t, "do=login&foo=bar&do=auch", u.RawQuery, "ach")
 	v := u.Query()
 
@@ -173,7 +173,7 @@ func TestHttpServer(t *testing.T) {
 func _TestPostConfigG(t *testing.T) {
 	defer prepTeardown(t)()
 
-	cgi := "/sub/shaarli.cgi"
+	cgi := "/sub/shaarligo.cgi"
 	pi := "/config/"
 	os.Setenv("SCRIPT_NAME", cgi)
 	os.Setenv("PATH_INFO", pi)
@@ -210,7 +210,7 @@ func _TestPostConfigG(t *testing.T) {
 }
 
 func doHttp(method, path_info string) (*http.Response, error) {
-	cgi := "shaarli.cgi"
+	cgi := "shaarligo.cgi"
 	os.Setenv("SCRIPT_NAME", "/sub/"+cgi)
 	os.Setenv("SERVER_PROTOCOL", "HTTP/1.1")
 	os.Setenv("HTTP_HOST", "example.com")
@@ -359,9 +359,9 @@ func _TestGetPostNew(t *testing.T) {
 	r, err = doGet("")
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, http.StatusFound, r.StatusCode, "aha")
-	assert.Equal(t, "/sub/shaarli.cgi?do=login", r.Header["Location"], "aha")
+	assert.Equal(t, "/sub/shaarligo.cgi?do=login", r.Header["Location"], "aha")
 
-	r, err = doGet(fmt.Sprintf("?do=login&returnurl=/sub/shaarli.cgi%s", url.QueryEscape(purl)))
+	r, err = doGet(fmt.Sprintf("?do=login&returnurl=/sub/shaarligo.cgi%s", url.QueryEscape(purl)))
 	assert.Nil(t, err, "aha")
 	assert.Equal(t, http.StatusOK, r.StatusCode, "aha")
 	cook := r.Header["Set-Cookie"][0]
@@ -372,7 +372,7 @@ func _TestGetPostNew(t *testing.T) {
 	assert.NotNil(t, root, "aha")
 	assert.Equal(t, 4, len(scrape.FindAll(root, func(n *html.Node) bool { return atom.Input == n.DataAtom })), "aha")
 
-	r, err = doPost(fmt.Sprintf("?do=login&returnurl=/sub/shaarli.cgi%s", url.QueryEscape(purl)), []byte(`login=B&password=123456789012`))
+	r, err = doPost(fmt.Sprintf("?do=login&returnurl=/sub/shaarligo.cgi%s", url.QueryEscape(purl)), []byte(`login=B&password=123456789012`))
 	os.Setenv("COOKIE", r.Header["Set-Cookie"][0])
 
 	r, err = doGet(purl)

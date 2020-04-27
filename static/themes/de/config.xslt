@@ -89,7 +89,7 @@
   <xsl:variable name="xml_base">../../</xsl:variable>
   <xsl:variable name="xml_base_pub" select="concat($xml_base,'o')"/>
 	<xsl:variable name="skin_base" select="concat($xml_base,'themes/current')"/>
-  <xsl:variable name="cgi_base" select="concat($xml_base,'shaarli.cgi')"/>
+  <xsl:variable name="cgi_base" select="concat($xml_base,'shaarligo.cgi')"/>
 
   <xsl:template match="/h:html/h:body/h:form">
     <html xmlns="http://www.w3.org/1999/xhtml">

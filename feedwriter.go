@@ -44,7 +44,7 @@ func mustParseURL(u string) *url.URL {
 	}
 }
 
-const cgiName = "shaarli.cgi"
+const cgiName = "shaarligo.cgi"
 const dirThemes = "themes"
 const dirApp = "app"
 

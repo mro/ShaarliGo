@@ -18,7 +18,7 @@
 // Files & Directories
 //
 // .htaccess
-// shaarli.cgi
+// shaarligo.cgi
 // app/.htaccess
 // app/config.yaml
 // app/posts.gob.gz

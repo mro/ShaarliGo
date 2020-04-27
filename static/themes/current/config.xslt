@@ -89,7 +89,7 @@
   <xsl:variable name="xml_base">../../</xsl:variable>
   <xsl:variable name="xml_base_pub" select="concat($xml_base,'o')"/>
 	<xsl:variable name="skin_base" select="concat($xml_base,'themes/current')"/>
-  <xsl:variable name="cgi_base" select="concat($xml_base,'shaarli.cgi')"/>
+  <xsl:variable name="cgi_base" select="concat($xml_base,'shaarligo.cgi')"/>
 
   <xsl:template match="/h:html/h:body/h:form">
     <html xmlns="http://www.w3.org/1999/xhtml">
@@ -150,7 +150,7 @@
             <div class="if_has_pwd form-group">
               <label for="confirmpassword" class="control-label col-sm-2">Repeat pwd</label>
               <div class="col-sm-8">
-                <input tabindex="500" name="confirmpassword" type="password" placeholder="the same once again" required="true" minlength="12" pattern="\S(.*\S)?" value="{h:input[@name='confirmpassword']/@value}" class="form-control"/>
+                <input tabindex="500" name="confirmpassword" type="password" placeholder="the same once more" required="true" minlength="12" pattern="\S(.*\S)?" value="{h:input[@name='confirmpassword']/@value}" class="form-control"/>
               </div>
             </div>
             <!-- evtl. Zeitzone, continent / city? -->
