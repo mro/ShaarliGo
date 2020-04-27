@@ -253,7 +253,7 @@ Search text or #tag..." class="awesomplete" data-multiple="true"/>
               <a href="{$xml_base}{a:link[@rel='previous']/@href}" class="{$disabled} btn">&#160;&lt;&#160;</a>
             </td>
             <td class="text-center">
-              <span class="hidden-xs">Page&#160;</span><xsl:value-of select="a:link[@rel='self']/@title"/>
+              <span class="hidden-xs"></span><xsl:value-of select="a:link[@rel='self']/@title"/>
             </td>
             <td class="text-center">
               <xsl:variable name="disabled"><xsl:if test="not(a:link[@rel='next'])">disabled</xsl:if></xsl:variable>
@@ -363,10 +363,10 @@ Search text or #tag..." class="awesomplete" data-multiple="true"/>
       <p class="categories">
         <xsl:for-each select="a:category">
           <xsl:sort select="@term"/>
-          <a href="{@scheme}{@term}/" class="tag">#<xsl:value-of select="@term"/></a>
-          <xsl:if test="position() != last()"><!-- https://stackoverflow.com/a/17098873 -->
+          <xsl:if test="position() != 1">
             <xsl:text>, </xsl:text>
           </xsl:if>
+          <a href="{@scheme}{@term}/" class="tag">#<xsl:value-of select="@term"/></a>
         </xsl:for-each>
       </p>
       <p class="footer">

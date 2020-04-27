@@ -362,10 +362,10 @@
       <p class="categories" title="Schlagworte">
         <xsl:for-each select="a:category">
           <xsl:sort select="@term"/>
-          <a href="{@scheme}{@term}/" class="tag">#<xsl:value-of select="@term"/></a>
-          <xsl:if test="position() != last()"><!-- https://stackoverflow.com/a/17098873 -->
+          <xsl:if test="position() != 1">
             <xsl:text>, </xsl:text>
           </xsl:if>
+          <a href="{@scheme}{@term}/" class="tag">#<xsl:value-of select="@term"/></a>
         </xsl:for-each>
       </p>
       <p class="footer">
