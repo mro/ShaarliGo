@@ -38,11 +38,10 @@ import (
 const lengthyAtomPreambleComment string = `
   https://developer.mozilla.org/en/docs/XSL_Transformations_in_Mozilla_FAQ#Why_isn.27t_my_stylesheet_applied.3F
 
-  Caution! Firefox ignores your XSLT stylesheet if your XML looks like a RSS or Atom feed. A typical workaround is to insert an XML comment at the beginning of your XML file to move the <fEEd or <rsS tag out of the first 512 bytes used by Firefox to guess whether it is a feed or not.
+  Caution! Firefox ignores the XSLT if the XML looks like a RSS or Atom feed.
+  So add a comment to the XML file to push the <fEEd or <rsS tag out of the first 512 bytes looked at by Firefox to guess whether it is a   feed or not.
 
-  See also the discussion at https://bugzilla.mozilla.org/show_bug.cgi?id=338621#c72.
-
-  For best results, serve both atom feed and xslt as 'text/xml' or 'application/xml' without charset specified.
+  https://bugzilla.mozilla.org/show_bug.cgi?id=338621#c72
 `
 
 const atomNamespace = "http://www.w3.org/2005/Atom"
@@ -213,17 +212,25 @@ func (c *GeoRssPoint) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error
 }
 
 func xmlEncodeWithXslt(e interface{}, hrefXslt string, enc *xml.Encoder) error {
+	comm := func() error {
+		var err error
+		if _, ok := e.(Feed); ok {
+			// write the comment only for feeds
+			if err = enc.EncodeToken(xml.Comment(lengthyAtomPreambleComment)); err == nil {
+				err = enc.EncodeToken(xml.CharData("\n"))
+			}
+		}
+		return err
+	}
 	var err error
 	// preamble
 	if err = enc.EncodeToken(xml.ProcInst{Target: "xml", Inst: []byte(`version="1.0" encoding="UTF-8"`)}); err == nil {
 		if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
 			if err = enc.EncodeToken(xml.ProcInst{Target: "xml-stylesheet", Inst: []byte("type='text/xsl' href='" + hrefXslt + "'")}); err == nil {
 				if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
-					if err = enc.EncodeToken(xml.Comment(lengthyAtomPreambleComment)); err == nil {
-						if err = enc.EncodeToken(xml.CharData("\n")); err == nil {
-							if err = enc.Encode(e); err == nil {
-								err = enc.EncodeToken(xml.CharData("\n"))
-							}
+					if err = comm(); err == nil {
+						if err = enc.Encode(e); err == nil {
+							err = enc.EncodeToken(xml.CharData("\n"))
 						}
 					}
 				}
