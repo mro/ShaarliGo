@@ -70,3 +70,5 @@ else
   rsync -avPz "build/${VERSION}-Linux-x86_64/shaarligo.cgi" s0:"/var/www/lighttpd/demo.0x4c.de/"
 fi
 
+"${say}" "done"
+

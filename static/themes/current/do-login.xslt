@@ -59,7 +59,7 @@
       <input name="returnurl" type="hidden" value="{h:input[@name='returnurl']/@value}"/>
       <input tabindex="100" name="login" type="text" autofocus="autofocus" placeholder="Who's there?" value="{h:input[@name='login']/@value}"/>
       <input tabindex="200" name="password" type="password" placeholder="Do you know the password?"/>
-      <button tabindex="300" type="submit">Go!</button>
+      <button tabindex="300" type="submit">Login</button>
     </form>
   </xsl:template>
 
