@@ -303,7 +303,7 @@ Search text or #tag..." class="awesomplete" data-multiple="true"/>
         🤫 Privacy<xsl:if test="string-length(a:link[@rel='terms-of-service']/@href) &lt; 2"><span> link rel='terms-of-service' missing.</span></xsl:if>
       </a>
       <xsl:text> </xsl:text>
-      <a title="Generator" href="{a:generator/@uri}#{a:generator/@version}">
+      <a title="Generator" href="{a:generator/@uri}v{a:generator/@version}">
         <xsl:value-of select="a:generator"/>
         <xsl:text> </xsl:text>
         <img class="qrcode" src="{$skin_base}/qrcode.png" alt="QR Code (Generator URI)"/>
