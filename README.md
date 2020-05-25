@@ -10,6 +10,13 @@ http://sebsauvage.net/wiki/doku.php?id=php:shaarli. Destilled down to the bare
 minimum, with easy hosting and security in mind. No PHP, no DB, no server-side
 templating, JS optional.
 
+## Responsible Disclosure
+
+In case you are reluctant to file a [public
+issue](http://purl.mro.name/ShaarliGo/issues), feel free to email
+[security@mro.name](mailto:security@mro.name?subject=ShaarliGo)
+([🔏key](https://mro.name/.well-known/openpgpkey/hu/t5s8ztdbon8yzntexy6oz5y48etqsnbb?security)).
+
 ## Design Goals
 
 - [x] backwards compatible posting (https://code.mro.name/mro/Shaarli-API-test)
