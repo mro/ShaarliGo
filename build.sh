@@ -62,12 +62,12 @@ mkdir -p "build/${VERSION}-Linux-armv6l/"
 env GOOS=linux GOARCH=amd64       go build -ldflags="${LDFLAGS}" -o "build/${VERSION}-Linux-x86_64/shaarligo.cgi" || { echo "Aua" 1>&2 && exit 1; }
 env GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="${LDFLAGS}" -o "build/${VERSION}-Linux-armv6l/shaarligo.cgi" || { echo "Aua" 1>&2 && exit 1; }
 
-"${say}" "deploy to dev server"
+"${say}" "deploy"
 
 if [ "${1}" = "prod" ] ; then
-  rsync -avPz "build/" s0:"/var/www/lighttpd/darknet.mro.name/public_html/dev/shaarligo/"
+  rsync -avPz "build/" c1:"/var/www/vhosts/darknet.mro.name/pages/dev/shaarligo/"
 else
-  rsync -avPz "build/${VERSION}-Linux-x86_64/shaarligo.cgi" s0:"/var/www/lighttpd/demo.0x4c.de/"
+  rsync -avPz "build/${VERSION}-Linux-x86_64/shaarligo.cgi" c0:"/var/www/vhosts/demo.0x4c.de/"
 fi
 
 "${say}" "done"

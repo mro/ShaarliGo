@@ -62,7 +62,9 @@ func mastodonStatusPost(base url.URL, token string, en Entry, foot string) (err 
 		req, _ := http.NewRequest(http.MethodPost, ur.String(), strings.NewReader(form.Encode()))
 		req.Header.Set("Accept-Encoding", "gzip, deflate")
 		req.Header.Set("User-Agent", strings.Join([]string{myselfNamespace, version}, ""))
-		req.Header.Set("Authorization", "Bearer "+token)
+		if "" != token {
+			req.Header.Set("Authorization", "Bearer "+token)
+		}
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		if resp, err := client.Do(req); nil == resp && nil != err {
 			return nil, err

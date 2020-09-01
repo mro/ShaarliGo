@@ -124,6 +124,12 @@ posse:
 It's ok to leave `prefix` empty. Each mastodon post gets a backlink as an
 additional footer line. If `prefix` is set, the footer line is `prefix` + `id`.
 
+Also, if you don't know the token but the endpoint accepts basic auth
+([pleroma](https://pleroma.social/)), you may [add the credentials to the
+url](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#Access_using_credentials_in_the_URL)
+for the time being until I figure out how to get a token from pleroma or do proper
+OAuth2.
+
 ## Todos
 
 1. private posts,
