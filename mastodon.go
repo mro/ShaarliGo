@@ -31,7 +31,7 @@ import (
 // https://docs.joinmastodon.org/methods/statuses/
 // https://docs.joinmastodon.org/client/token/
 //
-func mastodonStatusPost(base url.URL, token string, en Entry, foot string) (err error) {
+func mastodonStatusPost(base url.URL, token string, maxlen int, en Entry, foot string) (err error) {
 	if 0 == len(en.Links) {
 		return fmt.Errorf("need an url.")
 	}
@@ -50,7 +50,7 @@ func mastodonStatusPost(base url.URL, token string, en Entry, foot string) (err 
 		if "" != txt && !strings.HasSuffix(txt, "\n") {
 			foot = "\n" + foot
 		}
-		txt = limit(500-len(foot), "…", txt)
+		txt = limit(maxlen-len(foot), "…", txt)
 		txt += foot
 		form.Add("status", txt)
 	}

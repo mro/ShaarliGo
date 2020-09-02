@@ -45,6 +45,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -226,10 +227,21 @@ func (app Server) Posse(en Entry) {
 			}
 
 		case Mastodon:
+			max := func(x, y int) int {
+				if x < y {
+					return y
+				}
+				return x
+			}
 			if ep, err := url.Parse(pi.Endpoint); err != nil {
 				log.Printf("- posse %s error %s\n", pi.Endpoint, err)
 			} else {
-				if err := mastodonStatusPost(*ep, pi.Token, en, back(pi.Prefix, app.url, en.Id)); err != nil {
+				limit, _ := strconv.Atoi(pi.Limit)
+				if limit <= 0 {
+					limit = 500 // default
+				}
+				limit = max(100, limit) // mimimum
+				if err := mastodonStatusPost(*ep, pi.Token, limit, en, back(pi.Prefix, app.url, en.Id)); err != nil {
 					log.Printf("- posse %s error %s\n", ep, err)
 				}
 			}

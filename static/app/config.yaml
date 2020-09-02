@@ -22,5 +22,6 @@ posse:
   prefix:
 - mastodon_rename_to_activate: https://social.tchncs.de/api/v1/
   token:     <-  get access Token (only write:statuses) via new app at https://social.tchncs.de/settings/applications
+  limit: 500
   prefix:
 

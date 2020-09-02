@@ -51,6 +51,7 @@ type Mastodon struct {
 	Endpoint string
 	Token    string
 	Prefix   string
+	Limit    string
 }
 
 type Config struct {
@@ -96,6 +97,7 @@ func loadConfi(dat []byte) (Config, error) {
 				Endpoint: ma,
 				Prefix:   m["prefix"],
 				Token:    m["token"],
+				Limit:    m["limit"],
 			})
 		}
 	}

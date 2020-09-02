@@ -25,7 +25,7 @@ import (
 func TestYamlDeser(t *testing.T) {
 	t.Parallel()
 
-	cfg, err := loadConfi([]byte("posse:\n- pinboard: foo\n- mastodon: bar"))
+	cfg, err := loadConfi([]byte("posse:\n- pinboard: foo\n- mastodon: bar\n  limit: 200"))
 	assert.Equal(t, nil, err, "Na klar")
 	assert.Equal(t, 2, len(cfg.Posse), "Na klar")
 	{
@@ -35,5 +35,6 @@ func TestYamlDeser(t *testing.T) {
 	{
 		ma := (cfg.Posse[1]).(Mastodon)
 		assert.Equal(t, "bar", ma.Endpoint, "Na klar")
+		assert.Equal(t, "200", ma.Limit, "Na klar")
 	}
 }
