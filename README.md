@@ -5,77 +5,34 @@
 
 # ShaarliGo
 
-self-hosted microblogging inspired by
-http://sebsauvage.net/wiki/doku.php?id=php:shaarli. Destilled down to the bare
-minimum, with easy hosting and security in mind. No PHP, no DB, no server-side
-templating, JS optional.
+🌺 Self-reliant publishing for laypeople like your mother and me. Have a say and
+not be subjected to any T&Cs, just local law. All without setup headaches, but
+truly self-sustained and enduringly independent:
+
+## Install / Update
+
+1. Rent any web space from EUR 2 monthly with a domain-name as your enduring
+   digital property (e.g. https://variomedia.de/hosting),
+2. download https://mro.name/Linux-x86_64/shaarligo.cgi and
+3. copy it to the webspace, see e.g.
+   https://www.variomedia.de/faq/Wie-uebertrage-ich-meine-Seite-auf-den-Server/article/177,
+4. set the file permissions (chmod) to read-only+execute for all (numeric 555), see
+   e.g. https://wiki.filezilla-project.org/Other_Features#Chmod,
+5. visit http://\<my.domain\>/shaarligo.cgi and off you go!
+
+That's if the webserver is Apache (Linux, 64 bit, modules cgi and rewrite) as
+common with shared hosting.
+
+For lighttpd see `static/app/lighttpd.conf`. Nginx lacks CGI support (srsly?).
+
+Or build from source at http://mro.name/ShaarliGo
 
 ## Responsible Disclosure
 
 In case you are reluctant to file a [public
-issue](http://purl.mro.name/ShaarliGo/issues), feel free to email
+issue](https://mro.name/ShaarliGo/issues), feel free to email
 [security@mro.name](mailto:security@mro.name?subject=ShaarliGo)
 ([🔏key](https://mro.name/.well-known/openpgpkey/hu/t5s8ztdbon8yzntexy6oz5y48etqsnbb?security)).
-
-## Design Goals
-
-- [x] backwards compatible posting (https://code.mro.name/mro/Shaarli-API-test)
-- [x] trivial installation and minimal hosting requirements (run on simple hosted webspace),
-- [x] keep server lean, especially for readers,
-- [ ] standards compliant ([Atom](https://tools.ietf.org/html/rfc4287),
-  [Atompub](https://tools.ietf.org/html/rfc5023),
-  [WebSub](https://www.w3.org/TR/websub/)),
-- [ ] easy migration from existing shaarlis,
-- [x] run ok without javascript,
-- [x] visitor reading operates on static flat files only (no server code),
-- [ ] secure against brute force login attacks,
-- [x] easy translation & skinning,
-- [x] leverage existing, widely deployed web tec ([CGI](https://tools.ietf.org/html/rfc3875), [XSLT](https://www.w3.org/TR/xslt-10/),
-  [HTML](https://www.w3.org/TR/xhtml11/), [CSS](https://www.w3.org/TR/CSS/)),
-- [ ] easy fail2ban integration / DOS mitigation,
-
-| Quality         | very good | good | normal | irrelevant |
-|-----------------|:---------:|:----:|:------:|:----------:|
-| Functionality   |           |      |    ×   |            |
-| Reliability     |           |  ×   |        |            |
-| Usability       |     ×     |      |        |            |
-| Efficiency      |           |  ×   |        |            |
-| Changeability   |           |  ×   |        |            |
-| Portability     |           |  ×   |        |            |
-
-## Dependencies
-
-_tl;dr:_ a webserver that can execute [CGI](https://tools.ietf.org/html/rfc3875)s and serve files
-from disc.
-
-ShaarliGo is an old-school CGI binary executable, so it needs a webserver to drive it.
-Configurations come for [Apache](http://httpd.apache.org/) (automatic, see `static/.htaccess`) and
-[Lighttpd](http://www.lighttpd.net/) (see `static/app/lighttpd.conf`).
-
-As a self-contained, statically linked, [Go](https://golang.org/) executable, it has no runtime
-dependencies and works on a variety of platforms.
-
-ShaarliGo needs write access to the webroot filesystem to once unpack the web assets and when posting
-update the content.
-
-Storage footprint is <25 [KiB](https://en.wikipedia.org/wiki/Kibibyte) per post.
-
-When posting a page, it is once accessed via HTTP GET to infer title, tags and a thumbnail image
-URL.
-
-## Install / Update
-
-If the webserver is Apache (Linux, 64 bit, set up and running, modules cgi and
-rewrite):
-
-1. Download http://purl.mro.name/Linux-x86_64/shaarligo.cgi,
-2. copy this single file to your webspace,
-3. set it's file permissions (chmod) to numeric 555 (readonly + executable for all),
-4. visit in your browser: http://my.web.space/subdir/shaarligo.cgi,
-
-done! For lighttpd see `static/app/lighttpd.conf`.
-
-Or build from source at http://mro.name/ShaarliGo
 
 ## POSSE
 
@@ -130,8 +87,55 @@ url](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#Access_usi
 for the time being until I figure out how to get a token from pleroma or do proper
 OAuth2.
 
+## Design Goals
+
+- [x] backwards compatible posting (https://code.mro.name/mro/Shaarli-API-test)
+- [x] trivial installation and minimal hosting requirements (run on simple hosted webspace),
+- [x] keep server lean, especially for readers,
+- [ ] standards compliant ([Atom](https://tools.ietf.org/html/rfc4287),
+  [Atompub](https://tools.ietf.org/html/rfc5023),
+  [WebSub](https://www.w3.org/TR/websub/)),
+- [ ] easy migration from existing shaarlis,
+- [x] run ok without javascript,
+- [x] visitor reading operates on static flat files only (no server code),
+- [ ] secure against brute force login attacks,
+- [x] easy translation & skinning,
+- [x] leverage existing, widely deployed web tec ([CGI](https://tools.ietf.org/html/rfc3875), [XSLT](https://www.w3.org/TR/xslt-10/),
+  [HTML](https://www.w3.org/TR/xhtml11/), [CSS](https://www.w3.org/TR/CSS/)),
+- [ ] easy fail2ban integration / DOS mitigation,
+
+| Quality         | very good | good | normal | irrelevant |
+|-----------------|:---------:|:----:|:------:|:----------:|
+| Functionality   |           |      |    ×   |            |
+| Reliability     |           |  ×   |        |            |
+| Usability       |     ×     |      |        |            |
+| Efficiency      |           |  ×   |        |            |
+| Changeability   |           |  ×   |        |            |
+| Portability     |           |  ×   |        |            |
+
+## Dependencies
+
+_tl;dr:_ a webserver that can execute [CGI](https://tools.ietf.org/html/rfc3875)s and serve files
+from disc.
+
+ShaarliGo is an old-school CGI binary executable, so it needs a webserver to drive it.
+Configurations come for [Apache](http://httpd.apache.org/) (automatic, see `static/.htaccess`) and
+[Lighttpd](http://www.lighttpd.net/) (see `static/app/lighttpd.conf`).
+
+As a self-contained, statically linked, [Go](https://golang.org/) executable, it has no runtime
+dependencies and works on a variety of platforms.
+
+ShaarliGo needs write access to the webroot filesystem to once unpack the web assets and when posting
+update the content.
+
+Storage footprint is <25 [KiB](https://en.wikipedia.org/wiki/Kibibyte) per post.
+
+When posting a page, it is once accessed via HTTP GET to infer title, tags and a thumbnail image
+URL.
+
 ## Todos
 
+1. pinned posts,
 1. private posts,
 2. [PuSH/PubSubhubbub](https://github.com/pubsubhubbub/pubsubhubbub) / [WebSub](https://www.w3.org/TR/websub/),
 3. import shaarlis (login?),
@@ -139,4 +143,8 @@ OAuth2.
 5. images/enclosures,
 7. comments,
 8. trackback/pingback
+
+## Credits
+
+inspired by and compatible to http://sebsauvage.net/wiki/doku.php?id=php:shaarli.
 
