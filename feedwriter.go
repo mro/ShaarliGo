@@ -169,7 +169,7 @@ func (seed Feed) CompleteFeeds(uri2filter map[string]func(*Entry) bool) []Feed {
 
 func appendPageNumber(prefix string, page, pageCount int) string {
 	if !strings.HasSuffix(prefix, "/") {
-		panic("invalid input: appendPageNumber('" + prefix + "', " + string(page) + ") needs a trailing slash")
+		panic("invalid input: appendPageNumber('" + prefix + "', " + fmt.Sprint(page) + ") needs a trailing slash")
 	}
 	if page == pageCount-1 {
 		return prefix
@@ -351,7 +351,7 @@ func (app Server) PublishFeeds(feeds []Feed, force bool) error {
 	}
 
 	// create .lock file with pid
-	if err := ioutil.WriteFile(strFileLock, []byte(string(os.Getpid())), os.ModeExclusive); err == nil {
+	if err := ioutil.WriteFile(strFileLock, []byte(fmt.Sprint(os.Getpid())), os.ModeExclusive); err == nil {
 		defer os.Remove(strFileLock)
 		for _, feed := range feeds {
 			if err := app.PublishFeed(feed, force); err != nil {

@@ -67,7 +67,7 @@ env GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="${LDFLAGS}" -o "build/${VER
 if [ "${1}" = "prod" ] ; then
   rsync -avPz "build/" c1:"/var/www/vhosts/darknet.mro.name/pages/dev/shaarligo/"
 else
-  rsync -avPz "build/${VERSION}-Linux-x86_64/shaarligo.cgi" c0:"/var/www/vhosts/demo.0x4c.de/"
+  rsync -avPz "build/${VERSION}-Linux-x86_64/shaarligo.cgi" c0:"/var/www/vhosts/demo.mro.name/"
 fi
 
 "${say}" "done"
