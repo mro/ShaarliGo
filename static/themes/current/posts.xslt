@@ -185,7 +185,7 @@
         <xsl:sort select="@term" order="ascending"/>
         <!-- not log, just linear, similar to https://github.com/sebsauvage/Shaarli/blob/master/index.php#L1254 -->
         <xsl:variable name="size" select="8 + 40 * @label div $countMax"/>
-        <a style="font-size:{$size}pt" href="{$cgi_base}/search/?q=%23{@term}+" class="tag"><span class="label"><xsl:value-of select="@term"/></span><span style="font-size:8pt">&#160;(<span class="count"><xsl:value-of select="@label"/></span>)</span></a><xsl:text> </xsl:text>
+				<a style="font-size:{$size}pt" href="{$cgi_base}/search/?q=%23{@term}+" class="tag" data-count="{@label}"><span class="label"><xsl:value-of select="@term"/></span><span style="font-size:8pt">&#160;(<span class="count"><xsl:value-of select="@label"/></span>)</span></a><xsl:text> </xsl:text>
       </xsl:for-each>
     </p>
 
@@ -215,8 +215,8 @@
             </a>
           </td>
           <td tabindex="20" class="text-right"><a href="{$xml_base_pub}/t/">⛅ <span class="hidden-xs"># Tags</span></a></td>
-          <td tabindex="30" class="text-right"><a href="{$xml_base_pub}/d/" title="Not implemented yet.">📅 <span class="hidden-xs">Daily</span></a></td>
-          <td tabindex="40" class="text-right"><a href="{$xml_base_pub}/i/" title="Not implemented yet.">🎨 <span class="hidden-xs">Images</span></a></td>
+          <td tabindex="30" class="text-right"><a class="disabled" href="{$xml_base_pub}/d/" title="Not implemented yet.">📅 <span class="hidden-xs">Daily</span></a></td>
+          <td tabindex="40" class="text-right"><a class="disabled" href="{$xml_base_pub}/i/" title="Not implemented yet.">🎨 <span class="hidden-xs">Images</span></a></td>
           <td class="text-right"><!-- I'd prefer a class="text-right hidden-logged-out" but just don't get it right -->
             <a class="hidden-logged-out" href="{$cgi_base}/tools/" rel="nofollow">🔨 <span class="hidden-xs">Tools</span></a>
           </td>

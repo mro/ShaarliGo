@@ -39,7 +39,7 @@ button, .btn, a:any-link {
   text-decoration: none;
 }
 a img {
-	background: hsl(115, 50%, 55%);
+  background: hsl(115, 50%, 55%);
 }
 h2 {
   font-size: 2.5em;
@@ -106,9 +106,10 @@ p {
 p#tags {
   line-height: 1;
 }
+/* a[data-count="1"] { display: none } */
 img.qrcode {
-	width: 27px;
-	height: 27px;
+  width: 27px;
+  height: 27px;
 }
 .btn, button, input, textarea {
   border-radius: 4px;
@@ -177,33 +178,39 @@ div.awesomplete { display: block; }
 
 @media (prefers-color-scheme: dark) {
   html, input, textarea, .awesomplete > ul, .awesomplete > ul > li {
-		background-color: hsl(0,0%,23%);
+    background-color: hsl(0,0%,23%);
     color: hsl(30, 60%, 60%);
   }
   body, .awesomplete > ul > li:hover {
     background: hsl(30, 0%, 25%);
   }
-	ol > li:nth-of-type(2n+1) {
-		background-color: hsl(0,0%,23%);
-	}
-	.btn, button, a:any-link {
-		color: hsl(115, 50%, 45%);
-	}
-	.btn, button {
-		background: hsla(30, 60%, 60%, 0.40);
-	}
-	.btn, button, input, textarea {
-		border-color: #777;
-	}
+  ol > li:nth-of-type(2n+1) {
+    background-color: hsl(0,0%,23%);
+  }
+  .btn, button, a:any-link {
+    color: hsl(115, 50%, 45%);
+  }
+  .btn, button {
+    background: hsla(30, 60%, 60%, 0.40);
+  }
+  .btn, button, input, textarea {
+    border-color: #777;
+  }
   .btn.disabled {
-		background: hsla(30, 60%, 60%, 0.05);
-		color: hsla(115, 50%, 42%, 0.2);
-	}
+    background: hsla(30, 60%, 60%, 0.05);
+    color: hsla(115, 50%, 42%, 0.2);
+  }
   .awesomplete > ul > li[aria-selected="true"] {
     background: hsl(30, 60%, 23%);
   }
-	img {
-		filter: grayscale(30%);
-	}
+  img {
+    filter: grayscale(30%);
+  }
+}
+
+.disabled {
+  cursor: not-allowed;
+  opacity: 40%;
+  pointer-events: none;
 }
 

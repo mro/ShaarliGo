@@ -1,0 +1,19 @@
+
+# https://ahrefs.com/robot
+User-agent: AhrefsBot
+# https://support.apple.com/de-de/HT204683
+User-agent: Applebot
+User-agent: Buck
+# https://cliqz.com/cliqzbot
+User-agent: Cliqzbot
+User-agent: Daum
+# https://mj12bot.com/
+User-agent: MJ12bot
+User-agent: um-IC
+# https://yandex.com/support/webmaster/controlling-robot/robots-txt.html
+User-agent: Yandex
+Disallow: /
+
+User-agent: *
+Disallow: /shaarligo.cgi
+# Allow: /o/p/

@@ -1,7 +1,7 @@
 
 # Requires:
 #   mod_cgi.c
-#   mod_rewrite.c
+#   mod_rewrite.c  - only for legacy URL rediects
 
 # mandatory, already before first run of cgi (hopefully a webserver default or
 # uncomment and place .htaccess manually...):
@@ -9,7 +9,7 @@
 # Options FollowSymLinks ExecCGI
 
 # mandatory
-DirectoryIndex index.xml
+DirectoryIndex index.html index.xml
 
 # recommended
 AddDefaultCharset UTF-8
@@ -21,26 +21,23 @@ AddType text/html                 html
 AddType text/xml                  xml xslt
 AddOutputFilter DEFLATE html xml xslt css js json svg
 
-# https://stackoverflow.com/questions/21062290/set-rewritebase-to-the-current-folder-path-dynamically/21063276#21063276
-RewriteEngine On
-RewriteCond %{REQUEST_URI}::$1 ^(.*?/)(.*)::\2$
-RewriteRule ^(.*)$ - [E=BASE:%1]
-
-ErrorDocument 404 %{ENV:BASE}themes/current/404.html
-
-# redirect cgi probe and legacy posting
-RewriteCond %{QUERY_STRING} ^((.*&)?post=.*)$
-RewriteRule ^/?$  %{ENV:BASE}shaarligo.cgi?%1    [redirect=301,last,qsdiscard]
-
-# legacy URLs https://perishablepress.com/redirect-query-string-htaccess/
-RewriteCond %{QUERY_STRING} ^([0-9a-zA-Z_-]{6})$
-# RewriteRule ^/?$  %{ENV:BASE}o/p/%1/    [redirect=301,last,qsdiscard]
-RewriteRule ^/?$  %{ENV:BASE}shaarligo.cgi?%1    [redirect=301,last,qsdiscard]
-
-# webroot to o/p/
-RewriteRule ^/?$  %{ENV:BASE}o/p/       [redirect=301,last,qsdiscard]
-# legacy assets
-RewriteRule ^assets/default/de(/.*)$   themes/current$1   [last]
+## if you had a previous shaarli and want the posting URLs to be permanent 
+## i.e. redirects from oldurl -> newurl:
+##
+## https://stackoverflow.com/questions/21062290/set-rewritebase-to-the-current-folder-path-dynamically/21063276#21063276
+#RewriteEngine On
+#RewriteCond %{REQUEST_URI}::$1 ^(.*?/)(.*)::\2$
+#RewriteRule ^(.*)$ - [E=BASE:%1]
+#
+#ErrorDocument 404 %{ENV:BASE}themes/current/404.html
+#
+## redirect cgi probe and legacy posting
+#RewriteCond %{QUERY_STRING} ^((.*&)?post=.*)$
+#RewriteRule ^/?$  %{ENV:BASE}shaarligo.cgi?%1    [redirect=301,last,qsdiscard]
+#
+## legacy URLs https://perishablepress.com/redirect-query-string-htaccess/
+#RewriteCond %{QUERY_STRING} ^([0-9a-zA-Z_-]{6})$
+#RewriteRule ^/?$  %{ENV:BASE}shaarligo.cgi?%1    [redirect=301,last,qsdiscard]
 
 # recommended
 # http://www.golem.de/news/content-security-policy-schutz-vor-cross-site-scripting-1306-99795.html
@@ -50,7 +47,7 @@ Header add Content-Security-Policy "default-src 'none'; style-src 'self' 'unsafe
 # nice
 Header add X-Powered-By "http://purl.mro.name/ShaarliGo#v0.1"
 
-# cache assets only (see assets/.htaccess)
+# cache assets only (see themes/current/.htaccess)
 Header set Cache-Control "no-cache"
 
 Header set Connection Keep-Alive

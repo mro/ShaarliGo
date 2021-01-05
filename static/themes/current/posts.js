@@ -1,21 +1,21 @@
 
 function toggle() {
-	switch(document.cookie) {
-	case 'dark':
-			document.cookie = 'light';
-			break;
-	case 'light':
-			document.cookie = '';
-			break;
-	default:
-			document.cookie = 'dark';
-			break;
-	}
+  switch(document.cookie) {
+  case 'dark':
+      document.cookie = 'light';
+      break;
+  case 'light':
+      document.cookie = '';
+      break;
+  default:
+      document.cookie = 'dark';
+      break;
+  }
   console.log("uhu: "+document.cookie);
-	const lst = document.documentElement.classList;
-	lst.remove('dark');
-	lst.remove('light');
-	lst.add(document.cookie);
+  const lst = document.documentElement.classList;
+  lst.remove('dark');
+  lst.remove('light');
+  lst.add(document.cookie);
 }
 
 // list tags with font-size in relation to frequency
@@ -73,13 +73,15 @@ function clickableTextLinks(elmsRendered) {
   // console.log('make http and geo URIs (RFC 5870) clickable + microformat');
   for (var i = elmsRendered.length - 1; i >= 0 ; i--) {
     const elm = elmsRendered[i];
-    elm.innerHTML = elm.innerHTML.replace(/(https?:\/\/[^ \t\r\n"']+[^ ?\t\r\n"'.,;()])/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
+    elm.innerHTML = elm.innerHTML
+      .replace(/(https?:\/\/[^ \t\r\n"']+[^ ?\t\r\n"'.,;()])/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>')
     // https://alanstorm.com/url_regex_explained/ \b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))
-    // elm.innerHTML = elm.innerHTML.replace(/\b(([\w-]+:\/\/?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>');
-    elm.innerHTML = elm.innerHTML.replace(/geo:(-?\d+.\d+),(-?\d+.\d+)(\?z=(\d+))?/gi, '<a class="geo" href="https://opentopomap.org/#marker=12/$1/$2" title="zoom=$4">geo:<span class="latitude">$1</span>,<span class="longitude">$2</span>$3</a>');
-    elm.innerHTML = elm.innerHTML.replace(/(urn:ietf:rfc:(\d+)(#\S*[0-9a-z])?)/gi, '<a class="rfc" href="https://tools.ietf.org/html/rfc$2$3" title="RFC $2">$1</a>');
-    elm.innerHTML = elm.innerHTML.replace(/(urn:isbn:([0-9-]+)(#\S*[0-9a-z])?)/gi, '<a class="isbn" href="https://de.wikipedia.org/wiki/Spezial:ISBN-Suche?isbn=$2" title="ISBN $2">$1</a>');
-    elm.innerHTML = elm.innerHTML.replace(/(CVE-[0-9-]+-[0-9]+)/gi, '<a class="cve" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=$1">$1</a>');
+    // .replace(/\b(([\w-]+:\/\/?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))/gi, '<a rel="noreferrer" class="http" href="$1">$1</a>')
+      .replace(/geo:(-?\d+.\d+),(-?\d+.\d+)(\?z=(\d+))?/gi, '<a class="geo" href="https://opentopomap.org/#marker=12/$1/$2" title="zoom=$4">geo:<span class="latitude">$1</span>,<span class="longitude">$2</span>$3</a>')
+      .replace(/(urn:ietf:rfc:(\d+)(#\S*[0-9a-z])?)/gi, '<a class="rfc" href="https://tools.ietf.org/html/rfc$2$3" title="RFC $2">$1</a>')
+      .replace(/(urn:isbn:([0-9-]+)(#\S*[0-9a-z])?)/gi, '<a class="isbn" href="https://de.wikipedia.org/wiki/Spezial:ISBN-Suche?isbn=$2" title="ISBN $2">$1</a>')
+      .replace(/(urn:ean:([0-9-]+)(#\S*[0-9a-z])?)/gi, '<a class="ean" href="https://www.ean-suche.de/?q=$2" title="EAN $2">$1</a>')
+      .replace(/(CVE-[0-9-]+-[0-9]+)/gi, '<a class="cve" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=$1">$1</a>');
   }
 }
 
