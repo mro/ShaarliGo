@@ -341,6 +341,8 @@ func handleMux(wg *sync.WaitGroup) http.HandlerFunc {
 					Path:     app.url.EscapedPath(), // to match all requests
 					MaxAge:   int(toSession / time.Second),
 					HttpOnly: true,
+					SameSite: http.SameSiteNoneMode,
+					Secure:   true,
 				}
 			}
 		}

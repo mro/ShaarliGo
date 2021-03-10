@@ -90,7 +90,7 @@ func (app *Server) handleDoLogin() http.HandlerFunc {
 				squealFailure(r, now, "Unauthorised.")
 				// http.Error(w, "<script>alert(\"Wrong login/password.\");document.location='?do=login&returnurl='"+url.QueryEscape(returnurl)+"';</script>", http.StatusUnauthorized)
 				w.WriteHeader(http.StatusUnauthorized)
-				w.Header().Set("Content-Type", "application/javascript")
+				w.Header().Set("Content-Type", "text/html; charset=utf-8")
 				io.WriteString(w, "<script>alert(\"Wrong login/password.\");document.location='?do=login&returnurl='"+url.QueryEscape(returnurl)+"';</script>")
 				return
 			}
@@ -390,7 +390,7 @@ func (app *Server) handleDoPost(posse func(Entry)) http.HandlerFunc {
 			}
 			if "bookmarklet" == val("source") {
 				w.WriteHeader(http.StatusOK)
-				w.Header().Set("Content-Type", "application/javascript")
+				w.Header().Set("Content-Type", "text/html; charset=utf-8")
 				// CSP script-src 'sha256-hGqewLn4csF93PEX/0TCk2jdnAytXBZFxFBzKt7wcgo='
 				// echo -n "self.close(); // close bookmarklet popup" | openssl dgst -sha256 -binary | base64
 				io.WriteString(w, "<script>self.close(); // close bookmarklet popup</script>")
