@@ -12,24 +12,15 @@ else
 fi
 
 # prevent GOPATH pointing outside userland (especially on Alpine)
-go env -w GOPATH="${HOME}/go"
-mkdir -p "${GOPATH}" 2>/dev/null
-go env -w GOBIN="$(go env GOPATH)/bin"
+# go env -w GOPATH="${HOME}/go"
+# mkdir -p "${GOPATH}" 2>/dev/null
+# go env -w GOBIN="$(go env GOPATH)/bin"
 
 parm="" # "-u"
 {
   "${say}" "go get (install dependencies)"
-  go get "${parm}" github.com/gorilla/sessions \
-    github.com/jteeuwen/go-bindata/... \
-    golang.org/x/crypto/bcrypt \
-    golang.org/x/net/html \
-    golang.org/x/net/html/atom \
-    golang.org/x/text/language \
-    golang.org/x/text/search \
-    gopkg.in/yaml.v2 \
-    github.com/stretchr/testify \
-    github.com/yhat/scrape \
-    golang.org/x/tools/blog/atom
+	# go get "${parm}" github.com/jteeuwen/go-bindata/...
+	go get "${parm}" github.com/kevinburke/go-bindata/...
 }
 
 "$(go env GOBIN)/go-bindata" -ignore="\\.DS_Store" -ignore=".+\\.woff" -prefix static static/... tpl/...
