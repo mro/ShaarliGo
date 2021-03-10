@@ -5,8 +5,8 @@
 
 # ShaarliGo
 
-🌺 Self-reliant publishing for laypeople like your mother and me. Have a say and
-not be subjected to any T&Cs, just local law. All without setup headaches, but
+🌺 Self-reliant publishing for laypeople like your loved ones and mine. Have a say
+and not be subjected to any T&Cs, just local law. All without setup headaches, but
 truly self-sustained and enduringly independent:
 
 ## Install / Update
@@ -18,7 +18,7 @@ truly self-sustained and enduringly independent:
    https://www.variomedia.de/faq/Wie-uebertrage-ich-meine-Seite-auf-den-Server/article/177,
 4. set the file permissions (chmod) to read-only+execute for all (numeric 555), see
    e.g. https://wiki.filezilla-project.org/Other_Features#Chmod,
-5. visit http://\<my.domain\>/shaarligo.cgi and off you go!
+5. visit http://example.com/shaarligo.cgi and off you go!
 
 That's if the webserver is Apache (Linux, 64 bit, modules cgi and rewrite) as
 common with shared hosting.
@@ -52,7 +52,7 @@ end of `app/config.yaml` like this
 
 ```yaml
 posse:
-- pinboard: https://api.pinboard.in/v1?auth_token=johndoe:XOG86E7JIYMI
+- pinboard: https://api.pinboard.in/v1?auth_token=johndoe:XOG6EJIYMIZZ
   prefix:
 ```
 
