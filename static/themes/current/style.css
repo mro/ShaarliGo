@@ -21,25 +21,34 @@
  src:url(./B612-BoldItalic.woff2) format("woff2"),url(./B612-BoldItalic.woff) format("woff")
 }
 
+:root {
+  color-scheme: light dark;
+
+  --bgRough: hsl(30,0%,93%);
+  --bgFairway: hsl(30, 45%, 90%);
+  --text-color: hsl(30, 50%, 44%);
+  --link-color: hsl(115, 100%, 25%);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bgRough: #111;
+    --bgFairway: #111;
+    --text-color: hsl(30, 35%, 59%);
+    --link-color: hsl(115, 50%, 43%);
+  }
+}
+
 html {
-  font-family: Optima, Candara, Calibri, Arial, sans-serif;
-  font-family: B612, sans-serif;
+  font-family: B612, sans-serif, Optima, Candara, Calibri, Arial, sans-serif;
   line-height: 1.5;
   font-size: 12pt;
 }
 html, input, textarea, .awesomplete > ul, .awesomplete > ul > li {
-  background: hsl(30, 0%, 93%);
-  color: hsl(30, 50%, 44%);
+  background: var(--bgRough);
+  color: var(--text-color);
 }
 body, .awesomplete > ul > li:hover {
-  background: hsl(30, 50%, 93%);
-}
-button, .btn, a:any-link {
-  color: hsl(115, 100%, 25%);
-  text-decoration: none;
-}
-a img {
-  background: hsl(115, 50%, 55%);
+  background: var(--bgFairway);
 }
 h2 {
   font-size: 2.5em;
@@ -47,17 +56,12 @@ h2 {
 }
 h3 {
   font-size: 1.2em;
-  margin: 3ex 0 .1ex 0;
-}
-.btn.disabled {
-  color: hsla(115, 100%, 25%, 0.2);
-  background: hsla(30, 80%, 80%, 0.4);
-  pointer-events: none;
+  margin: .1ex 0 .1ex 0;
 }
 body {
-  min-height: 500px;
   margin: auto;
   max-width: 45rem;
+  min-height: 500px;
   padding: 1ex;
 }
 #footer {
@@ -65,6 +69,10 @@ body {
 }
 .manytags body {
   max-width: initial;
+}
+button, .btn, a:any-link {
+  color: var(--link-color);
+  text-decoration: none;
 }
 #do-post {
   margin-top: -1rem;
@@ -80,26 +88,24 @@ ol {
   padding: 0;
 }
 ol > li {
-  margin: 2ex 0;
   clear: both;
-}
-ol > li:nth-of-type(odd) {
-  background: hsl(30, 45%, 90%);
+  margin: 3ex 0;
+  padding: 1.0ex 0;
 }
 ol > li > h3 img {
-  float: right;
-  border: 1px dotted black;
-  max-width: 120px;
-  max-height: 120px;
   display: none;
+  border: 1px dotted black;
+  float: right;
+  max-height: 120px;
+  max-width: 120px;
 }
 p {
-  -webkit-hyphens: auto;
-  -moz-hyphens: auto;
   hyphens: auto;
   margin: .2ex 0;
-  overflow-wrap: break-word;
+  -moz-hyphens: auto;
   overflow: hidden;
+  overflow-wrap: break-word;
+  -webkit-hyphens: auto;
   word-break: break-word;
   word-wrap: break-word;
 }
@@ -108,12 +114,13 @@ p#tags {
 }
 /* a[data-count="1"] { display: none } */
 img.qrcode {
-  width: 27px;
+  background: hsl(115, 100%, 35%);
   height: 27px;
+  width: 27px;
 }
 .btn, button, input, textarea {
-  border-radius: 4px;
   border: 1px solid darkgrey;
+  border-radius: 4px;
   min-height: 3.5ex;
 }
 input, textarea {
@@ -131,7 +138,9 @@ button {
   min-width: 14ex;
   padding: .5ex;
 }
-button[name='delete_edit'] { background: hsla(0, 99%, 50%, 0.75); }
+button[name='delete_edit'] {
+  background: hsla(0, 99%, 50%, 0.75);
+}
 table {
   width: 100%;
 }
@@ -141,8 +150,8 @@ table {
 
 /* https://www.w3schools.com/Css/css_float.asp */
 .clearfix::after {
-  content: "";
   clear: both;
+  content: "";
   display: table;
 }
 @media only screen and (max-width: 600px) {
@@ -166,7 +175,9 @@ table {
 .rendered.type-text br.br { display:inline; }
 
 
-div.awesomplete { display: block; }
+div.awesomplete {
+  display: block;
+}
 .awesomplete > ul > li[aria-selected="true"] {
   background: hsl(30, 60%, 83%);
 }
@@ -177,28 +188,11 @@ div.awesomplete { display: block; }
 }
 
 @media (prefers-color-scheme: dark) {
-  html, input, textarea, .awesomplete > ul, .awesomplete > ul > li {
-    background-color: hsl(0,0%,23%);
-    color: hsl(30, 60%, 60%);
-  }
-  body, .awesomplete > ul > li:hover {
-    background: hsl(30, 0%, 25%);
-  }
-  ol > li:nth-of-type(2n+1) {
-    background-color: hsl(0,0%,23%);
-  }
-  .btn, button, a:any-link {
-    color: hsl(115, 50%, 45%);
-  }
   .btn, button {
     background: hsla(30, 60%, 60%, 0.40);
   }
   .btn, button, input, textarea {
     border-color: #777;
-  }
-  .btn.disabled {
-    background: hsla(30, 60%, 60%, 0.05);
-    color: hsla(115, 50%, 42%, 0.2);
   }
   .awesomplete > ul > li[aria-selected="true"] {
     background: hsl(30, 60%, 23%);
@@ -209,7 +203,6 @@ div.awesomplete { display: block; }
 }
 
 .disabled {
-  cursor: not-allowed;
   opacity: 40%;
   pointer-events: none;
 }
