@@ -55,6 +55,14 @@ func TestURLQuery(t *testing.T) {
 	assert.Equal(t, "me", par["source"][0], "Na klar")
 
 	assert.Equal(t, "foo", strings.SplitN("pub/posts/foo/", "/", 4)[2], "Na klar")
+
+	par = mustParseURL("https://demo.mro.name/shaarligo/shaarligo.cgi?post=https%3A%2F%2Fwww.golem.de%2Fnews%2Fscraping-daten-von-500-millionen-facebook-nutzern-geleakt-2104-155476.html&source=bookmarklet&scrape=no&title=Scraping%3A+Daten+von+500+Millionen+Facebook-Nutzern+geleakt+-+Golem.de&tags=Datenleck%2C+Datenschutz%2C+Datensicherheit%2C+Facebook%2C+Passwort%2C+Soziales+Netz%2C+Telegram%2C+Security&image=https%3A%2F%2Fwww.golem.de%2F2104%2F155476-266799-266796.jpg&description=st.%0A%0ADe").Query()
+	assert.Equal(t, 1, len(par["post"]), "Na klar")
+	assert.Equal(t, "https://www.golem.de/news/scraping-daten-von-500-millionen-facebook-nutzern-geleakt-2104-155476.html", par["post"][0], "Na klar")
+	assert.Equal(t, "Scraping: Daten von 500 Millionen Facebook-Nutzern geleakt - Golem.de", par["title"][0], "Na klar")
+	assert.Equal(t, "bookmarklet", par["source"][0], "Na klar")
+	assert.Equal(t, "no", par["scrape"][0], "Na klar")
+	assert.Equal(t, "st.\n\nDe", par["description"][0], "Na klar")
 }
 
 func TestLfTimeFmt(t *testing.T) {

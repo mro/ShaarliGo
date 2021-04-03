@@ -197,8 +197,11 @@ func (app *Server) handleDoPost(posse func(Entry)) http.HandlerFunc {
 					ent = &Entry{}
 					ent.Title = HumanText{Body: post}
 				} else {
-					// post parameter looks like an url, so we try to GET it
-					{
+					// post parameter looks like an url
+					if 1 == len(params["scrape"]) && "no" == params["scrape"][0] {
+						ent = &Entry{}
+					} else {
+						// so we try to GET it
 						ee, err := entryFromURL(url, time.Second*3/2)
 						if nil != err {
 							ee.Title.Body = err.Error()
@@ -222,6 +225,14 @@ func (app *Server) handleDoPost(posse func(Entry)) http.HandlerFunc {
 			}
 			app.KeepAlive(w, r, now)
 
+			if 1 == len(params["tags"]) && "" != params["tags"][0] {
+				tags := regexp.MustCompile("[ ,]+").Split(params["tags"][0], -1)
+				a := make([]Category, 0, len(tags))
+				for _, tag := range tags {
+					a = append(a, Category{Term: tag})
+				}
+				ent.Categories = a
+			}
 			if 1 == len(params["title"]) && "" != params["title"][0] {
 				ent.Title = HumanText{Body: params["title"][0]}
 			}

@@ -53,8 +53,40 @@ $ rm -rf app/delete_me_to_restore themes/current .htaccess app/.htaccess app/lig
     <li id="bookmarklet">
       <b>Bookmarklet:</b> <a
         onclick="alert('Drag this link to your bookmarks toolbar, or right-click it and choose Bookmark This Link...');return false;"
-        href="javascript:javascript:(function(){var%20url%20=%20location.href;var%20title%20=%20document.title%20||%20url;window.open('{{.xml_base}}?post='%20+%20encodeURIComponent(url)+'&amp;title='%20+%20encodeURIComponent(title)+'&amp;description='%20+%20encodeURIComponent(document.getSelection())+'&amp;source=bookmarklet','_blank','menubar=no,height=450,width=600,toolbar=no,scrollbars=no,status=no,dialog=1');})();"
-      >✚ShaarliGo 🌺</a>
+        href="javascript:javascript:(function(s){
+const bas=new URL(s);
+const agn='bookmarklet';
+const url=location.href;
+/* scrape */
+/* precedence like https://codeberg.org/mro/ShaarliGo/src/branch/master/comb.go#L54 */
+const tit=document.title
+??document.querySelector('meta[name=\'title\']')?.content
+??document.querySelector('meta[property=\'og:title\']')?.content;
+const tgs=document.querySelector('meta[name=\'keywords\']')?.content
+??document.querySelector('meta[name=\'news_keywords\']')?.content??'';
+const con=document.getSelection()?.toString()
+||document.querySelector('meta[name=\'description\']')?.content||'';
+const img=document.querySelector('meta[property=\'og:image\']')?.content;
+/* seed the popup */
+const ps=bas.searchParams;
+function put(k,v){ps.append(k,v);}
+put('post',url);
+put('source',agn);
+put('scrape','no');
+put('title',tit);
+put('tags',tgs);
+put('image',img);
+put('description',con);
+/* popup */
+console.info(bas);
+const po=window.open(bas.href,'_blank','menubar=no,height=450,width=600,toolbar=no,scrollbars=no,status=no,dialog=1');
+function fun(event){
+ put('token',event.data);
+ po.postMessage(ps,'*');
+ window.removeEventListener(event.type,fun);
+}
+window.addEventListener('message',fun);
+})('{{.xml_base}}');">✚ShaarliGo 🌺</a>
       <span>⇐ Drag this link to your bookmarks toolbar (or right-click it and choose Bookmark This Link…).
       Then click "✚ShaarliGo 🌺" button in any page you want to share.</span>
     </li>

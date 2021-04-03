@@ -1,0 +1,17 @@
+# mscgen -Tsvg -i bookmarklet.msc
+# https://www.mcternan.me.uk/mscgen/
+msc {
+  us [label=User], pa [label=Page], bo [label=Bookmarklet], po [label=Popup], sh [label=Shaarli];
+
+  us -> pa [label = "visit"];
+  us -> bo [label = "click"];
+  bo -> pa [label = "scrape"];
+  bo -> po [label = "open"];
+  po -> sh [label = "GET"];
+  sh -> sh [label = "query"];
+  sh -> pa [label = "GET & scrape !! never has consent cookie !!"];
+  po -> bo [label = "postMessage(ready)"];
+  bo -> po [label = "postMessage(data)"];
+  us -> po [label = "submit"];
+  po -> sh [label = "POST"];
+}

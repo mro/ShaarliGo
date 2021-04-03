@@ -34,3 +34,21 @@ document.onreadystatechange = function () {
   xhr.send();
 };
 
+const secret = 'popup is ready';
+
+function fun0(event) {
+  window.removeEventListener(event.type, fun0);
+  console.info(event.data);
+  function l(k){console.info(event.data.get(k));}
+  l('token');
+  l('post');
+  l('source');
+  l('title');
+  l('scrape');
+  l('tags');
+  l('description');
+  l('image');
+}
+
+window.addEventListener('message', fun0, false);
+window.opener.postMessage(secret, '*');

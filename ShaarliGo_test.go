@@ -124,7 +124,7 @@ func TestGetConfigRaw(t *testing.T) {
 `, string(b), "aha")
 
 	fi, _ := os.Stat(fileFeedStorage)
-	assert.Equal(t, int64(1025), fi.Size(), "uhu")
+	assert.Equal(t, int64(1019), fi.Size(), "uhu")
 
 	_, err := os.Stat(filepath.Join("tpl", "tools.html"))
 	assert.Equal(t, true, os.IsNotExist(err), "oje")
