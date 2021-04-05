@@ -90,8 +90,11 @@ func (app *Server) handleDoLogin() http.HandlerFunc {
 				squealFailure(r, now, "Unauthorised.")
 				// http.Error(w, "<script>alert(\"Wrong login/password.\");document.location='?do=login&returnurl='"+url.QueryEscape(returnurl)+"';</script>", http.StatusUnauthorized)
 				w.WriteHeader(http.StatusUnauthorized)
+				loc := cgiName + "?do=login&returnurl=" + url.QueryEscape(returnurl)
 				w.Header().Set("Content-Type", "text/html; charset=utf-8")
-				io.WriteString(w, "<script>alert(\"Wrong login/password.\");document.location='?do=login&returnurl='"+url.QueryEscape(returnurl)+"';</script>")
+				// Can't do a CSP header as with self.close – the returnurl isn't const.
+				// So maybe this won't ever trigger. Add a clickable link as a fallback.
+				io.WriteString(w, "<script>alert(\"Wrong login/password.\");document.location='"+loc+"';</script><p>Wrong login/password. <a href='"+loc+"'>Try again</a></p>")
 				return
 			}
 			if err == nil {
